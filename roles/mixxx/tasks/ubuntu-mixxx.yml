@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Add the Mixxx PPA repository
+  ansible.builtin.apt_repository:
+    repo: ppa:mixxx/mixxx
+    state: present
+
+- name: Update the apt package index
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Mixxx
+  ansible.builtin.apt:
+    name: mixxx
+    state: present

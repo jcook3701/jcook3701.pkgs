@@ -1,0 +1,120 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate Template files needed for Bind9 configuration
+  block:
+
+    # TODO: Need to eventually setup template options for RHEL.
+    - name: Generate named.conf configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/named.conf.j2
+        dest: "{{ bind9_file.named_conf }}"
+        group: bind
+        owner: bind
+        mode: "0644"
+
+    - name: Generate named.conf.options configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/named.conf.local.j2
+        dest: "{{ bind9_file.named_conf_local }}"
+        group: bind
+        owner: bind
+        mode: "0644"
+
+    - name: Generate named.conf.local configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/named.conf.options.j2
+        dest: "{{ bind9_file.named_conf_options }}"
+        group: bind
+        owner: bind
+        mode: "0644"
+
+    - name: Generate named.conf.controls configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/named.conf.controls.j2
+        dest: "{{ bind9_file.named_conf_controls }}"
+        group: bind
+        owner: bind
+        mode: "0644"
+
+    - name: Generate named.conf.log configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/named.conf.log.j2
+        dest: "{{ bind9_file.named_conf_log }}"
+        group: bind
+        owner: bind
+        mode: "0644"
+
+      # TODO: zones should be 775 if dydns
+    - name: Generate forward zone configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/db.forward.zone.j2
+        dest: "{{ bind9_file.forward_zone }}"
+        group: bind
+        owner: bind
+        mode: "0664"
+
+    - name: Generate reverse zone configuration file
+      ansible.builtin.template:
+        src: pkgs-server/bind9/debian/db.reverse.zone.j2
+        dest: "{{ bind9_file.reverse_zone }}"
+        group: bind
+        owner: bind
+        mode: "0664"
+
+- name: Ensure files needed for Bind9 configuration
+  block:
+
+    - name: Ensure secroots-file is created
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ bind9_file.secroots_file }}"
+        force: false
+        group: bind
+        owner: bind
+        mode: "0664"
+
+    - name: Ensure dump-file is created
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ bind9_options.dump_file }}"
+        force: false
+        group: bind
+        owner: bind
+        mode: "0664"
+
+    - name: Ensure statistics-file is created
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ bind9_file.statistics_file }}"
+        force: false
+        group: bind
+        owner: bind
+        mode: "0664"
+
+    - name: Ensure memstatistics-file is created
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ bind9_file.memstatistics_file }}"
+        force: false
+        group: bind
+        owner: bind
+        mode: "0664"
+
+    - name: Ensure recursing-file is created
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ bind9_file.recursing_file }}"
+        force: false
+        group: bind
+        owner: bind
+        mode: "0664"
+
+    - name: Ensure log-file is created
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ bind9_file.log_file }}"
+        force: false
+        group: bind
+        owner: bind
+        mode: "0664"

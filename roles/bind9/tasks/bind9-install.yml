@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Import Bind9 variables
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-import-vars.yml
+
+- name: Install Bind9 package and dependencies
+  ansible.builtin.apt:
+    name: "{{ bind9_pkg_names }}"
+    state: present
+
+- name: Create Bind9 configuration directories
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-directory-creation.yml
+
+- name: Bind9 DNSSEC keygen
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-dnssec-keygen-and-sign.yml
+  loop: "{{ bind9_zones }}"
+  loop_control:
+    loop_var: zone
+    label: "{{ zone.name }}"
+  when: not zone.inline_signing | bool
+
+- name: Bind9 TSIG keygen
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-tsig-kygen.yml
+  when: (enable_tsig | bool) or (enable_dydns | bool)
+
+- name: Backup initial Bind9 configuration files
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-file-backup.yml
+
+- name: Create Bind9 configuration files
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-file-generation.yml
+
+- name: Restart Bind9 for changes to take effect
+  ansible.builtin.include_tasks:
+    file: pkgs-server/bind9/bind9-systemctrl-restart.yml

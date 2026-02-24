@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Collect running user facts
+  ansible.builtin.include_tasks: utilities/sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Install mdopen using cargo
+  ansible.builtin.command:
+    cmd: cargo install mdopen
+  become: yes
+  become_user: "{{ sudo_user }}"

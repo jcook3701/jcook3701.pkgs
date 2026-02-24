@@ -1,0 +1,8 @@
+{# named.conf.keys.j2 #}
+{% for host in groups['all'] %}
+{% set hostname = hostvars[host].hostname | default(host) %}
+{% set key_path = bind9_key_directory + '/tsig/' + hostname + '/' + hostname + '-tsig.key' %}
+
+{{ lookup('file', key_path) }}
+
+{% endfor %}

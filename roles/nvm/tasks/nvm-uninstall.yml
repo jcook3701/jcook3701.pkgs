@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Collect running user facts
+  ansible.builtin.include_tasks: utilities/sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Remove nvm directory
+  ansible.builtin.file:
+    path: "{{ sudo_user_home }}/.nvm"
+    state: absent
+
+- name: Remove lines related to NVM from ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ sudo_user_home }}/.bashrc"
+    state: absent
+    regexp: "{{ item }}"
+  loop:
+    - '^export NVM_DIR="\$HOME\/\.nvm"$' # noqa: E501
+    - '^\[ -s "\$NVM_DIR\/nvm\.sh" \] && \\. "\$NVM_DIR\/nvm\.sh"  # This loads nvm$' # noqa: E501
+    - '^\[ -s "\$NVM_DIR\/bash_completion" \] && \\. "\$NVM_DIR\/bash_completion"  # This loads nvm bash_completion$' # noqa: E501
+  become: true
+  become_user: "{{ sudo_user }}"

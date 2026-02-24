@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate Template files needed for SSSD configuration
+  block:
+
+    - name: Generate sssd.conf configuration file
+      ansible.builtin.template:
+        src: pkgs-server/sssd/sssd.conf.j2
+        dest: "{{ sssd_file.sssd_conf }}"
+        group: root
+        owner: root
+        mode: "0555"

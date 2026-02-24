@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download Google Chrome stable deb package
+  ansible.builtin.get_url:
+    url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    dest: /tmp/google-chrome-stable_current_amd64.deb
+    mode: "0644"
+
+- name: Install Google Chrome stable deb package
+  ansible.builtin.apt:
+    deb: /tmp/google-chrome-stable_current_amd64.deb
+
+- name: Fix missing dependencies (if any)
+  ansible.builtin.apt:
+    update_cache: true
+    name: -f
+    state: present

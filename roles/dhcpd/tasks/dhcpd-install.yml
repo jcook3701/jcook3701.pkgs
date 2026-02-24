@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Import dhcpd variables.
+  ansible.builtin.include_tasks:
+    file: dhcpd-import-vars.yml
+
+- name: Install dhcpd package and dependencies.
+  ansible.builtin.apt:
+    name: "{{ dhcpd_pkg_names }}"
+    state: present

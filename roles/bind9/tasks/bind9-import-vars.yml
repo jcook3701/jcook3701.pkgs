@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Import Bind9 variables OS determinate variables
+  block:
+    - name: Import Debian Bind9 variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/bind9/debian-bind9.yml"
+      when: ansible_facts['os_family']|lower == 'debian'
+
+    - name: Import RHEL Bind9 variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/bind9/rhel-bind9.yml"
+      when: ansible_facts['os_family']|lower == 'rhel'
+
+- name: Include necessary variables for bind9 install
+  block:
+    - name: Import Bind9 primary server configuration variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/bind9/primary-bind9-server.yml"
+
+    # TODO: Need to setup when primary and secondary servers shuold be setup
+    - name: Import Bind9 configuration variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/bind9/bind9-config-vars.yml"

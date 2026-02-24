@@ -1,0 +1,16 @@
+// This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian for information on the
+// structure of BIND configuration files in Debian, *BEFORE* you customize
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
+
+include "{{ bind9_file.named_conf_options }}";
+include "{{ bind9_file.named_conf_local }}";
+include "{{ bind9_file.named_conf_controls }}";
+include "{{ bind9_file.named_conf_log }}";
+{% if enable_tsig is true %}
+  include "{{ bind9_file.named_conf_keys }}";
+{% endif %}
+include "{{ bind9_file.named_conf_default_zones }}";

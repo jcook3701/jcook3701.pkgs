@@ -1,0 +1,38 @@
+$TTL 86400
+@   IN  SOA     dns.{{ domain_name }}. root.{{ domain_name }}. (
+        2024122401  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@                  IN  NS  dns.{{ domain_name }}.
+@                  IN  A   {{ dns_server_ip_address }}
+{#- Collect IPs and hostnames into a list -#}
+{%- set ptr_records = [] %}
+{%- for host in groups['all'] %}
+  {%-   set hv = hostvars[host] %}
+  {%-   if hv.ip is defined %}
+    {%-     set ip_parts = hv.ip.split('.') %}
+    {%-     if ip_parts | length == 4 %}
+      {#- Add main hostname address -#}
+      {%- set _ = ptr_records.append({
+      'octet': ip_parts[3] | int,
+      'record': (hv.hostname | default(host)) ~ '\t\t\tIN\tA\t' ~ hv.ip
+      }) %}
+
+      {#- Add address for each alias -#}
+      {%- for alias in hv.aliases | default([]) %}
+        {%- set _ = ptr_records.append({
+        'octet': ip_parts[3] | int,
+        'record': alias ~ '\t\t\tIN\tA\t' ~ hv.ip
+        }) %}
+      {%- endfor %}
+    {%-     endif %}
+  {%-   endif %}
+{%- endfor %}
+
+{# Sort the list by the numeric octet #}
+{% for item in ptr_records | sort(attribute='octet') %}
+{{ item.record }}
+{% endfor %}

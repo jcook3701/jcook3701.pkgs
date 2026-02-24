@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+bind9_pkg_names:
+  - bind9
+  - bind9-utils
+  - bind9-dnsutils
+  - bind9-doc
+
+bind9_rfc1918: "zones.rfc1918"
+
+bind9_root_key: "bind.keys"
+
+bind9_configuration_directory: "/etc/bind"
+bind9_options_directory: "/var/cache/bind"
+bind9_dynamic_directory: "/var/lib/bind"   # Not currently used
+bind9_dynamic_keys_directory: "/run/named"
+bind9_root_key_directory: "/etc/bind"
+
+# Don't edit below this line
+bind9_os_directory:
+  conf: "{{ bind9_configuration_directory }}"
+  zone: "{{ bind9_configuration_directory }}/zones"
+  zone_keys: "{{ bind9_configuration_directory }}/keys"
+  root_keys: "{{ bind9_root_key_directory }}"
+  options: "{{ bind9_options_directory }}"
+  data: "{{ bind9_options_directory }}/data"
+  dynamic: "{{ bind9_options_directory }}/dynamic"
+  slaves: "{{ bind9_options_directory }}/slaves"
+  dynamic_keys: "{{ bind9_options_directory }}/keys"
+  run: "{{ bind9_dynamic_keys_directory }}"
+
+# Zones explained
+# /var/lib/bind/dynamic - master and dynamic zones
+# /var/lib/bind/data - master and dynamic zones
+# /var/cache/bind/zones - secondary zones
+# /etc/bind/zones - zones that should not change for the lifetime of the server.

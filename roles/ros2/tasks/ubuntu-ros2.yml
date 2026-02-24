@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate locale
+  ansible.builtin.command: locale-gen en_US en_US.UTF-8
+
+- name: Update locale settings
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    regexp: "^#?LC_ALL="
+    line: "LC_ALL=en_US.UTF-8"
+    state: present
+
+- name: Set LANG environment variable in locale file
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    regexp: "^#?LANG="
+    line: "LANG=en_US.UTF-8"
+    state: present
+
+- name: Export LANG environment variable for current session
+  ansible.builtin.shell: |
+    export LANG=en_US.UTF-8
+  args:
+    executable: /bin/bash
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg2
+      - lsb-release
+    update_cache: true
+    state: present
+
+- name: Add ROS 2 apt key
+  ansible.builtin.apt_key:
+    url: "https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc"
+    state: present
+
+- name: Add ROS 2 apt repository
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/ros2-latest.list
+    create: true
+    mode: "0644"
+    line: >-
+      deb [arch=$(dpkg --print-architecture)]
+      http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main

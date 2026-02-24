@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Import openldap variables OS determinate variables
+  block:
+    - name: Import Debian openldap variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/openldap/debian-openldap.yml"
+      when: ansible_facts['os_family']|lower == 'debian'
+
+    - name: Import RHEL openldap variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/openldap/rhel-openldap.yml"
+      when: ansible_facts['os_family']|lower == 'rhel'
+
+
+- name: Include necessary variables for openldap install
+  block:
+    - name: Import openldap configuration variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/openldap/openldap-config-vars.yml"

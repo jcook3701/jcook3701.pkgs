@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Collect running user facts
+  ansible.builtin.include_tasks: utilities/sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Include ruby variables
+  ansible.builtin.include_vars: pkgs-software-development/ruby/ruby.yml
+
+- name: Installing ruby
+  ansible.builtin.apt:
+    pkg:
+      - ruby
+      - ruby-dev
+    state: present
+
+- name: Create GEM_HOME Directory
+  ansible.builtin.file:
+    path: "{{ sudo_user_home }}/.ruby"
+    state: directory
+    mode: "0755"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Update .bashrc for ruby
+  ansible.builtin.blockinfile:
+    dest: "{{ sudo_user_home }}/.bashrc"
+    marker: "{{ ruby_marker }}"
+    block: "{{ ruby_bashrc }}"
+    state: present
+  when: sudo_user != "root" and ruby_bashrc is defined
+
+- name: Reload Shell
+  ansible.builtin.include_tasks: utilities/reload-shell.yml

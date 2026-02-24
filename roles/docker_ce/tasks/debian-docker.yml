@@ -1,0 +1,92 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# NOTE: This should work for all Debian based distributions and architectures that use apt-get.
+
+- name: Set facts for architecture, codename, & idname
+  ansible.builtin.set_fact:
+    arch: "{{ deb_architecture[ansible_architecture] }}"
+    codename: "{{ ansible_distribution_release }}"
+    idname: "{{ ansible_distribution | lower }}"
+
+- name: Installing Docker dependencies.
+  ansible.builtin.apt:
+    pkg:
+      - ca-certificates
+      - curl
+    state: present
+
+- name: Create the directory /etc/apt/keyrings with permissions 0755
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Download Docker GPG key
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/{{ idname }}/gpg"
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+    owner: root
+    group: root
+    force: true
+
+- name: Ensure /etc/apt/keyrings/docker.asc is readable by all users
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+
+- name: Add Docker repository
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/docker.list
+    create: true
+    mode: "0644"
+    line: >-
+      deb [arch={{ arch }}
+      signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/{{ idname }}
+      {{ codename }} stable
+
+- name: Run the equivalent of "apt-get update".
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Installing Docker-CE.
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - docker-buildx-plugin
+
+- name: Installing Docker Compose V1 (Debian).
+  ansible.builtin.apt:
+    pkg: docker-compose
+  when: ansible_facts['distribution']|lower == 'debian'
+
+- name: Installing Docker Compose V2 (Ubuntu).
+  ansible.builtin.apt:
+    pkg: docker-compose-v2
+  when: ansible_facts['distribution']|lower == 'ubuntu'
+
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add users in service_groups_users to docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ service_groups_users }}"
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started

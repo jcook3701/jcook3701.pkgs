@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Import Nano configuration variables
+  ansible.builtin.include_vars:
+    file: "pkgs-common/nano/nano-config-vars.yml"

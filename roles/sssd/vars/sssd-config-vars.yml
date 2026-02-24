@@ -1,0 +1,76 @@
+---
+sssd_pkg_names:
+  - sssd
+
+# Domain Options
+top_level_domain: "com"
+second_level_domain: "jcook3701"
+domain_name: "{{ second_level_domain }}.{{ top_level_domain }}"
+
+sssd_directory:
+  conf: "/etc/sssd"
+
+sssd_file:
+  sssd_conf: "{{ sssd_directory.conf }}/sssd.conf"
+
+sssd_sections:
+  - name: "domain/{{ domain_name }}"
+    cache_credentials: "True"
+    ldap_schema: "rfc2307bis"
+    ldap_search_base: "dc={{ second_level_domain }},dc={{ top_level_domain }}"
+    ldap_user_search_base: "ou=People,ou=Users,dc={{ second_level_domain }},dc={{ top_level_domain }}"
+    ldap_group_search_base: "ou=Group,dc={{ second_level_domain }},dc={{ top_level_domain }}"
+
+    id_provider: "ldap"
+    auth_provider: "ldap"
+    chpass_provider: "ldap"
+    access_provider: "ldap"
+    autofs_provider: "ldap"
+    sudo_provider: "ldap"
+
+    ldap_uri: "ldaps://modern-times.{{ domain_name }}:636"
+    ldap_id_use_start_tls: "True"
+    ldap_tls_reqcert: "allow"
+    ldap_tls_cert: "/etc/openldap/certs/cert.pem"
+    ldap_tls_key: "/etc/openldap/certs/priv.pem"
+    ldap_access_filter: "(objectClass=posixAccount)"
+
+    ldap_search_timeout: 90
+    ldap_network_timeout: 90
+    timeout: 30
+    debug_level: 6
+
+    # Autofs
+    ldap_autofs_search_base: "cn=AutoMount,dc={{ second_level_domain }},dc={{ top_level_domain }}"
+    ldap_autofs_map_object_class: "automountMap"
+    ldap_autofs_entry_object_class: "automount"
+    ldap_autofs_map_name: "automountMapName"
+    ldap_autofs_entry_key: "automountKey"
+    ldap_autofs_entry_value: "automountInformation"
+
+  - name: sssd
+    debug_level: 7
+    services: nss, pam, ssh, autofs
+    config_file_version: 2
+    domains: "{{ domain_name }}"
+
+  - name: nss
+    homedir_substring: "/home"
+
+  - name: pam
+    debug_level: 10
+
+  - name: sudo
+
+  - name: autofs
+    debug_level: 10
+
+  - name: ssh
+
+  - name: pac
+
+  - name: ifp
+
+  - name: secrets
+
+  - name: session_recording

@@ -1,0 +1,47 @@
+{% if nano_conf.autoindent is true -%}
+  set autoindent         # Keeps your indentation consistent when writing code
+{% endif -%}
+
+{% if nano_conf.nowrap is true -%}
+  set nowrap             # Don’t wrap long lines; scroll horizontally instead
+{% endif -%}
+
+{% if nano_conf.tabsize is defined -%}
+  set tabsize {{ nano_conf.tabsize }}          # Set tab width to 4 spaces
+{% endif -%}
+
+{% if nano_conf.rebinddelete is true -%}
+  set rebinddelete       # Makes the Delete key behave more like other editors
+{% endif -%}
+
+{% if nano_conf.mouse is true -%}
+  set mouse              # Enable mouse support for selecting text
+{% endif -%}
+
+{% if nano_conf.historylog is true -%}
+  set historylog         # Keep a history of recently edited files
+{% endif -%}
+
+{% if nano_conf.backup is true -%}
+  set backup             # Make a backup copy before saving
+{% endif -%}
+
+{% if nano_conf.smooth is true -%}
+  set smooth             # Smooth scrolling instead of jumping line by line
+{% endif -%}
+
+{% if nano_conf.titlecolor is defined -%}
+  set titlecolor {{ nano_conf.titlecolor }}  # Color for title bar
+{% endif -%}
+
+{% if nano_conf.statuscolor is defined -%}
+  set statuscolor {{ nano_conf.statuscolor }}  # Color for status bar
+{% endif -%}
+
+{% if nano_conf.constantshow is true %}
+set constantshow       # Always show cursor position
+{% endif -%}
+
+{% if nano_conf.linenumbers is true %}
+set linenumbers        # Show line numbers
+{% endif -%}

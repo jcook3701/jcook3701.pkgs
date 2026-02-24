@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Include necessary variables for dhcpd install
+  block:
+    - name: Import dhcpd configuration variables
+      ansible.builtin.include_vars:
+        file: "pkgs-server/dhcpd/dhcpd-config-vars.yml"

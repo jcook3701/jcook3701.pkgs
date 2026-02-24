@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Port Options
+# ldap = 389 or ldaps = 636
+port: "636"
+
+# Key Options
+
+# Domain Options
+top_level_domain: "com"
+second_level_domain: "jcook3701"
+domain_name: "{{ second_level_domain }}.{{ top_level_domain }}"
+
+ldap_directory:
+  conf: "/etc/openldap"
+  certs: "/etc/openldap/certs"
+
+ldap_key:
+  tls_cacert: ""
+  tls_cert: "{{ ldap_directory.certs }}/cert.pem"
+  tls_key: "{{ ldap_directory.certs }}/priv.pem"
+
+ldap_conf:
+  sasl_nocanon: "on"
+  tls_reqcert: "allow"

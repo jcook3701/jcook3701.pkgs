@@ -1,0 +1,8 @@
+// DNS BIND logging clause
+
+logging {
+        channel default_debug {
+                file "{{ bind9_logging.channel.default_debug.file }}";
+                severity {{ bind9_logging.channel.default_debug.severity }};
+        };
+};

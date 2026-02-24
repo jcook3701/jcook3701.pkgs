@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+nano_color:
+  black: "black"
+  red: "red"
+  green: "green"
+  yellow: "yellow"
+  blue: "blue"
+  magenta: "magenta"
+  cyan: "cyan"
+  white: "white"
+  brightblack: "brightblack"
+  brightred: "brightred"
+  brightgreen: "brightgreen"
+  brightyellow: "brightyellow"
+  brightblue: "brightblue"
+  brightmagenta: "brightmagenta"
+  brightcyan: "brightcyan"
+  brightwhite: "brightwhite"
+
+# NOTE: nano_conf.smooth not available until version 7.x
+nano_conf:
+  autoindent: true        # Keeps your indentation consistent when writing code
+  nowrap: true            # Don’t wrap long lines; scroll horizontally instead
+  tabsize: 4              # Set tab width to 4 spaces
+  rebinddelete: false     # Makes the Delete key behave more like other editors
+  mouse: true             # Enable mouse support for selecting text
+  historylog: true        # Keep a history of recently edited files
+  backup: false           # Make a backup copy before saving
+  smooth: false           # Smooth scrolling instead of jumping line by line
+  titlecolor: "{{ nano_color.brightgreen }},{{ nano_color.black }}"   # Color for title bar
+  statuscolor: "{{ nano_color.brightgreen }},{{ nano_color.black }}"  # Color for status bar
+  constantshow: true      # Always show cursor position
+  linenumbers: true       # Show line numbers

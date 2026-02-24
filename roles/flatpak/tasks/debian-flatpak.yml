@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Flatpak
+  ansible.builtin.apt:
+    pkg:
+      - flatpak
+      - gnome-software-plugin-flatpak
+
+- name: Add flathub remote if it does not exist
+  ansible.builtin.command: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  when: ansible_facts.packages['flatpak'] is defined
