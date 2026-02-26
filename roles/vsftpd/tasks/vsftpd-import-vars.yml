@@ -5,4 +5,4 @@
   block:
     - name: Import vsftpd configuration variables
       ansible.builtin.include_vars:
-        file: "pkgs-server/vsftpd/vsftpd-config-vars.yml"
+        file: "vsftpd-config-vars.yml"

@@ -24,7 +24,7 @@ galaxy_info:
         - all
 
   galaxy_tags:
-    - "distro-packages"
+    - "distro_packages"
     - yum
     - apt
     - pacman

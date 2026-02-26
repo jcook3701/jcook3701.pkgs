@@ -31,7 +31,7 @@
   # TODO: Need to eventually setup template options for RHEL.
 - name: Generate named.conf.keys from saved TSIG keys
   ansible.builtin.template:
-    src: pkgs-server/bind9/debian/named.conf.keys.j2
+    src: debian/named.conf.keys.j2
     dest: "{{ bind9_file.named_conf_keys }}"
     owner: bind
     group: bind

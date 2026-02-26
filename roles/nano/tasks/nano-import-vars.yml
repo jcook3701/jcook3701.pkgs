@@ -3,4 +3,4 @@
 ---
 - name: Import Nano configuration variables
   ansible.builtin.include_vars:
-    file: "pkgs-common/nano/nano-config-vars.yml"
+    file: "nano-config-vars.yml"

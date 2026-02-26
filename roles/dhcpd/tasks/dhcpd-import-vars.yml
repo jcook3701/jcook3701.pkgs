@@ -5,4 +5,4 @@
   block:
     - name: Import dhcpd configuration variables
       ansible.builtin.include_vars:
-        file: "pkgs-server/dhcpd/dhcpd-config-vars.yml"
+        file: "dhcpd-config-vars.yml"

@@ -3,7 +3,7 @@
 ---
 - name: Import Nano variables
   ansible.builtin.include_tasks:
-    file: pkgs-common/nano/nano-import-vars.yml
+    file: nano-import-vars.yml
 
 - name: Install nano package
   ansible.builtin.apt:
@@ -11,7 +11,9 @@
     state: present
 
 - name: Filter interactive users
-  ansible.builtin.include_tasks: utilities/filters/users-with-home-directory.yml
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    task_from: filters/users-with-home-directory.yml
 
 - name: Create nano configuration file
   ansible.builtin.template:
