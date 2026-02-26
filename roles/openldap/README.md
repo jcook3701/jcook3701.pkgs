@@ -1,1 +1,3 @@
 # OpenLDAP
+
+OpenLDAP Software is an open source implementation of the Lightweight Directory Access Protocol.
