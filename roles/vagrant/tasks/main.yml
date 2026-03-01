@@ -1,3 +1,70 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Collect running user facts
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Check if Vagrant is installed
+  ansible.builtin.shell: command -v vagrant
+  register: vagrant_check
+  ignore_errors: true
+  changed_when: false
+
+- name: Install Vagrant if not present
+  ansible.builtin.include_tasks: install.yml
+  when: vagrant_check.rc != 0
+
+- name: Expand the vagrant build directory path
+  ansible.builtin.set_fact:
+    vagrant_build_dir: "{{ sudo_user_home }}/{{ vagrant_build_dir }}"
+
+- name: Vagrant Build Directory
+  ansible.builtin.debug:
+    msg: "Vagrant build directory location: {{ vagrant_build_dir }}"
+
+- name: Ensure build directory exists
+  ansible.builtin.file:
+    path: "{{ vagrant_build_dir }}"
+    state: directory
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "775"
+
+- name: Generate Vagrantfile from template
+  ansible.builtin.template:
+    src: Vagrantfile.j2
+    dest: "{{ vagrant_build_dir }}/Vagrantfile"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0644"
+  vars:
+    vagrant_ansible_path: "{{ ansible_playbook_python | dirname }}/ansible-playbook"
+
+- name: Generate the provision playbook for Vagrant
+  ansible.builtin.copy:
+    dest: "{{ vagrant_build_dir }}/provision.yml"
+    content: |
+      ---
+      - hosts: all
+        roles:
+          - jcook3701.pkgs.snap
+          # Add whatever roles you want to run here
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0644"
+
+- name: Bring up VirtualBox VM
+  ansible.builtin.command:
+    cmd: vagrant up --provider virtualbox
+    chdir: "{{ vagrant_build_dir }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  register: vagrant_up_result
+  changed_when: "'Machine booted and ready' in vagrant_up_result.stdout"
+
+- name: Report VM status
+  ansible.builtin.debug:
+    msg: "VM {{ vagrant_vm_name }} is now running in {{ vagrant_build_dir }}"

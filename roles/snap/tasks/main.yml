@@ -5,3 +5,10 @@
   ansible.builtin.apt:
     name: "{{ snap_pkg_names }}"
     state: "{{ snap_state | default('present') }}"
+    update_cache: yes
+
+- name: Ensure snapd service is started and enabled
+  ansible.builtin.service:
+    name: snapd
+    state: started
+    enabled: yes
