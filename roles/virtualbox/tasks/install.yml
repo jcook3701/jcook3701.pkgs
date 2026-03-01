@@ -9,7 +9,12 @@
 
 - name: Add the official VirtualBox repository with the full signed-by path
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by={{ virtualbox_directories.asc }}] https://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib"
+    repo: >-
+      deb [arch={{ virtualbox.arch }}
+      signed-by={{ virtualbox.signed_by }}]
+      {{ virtualbox.url }}
+      {{ ansible_distribution_release }}
+      contrib
     state: present
     filename: virtualbox
     update_cache: yes
