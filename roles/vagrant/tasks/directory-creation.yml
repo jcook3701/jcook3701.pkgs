@@ -1,6 +1,18 @@
-
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Create directories needed for Bind9 setup
-  block:
+- name: Expand the vagrant build directory path
+  ansible.builtin.set_fact:
+    vagrant_build_dir: "{{ sudo_user_home }}/{{ vagrant_build_dir }}"
+
+- name: Vagrant Build Directory
+  ansible.builtin.debug:
+    msg: "Vagrant build directory location: {{ vagrant_build_dir }}"
+
+- name: Ensure build directory exists
+  ansible.builtin.file:
+    path: "{{ vagrant_build_dir }}"
+    state: directory
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "775"

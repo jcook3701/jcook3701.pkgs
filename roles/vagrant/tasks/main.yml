@@ -17,44 +17,11 @@
   ansible.builtin.include_tasks: install.yml
   when: vagrant_check.rc != 0
 
-- name: Expand the vagrant build directory path
-  ansible.builtin.set_fact:
-    vagrant_build_dir: "{{ sudo_user_home }}/{{ vagrant_build_dir }}"
+- name: Vagrant directory creation
+  ansible.builtin.include_tasks: directory-creation.yml
 
-- name: Vagrant Build Directory
-  ansible.builtin.debug:
-    msg: "Vagrant build directory location: {{ vagrant_build_dir }}"
-
-- name: Ensure build directory exists
-  ansible.builtin.file:
-    path: "{{ vagrant_build_dir }}"
-    state: directory
-    owner: "{{ sudo_user }}"
-    group: "{{ sudo_user }}"
-    mode: "775"
-
-- name: Generate Vagrantfile from template
-  ansible.builtin.template:
-    src: Vagrantfile.j2
-    dest: "{{ vagrant_build_dir }}/Vagrantfile"
-    owner: "{{ sudo_user }}"
-    group: "{{ sudo_user }}"
-    mode: "0644"
-  vars:
-    vagrant_ansible_path: "{{ ansible_playbook_python | dirname }}/ansible-playbook"
-
-- name: Generate the provision playbook for Vagrant
-  ansible.builtin.copy:
-    dest: "{{ vagrant_build_dir }}/provision.yml"
-    content: |
-      ---
-      - hosts: all
-        roles:
-          - jcook3701.pkgs.snap
-          # Add whatever roles you want to run here
-    owner: "{{ sudo_user }}"
-    group: "{{ sudo_user }}"
-    mode: "0644"
+- name: Vagrant file generation
+  ansible.builtin.include_tasks: file-generation.yml
 
 - name: Bring up VirtualBox VM
   ansible.builtin.command:
