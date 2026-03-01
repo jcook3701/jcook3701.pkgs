@@ -3,7 +3,7 @@
 ---
 - name: Import AppArmor variables
   ansible.builtin.include_tasks:
-    file: pkgs-server/apparmor/apparmor-import-vars.yml
+    file: apparmor-import-vars.yml
 
 - name: Install AppArmor package and dependencies
   ansible.builtin.apt:
@@ -12,8 +12,8 @@
 
 - name: Backup initial AppArmor configuration files
   ansible.builtin.include_tasks:
-    file: pkgs-server/apparmor/apparmor-file-backup.yml
+    file: apparmor-file-backup.yml
 
 - name: Create AppArmor configuration files
   ansible.builtin.include_tasks:
-    file: pkgs-server/apparmor/apparmor-file-generation.yml
+    file: apparmor-file-generation.yml

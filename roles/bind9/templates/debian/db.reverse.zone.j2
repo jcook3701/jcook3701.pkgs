@@ -1,14 +1,14 @@
 $TTL 86400
-@   IN  SOA     dns.{{ domain_name }}. root.{{ domain_name }}. (
+@   IN  SOA     dns.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
         2011071001  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@            IN  NS    dns.{{ domain_name }}.
-@            IN  PTR   {{ domain_name }}.
-dns          IN  A     {{ dns_server_ip_address }}
+@            IN  NS    dns.{{ bind9_domain_name }}.
+@            IN  PTR   {{ bind9_domain_name }}.
+dns          IN  A     {{ bind9_dns_server_ip_address }}
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
 {%- for host in groups['all'] %}
@@ -19,14 +19,14 @@ dns          IN  A     {{ dns_server_ip_address }}
       {#- Add main hostname PTR -#}
       {%- set _ = ptr_records.append({
       'octet': ip_parts[3] | int,
-      'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ (hv.hostname | default(host)) ~ '.' ~ domain_name
+      'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ (hv.hostname | default(host)) ~ '.' ~ bind9_domain_name
       }) %}
 
       {#- Add PTRs for each alias -#}
       {%- for alias in hv.aliases | default([]) %}
         {%- set _ = ptr_records.append({
         'octet': ip_parts[3] | int,
-        'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ alias ~ '.' ~ domain_name
+        'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ alias ~ '.' ~ bind9_domain_name
         }) %}
       {%- endfor %}
     {%-     endif %}

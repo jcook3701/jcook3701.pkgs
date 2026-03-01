@@ -2,34 +2,34 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 # dns switches
-enable_dydns: false
-enable_dnssec: true
-enable_tsig: false
-enable_public_access: false
+bind9_enable_dydns: false
+bind9_enable_dnssec: true
+bind9_enable_tsig: false
+bind9_enable_public_access: false
 
 # Port Options
-dns_port: 53
-rndc_port: 953
+bind9_dns_port: 53
+bind9_rndc_port: 953
 
 # Key Options
-ksk_algorithm: "RSASHA256"
-zsk_algorithm: "RSASHA256"
-tsig_algorithm: "HMAC-SHA256"
-ksk_size: 4096
-zsk_size: 2048
-tsig_size: 256
+bind9_ksk_algorithm: "RSASHA256"
+bind9_zsk_algorithm: "RSASHA256"
+bind9_tsig_algorithm: "HMAC-SHA256"
+bind9_ksk_size: 4096
+bind9_zsk_size: 2048
+bind9_tsig_size: 256
 
 # Domain Options
-top_level_domain: "com"
-second_level_domain: "jcook3701"
-domain_name: "{{ second_level_domain }}.{{ top_level_domain }}"
+bind9_top_level_domain: "com"
+bind9_second_level_domain: "jcook3701"
+bind9_domain_name: "{{ bind9_second_level_domain }}.{{ bind9_top_level_domain }}"
 
 # ip_address_space - Standard Options 10.0.0 and 192.168.0
-ip_address_space: "10.0.0"
-reverse_ip_address_space: "0.0.10"
+bind9_ip_address_space: "10.0.0"
+bind9_reverse_ip_address_space: "0.0.10"
 
 # Static IP of new (DNS) server
-dns_server_ip_address: "{{ ip_address_space }}.2"
+bind9_dns_server_ip_address: "{{ bind9_ip_address_space }}.2"
 
 # prefix_length - Standard Options: 8, 12, 16, 24
-prefix_length: "24"
+bind9_prefix_length: "24"

@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Orchestrate VirtualBox Lifecycle
+  hosts: localhost
+  gather_facts: no
+  vars:
+    vm_name: "Ansible-Managed-VM"
+    vm_iso: "/path/to/your/ubuntu.iso" # Ensure you have an ISO or VDI ready
+
+  tasks:
+    # --- STAGE 1: CREATE & START ---
+    - name: Create the VirtualBox VM
+      command: "VBoxManage createvm --name {{ vm_name }} --register"
+      register: vm_created
+      failed_when: "vm_created.rc != 0 and 'already exists' not in vm_created.stderr"
+
+    - name: Configure VM Hardware (RAM & CPU)
+      command: "VBoxManage modifyvm {{ vm_name }} --memory 2048 --cpus 2 --nic1 nat"
+
+    - name: Start the VM
+      command: "VBoxManage startvm {{ vm_name }} --type headless"
+
+    - name: Wait for VM to boot and SSH to be ready
+      wait_for:
+        host: "127.0.0.1"
+        port: 2222 # Assumes you set up port forwarding
+        timeout: 300
+
+    # --- STAGE 2: PREPARE INVENTORY ---
+    - name: Add the new VM to Ansible inventory
+      add_host:
+        name: "new_virtual_machine"
+        ansible_host: "127.0.0.1"
+        ansible_port: 2222
+        ansible_user: "your_user"
+        groups: "provisioned_vms"
+
+# --- STAGE 3: RUN SCRIPTS ON THE NEW VM ---
+- name: Run scripts on the newly created VM
+  hosts: provisioned_vms
+  tasks:
+    - name: Run an automated setup script
+      script: ./scripts/setup_everything.sh
