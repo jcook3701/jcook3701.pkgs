@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Manage vagrant on localhost
+- name: Manage VirtualBox on localhost
   hosts: localhost
   gather_facts: true
   become: true
@@ -11,9 +11,6 @@
       ansible.builtin.package_facts:
         manager: auto
 
-    - name: Install vagrant
+    - name: Install VirtualBox
       ansible.builtin.include_role:
-        name: jcook3701.pkgs.vagrant
-      vars:
-        vagrant_vm_name: "web-server-01"
-        vagrant_memory_mb: 4096
+        name: jcook3701.pkgs.virtualbox

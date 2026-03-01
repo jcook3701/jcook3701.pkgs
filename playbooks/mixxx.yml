@@ -6,7 +6,11 @@
   gather_facts: true
   become: true
   tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: Install Mixxx
       ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: pkgs-gui/mixxx/ubuntu-mixxx.yml
+        name: mixxx
+        tasks_from: ubuntu-mixxx.yml

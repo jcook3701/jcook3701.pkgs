@@ -8,7 +8,7 @@
   when: sudo_user is not defined
 
 - name: Check if Vagrant is installed
-  ansible.builtin.shell: command -v vagrant
+  ansible.builtin.command: command -v vagrant
   register: vagrant_check
   ignore_errors: true
   changed_when: false
