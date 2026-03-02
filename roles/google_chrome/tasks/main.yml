@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Google Chrome Install
+  ansible.builtin.include_tasks: debian-google-chrome-stable.yml

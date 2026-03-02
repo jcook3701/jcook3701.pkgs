@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Manage Google Chrome on localhost
+- name: Manage Plex on localhost
   hosts: localhost
   gather_facts: true
   become: true
@@ -11,6 +11,6 @@
       ansible.builtin.package_facts:
         manager: auto
 
-    - name: Install Google Chrome
+    - name: Install Plex
       ansible.builtin.include_role:
-        name: jcook3701.pkgs.google_chrome
+        name: jcook3701.pkgs.plex
