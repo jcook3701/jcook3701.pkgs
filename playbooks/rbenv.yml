@@ -5,8 +5,13 @@
   hosts: localhost
   gather_facts: true
   become: true
+
   tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: Install rbenv
       ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: pkgs-software-development/rbenv/rbenv-install.yml
+        name: jcook3701.pkgs.rbenv
+        tasks_from: rbenv-install.yml

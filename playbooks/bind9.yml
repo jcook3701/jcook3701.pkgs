@@ -5,13 +5,19 @@
   hosts: localhost
   gather_facts: true
   become: true
+
   tasks:
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: Bind9 install
       ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: pkgs-server/bind9/bind9-install.yml
+        name: jcook3701.pkgs.bind9
+        tasks_from: bind9-install.yml
 
 #    - name: Import Bind9 Variables
 #      ansible.builtin.include_role:
-#        name: pkg-install
-#        tasks_from: pkgs-server/bind9/bind9-import-vars.yml
+#        name: bind9
+#        tasks_from: bind9-import-vars.yml

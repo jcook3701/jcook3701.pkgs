@@ -1,13 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# TODO: This needs to be created in role.
 - name: Install nginx to localhost
   hosts: localhost
   gather_facts: true
   become: true
-  tasks:
-    - name: Install nginx directories
-      ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: nginx/nano-install.yml
+  vars:
+    # This is the "Decision" part
+    enabled_site_names:
+      - pxe.local
+      - mixxx.local
+  roles:
+    - jcook3701.pkgs.nginx

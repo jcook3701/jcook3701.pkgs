@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Remove the default NGINX site configuration
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Deploy a custom NGINX configuration using a template
+  ansible.builtin.template:
+    src: templates/nginx_proxy.conf.j2
+    dest: /etc/nginx/sites-available/my_service.conf
+    mode: "0644"
+
+- name: Enable the custom NGINX site by creating a symbolic link
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/my_service.conf
+    dest: /etc/nginx/sites-enabled/my_service.conf
+    state: link

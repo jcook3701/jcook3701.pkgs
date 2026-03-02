@@ -6,7 +6,12 @@
   gather_facts: true
   become: true
   tasks:
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: Install Docker-CE
       ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: pkgs-common/docker-ce/debian-docker.yml
+        name: jcook3701.pkgs.docker_ce
+        tasks_from: debian-docker.yml

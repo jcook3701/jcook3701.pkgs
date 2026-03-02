@@ -5,8 +5,14 @@
   hosts: localhost
   gather_facts: true
   become: true
+
   tasks:
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: Install ctop
       ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: pkgs-common/ctop/ctop-install.yml
+        name: jcook3701.pkgs.ctop
+        tasks_from: ctop-install.yml

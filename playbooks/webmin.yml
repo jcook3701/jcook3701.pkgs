@@ -5,8 +5,13 @@
   hosts: localhost
   gather_facts: true
   become: true
+
   tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: Install Webmin
       ansible.builtin.include_role:
-        name: pkg-install
-        tasks_from: pkgs-server/webmin/debian-webmin.yml
+        name: jcook3701.pkgs.webmin
+        tasks_from: debian-webmin.yml
