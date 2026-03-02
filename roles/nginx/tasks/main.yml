@@ -1,5 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Nginx Installer
-  ansible.builtin.include_tasks: install.yml
+- name: Install NGINX binaries
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure NGINX sites and state
+  ansible.builtin.import_tasks: configure.yml

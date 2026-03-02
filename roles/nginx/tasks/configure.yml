@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Remove the default NGINX site configuration
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Create configurations only for selected sites
+  ansible.builtin.template:
+    src: nginx_site.j2
+    dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+    mode: '0644'
+  # Filters the master list to only include sites in our enabled list
+  loop: "{{ all_nginx_sites | selectattr('server_name', 'in', enabled_site_names) | list }}"
+  notify: Reload NGINX
+
+- name: Enable only the selected NGINX sites
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
+    state: link
+  loop: "{{ all_nginx_sites | selectattr('server_name', 'in', enabled_site_names) | list }}"
+  notify: Reload NGINX
+
+- name: Remove symbolic links for sites that are NOT enabled
+  ansible.builtin.file:
+    path: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
+    state: absent
+  loop: "{{ all_nginx_sites | rejectattr('server_name', 'in', enabled_site_names) | list }}"
+  notify: Reload NGINX
