@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download the Oracle VirtualBox GPG key to the full keyring path
+  ansible.builtin.get_url:
+    url: "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
+    dest: "{{ virtualbox_directories.asc }}"
+    mode: "0644"
+
+- name: Add the official VirtualBox repository with the full signed-by path
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch={{ virtualbox.arch }}
+      signed-by={{ virtualbox.signed_by }}]
+      {{ virtualbox.url }}
+      {{ ansible_distribution_release }}
+      contrib
+    state: present
+    filename: virtualbox
+    update_cache: yes

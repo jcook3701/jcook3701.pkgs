@@ -3,4 +3,4 @@
 ---
 - name: Import AppArmor configuration variables
   ansible.builtin.include_vars:
-    file: "pkgs-server/apparmor/apparmor-config-vars.yml"
+    file: "apparmor-config-vars.yml"

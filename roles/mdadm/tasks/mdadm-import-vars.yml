@@ -5,4 +5,4 @@
   block:
     - name: Import mdadm configuration variables
       ansible.builtin.include_vars:
-        file: "pkgs-server/mdadm/mdadm-config-vars.yml"
+        file: "mdadm-config-vars.yml"

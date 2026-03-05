@@ -18,4 +18,4 @@
   block:
     - name: Import openldap configuration variables
       ansible.builtin.include_vars:
-        file: "pkgs-server/openldap/openldap-config-vars.yml"
+        file: "openldap-config-vars.yml"

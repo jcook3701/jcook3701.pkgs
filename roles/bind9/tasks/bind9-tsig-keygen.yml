@@ -22,7 +22,8 @@
   ansible.builtin.copy:
     content: "{{ item.stdout }}"
     dest: >-
-      {{ bind9_key_directory.tsig }}/{{ hostvars[item.item].hostname | default(item.item) }}/{{ hostvars[item.item].hostname | default(item.item) }}-tsig.key
+      {{ bind9_key_directory.tsig }}/{{ hostvars[item.item].hostname | default(item.item) }}/{{
+      hostvars[item.item].hostname | default(item.item) }}-tsig.key
     owner: bind
     group: bind
     mode: "0640"
@@ -31,10 +32,8 @@
   # TODO: Need to eventually setup template options for RHEL.
 - name: Generate named.conf.keys from saved TSIG keys
   ansible.builtin.template:
-    src: pkgs-server/bind9/debian/named.conf.keys.j2
+    src: debian/named.conf.keys.j2
     dest: "{{ bind9_file.named_conf_keys }}"
     owner: bind
     group: bind
     mode: "0640"
-  vars:
-    bind9_key_directory: "{{ bind9_key_directory }}"

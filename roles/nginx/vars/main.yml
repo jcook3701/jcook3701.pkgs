@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Default directory for NGINX configurations
+nginx_config_dir: /etc/nginx/sites-available
+nginx_enabled_dir: /etc/nginx/sites-enabled
+
+# Default web root
+nginx_default_root: /var/www/html
+
+# Default site list (empty by default so the role doesn't fail if no sites are defined)
+nginx_sites: []
+
+# Common site-level defaults used if not specified in the environment vars
+nginx_site_defaults:
+  listen: 80
+  server_name: _
+  root: "{{ nginx_default_root }}"
+  location_path: /
+  autoindex: "on"
+  autoindex_exact_size: "off"
+  autoindex_localtime: "on"
+
+# Package management defaults
+nginx_package_state: present
+nginx_service_state: started
+nginx_service_enabled: yes

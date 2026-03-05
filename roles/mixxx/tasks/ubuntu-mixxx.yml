@@ -1,16 +1,48 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Add the Mixxx PPA repository
-  ansible.builtin.apt_repository:
-    repo: ppa:mixxx/mixxx
-    state: present
+- name: Download the ACTUAL raw key file
+  become: true
+  ansible.builtin.get_url:
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search={{ mixxx_conf.gpg }}"
+    dest: /etc/apt/keyrings/mixxx.asc
+    mode: "0644"
 
-- name: Update the apt package index
-  ansible.builtin.apt:
+- name: Add the PPA using the specific key file
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      "deb [signed-by=/etc/apt/keyrings/mixxx.asc]
+      https://ppa.launchpadcontent.net/mixxx/mixxx/ubuntu
+      {{ ansible_distribution_release }} main"
+    state: present
+    filename: mixxx
     update_cache: yes
 
 - name: Install Mixxx
+  become: true
   ansible.builtin.apt:
     name: mixxx
-    state: present
+    state: latest
+
+- name: Fix Mixxx Qt6 symbol lookup error (Permanent LD Config)
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/ld.so.conf.d/mixxx-qt6.conf
+    content: "/lib/x86_64-linux-gnu/\n"
+    mode: "0644"
+  notify: Update ldconfig cache
+
+- name: Update ldconfig cache
+  become: true
+  ansible.builtin.command: ldconfig
+  changed_when: false
+
+# - name: Add LD_LIBRARY_PATH to bashrc for Mixxx CLI
+#  ansible.builtin.lineinfile:
+#    path: "{{ ansible_env.HOME }}/.bashrc"
+#    # This prepends the path to ensure it's checked FIRST
+#    line: 'export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH'
+#    state: present
+#    create: yes
+#    mode: "0644"

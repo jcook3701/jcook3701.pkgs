@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Collect running user facts
-  ansible.builtin.include_tasks: utilities/sudo_user_facts.yml
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
   when: sudo_user is not defined
 
 - name: Include ruby variables
-  ansible.builtin.include_vars: pkgs-software-development/ruby/ruby.yml
+  ansible.builtin.include_vars: ruby.yml
 
   # TODO: Actually remove ruby and directories related.
 

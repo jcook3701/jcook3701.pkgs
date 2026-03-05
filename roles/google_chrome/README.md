@@ -1,1 +1,3 @@
 # Google Chrome
+
+Chrome is the official web browser from Google, built to be fast, secure, and customizable. Download now and make it yours.

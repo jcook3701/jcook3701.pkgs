@@ -5,4 +5,4 @@
   block:
     - name: Import firewalld configuration variables
       ansible.builtin.include_vars:
-        file: "pkgs-server/firewalld/firewalld-config-vars.yml"
+        file: "firewalld-config-vars.yml"

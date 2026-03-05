@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate Vagrantfile from template
+  ansible.builtin.template:
+    src: Vagrantfile.j2
+    dest: "{{ vagrant_build_dir }}/Vagrantfile"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0644"
+  vars:
+    vagrant_ansible_path: "{{ ansible_playbook_python | dirname }}/ansible-playbook"
+
+- name: Generate the provision playbook for Vagrant
+  ansible.builtin.copy:
+    dest: "{{ vagrant_build_dir }}/provision.yml"
+    content: |
+      ---
+      - hosts: all
+        roles: {{ vagrant_roles }}
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0644"

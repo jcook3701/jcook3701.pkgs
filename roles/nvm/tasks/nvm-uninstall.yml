@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Collect running user facts
-  ansible.builtin.include_tasks: utilities/sudo_user_facts.yml
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    task_from: sudo_user_facts.yml
   when: sudo_user is not defined
 
 - name: Remove nvm directory
@@ -16,8 +18,13 @@
     state: absent
     regexp: "{{ item }}"
   loop:
-    - '^export NVM_DIR="\$HOME\/\.nvm"$' # noqa: E501
-    - '^\[ -s "\$NVM_DIR\/nvm\.sh" \] && \\. "\$NVM_DIR\/nvm\.sh"  # This loads nvm$' # noqa: E501
-    - '^\[ -s "\$NVM_DIR\/bash_completion" \] && \\. "\$NVM_DIR\/bash_completion"  # This loads nvm bash_completion$' # noqa: E501
+    - >-
+      ^export NVM_DIR="\$HOME\/\.nvm"$
+    - >-
+      ^\[ -s "\$NVM_DIR\/nvm\.sh" \] && \\. "\$NVM_DIR\/nvm\.sh"
+      # This loads nvm$
+    - >-
+      ^\[ -s "\$NVM_DIR\/bash_completion" \] && \\. "\$NVM_DIR\/bash_completion"
+      # This loads nvm bash_completion$
   become: true
   become_user: "{{ sudo_user }}"

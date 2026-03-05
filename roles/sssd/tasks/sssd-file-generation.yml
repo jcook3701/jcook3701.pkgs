@@ -6,7 +6,7 @@
 
     - name: Generate sssd.conf configuration file
       ansible.builtin.template:
-        src: pkgs-server/sssd/sssd.conf.j2
+        src: sssd.conf.j2
         dest: "{{ sssd_file.sssd_conf }}"
         group: root
         owner: root

@@ -5,16 +5,15 @@ samba_pkg_names:
   - samba
 
 # Domain Options
-top_level_domain: "com"
-second_level_domain: "jcook3701"
-domain_name: "{{ second_level_domain }}.{{ top_level_domain }}"
+samba_top_level_domain: "com"
+samba_second_level_domain: "jcook3701"
+samba_domain_name: "{{ samba_second_level_domain }}.{{ samba_top_level_domain }}"
 
 samba_directory:
   conf: "/etc/samba"
 
 samba_file:
   samba_conf: "{{ samba_directory.conf }}/smb.conf"
-
 
 samba_conf:
   - name: global
@@ -27,10 +26,10 @@ samba_conf:
     domain logons: yes
 
     # security = user
-    unix extensions: no
+    unix extensions: "no"
 
     # Cups Print Server Setup
-    load printers: yes
+    load printers: "yes"
     printing: "cups"
     printcap name: "cups"
     cups options: "raw"
@@ -42,18 +41,18 @@ samba_conf:
     # idmap config * : range = 1000000-1999999
 
     # LDAP Settings
-    Domain master: Yes
-    ldap suffix: "dc={{ second_level_domain }},dc={{ top_level_domain }}"
+    Domain master: "Yes"
+    ldap suffix: "dc={{ samba_second_level_domain }},dc={{ samba_top_level_domain }}"
     ldap user suffix: "ou=Group"
     ldap group suffix: "ou=People"
     ldap machine suffix: "ou=Computers"
     ldap idmap suffix: "ou=Idmap"
-    ldap admin dn: "cn=samba-admin, dc={{ second_level_domain }}, dc={{ top_level_domain }}"
-    ldap delete dn: no
-    ldap ssl: no
+    ldap admin dn: "cn=samba-admin, dc={{ samba_second_level_domain }}, dc={{ samba_top_level_domain }}"
+    ldap delete dn: "no"
+    ldap ssl: "no"
     # unix password sync = Yes
 
-    passdb backend: "ldapsam:ldaps://modern-times.{{ domain_name }}:636"
+    passdb backend: "ldapsam:ldaps://modern-times.{{ samba_domain_name }}:636"
 
     # ldapsam:trusted = yes
     # ldapsam:editposix = yes
@@ -78,65 +77,65 @@ samba_conf:
     comment: "Home Directories"
     path: "/media/raid10/samba_shares/samba_home_directories/%S"
     valid users: '%S, %D%w%S, @"JCOOK3701\Domain Users"'
-    browseable: No
-    read only: No
-    writable: Yes
-    inherit acls: Yes
-    follow symlinks: Yes
-    wide links: Yes
+    browseable: "No"
+    read only: "No"
+    writable: "Yes"
+    inherit acls: "Yes"
+    follow symlinks: "Yes"
+    wide links: "Yes"
 
     # File Permissions
     force user: "%S"
     force group: "Domain Users"
-    create mask: 0660
-    force create mode: 0660
-    force directory mode: 0770
+    create mask: "0660"
+    force create mode: "0660"
+    force directory mode: "0770"
 
   - name: printers
     comment: "All Printers"
     path: "/var/spool/samba"
-    create mask: 0600
-    browseable: Yes
-    writable: Yes
-    printable: Yes
+    create mask: "0600"
+    browseable: "Yes"
+    writable: "Yes"
+    printable: "Yes"
 
   - name: print$
     comment: "Printer Drivers"
     path: "/var/lib/samba/drivers"
-    writable: Yes
+    writable: "Yes"
     write list: "@printadmin root"
     force group: "@printadmin"
-    create mask: 0664
-    directory mask: 0775
+    create mask: "0664"
+    directory mask: "0775"
 
   - name: plex_media
     comment: "Plex Network Share"
     path: "/media/raid10/plexmedia"
-    public: No
+    public: "No"
     valid users: '@JCOOK3701\Domain Users'
     force group: "plex"
     force user: "plex"
-    read only: No
-    writable: Yes
-    browsable: Yes
+    read only: "No"
+    writable: "Yes"
+    browsable: "Yes"
 
     # File Permissions
-    create mask: 0660
-    force create mode: 0660
-    force directory mode: 0770
+    create mask: "0660"
+    force create mode: "0660"
+    force directory mode: "0770"
 
   - name: backup_share
     comment: "Backup Network Share"
     path: "/media/raid10/samba_shares/samba_backup_share"
-    public: No
+    public: "No"
     valid users: '@JCOOK3701\Domain Users'
     force group: "Domain Users"
     force user: "samba-user"
-    read only: No
-    writable: Yes
-    browsable: Yes
+    read only: "No"
+    writable: "Yes"
+    browsable: "Yes"
 
     # File Permissions
-    create mask: 0660
-    force create mode: 0660
-    force directory mode: 0770
+    create mask: "0660"
+    force create mode: "0660"
+    force directory mode: "0770"
