@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+
+virtualbox_directories:
+  asc: /etc/apt/keyrings/oracle-virtualbox-2016.asc
+
+# NOTE: Not currently used.
+virtualbox_conf:
+  arch: amd64
+  signed_by: "{{ virtualbox_directories.asc }}"
+  url: https://download.virtualbox.org/virtualbox/debian

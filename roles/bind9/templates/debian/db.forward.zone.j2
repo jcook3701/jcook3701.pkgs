@@ -1,13 +1,13 @@
 $TTL 86400
-@   IN  SOA     dns.{{ domain_name }}. root.{{ domain_name }}. (
+@   IN  SOA     dns.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
         2024122401  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@                  IN  NS  dns.{{ domain_name }}.
-@                  IN  A   {{ dns_server_ip_address }}
+@                  IN  NS  dns.{{ bind9_domain_name }}.
+@                  IN  A   {{ bind9_dns_server_ip_address }}
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
 {%- for host in groups['all'] %}

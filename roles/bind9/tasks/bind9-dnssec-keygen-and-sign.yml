@@ -14,7 +14,7 @@
 
     - name: Generate ZSK (Zone Signing Key)
       ansible.builtin.command: >-
-        dnssec-keygen -a {{ zsk_algorithm }} -b {{ zsk_size }} -n ZONE zsk-{{ zone.name }}
+        dnssec-keygen -a {{ bind9_zsk_algorithm }} -b {{ bind9_zsk_size }} -n ZONE zsk-{{ zone.name }}
       args:
         chdir: "{{ zone.key_directory }}"
       when: >-
@@ -23,7 +23,7 @@
 
     - name: Generate KSK (Key Signing Key)
       ansible.builtin.command: >-
-        dnssec-keygen -a {{ ksk_algorithm }} -b {{ ksk_size }} -n ZONE -f KSK ksk-{{ zone.name }}
+        dnssec-keygen -a {{ bind9_ksk_algorithm }} -b {{ bind9_ksk_size }} -n ZONE -f KSK ksk-{{ zone.name }}
       args:
         chdir: "{{ zone.key_directory }}"
       when: >-
@@ -52,13 +52,13 @@
         patterns: "K{{ zone.name }}.+008+*.key"
         contains: "KSK"
       register: ksk_keys
-      when: enable_public_access | bool
+      when: bind9_enable_public_access | bool
 
     - name: Generate DS record file from KSK public key
       ansible.builtin.command: >-
         dnssec-dsfromkey {{ ksk_keys.files[0].path }}
       register: ds_records
-      when: (enable_public_access | bool) and (ksk_keys.files | length > 0)
+      when: (bind9_enable_public_access | bool) and (ksk_keys.files | length > 0)
 
     - name: Save DS record for registrar/parent
       ansible.builtin.copy:
@@ -66,4 +66,4 @@
         dest: "{{ zone.key_directory }}/dsset-{{ zone.name }}"
         mode: "0644"
         loop: "{{ ds_records.results }}"
-      when: (enable_public_access | bool) and (ds_records.stdout is defined)
+      when: (bind9_enable_public_access | bool) and (ds_records.stdout is defined)

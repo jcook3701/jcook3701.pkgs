@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-pkgs:
+mdadm_pkgs:
    apt: [mdadm]
    dnf: [mdadm]
    pacman: []
 
 mdadm_directory:
    conf: "{{ mdadm_configuration_directory }}"
-   fstab: "{{ fstab_configuration_directory }}"
+   fstab: "{{ mdadm_fstab_configuration_directory }}"
    mount: "{{ mdadm_mount_directory }}"
 
 mdadm_file:

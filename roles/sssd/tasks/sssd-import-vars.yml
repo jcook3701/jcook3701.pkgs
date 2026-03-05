@@ -5,4 +5,4 @@
   block:
     - name: Import SSSD configuration variables
       ansible.builtin.include_vars:
-        file: "pkgs-server/sssd/sssd-config-vars.yml"
+        file: "sssd-config-vars.yml"

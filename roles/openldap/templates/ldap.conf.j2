@@ -13,11 +13,11 @@
 #DEREF		never
 
 # Turning this off breaks GSSAPI used with krb5 when rdns = false
-SASL_NOCANON	{{ ldap_conf.sasl_nocanon }}
-URI ldaps://modern-times.{{ domain_name }}/
-BASE dc={{ second_level_domain }},dc={{ top_level_domain }}
+SASL_NOCANON	{{ openldap_conf.sasl_nocanon }}
+URI ldaps://modern-times.{{ openldap_conf.domain_name }}/
+BASE dc={{ openldap_conf.second_level_domain }},dc={{ openldap_conf.top_level_domain }}
 
 # TLS_CACERT /etc/openldap/certs/cert.pem
-TLS_CERT {{ ldap_key.tls_cert }}
-TLS_KEY {{ ldap_key.tls_key }}
-TLS_REQCERT {{ ldap_conf.tls_reqcert }}
+TLS_CERT {{ openldap_key.tls_cert }}
+TLS_KEY {{ openldap_key.tls_key }}
+TLS_REQCERT {{ openldap_conf.tls_reqcert }}

@@ -1,0 +1,116 @@
+{#
+# nginx.conf.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{% macro nginx_mail_conf() %}
+mail {
+	# See sample authentication script at:
+	# http://wiki.nginx.org/ImapAuthenticateWithApachePhpScript
+
+	# auth_http localhost/auth.php;
+	# pop3_capabilities "TOP" "USER";
+	# imap_capabilities "IMAP4rev1" "UIDPLUS";
+
+	server {
+		listen     localhost:110;
+		protocol   pop3;
+		proxy      on;
+	}
+
+	server {
+		listen     localhost:143;
+		protocol   imap;
+		proxy      on;
+	}
+}
+{% endmacro%}
+
+{% macro nginx_events_conf() %}
+events {
+	worker_connections 768;
+	# multi_accept on;
+}
+{% endmacro %}
+
+{% macro nginx_http_conf() %}
+http {
+
+	##
+	# Basic Settings
+	##
+
+	sendfile on;
+	tcp_nopush on;
+	types_hash_max_size 2048;
+	# server_tokens off;
+
+	# server_names_hash_bucket_size 64;
+	# server_name_in_redirect off;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	##
+	# SSL Settings
+	##
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+
+	##
+	# Logging Settings
+	##
+
+	access_log /var/log/nginx/access.log;
+
+	##
+	# Gzip Settings
+	##
+
+	gzip on;
+
+	# gzip_vary on;
+	# gzip_proxied any;
+	# gzip_comp_level 6;
+	# gzip_buffers 16 8k;
+	# gzip_http_version 1.1;
+	# gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+	##
+	# Virtual Host Configs
+	##
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
+{% endmacro%}
+
+{% macro nginx_conf() %}
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /var/log/nginx/error.log;
+include /etc/nginx/modules-enabled/*.conf;
+
+	{{- nginx_events_conf }}
+
+	{{- nginx_http_conf }}
+{% endmacro %}
+
+{{- nginx_conf() }}
