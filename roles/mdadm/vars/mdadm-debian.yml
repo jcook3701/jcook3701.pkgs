@@ -3,4 +3,4 @@
 ---
 mdadm_mount_directory: "/media/raid"
 mdadm_configuration_directory: "/etc/mdadm"
-fstab_configuration_directory: "/etc"
+mdadm_fstab_configuration_directory: "/etc"

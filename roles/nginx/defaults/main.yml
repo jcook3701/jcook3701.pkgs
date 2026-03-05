@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 # A master list of all sites your role knows how to build
-all_nginx_sites:
+nginx_sites:
   - server_name: pxe.local
     location_path: /pub/
     root: /var/www/html
@@ -15,4 +15,4 @@ all_nginx_sites:
 
 # The selector: This is what you override in your playbook or env vars
 # By default, it's empty so nothing happens by accident
-enabled_site_names: []
+nginx_enabled_site_names: []

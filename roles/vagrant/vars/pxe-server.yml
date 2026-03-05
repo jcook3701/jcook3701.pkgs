@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+vagrant_vm_name: "pxe-server"
+vagrant_box: "ubuntu/focal64"
+vagrant_box_version: ">= 0"
+vagrant_memory_mb: 1024
+vagrant_cpus: 1
+vagrant_gui_enabled: false
+vagrant_build_dir: "{{ '/vagrant_builds/' + vagrant_vm_name }}"
+vagrant_forwarded_ports:
+  - { guest: 80, host: 8080 }
+vagrant_provision_scripts: []
+vagrant_roles:
+  - jcook3701.homelab.pxeboot

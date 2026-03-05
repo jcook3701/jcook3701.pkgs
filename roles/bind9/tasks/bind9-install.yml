@@ -25,7 +25,7 @@
 
 - name: Bind9 TSIG keygen
   ansible.builtin.include_tasks:
-    file: bind9-tsig-kygen.yml
+    file: bind9-tsig-keygen.yml
   when: (bind9_enable_tsig | bool) or (bind9_enable_dydns | bool)
 
 - name: Backup initial Bind9 configuration files

@@ -11,7 +11,10 @@
 - name: Add the PPA using the specific key file
   become: true
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/mixxx.asc] https://ppa.launchpadcontent.net/mixxx/mixxx/ubuntu {{ ansible_distribution_release }} main"
+    repo: >-
+      "deb [signed-by=/etc/apt/keyrings/mixxx.asc]
+      https://ppa.launchpadcontent.net/mixxx/mixxx/ubuntu
+      {{ ansible_distribution_release }} main"
     state: present
     filename: mixxx
     update_cache: yes

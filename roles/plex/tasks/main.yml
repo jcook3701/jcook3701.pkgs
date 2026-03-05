@@ -5,7 +5,7 @@
   ansible.builtin.get_url:
     url: "https://downloads.plex.tv/plex-keys/PlexSign.v2.key"
     dest: /etc/apt/keyrings/plexmediaserver.asc
-    mode: '0644'
+    mode: "0644"
 
 - name: Add the official Plex repository with folded formatting for linting
   ansible.builtin.apt_repository:

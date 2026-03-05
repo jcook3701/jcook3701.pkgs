@@ -22,7 +22,8 @@
   ansible.builtin.copy:
     content: "{{ item.stdout }}"
     dest: >-
-      {{ bind9_key_directory.tsig }}/{{ hostvars[item.item].hostname | default(item.item) }}/{{ hostvars[item.item].hostname | default(item.item) }}-tsig.key
+      {{ bind9_key_directory.tsig }}/{{ hostvars[item.item].hostname | default(item.item) }}/{{
+      hostvars[item.item].hostname | default(item.item) }}-tsig.key
     owner: bind
     group: bind
     mode: "0640"
@@ -36,5 +37,3 @@
     owner: bind
     group: bind
     mode: "0640"
-  vars:
-    bind9_key_directory: "{{ bind9_key_directory }}"

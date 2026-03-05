@@ -10,9 +10,9 @@
   ansible.builtin.template:
     src: nginx_site.j2
     dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
-    mode: '0644'
+    mode: "0644"
   # Filters the master list to only include sites in our enabled list
-  loop: "{{ all_nginx_sites | selectattr('server_name', 'in', enabled_site_names) | list }}"
+  loop: "{{ nginx_sites | selectattr('server_name', 'in', nginx_enabled_site_names) | list }}"
   notify: Reload NGINX
 
 - name: Enable only the selected NGINX sites
@@ -20,12 +20,12 @@
     src: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
     state: link
-  loop: "{{ all_nginx_sites | selectattr('server_name', 'in', enabled_site_names) | list }}"
+  loop: "{{ nginx_sites | selectattr('server_name', 'in', nginx_enabled_site_names) | list }}"
   notify: Reload NGINX
 
 - name: Remove symbolic links for sites that are NOT enabled
   ansible.builtin.file:
     path: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
     state: absent
-  loop: "{{ all_nginx_sites | rejectattr('server_name', 'in', enabled_site_names) | list }}"
+  loop: "{{ nginx_sites | rejectattr('server_name', 'in', nginx_enabled_site_names) | list }}"
   notify: Reload NGINX

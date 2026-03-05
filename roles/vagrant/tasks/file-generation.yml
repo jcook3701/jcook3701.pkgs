@@ -17,9 +17,7 @@
     content: |
       ---
       - hosts: all
-        roles:
-          - jcook3701.pkgs.snap
-          # Add whatever roles you want to run here
+        roles: {{ vagrant_roles }}
     owner: "{{ sudo_user }}"
     group: "{{ sudo_user }}"
     mode: "0644"

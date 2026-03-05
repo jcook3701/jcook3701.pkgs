@@ -5,16 +5,15 @@ samba_pkg_names:
   - samba
 
 # Domain Options
-top_level_domain: "com"
-second_level_domain: "jcook3701"
-domain_name: "{{ second_level_domain }}.{{ top_level_domain }}"
+samba_top_level_domain: "com"
+samba_second_level_domain: "jcook3701"
+samba_domain_name: "{{ samba_second_level_domain }}.{{ samba_top_level_domain }}"
 
 samba_directory:
   conf: "/etc/samba"
 
 samba_file:
   samba_conf: "{{ samba_directory.conf }}/smb.conf"
-
 
 samba_conf:
   - name: global
@@ -43,17 +42,17 @@ samba_conf:
 
     # LDAP Settings
     Domain master: "Yes"
-    ldap suffix: "dc={{ second_level_domain }},dc={{ top_level_domain }}"
+    ldap suffix: "dc={{ samba_second_level_domain }},dc={{ samba_top_level_domain }}"
     ldap user suffix: "ou=Group"
     ldap group suffix: "ou=People"
     ldap machine suffix: "ou=Computers"
     ldap idmap suffix: "ou=Idmap"
-    ldap admin dn: "cn=samba-admin, dc={{ second_level_domain }}, dc={{ top_level_domain }}"
+    ldap admin dn: "cn=samba-admin, dc={{ samba_second_level_domain }}, dc={{ samba_top_level_domain }}"
     ldap delete dn: "no"
     ldap ssl: "no"
     # unix password sync = Yes
 
-    passdb backend: "ldapsam:ldaps://modern-times.{{ domain_name }}:636"
+    passdb backend: "ldapsam:ldaps://modern-times.{{ samba_domain_name }}:636"
 
     # ldapsam:trusted = yes
     # ldapsam:editposix = yes
