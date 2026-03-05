@@ -11,4 +11,4 @@
       - pxe.local
       - mixxx.local
   roles:
-    - jcook3701.pkgs.nginx
+    - nginx
