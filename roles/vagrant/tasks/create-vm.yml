@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: "Include specific server variables from {{ vagrant_item.server_vars }}"
+  ansible.builtin.include_vars:
+    file: "{{ vagrant_item.server_vars }}"
+
+- name: Vagrant directory creation
+  ansible.builtin.include_tasks: directory-creation.yml
+
+- name: Vagrant file generation
+  ansible.builtin.include_tasks: file-generation.yml
+
+- name: Bring up VirtualBox VM
+  ansible.builtin.command:
+    cmd: vagrant up --provider virtualbox
+    chdir: "{{ vagrant_build_dir }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  register: vagrant_up_result
+  changed_when: "'Machine booted and ready' in vagrant_up_result.stdout"
+
+- name: Report VM status
+  ansible.builtin.debug:
+    msg: "VM {{ vagrant_vm_name }} is now running in {{ vagrant_build_dir }}"

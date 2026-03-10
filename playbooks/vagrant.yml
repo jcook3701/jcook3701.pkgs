@@ -12,8 +12,9 @@
         manager: auto
 
     - name: Install vagrant
+      vars:
+        vagrant_enabled_boxes:
+          - { server_vars: pxeboot-server.yml }
+
       ansible.builtin.include_role:
         name: jcook3701.pkgs.vagrant
-      vars:
-        vagrant_vm_name: "web-server-01"
-        vagrant_memory_mb: 4096

@@ -3,16 +3,11 @@
 ---
 # A master list of all sites your role knows how to build
 nginx_sites:
-  - server_name: pxe.local
-    location_path: /pub/
-    root: /var/www/html
-  - server_name: plex.local
-    location_path: /
-    root: /var/lib/plex
-  - server_name: mixxx.local
-    location_path: /stream/
-    root: /var/www/mixxx
+  - { server_vars: default.yml }
+  - { server_vars: pxeboot.yml }
+  - { server_vars: plex.yml }
+  - { server_vars: mixxx.yml }
 
 # The selector: This is what you override in your playbook or env vars
 # By default, it's empty so nothing happens by accident
-nginx_enabled_site_names: []
+nginx_enabled_sites: []

@@ -1,13 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-vagrant_vm_name: "ansible-node"
-vagrant_box: "ubuntu/focal64"
-vagrant_box_version: ">= 0"
-vagrant_memory_mb: 1024
-vagrant_cpus: 1
-vagrant_gui_enabled: false
-vagrant_build_dir: "{{ '/vagrant_builds/' + vagrant_vm_name }}"
-vagrant_forwarded_ports:
-  - { guest: 80, host: 8080 }
-vagrant_provision_scripts: []
+# A master list of all sites your role knows how to build
+vagrant_boxes:
+  - { server_vars: pxeboot-server.yml }
+  - { server_vars: plex-server.yml }
+  - { server_vars: mixxx-server.yml }
+
+# The selector: This is what you override in your playbook or env vars
+# By default, it's empty so nothing happens by accident
+vagrant_enabled_boxes: []

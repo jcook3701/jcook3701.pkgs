@@ -42,6 +42,12 @@ Vagrant.configure("2") do |config|
     vb.gui = {{ vagrant_gui_enabled | lower }}
   end
 
+  {# Direct Bridge Networking (Public Network) #}
+  {% if vagrant_network_type == 'public_network' %}
+  config.vm.network "public_network", ip: "{{ vagrant_ip }}", netmask: "{{ vagrant_netmask | default('255.255.255.0') }}", bridge: "{{ vagrant_bridge }}"
+  {% endif %}
+
+  {# Port Forwarding (Only if explicitly defined) #}
   {% if vagrant_forwarded_ports is defined %}
   {% for port in vagrant_forwarded_ports %}
   config.vm.network "forwarded_port", guest: {{ port.guest }}, host: {{ port.host }}

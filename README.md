@@ -62,3 +62,10 @@
 See the <a href="https://github.com/jcook3701/jcook3701.pkgs/blob/master/LICENSE.md">LICENSE</a> file for the full license text.</p>
 
 <p>SPDX-License-Identifier: AGPL-3.0-or-later</p>
+
+<!--
+    TODO: Setup the following packages
+        1. Email Sever
+            1. Postfix (SMTP/sending)
+            2. Dovecot (IMAP/receiving)
+-->

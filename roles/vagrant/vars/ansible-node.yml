@@ -1,23 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-vagrant_vm_name: "web-server"
+vagrant_vm_name: "ansible-node"
 vagrant_box: "ubuntu/focal64"
 vagrant_box_version: ">= 0"
 vagrant_memory_mb: 1024
 vagrant_cpus: 1
 vagrant_gui_enabled: false
-vagrant_ip: "10.0.1.51"
-vagrant_network_type: "public_network"
-vagrant_bridge: "enp4s0"
 vagrant_build_dir: "{{ '/vagrant_builds/' + vagrant_vm_name }}"
 vagrant_forwarded_ports:
   - { guest: 80, host: 8080 }
-  - { guest: 22, host: 2222, id: "ssh" }
-
-vagrant_roles:
-  - role: jcook3701.pkgs.nginx
-    vars:
-      # This matches the filename vars/pxeboot.yml in your role
-      nginx_enabled_sites:
-        - { server_vars: default.yml }

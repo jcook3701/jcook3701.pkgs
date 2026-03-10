@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: "Include variables from {{ site_item.server_vars }}"
+  ansible.builtin.include_vars:
+    file: "{{ site_item.server_vars }}"
+
+- name: "Enable site symlink for {{ nginx_site.server_name }}"
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ nginx_site.server_name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ nginx_site.server_name }}.conf"
+    state: link
+  notify: Reload NGINX
