@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+openldap_admin_password: "admin" # Change this!
+openldap_hostname: openldap-server
+
+# Domain Options
+openldap_top_level_domain: "com"
+openldap_second_level_domain: "jcook3701"
+openldap_domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
+
+openldap_conf:
+  # Port Options
+  # Port Options: 389 (ldap) or 636 (ldaps)
+  port: "636"
+  sasl_nocanon: "on"
+  tls_reqcert: "allow"
+
+openldap_key:
+  # Key Options
+  tls_cacert: ""
+  tls_cert: "{{ openldap_directory.certs }}/cert.pem"
+  tls_key: "{{ openldap_directory.certs }}/priv.pem"

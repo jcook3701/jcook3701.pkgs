@@ -4,6 +4,7 @@
 vagrant_vm_name: "pxe-server"
 vagrant_box: "ubuntu/focal64"
 vagrant_box_version: ">= 0"
+vagrant_os_family: "debian"
 vagrant_memory_mb: 1024
 vagrant_cpus: 1
 vagrant_gui_enabled: false
@@ -15,7 +16,6 @@ vagrant_build_dir: "{{ '/vagrant_builds/' + vagrant_vm_name }}"
 vagrant_roles:
   - role: jcook3701.pkgs.nginx
     vars:
-      # This matches the filename vars/pxeboot.yml in your role
       nginx_enabled_sites:
         - { server_vars: pxeboot.yml }
   # - role: jcook3701.homelab.pxeboot

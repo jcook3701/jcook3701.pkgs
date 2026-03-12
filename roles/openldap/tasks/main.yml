@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Openldap OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Install openldap package and dependencies.
+  ansible.builtin.package:
+    name: "{{ openldap_pkg_names }}"
+    state: present
+
+- name: Openldap key generation
+  ansible.builtin.include_tasks: keys.yml
+
+- name: Openldap configuration
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Openldap database
+  ansible.builtin.include_tasks: database.yml

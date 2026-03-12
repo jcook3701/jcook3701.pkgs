@@ -1,0 +1,98 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate OpenLDAP admin password hash
+  ansible.builtin.shell: "slappasswd -s {{ openldap_admin_password }}"
+  register: openldap_hashed_pass_cmd
+  no_log: true
+  changed_when: false
+
+- name: Set hashed password as fact
+  ansible.builtin.set_fact:
+    openldap_admin_password_hashed: "{{ openldap_hashed_pass_cmd.stdout }}"
+
+- name: Deploy Database OLC configuration LDIF
+  ansible.builtin.template:
+    src: olc_config.ldif.j2
+    dest: "/tmp/olc_config.ldif"
+    mode: '0600'
+
+- name: Apply OLC configuration to slapd
+  ansible.builtin.shell: "ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/olc_config.ldif"
+  register: ldap_modify_result
+  failed_when:
+    - ldap_modify_result.rc != 0
+    - "'Already exists' not in ldap_modify_result.stderr"
+  changed_when: "'modifying entry' in ldap_modify_result.stdout"
+
+- name: Upload custom LDIF schemas to the guest
+  ansible.builtin.copy:
+    src: "schema/"
+    dest: "/etc/ldap/schema/"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: List all LDIF files in the schema directory
+  ansible.builtin.find:
+    paths: "/etc/ldap/schema"
+    patterns: "*.ldif"
+  register: found_schemas
+
+- name: Import all schemas into running LDAP configuration
+  ansible.builtin.shell: "ldapadd -Y EXTERNAL -H ldapi:/// -f {{ item.path }}"
+  loop: "{{ found_schemas.files | sort(attribute='path') }}"
+  register: ldap_import_result
+  # We ignore "Already exists" (code 68) because core/cosine are likely already there
+  failed_when:
+    - ldap_import_result.rc != 0
+    - "'Already exists' not in ldap_import_result.stderr"
+  changed_when: "'adding new entry' in ldap_import_result.stdout"
+
+- name: Verify loaded LDAP schemas
+  ansible.builtin.shell: |
+    ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" "(objectClass=olcSchemaConfig)" cn
+  register: ldap_schema_list
+  changed_when: false
+
+- name: Display active LDAP schemas
+  ansible.builtin.debug:
+    msg: "The following schemas are active: {{ ldap_schema_list.stdout_lines | select('match', '^cn:.*') | list }}"
+
+- name: Deploy base domain structure LDIF
+  ansible.builtin.template:
+    src: base_structure.ldif.j2
+    dest: "/tmp/base_structure.ldif"
+    mode: "0600"
+
+- name: Create base domain structure
+  ansible.builtin.shell: "ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/base_structure.ldif"
+  register: base_dn_result
+  failed_when:
+    - base_dn_result.rc != 0
+    - "'Already exists' not in base_dn_result.stderr"
+  changed_when: "'adding new entry' in base_dn_result.stdout"
+
+- name: Test LDAP Bind (Login) as Admin
+  ansible.builtin.shell: >
+    ldapsearch -x
+    -H ldap://localhost
+    -D "cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    -w "{{ openldap_admin_password }}"
+    -b "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    -s base
+  register: ldap_bind_test
+  changed_when: false
+  no_log: true # Keeps your password out of the Ansible logs
+
+- name: Verify Secure LDAPS Bind (Port 636)
+  ansible.builtin.shell: >
+    LDAPTLS_REQCERT=allow ldapsearch -x
+    -H ldaps://localhost
+    -D "cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    -w "{{ openldap_admin_password }}"
+    -b "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    -s base
+  register: ldaps_test
+  changed_when: false
+  no_log: true

@@ -5,7 +5,6 @@ openldap_pkg_names:
   - slapd
   - ldap-utils
 
-openldap_configuration_directory: "/etc/ldap"
-
-openldap_os_directory:
-  conf: ""
+openldap_directory:
+  conf: "/etc/ldap"
+  certs: "/etc/ldap/certs"

@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+openldap_pkg_names:
+  - openldap-servers
+  - openldap-clients
+
+openldap_directory:
+  conf: "/etc/openldap"
+  certs: "/etc/openldap/certs"

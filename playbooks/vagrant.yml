@@ -14,7 +14,7 @@
     - name: Install vagrant
       vars:
         vagrant_enabled_boxes:
-          - { server_vars: pxeboot-server.yml }
+          - { server_vars: openldap-server.yml }
 
       ansible.builtin.include_role:
         name: jcook3701.pkgs.vagrant

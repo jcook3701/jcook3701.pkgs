@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create LDAP certificate directory
+  ansible.builtin.file:
+    path: "{{ openldap_directory.certs }}"
+    state: directory
+    owner: openldap
+    group: openldap
+    mode: "0700"
+
+- name: Generate private key for OpenLDAP
+  community.crypto.openssl_privatekey:
+    path: "{{ openldap_key.tls_key }}"
+    owner: openldap
+    group: openldap
+    mode: "0600"
+
+- name: Generate Certificate Signing Request (CSR)
+  community.crypto.openssl_csr:
+    path: "{{ openldap_directory.certs }}/ldap.csr"
+    privatekey_path: "{{ openldap_key.tls_key }}"
+    common_name: "{{ ansible_hostname }}.{{ openldap_domain_name }}"
+    owner: openldap
+    group: openldap
+    mode: "0600"
+
+- name: Generate self-signed certificate
+  community.crypto.x509_certificate:
+    path: "{{ openldap_key.tls_cert }}"
+    csr_path: "{{ openldap_directory.certs }}/ldap.csr"
+    privatekey_path: "{{ openldap_key.tls_key }}"
+    provider: selfsigned
+    selfsigned_not_after: "+365d"
+    owner: openldap
+    group: openldap
+    mode: "0644"

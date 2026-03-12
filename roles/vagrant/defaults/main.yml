@@ -1,11 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# A master list of all sites your role knows how to build
+# A master list of all available sites
 vagrant_boxes:
   - { server_vars: pxeboot-server.yml }
   - { server_vars: plex-server.yml }
   - { server_vars: mixxx-server.yml }
+  - { server_vars: openldap-server.yml }
+
+vagrant_guest_prep_commands:
+  debian: "apt-get update && apt-get install -y build-essential dkms linux-headers-amd64"
+  ubuntu: "apt-get update && apt-get install -y build-essential dkms linux-headers-generic"
+  redhat: "dnf install -y gcc make dkms kernel-devel-$(uname -r) kernel-headers-$(uname -r) elfutils-libelf-devel"
+  arch: "pacman -Sy --noconfirm base-devel linux-headers"
+  suse: "zypper install -y -t pattern devel_kernel devel_basis"
 
 # The selector: This is what you override in your playbook or env vars
 # By default, it's empty so nothing happens by accident

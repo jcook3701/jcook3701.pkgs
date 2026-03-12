@@ -6,7 +6,7 @@ virtualbox_directories:
   asc: /etc/apt/keyrings/oracle-virtualbox-2016.asc
 
 # NOTE: Not currently used.
-virtualbox_conf:
+virtualbox:
   arch: amd64
   signed_by: "{{ virtualbox_directories.asc }}"
   url: https://download.virtualbox.org/virtualbox/debian

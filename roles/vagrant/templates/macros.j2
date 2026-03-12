@@ -35,29 +35,43 @@ Vagrant.configure("2") do |config|
   config.vm.box_version = "{{ vagrant_box_version | default('>= 0') }}"
   # Force VirtualBox to avoid that libvirt error
 
-  config.vm.provider "virtualbox" do |vb|
-    vb.name = "{{ vagrant_vm_name }}"
-    vb.memory = {{ vagrant_memory_mb }}
-    vb.cpus = {{ vagrant_cpus }}
-    vb.gui = {{ vagrant_gui_enabled | lower }}
-  end
+  config.vm.define "{{ vagrant_vm_name }}" do |node|
+    node.vm.hostname = "{{ vagrant_vm_name }}"
 
-  {# Direct Bridge Networking (Public Network) #}
-  {% if vagrant_network_type == 'public_network' %}
-  config.vm.network "public_network", ip: "{{ vagrant_ip }}", netmask: "{{ vagrant_netmask | default('255.255.255.0') }}", bridge: "{{ vagrant_bridge }}"
-  {% endif %}
+    # --- OS-Specific Kernel Header Setup ---
+    {% set prep_cmd = vagrant_guest_prep_commands[vagrant_os_family] %}
+    node.vm.provision "shell", inline: "{{ prep_cmd }}"
 
-  {# Port Forwarding (Only if explicitly defined) #}
-  {% if vagrant_forwarded_ports is defined %}
-  {% for port in vagrant_forwarded_ports %}
-  config.vm.network "forwarded_port", guest: {{ port.guest }}, host: {{ port.host }}
-  {% endfor %}
-  {% endif %}
+    if Vagrant.has_plugin?("vagrant-vbguest")
+      node.vbguest.auto_update = true
+      node.vbguest.auto_reboot = true
+      node.vbguest.installer_options = { allow_new_kernel: true }
+    end
 
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "provision.yml"
-    ansible.become = true
-    ansible.playbook_command = "{{ vagrant_ansible_path }}"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "{{ vagrant_vm_name }}"
+      vb.memory = {{ vagrant_memory_mb }}
+      vb.cpus = {{ vagrant_cpus }}
+      vb.gui = {{ vagrant_gui_enabled | lower }}
+    end
+
+    {# Direct Bridge Networking (Public Network) #}
+    {% if vagrant_network_type == 'public_network' %}
+    node.vm.network "public_network", ip: "{{ vagrant_ip }}", netmask: "{{ vagrant_netmask | default('255.255.255.0') }}", bridge: "{{ vagrant_bridge }}"
+    {% endif %}
+
+    {# Port Forwarding (Only if explicitly defined) #}
+    {% if vagrant_forwarded_ports is defined %}
+    {% for port in vagrant_forwarded_ports %}
+    node.vm.network "forwarded_port", guest: {{ port.guest }}, host: {{ port.host }}
+    {% endfor %}
+    {% endif %}
+
+    node.vm.provision "ansible" do |ansible|
+      ansible.playbook = "provision.yml"
+      ansible.become = true
+      ansible.playbook_command = "{{ vagrant_ansible_path }}"
+    end
   end
 end
 {% endmacro %}

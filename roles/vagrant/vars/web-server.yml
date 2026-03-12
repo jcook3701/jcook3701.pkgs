@@ -4,6 +4,7 @@
 vagrant_vm_name: "web-server"
 vagrant_box: "ubuntu/focal64"
 vagrant_box_version: ">= 0"
+vagrant_os_family: "debian"
 vagrant_memory_mb: 1024
 vagrant_cpus: 1
 vagrant_gui_enabled: false

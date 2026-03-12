@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create LDAP configuration directory
+  ansible.builtin.file:
+    path: "{{ openldap_directory.conf }}"
+    state: directory
+    owner: openldap
+    group: openldap
+    mode: "0750"
+
+- name: Deploy client configuration (ldap.conf)
+  ansible.builtin.template:
+    src: ldap.conf.j2
+    dest: "{{ openldap_directory.conf }}/ldap.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart slapd
+
+- name: Ensure slapd listens on LDAPS (636)
+  ansible.builtin.lineinfile:
+    path: /etc/default/slapd
+    regexp: '^SLAPD_SERVICES='
+    line: 'SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"'
+  notify: restart slapd
+
+- name: Ensure OpenLDAP service is started and enabled
+  ansible.builtin.service:
+    name: slapd
+    state: started
+    enabled: yes
+
+- name: Flush handlers to ensure slapd is ready
+  ansible.builtin.meta: flush_handlers
