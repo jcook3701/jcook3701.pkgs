@@ -76,7 +76,8 @@ samba_conf:
   - name: homes
     comment: "Home Directories"
     path: "/media/raid10/samba_shares/samba_home_directories/%S"
-    valid users: '%S, %D%w%S, @"JCOOK3701\Domain Users"'
+    valid users: >-
+      %S, %D%w%S, @"JCOOK3701\Domain Users"
     browseable: "No"
     read only: "No"
     writable: "Yes"
@@ -112,7 +113,8 @@ samba_conf:
     comment: "Plex Network Share"
     path: "/media/raid10/plexmedia"
     public: "No"
-    valid users: '@JCOOK3701\Domain Users'
+    valid users: >-
+      @JCOOK3701\Domain Users
     force group: "plex"
     force user: "plex"
     read only: "No"
@@ -128,7 +130,8 @@ samba_conf:
     comment: "Backup Network Share"
     path: "/media/raid10/samba_shares/samba_backup_share"
     public: "No"
-    valid users: '@JCOOK3701\Domain Users'
+    valid users: >-
+      @JCOOK3701\Domain Users
     force group: "Domain Users"
     force user: "samba-user"
     read only: "No"

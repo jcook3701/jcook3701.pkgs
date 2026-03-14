@@ -21,8 +21,12 @@
   ansible.builtin.debug:
     msg: "Processing box with variables from: {{ vagrant_enabled_boxes }}"
 
-- name: Create virtualbox with vagrant
-  ansible.builtin.include_tasks: create-vm.yml
-  loop: "{{ vagrant_boxes | selectattr('server_vars', 'in', vagrant_enabled_boxes | map(attribute='server_vars') | list) | list }}"
+- name: Provision and Configure VMs
+  vars:
+    # Filter the list once at the block level for readability
+    enabled_vms: >-
+      {{ vagrant_boxes | selectattr('server_vars', 'in', vagrant_enabled_boxes | map(attribute='server_vars')) | list }}
+  ansible.builtin.include_tasks: process-vm.yml
+  loop: "{{ enabled_vms }}"
   loop_control:
     loop_var: vagrant_item

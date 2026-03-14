@@ -4,7 +4,10 @@
 openldap_pkg_names:
   - slapd
   - ldap-utils
+  - python3-cryptography
 
 openldap_directory:
   conf: "/etc/ldap"
+  slapd: "/etc/ldap/slapd.d"
   certs: "/etc/ldap/certs"
+  database: "/var/lib/ldap"

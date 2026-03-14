@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Manage vagrant on localhost
+- name: "Phase 1: Manage vagrant on localhost"
   hosts: localhost
   gather_facts: true
   become: true
-
   tasks:
     - name: Gather package facts
       ansible.builtin.package_facts:
@@ -15,6 +14,18 @@
       vars:
         vagrant_enabled_boxes:
           - { server_vars: openldap-server.yml }
-
       ansible.builtin.include_role:
         name: jcook3701.pkgs.vagrant
+
+- name: "Phase 2: Configure OpenLDAP"
+  hosts: vagrant_vms  # This matches the group we just created
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Install Openldap
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.openldap

@@ -16,14 +16,16 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart slapd
+  notify: Restart slapd
 
 - name: Ensure slapd listens on LDAPS (636)
   ansible.builtin.lineinfile:
     path: /etc/default/slapd
-    regexp: '^SLAPD_SERVICES='
-    line: 'SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"'
-  notify: restart slapd
+    regexp: >-
+      ^SLAPD_SERVICES=
+    line: >-
+      SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"
+  notify: Restart slapd
 
 - name: Ensure OpenLDAP service is started and enabled
   ansible.builtin.service:

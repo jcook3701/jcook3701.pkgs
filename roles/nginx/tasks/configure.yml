@@ -21,12 +21,16 @@
 
 - name: Deploy selected NGINX sites
   ansible.builtin.include_tasks: deploy-site.yml
-  loop: "{{ nginx_sites | selectattr('server_vars', 'in', nginx_enabled_sites | map(attribute='server_vars') | list) | list }}"
+  loop: >-
+    {{ nginx_sites | selectattr('server_vars', 'in', nginx_enabled_sites |
+    map(attribute='server_vars') | list) | list }}
   loop_control:
     loop_var: site_item
 
 - name: Remove symbolic links for sites that are NOT enabled
   ansible.builtin.include_tasks: remove-site.yml
-  loop: "{{ nginx_sites | rejectattr('server_vars', 'in', nginx_enabled_sites | map(attribute='server_vars') | list) | list }}"
+  loop: >-
+    {{ nginx_sites | rejectattr('server_vars', 'in', nginx_enabled_sites |
+      map(attribute='server_vars') | list) | list }}
   loop_control:
     loop_var: site_item
