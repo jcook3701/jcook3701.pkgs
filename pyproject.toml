@@ -71,6 +71,7 @@ tools = [
   "mypy==1.9",
   "nameisok>=0.1",
   "nutri-matic>=0.1",
+  "passlib>=1.7",
   "pip-audit>=2.10",
   "pre-commit>=4.5",
   "pytest>=9.0",

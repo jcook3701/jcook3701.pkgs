@@ -26,6 +26,14 @@
       ansible.builtin.package_facts:
         manager: auto
 
+    - name: Setup bash
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.bash
+
+    - name: Setup nano
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.nano
+
     - name: Install Openldap
       ansible.builtin.include_role:
         name: jcook3701.pkgs.openldap

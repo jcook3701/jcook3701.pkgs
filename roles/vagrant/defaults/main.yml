@@ -12,7 +12,7 @@ vagrant_boxes:
 vagrant_shutdown: "(nohup sh -c 'sleep 2 && shutdown -r now' > /dev/null 2>&1 &)"
 
 vagrant_guest_prep_commands:
-  debian: "apt-get update && apt-get install -y build-essential dkms linux-headers-amd64 && {{ vagrant_shutdown }}"
+  debian: "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y python3-minimal python3-pip build-essential dkms linux-headers-amd64"
   ubuntu: "apt-get update && apt-get install -y build-essential dkms linux-headers-generic"
   redhat: "dnf install -y gcc make dkms kernel-devel kernel-headers elfutils-libelf-devel"
   arch: "pacman -Sy --noconfirm base-devel linux-headers"

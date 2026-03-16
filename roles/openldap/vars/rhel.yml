@@ -7,4 +7,12 @@ openldap_pkg_names:
 
 openldap_directory:
   conf: "/etc/openldap"
+  slapd: "/etc/openldap/slapd.d"
   certs: "/etc/openldap/certs"
+  database: "/var/lib/ldap"
+  modules: "/usr/lib64/openldap"
+  schema: "/etc/openldap/schema"
+  run: "/run/openldap"
+  defaults: "/etc/sysconfig/slapd"
+
+openldap_group: ldap

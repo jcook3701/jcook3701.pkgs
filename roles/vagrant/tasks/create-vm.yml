@@ -15,6 +15,7 @@
   ansible.builtin.command:
     cmd: vagrant up --provider virtualbox
     chdir: "{{ vagrant_build_dir }}"
+  async: 1200
   become: true
   become_user: "{{ sudo_user }}"
   register: vagrant_up_result
@@ -39,12 +40,12 @@
     groups: "vagrant_vms"
     # Grab whatever unique port Vagrant assigned to this specific VM
     ansible_host: >-
-      {{ (vagrant_ssh_config.stdout | regex_search('HostName\\s+(.*)', '\\1')) | first | trim }}
+      {{ (vagrant_ssh_config.stdout | regex_search('HostName\s+(.*)', '\1')) | first | trim }}
     ansible_port: >-
-      {{ (vagrant_ssh_config.stdout | regex_search('Port\\s+(.*)', '\\1')) | first | trim | int }}
+      {{ (vagrant_ssh_config.stdout | regex_search('Port\s+(.*)', '\1')) | first | trim | int }}
     ansible_user: >-
-      {{ (vagrant_ssh_config.stdout | regex_search('User\\s+(.*)', '\\1')) | first | trim }}
+      {{ (vagrant_ssh_config.stdout | regex_search('User\s+(.*)', '\1')) | first | trim }}
     ansible_ssh_private_key_file: >-
-      {{ (vagrant_ssh_config.stdout | regex_search('IdentityFile\\s+(.*)', '\\1')) | first | trim }}
+      {{ (vagrant_ssh_config.stdout | regex_search('IdentityFile\s+(.*)', '\1')) | first | trim }}
     ansible_ssh_common_args: >-
       -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null

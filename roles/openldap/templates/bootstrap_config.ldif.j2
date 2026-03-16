@@ -23,30 +23,64 @@
 dn: cn=config
 objectClass: olcGlobal
 cn: config
+olcPidFile: {{ openldap_directory.run }}/slapd.pid
+olcArgsFile: {{ openldap_directory.run }}/slapd.args
 olcTLSCertificateFile: {{ openldap_key.tls_cert }}
 olcTLSCertificateKeyFile: {{ openldap_key.tls_key }}
+olcLogLevel: stats
 
-# 2. Schema Container (Must exist before importing schemas)
+
+# 2. Config Database (GRANTS LOCAL ROOT PERMISSIONS)
+dn: olcDatabase={0}config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: {0}config
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * break
+
+# 3. Schema Container (Must exist before importing schemas)
 dn: cn=schema,cn=config
 objectClass: olcSchemaConfig
 cn: schema
 
-# 3. Load the MDB Module (Required on Ubuntu/Debian)
+# 4. Load Basic Schemas (REQUIRED for 'sn', 'uid', etc.)
+# Note: In an offline slapadd, you usually include these files
+include: file://{{ openldap_directory.schema }}/core.ldif
+include: file://{{ openldap_directory.schema }}/cosine.ldif
+include: file://{{ openldap_directory.schema }}/inetorgperson.ldif
+include: file://{{ openldap_directory.schema }}/nis.ldif
+include: file://{{ openldap_directory.schema }}/openldap.ldif
+include: file://{{ openldap_directory.schema }}/ppolicy.ldif
+include: file://{{ openldap_directory.schema }}/collective.ldif
+include: file://{{ openldap_directory.schema }}/corba.ldif
+include: file://{{ openldap_directory.schema }}/duaconf.ldif
+include: file://{{ openldap_directory.schema }}/dyngroup.ldif
+include: file://{{ openldap_directory.schema }}/java.ldif
+include: file://{{ openldap_directory.schema }}/misc.ldif
+include: file://{{ openldap_directory.schema }}/pmi.ldif
+include: file://{{ openldap_directory.schema }}/samba.ldif
+include: file://{{ openldap_directory.schema }}/sudo.ldif
+include: file://{{ openldap_directory.schema }}/autofs.ldif
+include: file://{{ openldap_directory.schema }}/guacConfigGroup.ldif
+
+# 5. Load the MDB Module (Required on Ubuntu/Debian)
 dn: cn=module{0},cn=config
 objectClass: olcModuleList
 cn: module{0}
-olcModulePath: /usr/lib/ldap
+olcModulePath: {{ openldap_directory.modules }}
 olcModuleLoad: back_mdb
 
-# 4. Create the Database Entry (Not modify!)
+# 6. Create the Database Entry (Not modify!)
 dn: olcDatabase={1}mdb,cn=config
 objectClass: olcDatabaseConfig
 objectClass: olcMdbConfig
 olcDatabase: {1}mdb
-olcDbDirectory: /var/lib/ldap
+olcDbDirectory: {{ openldap_directory.database }}
 olcSuffix: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 olcRootDN: cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 olcRootPW: {{ openldap_admin_password_hashed }}
+# Basic indexing for performance and stability
+olcDbIndex: objectClass eq
+olcDbIndex: cn,sn,mail pres,eq,sub
+olcDbIndex: uid pres,eq,sub
 {%- endmacro %}
 
 {{- bootstrap_config() }}

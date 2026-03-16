@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+bash_user_name: "{{ ansible_user_id }}"
+bash_user_group: "{{ ansible_user_id }}"
+bash_user_home: "{{ ansible_env.HOME }}"
+
+# Toggle features for the template
+bash_show_git_branch: true
+bash_history_size: 10000

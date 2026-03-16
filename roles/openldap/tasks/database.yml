@@ -26,6 +26,27 @@
   loop: [absent, directory]
   become: true
 
+- name: Upload custom LDIF schemas to the guest
+  ansible.builtin.copy:
+    src: "schema/"
+    dest: "{{ openldap_directory.schema }}/"
+    owner: openldap
+    group: openldap
+    mode: "0644"
+  tags: never
+
+- name: Set permissions for OpenLDAP directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: openldap
+    group: openldap
+    mode: "0750"
+    recurse: true
+  loop:
+    - "{{ openldap_directory.slapd }}"
+    - "{{ openldap_directory.database }}"
+  become: true
+
 - name: Deploy bootstrap configuration from J2 template
   ansible.builtin.template:
     src: bootstrap_config.ldif.j2
@@ -59,29 +80,6 @@
     - ldap_modify_result.rc != 0
     - "'Already exists' not in ldap_modify_result.stderr"
   changed_when: "'modifying entry' in ldap_modify_result.stdout"
-
-- name: Upload custom LDIF schemas to the guest
-  ansible.builtin.copy:
-    src: "schema/"
-    dest: "/etc/ldap/schema/"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: List all LDIF files in the schema directory
-  ansible.builtin.find:
-    paths: "/etc/ldap/schema"
-    patterns: "*.ldif"
-  register: found_schemas
-
-- name: Offline import using slapadd (The script way)
-  ansible.builtin.shell: "slapadd -v -n 0 -F {{ openldap_directory.slapd }} -l {{ item }} > /dev/null 2>&1"
-  loop: "{{ found_schemas.files | sort(attribute='path') | map(attribute='path') | list }}"
-  register: slapadd_result
-  failed_when:
-    - slapadd_result.rc != 0
-    - slapadd_result.rc != 68 # Already exists
-  changed_when: slapadd_result.rc == 0
 
 - name: Verify loaded LDAP schemas
   ansible.builtin.shell: |

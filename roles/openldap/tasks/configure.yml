@@ -20,18 +20,12 @@
 
 - name: Ensure slapd listens on LDAPS (636)
   ansible.builtin.lineinfile:
-    path: /etc/default/slapd
+    path: "{{ openldap_directory.defaults }}"
     regexp: >-
       ^SLAPD_SERVICES=
     line: >-
       SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"
   notify: Restart slapd
-
-- name: Ensure OpenLDAP service is started and enabled
-  ansible.builtin.service:
-    name: slapd
-    state: started
-    enabled: yes
 
 - name: Flush handlers to ensure slapd is ready
   ansible.builtin.meta: flush_handlers

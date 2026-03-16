@@ -11,3 +11,9 @@ openldap_directory:
   slapd: "/etc/ldap/slapd.d"
   certs: "/etc/ldap/certs"
   database: "/var/lib/ldap"
+  modules: "/usr/lib/ldap"
+  schema: "/etc/ldap/schema"
+  run: "/run/slapd"
+  defaults: "/etc/default/slapd"
+
+openldap_group: openldap

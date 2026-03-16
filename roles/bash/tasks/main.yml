@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy .bashrc from template
+  ansible.builtin.template:
+    src: .bashrc.j2
+    dest: "{{ bash_user_home }}/.bashrc"
+    owner: "{{ bash_user_name }}"
+    group: "{{ bash_user_group }}"
+    mode: "0644"
+    backup: yes
+
+- name: Deploy .bash_aliases from template
+  ansible.builtin.template:
+    src: .bash_aliases.j2
+    dest: "{{ bash_user_home }}/.bash_aliases"
+    owner: "{{ bash_user_name }}"
+    group: "{{ bash_user_group }}"
+    mode: "0644"

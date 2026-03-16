@@ -34,3 +34,9 @@
 
 - name: Openldap database
   ansible.builtin.include_tasks: database.yml
+
+- name: Ensure OpenLDAP service is started and enabled
+  ansible.builtin.service:
+    name: slapd
+    state: started
+    enabled: yes

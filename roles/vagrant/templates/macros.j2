@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
     node.vm.provision "shell", inline: "{{ prep_cmd }}"
 
     if Vagrant.has_plugin?("vagrant-vbguest")
-      node.vbguest.auto_update = true
+      node.vbguest.auto_update = false
       # node.vbguest.auto_reboot = false
       # node.vbguest.rebuild = true
     end
@@ -67,11 +67,11 @@ Vagrant.configure("2") do |config|
     {% endfor %}
     {% endif %}
 
-    node.vm.provision "ansible" do |ansible|
-      ansible.playbook = "provision.yml"
-      ansible.become = true
-      ansible.playbook_command = "{{ vagrant_ansible_path }}"
-    end
+    # node.vm.provision "ansible" do |ansible|
+      # ansible.playbook = "provision.yml"
+      # ansible.become = true
+      # ansible.playbook_command = "{{ vagrant_ansible_path }}"
+    # end
   end
 end
 {% endmacro %}
