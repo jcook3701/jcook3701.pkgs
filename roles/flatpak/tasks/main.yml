@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Flatpak OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Install flatpak
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure flatpak
+  ansible.builtin.include_tasks: configure.yml

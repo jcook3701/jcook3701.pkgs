@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Installing Docker Repository dependencies.
+  ansible.builtin.apt:
+    pkg:
+      - ca-certificates
+      - curl
+    state: present
+
+- name: Create APT repository keys directory.
+  ansible.builtin.file:
+    path: "{{ docker_ce_directory.keyrings }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Download Docker GPG key
+  ansible.builtin.get_url:
+    url: "{{ docker_ce_gpg_url }}"
+    dest: "{{ docker_ce_file.gpg }}"
+    mode: "0644"
+    owner: root
+    group: root
+    force: true
+
+- name: Add Docker repository
+  ansible.builtin.lineinfile:
+    path: "{{ docker_ce_file.list }}"
+    create: true
+    mode: "0644"
+    owner: root
+    group: root
+    line: "{{ docker_ce_repo_line }}"
+
+- name: Run apt-get update
+  ansible.builtin.apt:
+    update_cache: true

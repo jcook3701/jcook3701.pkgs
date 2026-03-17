@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add users in service_groups_users to docker group
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: docker
+    append: true
+  loop: "{{ docker_ce_users }}"
+  when: item.name is defined and item.name | length > 0
+  notify: Restart docker

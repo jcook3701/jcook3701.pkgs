@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install DNF plugins core
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+
+- name: Add Docker repository via DNF
+  ansible.builtin.dnf_config_manager:
+    add_repo: "{{ docker_ce_repo_url }}"
+    state: enabled

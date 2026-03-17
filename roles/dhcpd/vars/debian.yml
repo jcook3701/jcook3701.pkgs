@@ -1,6 +1,4 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-flatpak_repos:
-  - name: flathub
-    url: https://dl.flathub.org/repo/flathub.flatpakrepo
+dhcpd_service: isc-dhcp-server

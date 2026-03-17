@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+docker_ce_pkgs:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+docker_ce_compose_pkg: "docker-compose-plugin"
+
+docker_ce_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d/"
+
+docker_ce_file:
+  gpg: "{{ docker_ce_directory.keyrings }}/docker.asc"
+  list: "{{ docker_ce_directory.sources }}/docker.list"
+
+docker_ce_repo_base_url: "https://download.docker.com"
+docker_ce_repo_distro: "{{ ansible_distribution | lower }}"
+
+docker_ce_repo_url: >-
+  {{ docker_ce_repo_base_url }}/linux/{{ docker_ce_repo_distro }}
+
+docker_ce_gpg_url: >-
+  {{ docker_ce_repo_url }}/gpg
+
+docker_ce_repo_line: >-
+  deb [arch={{ docker_ce_arch }}
+  signed-by={{ docker_ce_file.gpg }}]
+  {{ docker_ce_repo_url }} {{ docker_ce_codename }} stable
+
+# TODO: Remove this after testing.
+# "https://download.docker.com/linux/{{ idname }}/gpg"
+
+#      deb [arch={{ arch }}
+#      signed-by=/etc/apt/keyrings/docker.asc]
+#      https://download.docker.com/linux/{{ idname }}
+#      {{ codename }} stable
+
+# - name: Set facts for architecture, codename, & idname
+#  ansible.builtin.set_fact:
+#    arch: "{{ deb_architecture[ansible_architecture] }}"
+#    codename: "{{ ansible_distribution_release }}"
+#    idname: "{{ ansible_distribution | lower }}"

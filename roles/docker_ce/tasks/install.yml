@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Installing Docker Community Edition
+  ansible.builtin.package:
+    name: "{{ docker_ce_pkgs }} + [docker_ce_compose_pkg]"
+    state: present
+
+- name: Ensure Docker service is started and enabled
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: yes

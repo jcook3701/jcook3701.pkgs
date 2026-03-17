@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+docker_ce_pkgs:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+
+docker_ce_compose_pkg: "docker-compose-plugin"
+
+docker_ce_repo_base_url: "https://download.docker.com"
+docker_ce_repo_distro: "{{ (ansible_distribution == 'Fedora') | ternary('fedora', 'centos') }}"
+
+# Final assembled URL
+docker_ce_repo_url: "{{ docker_ce_repo_base_url }}/{{ docker_ce_repo_distro }}/docker-ce.repo"
