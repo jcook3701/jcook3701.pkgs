@@ -1,16 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Collect running user facts
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: sudo_user_facts.yml
-  when: sudo_user is not defined
-
-- name: Install nvm
+- name: Download nvm install script
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh
-    dest: /tmp/nvm-install.sh
+    url: "{{ nvm_repo_url }}"
+    dest: "{{ nvm_file.script }}"
     mode: "0755"
   become: true
   become_user: "{{ sudo_user }}"
@@ -18,7 +12,7 @@
 
 - name: Run nvm install script
   ansible.builtin.command:
-    cmd: /tmp/nvm-install.sh
+    cmd: "{{ nvm_file.script }}"
   become: true
   become_user: "{{ sudo_user }}"
   when: sudo_user != "root"

@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy configuration file (vsftpd.conf)
+  ansible.builtin.template:
+    src: vsftpd.conf.j2
+    dest: "{{ vsftpd_directory.conf }}/vsftpd.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart vsftpd

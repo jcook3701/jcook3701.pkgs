@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Generate Template files needed for SSSD configuration
+  notify: Restart sssd
   block:
 
     - name: Generate sssd.conf configuration file
