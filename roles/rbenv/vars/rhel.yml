@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-sdkman_base_url: https://get.sdkman.io
-
-sdkman_file:
-  package: "/tmp/sdkman-install.sh"
+rbenv_pkg_deps:
+  - git
+  - curl

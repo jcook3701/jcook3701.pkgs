@@ -22,10 +22,10 @@
   loop: [gdm, gdm3, sddm]
   ignore_errors: true
 
-- name: Deploy .xsession configuration from J2 template
+- name: Deploy lightdm configuration from J2 template
   ansible.builtin.template:
     src: .xsession.j2
-    dest: "{{ sudo_user_home }}/.xsession"
+    dest: "{{ sudo_user_home }}/{{ lightdm_file.config }}"
     owner: "{{ sudo_user }}"
     group: "{{ sudo_user }}"
     mode: "0775"

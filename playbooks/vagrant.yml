@@ -5,6 +5,7 @@
   hosts: localhost
   gather_facts: true
   become: true
+  tags: always
   tasks:
     - name: Gather package facts
       ansible.builtin.package_facts:
@@ -17,9 +18,10 @@
       ansible.builtin.include_role:
         name: jcook3701.pkgs.vagrant
 
-- name: "Phase 2: Configure OpenLDAP"
-  hosts: vagrant_vms  # This matches the group we just created
+- name: "Phase 2: Configure Common Defaults"
+  hosts: vagrant_vms
   gather_facts: true
+  tags: always
   become: true
   tasks:
     - name: Gather package facts
@@ -34,6 +36,30 @@
       ansible.builtin.include_role:
         name: jcook3701.pkgs.nano
 
+- name: "Phase 3: Configure Default Server"
+  hosts: vagrant_vms
+  gather_facts: true
+  become: true
+  tags: server
+  tasks:
     - name: Install Openldap
       ansible.builtin.include_role:
         name: jcook3701.pkgs.openldap
+
+- name: "Phase 3: Configure Default Workstation"
+  hosts: vagrant_vms
+  gather_facts: true
+  become: true
+  tags: workstation
+  tasks:
+    - name: Install xfce4
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.xfce4
+
+    - name: Install lightdm
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.lightdm
+
+    - name: Install google chrome
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.google_chrome

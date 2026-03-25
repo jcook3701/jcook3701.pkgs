@@ -4,3 +4,6 @@
 lightdm_pkgs:
   - lightdm
   - lightdm-gtk-greeter
+
+lightdm_file:
+  config: .xsession

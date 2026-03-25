@@ -4,7 +4,7 @@
 - name: Download sdkman install script
   ansible.builtin.get_url:
     url: "{{ sdkman_base_url }}"
-    dest: /tmp/sdkman-install.sh
+    dest: "{{ sdkman_file.package }}"
     mode: "0755"
     user: "{{ sudo_user }}"
     group: "{{ sudo_group }}"
@@ -14,7 +14,7 @@
 
 - name: Run sdkman install script
   ansible.builtin.command:
-    cmd: /tmp/sdkman-install.sh
+    cmd: "{{ sdkman_base_url }}"
   become: true
   become_user: "{{ sudo_user }}"
   when: sudo_user != "root"

@@ -4,3 +4,6 @@
 lightdm_pkgs:
   - lightdm
   - lightdm-gtk
+
+lightdm_file:
+  config: .Xclients

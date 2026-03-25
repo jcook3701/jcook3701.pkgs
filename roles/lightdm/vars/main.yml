@@ -1,3 +1,5 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+lightdm_window_manager: xfce4
+lightdm_session_manager: xfce4-session

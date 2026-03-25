@@ -11,19 +11,8 @@
   ansible.builtin.include_vars: rbenv.yml
 
 - name: Installing necessary packages for rbenv
-  ansible.builtin.apt:
-    pkg:
-      - build-essential
-      - git
-      - curl
-      - zlib1g-dev
-      - libssl-dev
-      - libreadline-dev
-      - libyaml-dev
-      - libxml2-dev
-      - libxslt1-dev
-      - libcurl4-openssl-dev
-      - libffi-dev
+  ansible.builtin.package:
+    name: "{{ rbenv_pkg_deps }}"
     state: present
 
 - name: Clone rbenv repository

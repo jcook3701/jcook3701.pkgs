@@ -10,7 +10,7 @@
 - name: Install rustup
   ansible.builtin.get_url:
     url: "{{ rustup_init_url }}"
-    dest: /tmp/rustup-init.sh
+    dest: "{{ rustup_file.package }}"
     mode: "0755"
   become: true
   become_user: "{{ sudo_user }}"
@@ -18,7 +18,7 @@
 
 - name: Run rustup install script
   ansible.builtin.command:
-    cmd: /tmp/rustup-init.sh -y
+    cmd: "{{ rustup_file.package }} -y"
   become: true
   become_user: "{{ sudo_user }}"
   when: sudo_user != "root"
