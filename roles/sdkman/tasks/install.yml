@@ -6,7 +6,7 @@
     url: "{{ sdkman_base_url }}"
     dest: "{{ sdkman_file.package }}"
     mode: "0755"
-    user: "{{ sudo_user }}"
+    owner: "{{ sudo_user }}"
     group: "{{ sudo_group }}"
   become: true
   become_user: "{{ sudo_user }}"
