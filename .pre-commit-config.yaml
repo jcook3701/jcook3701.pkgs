@@ -23,14 +23,14 @@ default_install_hook_types:
 repos:
 
   - repo: https://github.com/ansible/ansible-lint.git
-    rev: v24.5.0
+    rev: v24.12.0
     hooks:
       - id: ansible-lint
         args: ["-q"]
         pass_filenames: false
         stages: [manual]
         additional_dependencies:
-          - ansible-core<2.16
+          - ansible-core<2.18.0
           - ansible
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

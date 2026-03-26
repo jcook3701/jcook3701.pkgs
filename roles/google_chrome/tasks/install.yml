@@ -10,6 +10,10 @@
     group: root
 
 - name: Install Google Chrome stable package
-  ansible.builtin.package:
-    name: "{{ google_chrome_file.package }}"
-    state: present
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs:
+      - "{{ google_chrome_file.package }}"
+    pkg_manager_state: "present"
+    pkg_manager_update_cache: true
