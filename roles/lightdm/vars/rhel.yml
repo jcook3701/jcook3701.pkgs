@@ -6,4 +6,5 @@ lightdm_pkgs:
   - lightdm-gtk
 
 lightdm_file:
-  config: .Xclients
+  config: "{{ lightdm_directory.config }}/lightdm.conf"
+  xsession: .Xclients

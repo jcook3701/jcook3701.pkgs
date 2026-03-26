@@ -1,5 +1,5 @@
 {#
-# .xsession.j2 for jcook3701.pkgs
+# lightdm.conf.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,8 +18,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro xsession() -%}
-    {{- lightdm_session_manager }}
+{%- macro lightdm_conf() -%}
+[Seat:*]
+user-session=xfce
+greeter-session={{ lightdm_greeter }}
 {%- endmacro -%}
 
-{{- xsession() }}
+{{- lightdm_conf() }}

@@ -11,11 +11,11 @@
     name: "{{ lightdm_pkgs }}"
     state: present
 
-- name: Configure LightDM service
-  ansible.builtin.include_tasks: configure.yml
-
 - name: Enable and start LightDM service
   ansible.builtin.systemd:
     name: lightdm
     enabled: yes
     state: started
+
+- name: Configure LightDM service
+  ansible.builtin.include_tasks: configure.yml

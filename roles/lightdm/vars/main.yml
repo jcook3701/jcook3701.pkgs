@@ -3,3 +3,6 @@
 ---
 lightdm_window_manager: xfce4
 lightdm_session_manager: xfce4-session
+
+lightdm_directory:
+  config: "/etc/lightdm/"

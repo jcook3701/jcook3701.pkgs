@@ -6,4 +6,5 @@ lightdm_pkgs:
   - lightdm-gtk-greeter
 
 lightdm_file:
-  config: .xsession
+  config: "{{ lightdm_directory.config }}/lightdm.conf"
+  xsession: .xsession

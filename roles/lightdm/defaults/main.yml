@@ -5,3 +5,10 @@ lightdm_desktop_envs:
   - xfce
   - gnome
   - kde
+
+lightdm_window_manager: xfce4
+lightdm_session_manager: xfce4-session
+lightdm_greeter: lightdm-gtk-greeter
+
+lightdm_directory:
+  config: "/etc/lightdm/"

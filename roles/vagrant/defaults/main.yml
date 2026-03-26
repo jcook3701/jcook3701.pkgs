@@ -3,6 +3,8 @@
 ---
 # A master list of all available sites
 vagrant_boxes:
+  - { server_vars: default-server.yml }
+  - { server_vars: default-workstation.yml }
   - { server_vars: pxeboot-server.yml }
   - { server_vars: plex-server.yml }
   - { server_vars: mixxx-server.yml }

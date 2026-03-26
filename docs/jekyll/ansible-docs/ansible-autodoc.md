@@ -21,12 +21,6 @@ parent: jcook3701.pkgs
 * `infrastructure` - 
 
 
-* `server` - 
-
-
-* `workstation` - 
-
-
 
 Documentation generated using: [Ansible-autodoc](https://github.com/AndresBott/ansible-autodoc)
 

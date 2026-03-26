@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+my_vagrant_boxes:
+  - { server_vars: default-workstation.yml }
+
+my_vagrant_roles:
+  - jcook3701.pkgs.xfce
+  - jcook3701.pkgs.lightdm
+  - jcook3701.pkgs.google_chrome

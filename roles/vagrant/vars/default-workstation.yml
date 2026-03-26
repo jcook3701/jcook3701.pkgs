@@ -4,7 +4,7 @@
 vagrant_vm_name: "default-workstation"
 vagrant_box: "ubuntu/focal64"
 vagrant_box_version: ">= 0"
-vagrant_os_family: "debian"
+vagrant_os_family: "ubuntu"
 vagrant_memory_mb: 2048
 vagrant_cpus: 1
 vagrant_gui_enabled: true

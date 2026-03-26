@@ -4,7 +4,7 @@
 - name: Collect running user facts
   ansible.builtin.include_role:
     name: jcook3701.utils.general
-    task_from: sudo_user_facts.yml
+    tasks_from: sudo_user_facts.yml
   when: sudo_user is not defined
 
 - name: Ensure LightDM is the default (Debian/Ubuntu only)
@@ -24,8 +24,18 @@
 
 - name: Deploy lightdm configuration from J2 template
   ansible.builtin.template:
-    src: .xsession.j2
-    dest: "{{ sudo_user_home }}/{{ lightdm_file.config }}"
+    src: lightdm.conf.j2
+    dest: "{{ lightdm_file.config }}"
     owner: "{{ sudo_user }}"
     group: "{{ sudo_user }}"
     mode: "0775"
+  notify: Restart lightdm
+
+- name: Deploy lightdm user specific X sever configuration from J2 template
+  ansible.builtin.template:
+    src: .xsession.j2
+    dest: "{{ sudo_user_home }}/{{ lightdm_file.xsession }}"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0775"
+  notify: Restart lightdm

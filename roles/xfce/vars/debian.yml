@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart lightdm
-  ansible.builtin.service:
-    name: lightdm
-    state: restarted
+xfce_pkgs:
+  - xfce4
+  - xfce4-goodies
+  - xorg
