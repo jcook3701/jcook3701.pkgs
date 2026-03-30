@@ -5,3 +5,8 @@ sdkman_base_url: https://get.sdkman.io
 
 sdkman_file:
   package: "/tmp/sdkman-install.sh"
+
+sdkman_pkgs:
+  - zip
+  - unzip
+  - curl

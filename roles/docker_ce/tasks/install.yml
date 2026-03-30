@@ -2,9 +2,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Installing Docker Community Edition
-  ansible.builtin.package:
-    name: "{{ docker_ce_pkgs }} + [docker_ce_compose_pkg]"
-    state: present
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ docker_ce_pkgs + docker_ce_compose_pkgs }}"
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
 
 - name: Ensure Docker service is started and enabled
   ansible.builtin.systemd:

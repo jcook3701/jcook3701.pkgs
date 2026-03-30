@@ -8,3 +8,17 @@ my_vagrant_roles:
   - jcook3701.pkgs.xfce
   - jcook3701.pkgs.lightdm
   - jcook3701.pkgs.google_chrome
+# Package Installers
+  - jcook3701.pkgs.flatpak
+  - jcook3701.pkgs.docker_ce
+  - jcook3701.pkgs.snap
+# Developer tools
+  - jcook3701.pkgs.sdkman
+  - jcook3701.pkgs.nvm
+  - jcook3701.pkgs.rbenv
+  - jcook3701.pkgs.ruby
+  - jcook3701.pkgs.rust
+  - jcook3701.pkgs.rustup
+  - jcook3701.pkgs.ctop
+# Extra
+  - jcook3701.pkgs.mixxx

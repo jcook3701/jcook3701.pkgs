@@ -6,7 +6,8 @@ docker_ce_pkgs:
   - docker-ce-cli
   - containerd.io
 
-docker_ce_compose_pkg: "docker-compose-plugin"
+docker_ce_compose_pkgs:
+  - "docker-compose-plugin"
 
 docker_ce_repo_base_url: "https://download.docker.com"
 docker_ce_repo_distro: "{{ (ansible_distribution == 'Fedora') | ternary('fedora', 'centos') }}"

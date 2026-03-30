@@ -6,9 +6,9 @@ docker_ce_pkgs:
   - docker-ce-cli
   - containerd.io
   - docker-buildx-plugin
-  - docker-compose-plugin
 
-docker_ce_compose_pkg: "docker-compose-plugin"
+docker_ce_compose_pkgs:
+  - "docker-compose-plugin"
 
 docker_ce_directory:
   keyrings: "/etc/apt/keyrings"

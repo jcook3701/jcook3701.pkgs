@@ -4,4 +4,4 @@
 - name: Reload shell
   ansible.builtin.include_role:
     name: jcook3701.utils.general
-    task_from: reload-shell.yml
+    tasks_from: reload-shell.yml

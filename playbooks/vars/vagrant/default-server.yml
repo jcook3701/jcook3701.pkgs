@@ -5,4 +5,7 @@ my_vagrant_boxes:
   - { server_vars: default-server.yml }
 
 my_vagrant_roles:
+  - jcook3701.pkgs.plex
+  - jcook3701.pkgs.webmin
+  - jcook3701.pkgs.docker_ce
   - jcook3701.pkgs.openldap
