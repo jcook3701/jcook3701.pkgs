@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Collect running user facts
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Load plugin-specific variables
+  ansible.builtin.include_vars:
+    dir: plugins
+    extensions: ["yml"]
+
+- name: Ensure rbenv plugins directory exists
+  ansible.builtin.file:
+    path: "{{ sudo_user_home }}/.rbenv/plugins"
+    state: directory
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0755"
+  when: sudo_user != "root"
+
+- name: Install rbenv plugins
+  ansible.builtin.git:
+    repo: "{{ rbenv_plugin.repo_url }}"
+    dest: "{{ sudo_user_home }}/.rbenv/plugins/{{ rbenv_plugin.name }}"
+    version: "{{ rbenv_plugin.version | default('master') }}"
+  loop: "{{ rbenv_plugins }}"
+  loop_control:
+    loop_var: rbenv_plugin
+    label: "{{ rbenv_plugin.name }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Add plugin initialization to bashrc
+  ansible.builtin.blockinfile:
+    path: "{{ sudo_user_home }}/.bashrc"
+    marker: "# {mark} rbenv plugin: {{ rbenv_plugin.name }}"
+    block: "{{ rbenv_plugin.bashrc }}"
+    mode: "0644"
+  loop: "{{ rbenv_plugins }}"
+  loop_control:
+    loop_var: rbenv_plugin
+    label: "bashrc: {{ rbenv_plugin.name }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when:
+    - sudo_user != "root"
+    - rbenv_plugin.bashrc is defined

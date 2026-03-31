@@ -7,5 +7,22 @@ my_vagrant_boxes:
 my_vagrant_roles:
   - jcook3701.pkgs.plex
   - jcook3701.pkgs.webmin
+# Package Installers
   - jcook3701.pkgs.docker_ce
+#  - jcook3701.pkgs.bind9
+#  - jcook3701.pkgs.dhcpd
+  - jcook3701.pkgs.nginx
   - jcook3701.pkgs.openldap
+#  - jcook3701.pkgs.samba
+#  - jcook3701.pkgs.sssd
+# TODO:
+#  - jcook3701.pkgs.ntp
+#  - jcook3701.pkgs.vsftpd
+# Security
+#  - jcook3701.pkgs.firewalld
+#  - jcook3701.pkgs.apparmor
+#  - jcook3701.pkgs.selinux
+# VPN options
+#  - jcook3701.pkgs.openvpn
+#  - jcook3701.pkgs.tailscale
+#  - jcook3701.pkgs.wireguard

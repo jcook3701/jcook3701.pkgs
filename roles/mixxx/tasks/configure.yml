@@ -1,30 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Download the ACTUAL raw key file
-  become: true
-  ansible.builtin.get_url:
-    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search={{ mixxx_conf.gpg }}"
-    dest: /etc/apt/keyrings/mixxx.asc
-    mode: "0644"
-
-- name: Add the PPA using the specific key file
-  become: true
-  ansible.builtin.apt_repository:
-    repo: >-
-      "deb [signed-by=/etc/apt/keyrings/mixxx.asc]
-      https://ppa.launchpadcontent.net/mixxx/mixxx/ubuntu
-      {{ ansible_distribution_release }} main"
-    state: present
-    filename: mixxx
-    update_cache: yes
-
-- name: Install Mixxx
-  become: true
-  ansible.builtin.apt:
-    name: mixxx
-    state: latest
-
 - name: Fix Mixxx Qt6 symbol lookup error (Permanent LD Config)
   become: true
   ansible.builtin.copy:

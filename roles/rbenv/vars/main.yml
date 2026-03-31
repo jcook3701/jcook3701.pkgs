@@ -1,12 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-rbenv_marker: "# {mark} Ansible - rbenv and ruby-bulid initialization"
+rbenv_marker: "# {mark} Ansible - rbenv initialization"
 rbenv_bashrc: |
   # rbenv initialization
   export PATH="$HOME/.rbenv/bin:$PATH"
   eval "$(rbenv init -)"
-  # ruby-build initialization
-  export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
 
 rbenv_repo_url: "https://github.com/rbenv/rbenv.git"

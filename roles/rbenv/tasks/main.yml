@@ -8,3 +8,6 @@
 
 - name: Rbenv Install
   ansible.builtin.include_tasks: install.yml
+
+- name: Rbenv Plugins
+  ansible.builtin.include_tasks: plugins.yml

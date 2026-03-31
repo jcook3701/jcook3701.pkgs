@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download the ACTUAL raw key file
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ mixxx_gpg_url }}"
+    dest: "{{ mixxx_file.gpg }}"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Add the PPA using the specific key file
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "{{ mixxx_repo_line }}"
+    state: present
+    filename: mixxx
+    update_cache: yes
+
+- name: Run apt-get update
+  ansible.builtin.apt:
+    update_cache: true

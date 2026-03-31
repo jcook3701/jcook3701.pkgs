@@ -24,6 +24,7 @@ exclude_paths:
   - .git
   - .github/workflows
   - .venv
+  - .venv/
   - .pre-commit-config.yaml
   - .yamllint
   - changelogs/.plugin-cache.yaml

@@ -14,23 +14,14 @@
 
 - name: Clone rbenv repository
   ansible.builtin.git:
-    repo: https://github.com/rbenv/rbenv.git
+    repo: "{{ rbenv_repo_url }}"
     dest: "{{ sudo_user_home }}/.rbenv"
     version: master
   become: true
   become_user: "{{ sudo_user }}"
   when: sudo_user != "root"
 
-- name: Clone ruby-build repository
-  ansible.builtin.git:
-    repo: https://github.com/rbenv/ruby-build.git
-    dest: "{{ sudo_user_home }}/.rbenv/plugins/ruby-build"
-    version: master
-  become: true
-  become_user: "{{ sudo_user }}"
-  when: sudo_user != "root"
-
-- name: Update .bashrc for rbenv and ruby-build
+- name: Update .bashrc for rbenv
   ansible.builtin.blockinfile:
     dest: "{{ sudo_user_home }}/.bashrc"
     marker: "{{ rbenv_marker }}"

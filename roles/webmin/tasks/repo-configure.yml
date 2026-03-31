@@ -18,5 +18,4 @@
   ansible.builtin.expect:
     command: "{{ webmin_file.script }}"
     responses:
-      Question:
-        - "y"
+      'repository\? \(y/N\)': "y"

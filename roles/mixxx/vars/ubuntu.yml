@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+mixxx_pkg_deps:
+  - curl
+
+
+mixxx_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d/"
+
+mixxx_file:
+  gpg: "{{ mixxx_directory.keyrings }}/mixxx.asc"
+  list: "{{ mixxx_directory.sources }}/mixxx.list"
+
+mixxx_repo_base_url: "https://keyserver.ubuntu.com"
+
+mixxx_gpg_url: >-
+  {{ mixxx_repo_base_url }}/pks/lookup?op=get&search={{ mixxx_conf.gpg }}
+
+mixxx_repo_line: >-
+  "deb [signed-by={{ mixxx_file.gpg }}]
+  https://ppa.launchpadcontent.net/mixxx/mixxx/ubuntu
+  {{ ansible_distribution_release }} main"
