@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Add i386 architecture
+  ansible.builtin.command:
+    cmd: dpkg --add-architecture i386
+
+- name: Install lutris dependencies
+  ansible.builtin.apt:
+    pkg: "{{ lutris_pkg_deps }}"
+    update_cache: true
+
+- name: Manage the lutris PPA repository
+  ansible.builtin.apt_repository:
+    repo: ppa:lutris-team/lutris
+    state: "{{ lutris_state }}"
+  notify: Run apt-get update

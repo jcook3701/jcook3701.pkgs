@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart ntp
-  ansible.builtin.service:
-    name: ntp
-    state: restarted
+# Options: 'desktop', 'desktop-full', 'ros-base'
+ros2_flavor: "desktop"
+
+ros2_state: present

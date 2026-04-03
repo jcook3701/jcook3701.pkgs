@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Get installed VirtualBox version for Extension Pack
+  ansible.builtin.shell: "VBoxManage --version | cut -d'r' -f1"
+  register: virtualbox_vboxmanage_output
+  changed_when: false
+
+- name: Set VirtualBox version fact
+  ansible.builtin.set_fact:
+    virtualbox_installed_version: "{{ virtualbox_vboxmanage_output.stdout | trim }}"
+
+- name: Download VirtualBox Extension Pack
+  ansible.builtin.get_url:
+    url: "{{ virtualbox_extpack_url }}"
+    dest: "{{ virtualbox_extpack_dest }}"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Pre-accept VirtualBox Extension Pack license (Debian/Ubuntu)
+  ansible.builtin.debconf:
+    name: "{{ virtualbox_extpack_license.name }}"
+    question: "{{ virtualbox_extpack_license.question }}"
+    value: "true"
+    vtype: select
+  when: ansible_os_family == "Debian"
+
+- name: Install VirtualBox Extension Pack
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "y" | VBoxManage extpack install --replace "{{ virtualbox_extpack_dest }}"
+  args:
+    executable: /bin/bash
+  register: virtualbox_extpack_install
+  changed_when: "'successfully installed' in virtualbox_extpack_install.stdout"
+  become: true

@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# "ubuntu/noble64" # (Ubuntu 24.04)
 vagrant_vm_name: "default-workstation"
-vagrant_box: "ubuntu/focal64"
+vagrant_box: "ubuntu/jammy64" # (Ubuntu 22.04)
 vagrant_box_version: ">= 0"
 vagrant_os_family: "ubuntu"
 vagrant_memory_mb: 2048

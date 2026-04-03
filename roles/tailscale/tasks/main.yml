@@ -1,3 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Tailscale Repository Setup
+  ansible.builtin.include_tasks: repo-configure.yml
+
+- name: Tailscale Install
+  ansible.builtin.include_tasks: pkg-manager.yml

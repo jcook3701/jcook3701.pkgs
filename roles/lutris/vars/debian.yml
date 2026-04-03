@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+lutris_pkg_deps:
+  - libvulkan1
+  - libvulkan1:i386
+
+lutris_pkgs:
+  - lutris
+  - wine
+
+lutris_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d/"
+
+lutris_file:
+  gpg: "{{ lutris_directory.keyrings }}/lutris.asc"
+  list: "{{ lutris_directory.sources }}/lutris.list"
+
+lutris_repo_base_url: >-
+  https://download.opensuse.org/repositories/home:/strycore
+
+# TODO: OS should be matched and chosen from a list of options
+lutris_repo_url: >-
+  {{ lutris_repo_base_url }}/Debian_12
+
+lutris_gpg_url: >-
+  {{ lutris_repo_url }}/Release.key
+
+lutris_repo_line: >-
+  deb [signed-by={{ lutris_files.gpg }}]
+  {{ lutris_repo_base_url }}/Debian_12/
+  ./

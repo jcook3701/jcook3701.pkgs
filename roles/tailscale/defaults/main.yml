@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart ntp
-  ansible.builtin.service:
-    name: ntp
-    state: restarted
+tailscale_state: present
+tailscale_repo_url: https://tailscale.com/install.sh
+tailscale_auth_key: null

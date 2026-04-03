@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-virtualbox_conf:
-  name: "debian-trixie"
-  ip: "10.1.0.125"
+- name: Run apt-get update
+  ansible.builtin.apt:
+    update_cache: true

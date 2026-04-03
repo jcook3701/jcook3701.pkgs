@@ -4,5 +4,5 @@
 
 Setup **VirtualBox** repository.
 ``` shell
-$ ansible-playbook jcook3701.pkgs.virtualbox.yml -K
+$ ansible-playbook jcook3701.pkgs.virtualbox.yml -K -e "virtualbox_selected_type=virtualbox_7_2"
 ```

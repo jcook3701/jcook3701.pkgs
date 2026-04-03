@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+virtualbox_deb_architecture:
+  armv6l: "armhf"
+  armv7l: "armhf"
+  aarch64: "arm64"
+  x86_64: "amd64"
+  i386: "i386"
+
+virtualbox_pkg_deps:
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - apt-transport-https
+  - build-essential
+  - dkms
+  - "linux-headers-{{ ansible_kernel }}"
+
+virtualbox_pkgs:
+  - "{{ virtualbox_version.debian_pkg }}"
+
+virtualbox_directory:
+  keyrings: "/etc/apt/keyrings/"
+  sources: "/etc/apt/sources.list.d/"
+
+virtualbox_file:
+  gpg: "{{ virtualbox_directory.keyrings }}/oracle-virtualbox-2016.asc"
+  list: "{{ virtualbox_directory.sources }}/oracle-virtualbox-2016.list"
+
+virtualbox_repo_url: "{{ virtualbox_download_url }}/virtualbox/debian"
+virtualbox_gpg_url: "{{ virtualbox_repo_url }}/oracle_vbox_2016.asc"
+
+virtualbox_repo_line: >-
+  deb [arch={{ virtualbox_deb_architecture[ansible_architecture] }}
+  signed-by={{ virtualbox_file.gpg }}]
+  {{ virtualbox_repo_url }}
+  {{ ansible_distribution_release }}
+  contrib

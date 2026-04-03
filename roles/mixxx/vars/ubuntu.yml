@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 mixxx_pkg_deps:
+  - ca-certificates
   - curl
-
 
 mixxx_directory:
   keyrings: "/etc/apt/keyrings"
@@ -19,6 +19,6 @@ mixxx_gpg_url: >-
   {{ mixxx_repo_base_url }}/pks/lookup?op=get&search={{ mixxx_conf.gpg }}
 
 mixxx_repo_line: >-
-  "deb [signed-by={{ mixxx_file.gpg }}]
+  deb [signed-by={{ mixxx_file.gpg }}]
   https://ppa.launchpadcontent.net/mixxx/mixxx/ubuntu
-  {{ ansible_distribution_release }} main"
+  {{ ansible_distribution_release }} main

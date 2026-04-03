@@ -2,4 +2,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 webmin_service: webmin
+webmin_state: present
 webmin_repo_url: https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repos.sh

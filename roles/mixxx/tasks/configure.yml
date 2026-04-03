@@ -9,11 +9,6 @@
     mode: "0644"
   notify: Update ldconfig cache
 
-- name: Update ldconfig cache
-  become: true
-  ansible.builtin.command: ldconfig
-  changed_when: false
-
 # - name: Add LD_LIBRARY_PATH to bashrc for Mixxx CLI
 #  ansible.builtin.lineinfile:
 #    path: "{{ ansible_env.HOME }}/.bashrc"

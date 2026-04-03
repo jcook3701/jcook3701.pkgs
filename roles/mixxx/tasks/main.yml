@@ -8,7 +8,7 @@
         - "{{ ansible_os_family | lower }}.yml"
         - "default.yml"
 
-- name: Prepare repositories for {{ ansible_distribution }}
+- name: Prepare Mixxx repositories for {{ ansible_distribution }}
   ansible.builtin.include_tasks: "repo-{{ ansible_distribution | lower }}.yml"
   # Arch doesn't need repo prep, so we skip it
   when: ansible_distribution in ['Ubuntu'] # , 'Debian', 'RedHat'

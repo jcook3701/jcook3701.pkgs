@@ -1,5 +1,30 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Collect running user facts
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Load Virtualbox OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_os_family | lower }}.yml"
+    - "default.yml"
+
+- name: Prepare Virtualbox repositories for {{ ansible_distribution }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo-{{ ansible_os_family | lower }}.yml"
+    - "repo-default.yml"
+  when: ansible_os_family in ['Debian', 'RedHat']
+
 - name: VirtualBox Install
   ansible.builtin.include_tasks: install.yml
+
+- name: VirtualBox Extension Pack
+  ansible.builtin.include_tasks: extension-pack.yml
+
+- name: VirtualBox Configure
+  ansible.builtin.include_tasks: configure.yml

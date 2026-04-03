@@ -9,6 +9,7 @@ my_vagrant_roles:
   - jcook3701.pkgs.xfce
   - jcook3701.pkgs.lightdm
 # - jcook3701.pkgs.i3
+  - jcook3701.pkgs.ros2
   - jcook3701.pkgs.google_chrome
 # - jcook3701.pkgs.virtualbox
 # Package Installers
@@ -24,8 +25,8 @@ my_vagrant_roles:
   - jcook3701.pkgs.rustup
   - jcook3701.pkgs.ctop
 # - jcook3701.pkgs.mutt
-# - jcook3701.pkgs.ros2
 # Extras
   - jcook3701.pkgs.mixxx
+#  - jcook3701.pkgs.lutris # TODO: Move to flatpak version
 # TODO:
 # - jcook3701.pkgs.sssd

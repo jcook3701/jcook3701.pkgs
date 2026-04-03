@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install VirtualBox dependencies
+  ansible.builtin.apt:
+    pkg: "{{ virtualbox_pkg_deps }}"
+    state: "{{ virtualbox_state | default('present') }}"
+
+- name: Ensure {{ virtualbox_directory.keyrings }} directory exists
+  ansible.builtin.file:
+    path: "{{ virtualbox_directory.keyrings }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Download the Oracle VirtualBox armored GPG key
+  ansible.builtin.get_url:
+    url: "{{ virtualbox_gpg_url }}"
+    dest: "{{ virtualbox_directory.gpg }}"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Add VirtualBox repository to sources list
+  ansible.builtin.copy:
+    dest: "{{ virtualbox_file.list }}"
+    mode: "0644"
+    owner: root
+    group: root
+    content: "{{ virtualbox_repo_line }}"
+  notify: Run apt-get update

@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure {{ lutris_directory.keyrings }} directory exists
+  ansible.builtin.file:
+    path: "{{ lutris_directory.keyrings }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Download lutris armored GPG key
+  ansible.builtin.get_url:
+    url: "{{ lutris_repo_gpg_url }}"
+    dest: "{{ lutris_files.gpg }}"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Add lutris repository to sources list
+  ansible.builtin.copy:
+    dest: "{{ lutris_file.list }}"
+    mode: "0644"
+    owner: root
+    group: root
+    content: "{{ lutris_repo_line }}"
+  notify: Run apt-get update
+
+# - name: Convert Lutris armored text to binary GPG format
+#  ansible.builtin.command:
+#    cmd: gpg --dearmor -o /etc/apt/keyrings/lutris.gpg /tmp/lutris.gpg
+#  args:
+#    creates: /etc/apt/keyrings/lutris.gpg

@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+virtualbox_selected_type: "virtualbox_7_1"
+virtualbox_state: present
+virtualbox_download_url: "https://download.virtualbox.org"
+
+# virtualbox_conf:
+#  name: "debian-trixie"
+#  ip: "10.1.0.125"

@@ -11,6 +11,7 @@ docker_ce_deb_architecture:
 docker_ce_arch: "{{ docker_ce_deb_architecture[ansible_architecture] | default(ansible_architecture) }}"
 docker_ce_codename: "{{ ansible_distribution_release }}"
 docker_ce_idname: "{{ ansible_distribution | lower }}"
+docker_ce_state: present
 
 docker_ce_users:
   - name: "{{ ansible_user }}"

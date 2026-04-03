@@ -12,11 +12,13 @@
 
 - name: Add the PPA using the specific key file
   become: true
-  ansible.builtin.apt_repository:
-    repo: "{{ mixxx_repo_line }}"
-    state: present
-    filename: mixxx
-    update_cache: yes
+  ansible.builtin.lineinfile:
+    path: "{{ mixxx_file.list }}"
+    create: true
+    mode: "0644"
+    owner: root
+    group: root
+    line: "{{ mixxx_repo_line }}"
 
 - name: Run apt-get update
   ansible.builtin.apt:

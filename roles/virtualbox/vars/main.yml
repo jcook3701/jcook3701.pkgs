@@ -1,12 +1,36 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+virtualbox_version_options:
+  virtualbox_6_1:
+    debian_pkg: "virtualbox-6.1"
+    redhat_pkg: "VirtualBox-6.1"
+  virtualbox_7_0:
+    debian_pkg: "virtualbox-7.0"
+    redhat_pkg: "VirtualBox-7.0"
+  virtualbox_7_1:
+    debian_pkg: "virtualbox-7.1"
+    redhat_pkg: "VirtualBox-7.1"
+  virtualbox_7_2:
+    debian_pkg: "virtualbox-7.2"
+    redhat_pkg: "VirtualBox-7.2"
 
-virtualbox_directories:
-  asc: /etc/apt/keyrings/oracle-virtualbox-2016.asc
+virtualbox_version: "{{ virtualbox_version_options[virtualbox_selected_type] }}"
 
-# NOTE: Not currently used.
-virtualbox_conf:
-  arch: amd64
-  signed_by: "{{ virtualbox_directories.asc }}"
-  url: https://download.virtualbox.org/virtualbox/debian
+# Determine the correct filename prefix based on the version
+# Legacy (6.1, 7.0): Oracle_VM_VirtualBox_Extension_Pack-
+# Modern (7.1+): Oracle_VirtualBox_Extension_Pack-
+virtualbox_extpack_prefix: >-
+  {{
+    (virtualbox_installed_version | default('7.1') is version('7.1', '>='))
+    | ternary('Oracle_VirtualBox_Extension_Pack-', 'Oracle_VM_VirtualBox_Extension_Pack-')
+  }}
+
+virtualbox_extpack_file: "{{ virtualbox_extpack_prefix }}{{ virtualbox_installed_version }}.vbox-extpack"
+virtualbox_extpack_url: "{{ virtualbox_download_url }}/{{ virtualbox_installed_version }}/{{ virtualbox_extpack_file }}"
+virtualbox_extpack_dest: "/tmp/{{ virtualbox_extpack_file }}"
+
+# The license acceptance string for the debconf module (Debian/Ubuntu)
+virtualbox_extpack_license:
+  name: "virtualbox-ext-pack"
+  question: "virtualbox-ext-pack/license"
