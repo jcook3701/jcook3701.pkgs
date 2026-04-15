@@ -1,12 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-openldap_admin_password: "admin" # Change this!
-openldap_hostname: openldap-server
-
-# Domain Options
-openldap_top_level_domain: "com"
-openldap_second_level_domain: "jcook3701"
 openldap_domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
 
 openldap_conf:
@@ -21,3 +15,28 @@ openldap_key:
   tls_cacert: ""
   tls_cert: "{{ openldap_directory.certs }}/cert.pem"
   tls_key: "{{ openldap_directory.certs }}/priv.pem"
+
+openldap_schemas_base:
+  - core
+  - cosine
+  - inetorgperson
+  - nis
+  - openldap
+  - collective
+  - corba
+  - duaconf
+  - dyngroup
+  - java
+  - misc
+  - namedobject
+  - pmi
+
+openldap_schemas: >-
+  {{
+    openldap_schemas_base +
+    ( ['ppolicy'] if (openldap_ppolicy | default(false)) else [] ) +
+    ( ['samba'] if (openldap_samba | default(false)) else [] ) +
+    ( ['sudo'] if (openldap_sudo | default(false)) else [] ) +
+    ( ['autofs'] if (openldap_autofs | default(false)) else [] ) +
+    ( ['guacConfigGroup'] if (openldap_guac | default(false)) else [] )
+  }}

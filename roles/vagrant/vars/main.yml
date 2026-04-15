@@ -6,3 +6,6 @@ vagrant_second_level_domain: "jcook3701"
 vagrant_domain_name: "{{ vagrant_second_level_domain }}.{{ vagrant_top_level_domain }}"
 
 vagrant_enabled_boxes: []
+
+vagrant_plugins:
+  - "vagrant-vbguest"

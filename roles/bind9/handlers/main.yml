@@ -3,5 +3,5 @@
 ---
 - name: Restart bind9 DNS
   ansible.builtin.service:
-    name: bind9
+    name: "{{ bind9_service }}"
     state: restarted

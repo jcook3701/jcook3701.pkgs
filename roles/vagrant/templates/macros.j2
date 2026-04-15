@@ -43,7 +43,8 @@ Vagrant.configure("2") do |config|
     node.vm.provision "shell", inline: "{{ prep_cmd }}"
 
     if Vagrant.has_plugin?("vagrant-vbguest")
-      node.vbguest.auto_update = false
+      node.vbguest.auto_update = true
+      # node.vbguest.install_repo = true
       # node.vbguest.auto_reboot = false
       # node.vbguest.rebuild = true
     end
@@ -53,6 +54,23 @@ Vagrant.configure("2") do |config|
       vb.memory = {{ vagrant_memory_mb }}
       vb.cpus = {{ vagrant_cpus }}
       vb.gui = {{ vagrant_gui_enabled | lower }}
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
+
+      {% if vagrant_gui_enabled %}
+      vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+      vb.customize ["modifyvm", :id, "--vram", "128"]
+      vb.customize ["modifyvm", :id, "--accelerate3d", "off"]
+      {% endif %}
+
+      vb.customize ["modifyvm", :id, "--mouse", "usbtablet"]
+      vb.customize ["modifyvm", :id, "--clipboard-mode", "bidirectional"]
+      vb.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
+
+      # vb.customize ["modifyvm", :id, "--usbxhci", "on"]
+      # vb.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--bootable", "on"]
+      # vb.customize ["storageattach", :id, "--storagectl", "SATA", "--port", "1", "--device", "0", "--type", "dvddrive", "--medium", "emptydrive"]
+
     end
 
     {# Direct Bridge Networking (Public Network) #}

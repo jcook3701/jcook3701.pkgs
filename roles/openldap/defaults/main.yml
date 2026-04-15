@@ -1,4 +1,16 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-openldap_admin_password: "admin" # Change this!
+openldap_hostname: openldap-server
+openldap_admin_password: "admin"
+
+# Domain Options
+openldap_top_level_domain: "com"
+openldap_second_level_domain: "jcook3701"
+
+# Extra Schemas
+openldap_autofs: true
+openldap_guac: true
+openldap_ppolicy: true
+openldap_samba: true
+openldap_sudo: true

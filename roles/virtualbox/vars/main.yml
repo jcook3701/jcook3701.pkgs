@@ -1,21 +1,25 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-virtualbox_version_options:
+virtualbox_selector:
   virtualbox_6_1:
+    version: "6.1"
     debian_pkg: "virtualbox-6.1"
     redhat_pkg: "VirtualBox-6.1"
   virtualbox_7_0:
+    version: "7.0"
     debian_pkg: "virtualbox-7.0"
     redhat_pkg: "VirtualBox-7.0"
   virtualbox_7_1:
+    version: "7.1"
     debian_pkg: "virtualbox-7.1"
     redhat_pkg: "VirtualBox-7.1"
   virtualbox_7_2:
+    version: "7.2"
     debian_pkg: "virtualbox-7.2"
     redhat_pkg: "VirtualBox-7.2"
 
-virtualbox_version: "{{ virtualbox_version_options[virtualbox_selected_type] }}"
+virtualbox_info: "{{ virtualbox_selector[virtualbox_selected] }}"
 
 # Determine the correct filename prefix based on the version
 # Legacy (6.1, 7.0): Oracle_VM_VirtualBox_Extension_Pack-

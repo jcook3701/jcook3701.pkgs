@@ -19,7 +19,7 @@ virtualbox_pkg_deps:
   - "linux-headers-{{ ansible_kernel }}"
 
 virtualbox_pkgs:
-  - "{{ virtualbox_version.debian_pkg }}"
+  - "{{ virtualbox_info.debian_pkg }}"
 
 virtualbox_directory:
   keyrings: "/etc/apt/keyrings/"
@@ -27,7 +27,7 @@ virtualbox_directory:
 
 virtualbox_file:
   gpg: "{{ virtualbox_directory.keyrings }}/oracle-virtualbox-2016.asc"
-  list: "{{ virtualbox_directory.sources }}/oracle-virtualbox-2016.list"
+  list: "{{ virtualbox_directory.sources }}/virtualbox-{{ virtualbox_info.version | replace('.', '_') }}.list"
 
 virtualbox_repo_url: "{{ virtualbox_download_url }}/virtualbox/debian"
 virtualbox_gpg_url: "{{ virtualbox_repo_url }}/oracle_vbox_2016.asc"

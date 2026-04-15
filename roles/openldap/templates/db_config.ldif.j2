@@ -19,6 +19,27 @@
 #}
 
 {%- macro db_config() -%}
+# 4. Load the MDB Module (Required on Ubuntu/Debian)
+dn: cn=module{0},cn=config
+objectClass: olcModuleList
+cn: module{0}
+olcModulePath: {{ openldap_directory.modules }}
+olcModuleLoad: back_mdb
+
+# 5. Create the Database Entry (Not modify!)
+dn: olcDatabase={1}mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: {1}mdb
+olcDbDirectory: {{ openldap_directory.database }}
+olcSuffix: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+olcRootDN: cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+olcRootPW: {{ openldap_admin_password_hashed }}
+# Basic indexing for performance and stability
+olcDbIndex: objectClass eq
+olcDbIndex: cn,sn,mail pres,eq,sub
+olcDbIndex: uid pres,eq,sub
+
 # Configure TLS/SSL
 dn: cn=config
 changetype: modify

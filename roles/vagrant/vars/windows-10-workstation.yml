@@ -1,15 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# "ubuntu/noble64" # (Ubuntu 24.04)
-vagrant_vm_name: "default-workstation"
-vagrant_box: "ubuntu/jammy64" # (Ubuntu 22.04)
+vagrant_vm_name: "windows-10-workstation"
+vagrant_box: "microsoft/windows_10"
 vagrant_box_version: ">= 0"
-vagrant_os_family: "ubuntu"
+vagrant_os_family: "windows"
 vagrant_memory_mb: 4096
 vagrant_cpus: 2
 vagrant_gui_enabled: true
-vagrant_ip: "10.0.1.100"
+vagrant_ip: "10.0.1.105"
 vagrant_netmask: "255.0.0.0"
 vagrant_network_type: "public_network"
 vagrant_bridge: "enp8s0"

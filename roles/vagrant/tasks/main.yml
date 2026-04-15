@@ -17,6 +17,9 @@
   ansible.builtin.include_tasks: install.yml
   when: vagrant_check.rc != 0
 
+- name: Install Vagrant plugins
+  ansible.builtin.include_tasks: plugins.yml
+
 - name: Inspect the current Vagrant item being processed
   ansible.builtin.debug:
     msg: "Processing box with variables from: {{ vagrant_enabled_boxes }}"

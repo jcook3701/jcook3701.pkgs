@@ -15,7 +15,7 @@ virtualbox_pkg_deps:
   - qt5-qtbase-devel
 
 virtualbox_pkgs:
-  - "{{ virtualbox_version.redhat_pkg }}"
+  - "{{ virtualbox_info.redhat_pkg }}"
 
 virtualbox_directory:
   repo: "/etc/yum.repos.d"
