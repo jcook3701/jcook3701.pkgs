@@ -29,13 +29,19 @@ olcTLSCertificateFile: {{ openldap_key.tls_cert }}
 olcTLSCertificateKeyFile: {{ openldap_key.tls_key }}
 olcLogLevel: stats
 
-# 2. Config Database (GRANTS LOCAL ROOT PERMISSIONS)
+# 2. Module Container (Allows online module loading later)
+dn: cn=module{0},cn=config
+objectClass: olcModuleList
+cn: module{0}
+olcModulePath: {{ openldap_directory.modules }}
+
+# 3. Config Database (GRANTS LOCAL ROOT PERMISSIONS)
 dn: olcDatabase={0}config,cn=config
 objectClass: olcDatabaseConfig
 olcDatabase: {0}config
 olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * break
 
-# 3. Schema Container (Must exist before importing schemas)
+# 4. Schema Container (Must exist before importing schemas)
 dn: cn=schema,cn=config
 objectClass: olcSchemaConfig
 cn: schema

@@ -19,15 +19,15 @@
 #}
 
 {%- macro db_config() -%}
-# 4. Load the MDB Module (Required on Ubuntu/Debian)
+# Load the MDB Module into the existing module list
 dn: cn=module{0},cn=config
-objectClass: olcModuleList
-cn: module{0}
-olcModulePath: {{ openldap_directory.modules }}
+changetype: modify
+add: olcModuleLoad
 olcModuleLoad: back_mdb
 
-# 5. Create the Database Entry (Not modify!)
+# Create the brand new Database
 dn: olcDatabase={1}mdb,cn=config
+changetype: add
 objectClass: olcDatabaseConfig
 objectClass: olcMdbConfig
 olcDatabase: {1}mdb
@@ -35,6 +35,7 @@ olcDbDirectory: {{ openldap_directory.database }}
 olcSuffix: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 olcRootDN: cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 olcRootPW: {{ openldap_admin_password_hashed }}
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * read
 # Basic indexing for performance and stability
 olcDbIndex: objectClass eq
 olcDbIndex: cn,sn,mail pres,eq,sub
@@ -48,18 +49,6 @@ olcTLSCertificateFile: {{ openldap_key.tls_cert }}
 -
 replace: olcTLSCertificateKeyFile
 olcTLSCertificateKeyFile: {{ openldap_key.tls_key }}
-
-# Configure Database 1 (mdb or hdb depending on OS)
-dn: olcDatabase={1}mdb,cn=config
-changetype: modify
-replace: olcSuffix
-olcSuffix: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
--
-replace: olcRootDN
-olcRootDN: cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
--
-replace: olcRootPW
-olcRootPW: {{ openldap_admin_password_hashed }}
 {%- endmacro %}
 
 {{- db_config() }}

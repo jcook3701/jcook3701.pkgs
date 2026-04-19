@@ -47,29 +47,30 @@
     - "{{ openldap_directory.database }}"
   become: true
 
-- name: Load schemas offline (In Order)
-  ansible.builtin.command: >-
-    slapadd -v -n 0 -F {{ openldap_directory.slapd }} -l {{ openldap_directory.schema }}/{{ item }}.ldif
-  become: true
-  loop: "{{ openldap_schemas }}"
-
 - name: Deploy bootstrap configuration from J2 template
   ansible.builtin.template:
     src: bootstrap_config.ldif.j2
     dest: /tmp/bootstrap_config.ldif
-    owner: root
-    group: root
+    owner: openldap
+    group: openldap
     mode: "0600"
 
 - name: Initialize OpenLDAP configuration offline
   ansible.builtin.command: >-
     slapadd -v -n 0 -F {{ openldap_directory.slapd }} -l /tmp/bootstrap_config.ldif
   become: true
+  become_user: openldap
 
 - name: Start slapd service
   ansible.builtin.service:
     name: slapd
     state: started
+
+- name: Load schemas offline (In Order)
+  ansible.builtin.command: >-
+    ldapadd -Y EXTERNAL -H ldapi:/// -f {{ openldap_directory.schema }}/{{ item }}.ldif
+  become: true
+  loop: "{{ openldap_schemas }}"
 
 - name: Deploy Database OLC configuration LDIF
   ansible.builtin.template:
