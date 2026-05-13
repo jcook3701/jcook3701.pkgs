@@ -37,10 +37,18 @@ repos:
     rev: v6.0.0
     hooks:
       - id: end-of-file-fixer
-        exclude: "docs/jekyll/ansible-docs/ansible-autodoc.md"
+        exclude: |
+          (?x)^(
+            docs/jekyll/ansible-docs/ansible-autodoc\.md|
+            roles/openldap/files/schema/samba\.ldif
+          )$
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md, --markdown-linebreak-ext=mdx]
-        exclude: "docs/jekyll/ansible-docs/ansible-autodoc.md"
+        exclude: |
+          (?x)^(
+            docs/jekyll/ansible-docs/ansible-autodoc\.md|
+            roles/openldap/files/schema/samba\.ldif
+          )$
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: check-yaml
