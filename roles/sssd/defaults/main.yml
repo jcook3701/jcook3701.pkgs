@@ -1,3 +1,27 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+sssd_state: present
+
+# Dynamic Service Toggles
+sssd_enable_autofs: true
+sssd_enable_ssh: true
+sssd_enable_sudo: true
+
+# Domain Options
+sssd_top_level_domain: "com"
+sssd_second_level_domain: "example"
+sssd_domain_name: "{{ sssd_second_level_domain }}.{{ sssd_top_level_domain }}"
+
+# LDAP Protocol (ldaps or ldap)
+sssd_ldap_protocol: "ldaps"
+
+# LDAP and Kerberos Server Settings
+sssd_ldap_hosts:
+  - "ldap-server.{{ sssd_domain_name }}"
+
+sssd_krb5_hosts:
+  - "kerberos.{{ sssd_domain_name }}"
+
+# SSL/TLS Toggle
+sssd_ldap_tls: true

@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Cockpit package
+  ansible.builtin.package:
+    name: "{{ cockpit_pkgs }}"
+    state: "{{ cockpit_state }}"
+  notify: Restart Cockpit
+
+- name: Ensure Cockpit service is configured
+  ansible.builtin.service:
+    name: "{{ cockpit_service }}"
+    state: started
+    enabled: true

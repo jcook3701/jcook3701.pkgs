@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Force stop and disable chrony daemon service on teardown
+  ansible.builtin.systemd:
+    name: "{{ chrony_service }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Uninstall chrony package and dependencies.
+  ansible.builtin.package:
+    name: "{{ chrony_pkgs }}"
+    state: absent

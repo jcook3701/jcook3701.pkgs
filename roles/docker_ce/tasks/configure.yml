@@ -8,9 +8,12 @@
 
 - name: Add users in service_groups_users to docker group
   ansible.builtin.user:
-    name: "{{ item.name }}"
+    name: "{{ user.name }}"
     groups: docker
     append: true
   loop: "{{ docker_ce_users }}"
-  when: item.name is defined and item.name | length > 0
+  loop_control:
+    loop_var: user
+    label: "{{ user.name }}"
+  when: user.name is defined and user.name | length > 0
   notify: Restart docker

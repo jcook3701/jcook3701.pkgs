@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+rollo_driver_versions:
+  - "1.8.4-1" # debian/ubuntu
+  - "1.8.4-0" # redhat
+
+# Static dictionary translation mappings
+rollo_deb_architecture:
+  armv6l: "armhf"
+  armv7l: "armhf"
+  aarch64: "arm64"
+  x86_64: "amd64"
+  i386: "i386"
+
+# Normalized data properties evaluated during runtime
+rollo_ce_arch: "{{ rollo_deb_architecture[ansible_architecture] | default(ansible_architecture) }}"
+rollo_ce_codename: "{{ ansible_distribution_release }}"
+rollo_ce_idname: "{{ ansible_distribution | lower }}"
+
+# Driver package locations
+rollo_deb_url: >-
+  https://rollo-main.b-cdn.net/driver-dl/linux/rollo-cups-driver_{{ rollo_driver_version }}_amd64.deb
+rollo_deb_arm_url: >-
+  https://rollo-main.b-cdn.net/driver-dl/linux/rollo-cups-driver_{{ rollo_driver_version }}_arm64.deb
+rollo_rpm_url: >-
+  https://rollo-main.b-cdn.net/driver-dl/linux/rollo-cups-driver-{{ rollo_driver_version }}.x86_64.rpm
+rollo_src_url: >-
+  https://rollo-main.b-cdn.net/driver-dl/linux/rollo-cups-driver-{{ rollo_driver_version | split('-') | first }}.tar.gz
+
+rollo_url: >-
+  {% if ansible_os_family == "Debian" %}
+    {% if rollo_ce_arch == "arm64" %}
+      {{- rollo_deb_arm_url -}}
+    {% else %}
+      {{- rollo_deb_url -}}
+    {% endif %}
+  {% elif ansible_os_family == "RedHat" %}
+    {{- rollo_rpm_url -}}
+  {% else %}
+    {{- rollo_src_url -}}
+  {% endif %}
+
+rollo_pkg:
+  - rollo-cups-driver

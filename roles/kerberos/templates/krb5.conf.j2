@@ -1,0 +1,50 @@
+{#
+# client.conf.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro kerberos() -%}
+[libdefaults]
+    default_realm = {{ kerberos_default_realm | upper }}
+    dns_lookup_realm = {{ kerberos_dns_lookup_realm }}
+    dns_lookup_kdc = {{ kerberos_dns_lookup_kdc }}
+    ticket_lifetime = {{ kerberos_ticket_lifetime }}
+    renew_lifetime = {{ kerberos_renew_lifetime }}
+    forwardable = {{ kerberos_forwardable }}
+    rdns = false
+
+[realms]
+{% for realm in kerberos_realms %}
+    {{ realm.name | upper }} = {
+        kdc = {{ realm.kdc }}
+        admin_server = {{ realm.admin_server }}
+    }
+{% endfor %}
+
+[domain_realm]
+{% for item in kerberos_domain_realms %}
+    {{ item.domain }} = {{ item.realm | upper }}
+{% endfor %}
+
+[logging]
+    default = FILE:/var/log/krb5libs.log
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmind.log
+{%- endmacro -%}
+
+{{- kerberos() -}}

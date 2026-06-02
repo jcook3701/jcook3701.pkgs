@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Cockpit service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ cockpit_service }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Uninstall Cockpit package
+  ansible.builtin.package:
+    name: "{{ cockpit_pkgs }}"
+    state: "{{ cockpit_state }}"

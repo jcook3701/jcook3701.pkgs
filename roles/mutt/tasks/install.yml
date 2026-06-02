@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Mutt package and dependencies.
+  ansible.builtin.apt:
+    name: "{{ mutt_pkgs }}"
+    state: present
+
+- name: Deploy .muttrc configuration
+  ansible.builtin.template:
+    src: muttrc.j2
+    dest: "~/.muttrc"
+    mode: "0600"

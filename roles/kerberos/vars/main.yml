@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kerberos_pkgs: >-
+  {{
+    (kerberos_is_server | bool) |
+    ternary(kerberos_server_pkgs + kerberos_client_pkgs, kerberos_client_pkgs)
+  }}
+
+kerberos_directory:
+  conf: "/etc/sssd"
+  log: "/var/log/"

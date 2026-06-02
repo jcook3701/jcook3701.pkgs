@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+samba_state: present
+
+samba_port: ""
+
+# Domain Options
+samba_top_level_domain: "com"
+samba_second_level_domain: "jcook3701"

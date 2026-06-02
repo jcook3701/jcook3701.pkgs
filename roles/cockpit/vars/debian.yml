@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+cockpit_pkgs:
+  - cockpit
+  - cockpit-storaged
+  - cockpit-networkmanager
+  - cockpit-packagekit
+  - cockpit-podman
+  - cockpit-machines

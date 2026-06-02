@@ -1,6 +1,17 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+docker_ce_deb_architecture:
+  armv6l: "armhf"
+  armv7l: "armhf"
+  aarch64: "arm64"
+  x86_64: "amd64"
+  i386: "i386"
+
+docker_ce_arch: "{{ docker_ce_deb_architecture[ansible_architecture] | default(ansible_architecture) }}"
+docker_ce_codename: "{{ ansible_distribution_release }}"
+docker_ce_idname: "{{ ansible_distribution | lower }}"
+
 docker_ce_pkgs:
   - docker-ce
   - docker-ce-cli

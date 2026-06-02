@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+firewalld_packages:
+  - firewalld
+
+firewalld_directory:
+  conf: "/etc/firewalld"
+  services: "/etc/firewalld/services"
+
+firewalld_native_services:
+  - dns
+  - dhcp
+  - ntp
+  - ldap
+  - ldaps
+  - samba
+  - ftp
+  - http
+  - https
+  - ipp
+  - ssh
+  - openvpn

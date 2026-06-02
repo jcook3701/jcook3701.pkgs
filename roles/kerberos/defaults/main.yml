@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kerberos_state: present
+kerberos_is_server: false
+
+kerberos_default_realm: "EXAMPLE.COM"
+kerberos_dns_lookup_realm: "false"
+kerberos_dns_lookup_kdc: "false"
+kerberos_ticket_lifetime: "24h"
+kerberos_renew_lifetime: "7d"
+kerberos_forwardable: "true"
+
+# List of KDCs and Admin servers for your realm(s)
+kerberos_realms:
+  - name: "EXAMPLE.COM"
+    kdc: "kerberos.example.com"
+    admin_server: "kerberos.example.com"
+
+# Mapping local domain strings to Kerberos realms
+kerberos_domain_realms:
+  - domain: "example.com"
+    realm: "EXAMPLE.COM"
+  - domain: ".example.com"
+    realm: "EXAMPLE.COM"

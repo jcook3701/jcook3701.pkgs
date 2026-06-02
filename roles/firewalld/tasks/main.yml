@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Firewalld
+  ansible.builtin.include_tasks: install.yml
+  when: firewalld_state | default('present') == 'present'
+
+- name: Uninstall Firewalld
+  ansible.builtin.include_tasks: uninstall.yml
+  when: firewalld_state | default('present') == 'absent'

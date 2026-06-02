@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+
+kerberos_server_pkgs:
+  - krb5-kdc
+  - krb5-admin-server
+
+kerberos_client_pkgs:
+  - krb5-user
+  - libpam-krb5
+  - libpam-ccreds
+
+kerberos_services:
+  - krb5-kdc
+  - krb5-admin-server

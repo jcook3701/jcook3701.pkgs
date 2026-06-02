@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Kerberos service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: stopped
+    enabled: false
+  loop: "{{ kerberos_services }}"
+  loop_control:
+    loop_var: service
+  when: kerberos_is_server | bool
+  failed_when: false
+
+- name: Remove Kerberos configuration file
+  ansible.builtin.file:
+    path: /etc/krb5.conf
+    state: absent
+
+- name: Uninstall Kerberos packages
+  ansible.builtin.package:
+    name: "{{ kerberos_pkgs }}"
+    state: absent

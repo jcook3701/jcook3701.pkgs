@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Samba
+  ansible.builtin.include_tasks:
+    file: install.yml
+  when: samba_state | default('present') == 'present'
+
+- name: Uninstall Samba
+  ansible.builtin.include_tasks:
+    file: uninstall.yml
+  when: samba_state | default('present') == 'absent'

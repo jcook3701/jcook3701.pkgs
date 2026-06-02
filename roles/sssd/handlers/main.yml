@@ -3,5 +3,5 @@
 ---
 - name: Restart sssd
   ansible.builtin.service:
-    name: sssd
+    name: "{{ sssd_services }}"
     state: restarted

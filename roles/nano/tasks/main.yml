@@ -3,4 +3,10 @@
 ---
 - name: Install and configure nano package
   ansible.builtin.include_tasks:
-    file: nano-install.yml
+    file: install.yml
+  when: nano_state | default('present') == 'present'
+
+- name: Uninstall nano package
+  ansible.builtin.include_tasks:
+    file: uninstall.yml
+  when: nano_state | default('present') == 'absent'

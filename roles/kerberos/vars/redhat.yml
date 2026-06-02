@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kerberos_server_packages:
+  - krb5-server
+  - krb5-workstation
+kerberos_client_packages:
+  - krb5-workstation
+
+kerberos_services:
+  - krb5kdc
+  - kadmin

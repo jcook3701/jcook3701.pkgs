@@ -2,6 +2,20 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install SSSD package and dependencies.
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ sssd_pkgs }}"
     state: present
+
+- name: Generate sssd.conf configuration file
+  ansible.builtin.template:
+    src: sssd.conf.j2
+    dest: "{{ sssd_file.sssd_conf }}"
+    group: root
+    owner: root
+    mode: "0555"
+
+- name: Ensure SSSD service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_services }}"
+    state: started
+    enabled: true
