@@ -3,3 +3,4 @@
 ---
 - name: Rustup Install
   ansible.builtin.include_tasks: install.yml
+  when: rustup_state | default('present') == 'present'

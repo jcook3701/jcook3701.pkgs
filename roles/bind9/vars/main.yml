@@ -1,3 +1,108 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+bind9_generate_tsig_keys: "{{ bind9_enable_tsig | bool or bind9_enable_dydns | bool }}"
+bind9_tsig_clients: "{{ (bind9_secondary_servers + bind9_dydns_update_servers) | unique }}"
+
+# Modify the file below at your own risk...
+bind9_ip_loopback_space: "127.0.0"
+bind9_ip_loopback_address: "{{ bind9_ip_loopback_space }}.1"
+
+bind9_directory:
+  conf: "{{ bind9_os_directory.conf }}"
+  zone: "{{ bind9_os_directory.cache if not (bind9_is_primary | bool) else (bind9_os_directory.dynamic if bind9_enable_dydns | bool else bind9_os_directory.zone) }}"
+  zone_keys: "{{ bind9_os_directory.dynamic_keys if (bind9_enable_dydns | bool) else bind9_os_directory.zone_keys }}"
+  options: "{{ bind9_os_directory.options }}"
+  data: "{{ bind9_os_directory.data }}"
+  run: "{{ bind9_os_directory.run }}"
+  log: "{{ bind9_os_directory.log }}"
+
+bind9_key_directory:
+  base: "{{ bind9_directory.zone_keys }}"
+  tsig: "{{ bind9_directory.zone_keys }}/tsig"
+  dnssec: "{{ bind9_directory.zone_keys }}/dnssec"
+
+bind9_key:
+  root: "{{ bind9_directory.conf }}/{{ bind9_root_key }}"
+  rndc: "{{ bind9_directory.conf }}/rndc.key"
+  session_keyfile: "{{ bind9_directory.run }}/session.key"
+
+bind9_file:
+  named_conf: "{{ bind9_directory.conf }}/named.conf"
+  named_conf_local: "{{ bind9_directory.conf }}/named.conf.local"
+  named_conf_options: "{{ bind9_directory.conf }}/named.conf.options"
+  named_conf_controls: "{{ bind9_directory.conf }}/named.conf.controls"
+  named_conf_log: "{{ bind9_directory.conf }}/named.conf.log"
+  named_conf_keys: "{{ bind9_directory.conf }}/named.conf.keys"
+  named_conf_default_zones: "{{ bind9_directory.conf }}/named.conf.default-zones"
+  rfc1918_zone: "{{ bind9_directory.conf }}/{{ bind9_rfc1918 }}"
+
+  forward_zone: "{{ bind9_directory.zone }}/{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.{{ bind9_second_level_domain }}.zone"
+  reverse_zone: "{{ bind9_directory.zone }}/{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.reverse-{{ bind9_reverse_ip_address_space }}.zone"
+
+  secroots_file: "{{ bind9_directory.data }}/named.secroots"
+  dump_file: "{{ bind9_directory.data }}/cache_dump.db"
+  statistics_file: "{{ bind9_directory.data }}/named_stats.txt"
+  memstatistics_file: "{{ bind9_directory.data }}/named_mem_stats.txt"
+  pid_file: "{{ bind9_directory.run }}/named.pid"
+
+  log_file: "{{ bind9_directory.log }}/named.log"
+  security_log: "{{ bind9_directory.log }}/security.log"
+  update_log: "{{ bind9_directory.log }}/update.log"
+  dnssec_log: "{{ bind9_directory.log }}/dnssec.log"
+
+# Items below this line should not be touched for basic DNS setup. #
+bind9_acl_clients:
+  - "{{ bind9_ip_loopback_space }}.0/8"
+  - "{{ bind9_ip_address_space }}.0/{{ bind9_prefix_length }}"
+
+bind9_options:
+  listen_on: "port {{ bind9_dns_port }} { any; }"
+  listen_on_v6: "port {{ bind9_dns_port }} { any; }"
+  directory: "{{ bind9_directory.options }}"
+  dump_file: "{{ bind9_file.dump_file }}"
+  statistics_file: "{{ bind9_file.statistics_file }}"
+  memstatistics_file: "{{ bind9_file.memstatistics_file }}"
+  secroots_file: "{{ bind9_file.secroots_file }}"
+  allow_query: '"clients"'
+  recursion: "yes"
+  dnssec_validation: "{{ 'auto' if (bind9_enable_dnssec | bool) else 'no' }}"
+  managed_keys_directory: "{{ bind9_directory.options }}"
+  pid_file: "{{ bind9_file.pid_file }}"
+  session_keyfile: "{{ bind9_key.session_keyfile }}"
+  bindkeys_file: "{{ bind9_key.root }}"
+
+bind9_zones:
+  - name: "{{ bind9_domain_name }}"
+    type: "{{ 'master' if (bind9_is_primary | bool) else 'slave' }}"
+    path: "{{ bind9_directory.zone }}"
+    filename: "{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.{{ bind9_second_level_domain }}.zone"
+    signed_filename: "{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.{{ bind9_second_level_domain }}.signed"
+    allow_update: "{{ bind9_dydns_update_servers if (bind9_enable_dydns | bool) else 'none' }}"
+    key_directory: "{{ bind9_key_directory.dnssec }}/{{ bind9_domain_name }}"
+    dnssec_policy: "default"
+    inline_signing: "{{ 'yes' if (bind9_is_primary | bool) else 'no' }}"
+    masters_list: "{{ bind9_primary_servers | default([]) }}"
+
+  - name: "{{ bind9_reverse_ip_address_space }}.in-addr.arpa"
+    type: "{{ 'master' if (bind9_is_primary | bool) else 'slave' }}"
+    path: "{{ bind9_directory.zone }}"
+    filename: "{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.reverse-{{ bind9_reverse_ip_address_space }}.zone"
+    signed_filename: "{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.reverse-{{ bind9_reverse_ip_address_space }}.signed"
+    allow_update: "{{ bind9_dydns_update_servers if (bind9_enable_dydns | bool) else 'none' }}"
+    key_directory: "{{ bind9_key_directory.dnssec }}/{{ bind9_reverse_ip_address_space }}.in-addr.arpa"
+    dnssec_policy: "default"
+    inline_signing: "{{ 'yes' if (bind9_is_primary | bool) else 'no' }}"
+    masters_list: "{{ bind9_primary_servers | default([]) }}"
+
+bind9_controls:
+  inet: "{{ bind9_ip_loopback_address }}"
+  port: "{{ bind9_rndc_port }}"
+  allow: "{{ bind9_ip_loopback_address }}"
+  rndc_key: "rndc-key"
+
+bind9_logging:
+  channel:
+    default_debug:
+      file: "{{ bind9_file.log_file }}"
+      severity: "dynamic"

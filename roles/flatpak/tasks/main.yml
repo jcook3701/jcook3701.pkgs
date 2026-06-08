@@ -6,8 +6,18 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Install flatpak
-  ansible.builtin.include_tasks: install.yml
+- name: Manage flatpak installation status
+  ansible.builtin.package:
+    name: "{{ flatpak_pkgs }}"
+    state: "{{ flatpak_state }}"
 
-- name: Configure flatpak
-  ansible.builtin.include_tasks: configure.yml
+- name: Add flathub remote if it does not exist
+  ansible.builtin.command: flatpak remote-add --if-not-exists {{ repo.name }} {{ repo.url }}
+  loop: "{{ flatpak_repos }}"
+  loop_control:
+    loop_var: repo
+    label: "{{ repo.name }}"
+  when:
+    - repo.name is defined
+    - repo.name | length > 0
+    - flatpak_state | default('present') == 'present'

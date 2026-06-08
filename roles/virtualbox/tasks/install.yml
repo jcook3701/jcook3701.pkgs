@@ -4,7 +4,7 @@
 - name: Install VirtualBox
   ansible.builtin.package:
     name: "{{ virtualbox_pkgs }}"
-    state: "{{ virtualbox_state | default('present') }}"
+    state: present
 
 - name: Ensure VirtualBox kernel modules are loaded (RedHat)
   ansible.builtin.command: /sbin/vboxconfig
@@ -14,5 +14,4 @@
     creates: /lib/modules/{{ ansible_kernel }}/misc/vboxdrv.ko
   when:
     - ansible_os_family == "RedHat"
-    - virtualbox_state != "absent"
   failed_when: false

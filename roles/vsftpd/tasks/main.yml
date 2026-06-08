@@ -8,6 +8,12 @@
 
 - name: Install vsftpd
   ansible.builtin.include_tasks: install.yml
+  when: vsftpd_state | default('present') == 'present'
 
 - name: Configure vsftpd
   ansible.builtin.include_tasks: configure.yml
+  when: vsftpd_state | default('present') == 'present'
+
+- name: Uninstall vsftpd
+  ansible.builtin.include_tasks: uninstall.yml
+  when: vsftpd_state | default('present') == 'absent'

@@ -22,10 +22,43 @@
 // DNS BIND logging clause
 
 logging {
-        channel default_debug {
-                file "{{ bind9_logging.channel.default_debug.file }}";
-                severity {{ bind9_logging.channel.default_debug.severity }};
-        };
+    // Operational and General Debugging Channel
+    channel default_debug {
+        file "{{ bind9_logging.channel.default_debug.file }}";
+        severity {{ bind9_logging.channel.default_debug.severity }};
+        print-time yes;
+        print-category yes;
+        print-severity yes;
+    };
+
+    // Dedicated channel to track rogue traffic, unauthorized queries, or spoofing attempts
+    channel security_file {
+        file "{{ bind9_directory.log }}/security.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+    };
+
+    // Dedicated channel to log Dynamic DNS (DyDNS) modifications
+    channel update_file {
+        file "{{ bind9_directory.log }}/update.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+    };
+
+    // Dedicated channel to track DNSSEC signature expiration or verification issues
+    channel dnssec_file {
+        file "{{ bind9_directory.log }}/dnssec.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+    };
+
+    // --- Category Mappings ---
+    category default { default_debug; };
+    category general { default_debug; };
+    category security { security_file; default_debug; };
+    category update { update_file; default_debug; };
+    category update-security { update_file; security_file; };
+    category dnssec { dnssec_file; default_debug; };
 };
 {%- endmacro -%}
 

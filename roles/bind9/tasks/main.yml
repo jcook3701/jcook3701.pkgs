@@ -1,5 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Load Bind9 OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
 - name: Bind9 Install
-  ansible.builtin.include_tasks: bind9-install.yml
+  ansible.builtin.include_tasks: install.yml
+  when: bind9_state | default('present') == 'present'
+
+- name: Bind9 Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+  when: bind9_state | default('present') == 'absent'

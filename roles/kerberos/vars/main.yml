@@ -3,9 +3,23 @@
 ---
 kerberos_pkgs: >-
   {{
-    (kerberos_is_server | bool) |
-    ternary(kerberos_server_pkgs + kerberos_client_pkgs, kerberos_client_pkgs)
+    (kerberos_node_type in ['admin_master', 'kdc_replica']) | ternary(
+      kerberos_server_pkgs + kerberos_client_pkgs,
+      kerberos_client_pkgs)
   }}
+
+# 1. Compile the service structure as a raw YAML text block
+kerberos_raw_services: >-
+  {% if kerberos_node_type == 'admin_master' %}
+    {{ [service_kdc_daemon, service_admin_daemon] | to_yaml }}
+  {% elif kerberos_node_type == 'kdc_replica' %}
+    {{ [service_kdc_daemon] | to_yaml }}
+  {% else %}
+    {{ [] | to_yaml }}
+  {% endif %}
+
+# 2. Convert it immediately into a native, true executable data list
+kerberos_services: "{{ kerberos_raw_services | from_yaml }}"
 
 kerberos_directory:
   conf: "/etc/sssd"

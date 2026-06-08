@@ -1,6 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Prepare Docker-CE repositories for {{ ansible_os_family }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo-{{ ansible_os_family | lower }}.yml"
+    - "repo-default.yml"
+  when:
+    - ansible_os_family in ['Debian', 'RedHat']
+
 - name: Installing Docker Community Edition
   ansible.builtin.include_role:
     name: jcook3701.utils.pkg_manager
@@ -11,6 +19,9 @@
 
 - name: Ensure Docker service is started and enabled
   ansible.builtin.systemd:
-    name: docker
+    name: "{{ docker_service }}"
     state: started
-    enabled: yes
+    enabled: true
+
+- name: Configure Docker Community Edition
+  ansible.builtin.include_tasks: configure.yml

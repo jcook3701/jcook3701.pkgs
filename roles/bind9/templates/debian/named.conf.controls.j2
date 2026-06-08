@@ -24,7 +24,7 @@
 include "{{ bind9_key.rndc }}";
 
 controls {
-        inet {{ bind9_controls.inet }} port {{ bind9_controls.port }} allow { {{ bind9_controls.allow }}; } keys { {{ bind9_controls.rndc_key }}; };
+    inet {{ bind9_controls.inet }} port {{ bind9_controls.port }} allow { {{ bind9_controls.allow }}; } keys { "{{ bind9_controls.rndc_key }}"; };
 };
 {%- endmacro -%}
 

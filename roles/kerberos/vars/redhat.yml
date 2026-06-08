@@ -7,6 +7,5 @@ kerberos_server_packages:
 kerberos_client_packages:
   - krb5-workstation
 
-kerberos_services:
-  - krb5kdc
-  - kadmin
+kerberos_kdc_service: "krb5kdc"
+kerberos_admin_service: "kadmin"

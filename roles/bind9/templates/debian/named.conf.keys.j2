@@ -19,11 +19,9 @@
 #}
 
 {%- macro named_conf_keys() -%}
-{% for host in groups['all'] %}
-{% set hostname = hostvars[host].hostname | default(host) %}
-{% set key_path = bind9_key_directory + '/tsig/' + hostname + '/' + hostname + '-tsig.key' %}
-
-{{ lookup('file', key_path) }}
+{% for host in bind9_tsig_clients | default([]) %}
+// Cryptographic Secret for client node: {{ host }}
+include "{{ bind9_key_directory.tsig }}/{{ host }}/{{ host }}-tsig.key";
 
 {% endfor %}
 {%- endmacro -%}

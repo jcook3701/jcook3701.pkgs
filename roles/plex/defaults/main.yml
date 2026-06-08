@@ -1,7 +1,4 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Install Flatpak
-  ansible.builtin.package:
-    name: "{{ flatpak_pkgs }}"
-    state: present
+plex_state: present

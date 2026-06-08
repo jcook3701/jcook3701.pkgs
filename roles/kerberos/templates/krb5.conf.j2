@@ -29,12 +29,12 @@
     rdns = false
 
 [realms]
-{% for realm in kerberos_realms %}
-    {{ realm.name | upper }} = {
+    {{ kerberos_default_realm | upper }} = {
+    {% for realm in kerberos_realms %}
         kdc = {{ realm.kdc }}
-        admin_server = {{ realm.admin_server }}
+    {% endfor %}
+        admin_server = {{ (kerberos_realms | first).admin_server | default('kerberos.' ~ kerberos_domain_name) }}
     }
-{% endfor %}
 
 [domain_realm]
 {% for item in kerberos_domain_realms %}

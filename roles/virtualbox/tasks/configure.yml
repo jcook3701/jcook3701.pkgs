@@ -4,7 +4,7 @@
 - name: Ensure VirtualBox group exists
   ansible.builtin.group:
     name: vboxusers
-    state: "{{ virtualbox_state | default('present') }}"
+    state: present
 
 - name: Add sudo_user to the VirtualBox group
   ansible.builtin.user:
@@ -12,4 +12,3 @@
     groups: vboxusers
     append: true
   become: true
-  when: virtualbox_state | default('present') == 'present'

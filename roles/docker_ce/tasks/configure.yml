@@ -15,5 +15,7 @@
   loop_control:
     loop_var: user
     label: "{{ user.name }}"
-  when: user.name is defined and user.name | length > 0
+  when:
+    - user.name is defined
+    - user.name | length > 0
   notify: Restart docker

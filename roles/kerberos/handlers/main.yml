@@ -8,4 +8,3 @@
   loop: "{{ kerberos_services }}"
   loop_control:
     loop_var: service
-  when: kerberos_is_server | bool

@@ -31,8 +31,8 @@ include "{{ bind9_file.named_conf_options }}";
 include "{{ bind9_file.named_conf_local }}";
 include "{{ bind9_file.named_conf_controls }}";
 include "{{ bind9_file.named_conf_log }}";
-{% if bind9_enable_tsig is true %}
-  include "{{ bind9_file.named_conf_keys }}";
+{% if bind9_generate_tsig_keys | bool %}
+include "{{ bind9_file.named_conf_keys }}";
 {% endif %}
 include "{{ bind9_file.named_conf_default_zones }}";
 {%- endmacro -%}

@@ -15,6 +15,19 @@
     mode: "0644"
   notify: Restart Kerberos Server Services
 
+- name: Check if Kerberos principal database exists
+  ansible.builtin.stat:
+    path: /var/lib/krb5kdc/principal
+  register: kdc_db_stat
+  when: kerberos_node_type == 'admin_master'
+
+- name: Create initial Kerberos Realm Database (Master Only)
+  ansible.builtin.command: >
+    kdb5_util create -s -P {{ kerberos_master_password | default('SecretPassword123') }}
+  when:
+    - kerberos_node_type == 'admin_master'
+    - not kdc_db_stat.stat.exists
+
 - name: Ensure Kerberos service is started and enable
   ansible.builtin.systemd:
     name: "{{ service }}"
@@ -23,4 +36,3 @@
   loop: "{{ kerberos_services }}"
   loop_control:
     loop_var: service
-  when: kerberos_is_server | bool

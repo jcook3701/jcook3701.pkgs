@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Bind9 service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ bind9_service }}"
+    state: stopped
+    enabled: false
+
+- name: Uninstall Bind9 package and dependencies
+  ansible.builtin.apt:
+    name: "{{ bind9_pkg_names }}"
+    state: absent
+
+- name: Clean Bind9 configuration files
+  ansible.builtin.include_tasks: file-removal.yml

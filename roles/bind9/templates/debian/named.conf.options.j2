@@ -18,44 +18,68 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
+{# TODO: allow-transfer { key "ns2-companion-key"; }; #}
+
 {%- macro named_conf_options() -%}
 # Limit access to local network and home LAN
 acl "clients" {
-{% for client in bind9_acl_clients %}
+{% for client in bind9_acl_clients | default(['127.0.0.1', '192.168.0.0/24']) %}
 	{{ client }};
 {% endfor %}
 };
 
+{#
+- If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
+- If you are building a RECURSIVE (caching) DNS server, you need to enable
+	recursion.
+- If your recursive DNS server has a public IP address, you MUST enable access
+	control to limit queries to your legitimate users. Failing to do so will
+	cause your server to become part of large scale DNS amplification
+	attacks. Implementing BCP38 within your network would greatly
+	reduce such attack surface
+#}
 options {
-	listen-on {{ bind9_options.listen_on }}; ### Master DNS IP ###
+	listen-on  {{ bind9_options.listen_on }}; ### Master DNS IP ###
 	listen-on-v6 {{ bind9_options.listen_on_v6 }};
+
 	directory "{{ bind9_options.directory }}";
 	dump-file "{{ bind9_options.dump_file }}";
 	statistics-file "{{ bind9_options.statistics_file }}";
 	memstatistics-file "{{ bind9_options.memstatistics_file }}";
-	recursing-file "{{ bind9_options.recursing_file }}";
 	secroots-file "{{ bind9_options.secroots_file }}";
-	allow-query { {{ bind9_options.allow_query}}; };
 
-	/*
-	 - If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
-	 - If you are building a RECURSIVE (caching) DNS server, you need to enable
-	   recursion.
-	 - If your recursive DNS server has a public IP address, you MUST enable access
-	   control to limit queries to your legitimate users. Failing to do so will
-	   cause your server to become part of large scale DNS amplification
-	   attacks. Implementing BCP38 within your network would greatly
-	   reduce such attack surface
-	*/
+	allow-query { {{ bind9_options.allow_query }}; };
+    allow-transfer {
+        {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
+        {% for secondary in bind9_secondary_servers %}
+        {{ secondary }};
+        {% endfor %}
+        {% else %}
+        none;
+        {% endif %}
+    };
+
+    {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
+    also-notify {
+        {% for secondary in bind9_secondary_servers %}
+        {{ secondary }};
+        {% endfor %}
+    };
+    {% endif %}
+
+    {% if bind9_forwarders is defined and bind9_forwarders %}
+    forwarders {
+        {% for forwarder in bind9_forwarders %}
+        {{ forwarder }};
+        {% endfor %}
+    };
+    forward first;
+    {% endif %}
 
 	recursion {{ bind9_options.recursion }};
-
 	dnssec-validation {{ bind9_options.dnssec_validation }};
-
-        bindkeys-file "{{ bind9_options.bindkeys_file }}";
-
+    bindkeys-file "{{ bind9_options.bindkeys_file }}";
 	managed-keys-directory "{{ bind9_options.managed_keys_directory }}";
-
 	pid-file "{{ bind9_options.pid_file }}";
 	session-keyfile "{{ bind9_options.session_keyfile }}";
 };

@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download the official Plex V2 GPG key
+  ansible.builtin.get_url:
+    url: "https://downloads.plex.tv/plex-keys/PlexSign.v2.key"
+    dest: /etc/apt/keyrings/plexmediaserver.asc
+    mode: "0644"
+
+- name: Add the official Plex repository with folded formatting for linting
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/plexmediaserver.asc]
+      https://repo.plex.tv/deb/
+      public
+      main
+    state: present
+    filename: plexmediaserver
+    update_cache: yes

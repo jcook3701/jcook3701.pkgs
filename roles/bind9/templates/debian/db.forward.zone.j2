@@ -20,39 +20,48 @@
 
 {%- macro db_forward_zone() -%}
 $TTL 86400
-@   IN  SOA     dns.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
-        2024122401  ;Serial
+@   IN  SOA     ns1.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
+        {{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@                  IN  NS  dns.{{ bind9_domain_name }}.
-@                  IN  A   {{ bind9_dns_server_ip_address }}
+@ IN NS ns1.{{ bind9_domain_name }}.
+@ IN NS ns2.{{ bind9_domain_name }}.
+
+ns1 IN A {{ bind9_dns_server_ip_address }}
+{% if bind9_secondary_servers is defined and bind9_secondary_servers %}
+ns2 IN A {{ bind9_secondary_servers[0] }}
+{% endif %}
+
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
-{%- for host in groups['all'] %}
-  {%-   set hv = hostvars[host] %}
-  {%-   if hv.ip is defined %}
-    {%-     set ip_parts = hv.ip.split('.') %}
-    {%-     if ip_parts | length == 4 %}
-      {#- Add main hostname address -#}
-      {%- set _ = ptr_records.append({
-      'octet': ip_parts[3] | int,
-      'record': (hv.hostname | default(host)) ~ '\t\t\tIN\tA\t' ~ hv.ip
-      }) %}
+{%- for host in bind9_zone_records | default([]) %}
+  {%- if host.ip is defined and host.hostname is defined %}
+    {%- set ip_parts = host.ip.split('.') %}
+    {%- if ip_parts | length == 4 %}
+      {%- if host.hostname not in ['ns1', 'ns2'] %}
 
-      {#- Add address for each alias -#}
-      {%- for alias in hv.aliases | default([]) %}
+        {#- Add main hostname address -#}
         {%- set _ = ptr_records.append({
-        'octet': ip_parts[3] | int,
-        'record': alias ~ '\t\t\tIN\tA\t' ~ hv.ip
+          'octet': ip_parts[3] | int,
+          'record': host.hostname ~ '\t\t\tIN\tA\t' ~ host.ip
         }) %}
-      {%- endfor %}
-    {%-     endif %}
-  {%-   endif %}
+
+        {#- Add address for each alias -#}
+        {%- for alias in host.aliases | default([]) %}
+          {%- set _ = ptr_records.append({
+            'octet': ip_parts[3] | int,
+            'record': alias ~ '\t\t\tIN\tA\t' ~ host.ip
+          }) %}
+        {%- endfor %}
+      {%- endif %}
+    {%- endif %}
+  {%- endif %}
 {%- endfor %}
 
+# --- Static Custom Zone Records ---
 {# Sort the list by the numeric octet #}
 {% for item in ptr_records | sort(attribute='octet') %}
 {{ item.record }}

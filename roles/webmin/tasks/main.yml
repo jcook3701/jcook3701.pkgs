@@ -8,6 +8,12 @@
 
 - name: Webmin Repository Setup
   ansible.builtin.include_tasks: repo-configure.yml
+  when: webmin_state | default('present') == 'present'
 
 - name: Webmin Install
   ansible.builtin.include_tasks: install.yml
+  when: webmin_state | default('present') == 'present'
+
+- name: Webmin Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+  when: webmin_state | default('present') == 'absent'

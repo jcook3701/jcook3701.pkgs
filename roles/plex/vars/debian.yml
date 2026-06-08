@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Reload BIND configuration with rndc
-  ansible.builtin.command: >
-    rndc reload
+plex_pkgs:
+  - plexmediaserver
+
+plex_service: "plexmediaserver"
+
+plex_user_groups:
+  - video
+  - render

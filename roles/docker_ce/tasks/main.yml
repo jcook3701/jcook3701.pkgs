@@ -1,18 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Load Docker OS-specific variables
+- name: Load Docker-CE OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Prepare repositories for {{ ansible_os_family }}
-  ansible.builtin.include_tasks: "repo-{{ ansible_os_family | lower }}.yml"
-  # Arch doesn't need repo prep, so we skip it
-  when: ansible_os_family in ['Debian', 'RedHat']
-
-- name: Install Docker Community
+- name: Install Docker Community Edition
   ansible.builtin.include_tasks: install.yml
+  when: docker_ce_state | default('present') == 'present'
 
-- name: Configure Docker Community
-  ansible.builtin.include_tasks: configure.yml
+- name: Uninstall Docker Community Edition
+  ansible.builtin.include_tasks: uninstall.yml
+  when: docker_ce_state | default('present') == 'absent'

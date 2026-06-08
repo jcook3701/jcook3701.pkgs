@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Plex Media Server
+  ansible.builtin.package:
+    name: "{{ plex_pkgs }}"
+    state: present
+
+- name: Add plex user to secondary groups for hardware and media access
+  ansible.builtin.user:
+    name: plex
+    groups: "{{ plex_user_groups }}"
+    append: true
+  become: true
+
+- name: Ensure Plex Media Server is started and enable
+  ansible.builtin.systemd:
+    name: "{{ plex_service }}"
+    state: started
+    enabled: true

@@ -3,35 +3,28 @@
 ---
 - name: Create directories needed for Bind9 setup
   block:
-
-    - name: Check if directory exists
-      ansible.builtin.stat:
-        path: "{{ item }}"
-      register: existing_dirs
-      loop: "{{ bind9_os_directory.values() | list }}"
-
     - name: Create bind9 base directories
-      when: not item.stat.exists
       ansible.builtin.file:
-        path: "{{ item.item }}"
+        path: "{{ dir }}"
         state: directory
-        group: bind
-        owner: bind
+        group: "{{ bind9_user }}"
+        owner: "{{ bind9_user }}"
         mode: "0775"
-      loop: "{{ existing_dirs.results }}"
+      loop: "{{ bind9_os_directory.values() | list }}"
       loop_control:
-        label: "{{ item.item }}"
+        loop_var: dir
+        label: "{{ dir }}"
 
       # NOTE: This is otherwise handled in bind9-dnssec-keygen-and-sign.yml
     - name: Ensure key directories exist
-      when: zone.inline_signing | bool
       ansible.builtin.file:
         path: "{{ zone.key_directory }}"
         state: directory
-        owner: bind
-        group: bind
+        owner: "{{ bind9_user }}"
+        group: "{{ bind9_user }}"
         mode: "0775"
       loop: "{{ bind9_zones }}"
       loop_control:
         loop_var: zone
         label: "{{ zone.key_directory }}"
+      when: zone.inline_signing | bool

@@ -1,28 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Manage snap package.
-  ansible.builtin.package:
-    name: "{{ snap_pkgs }}"
-    state: "{{ snap_state | default('present') }}"
+- name: Snap Install
+  ansible.builtin.include_tasks: install.yml
+  when: snap_state | default('present') == 'present'
 
-- name: Ensure snapd service is started and enabled
-  ansible.builtin.service:
-    name: "{{ item }}"
-    state: started
-    enabled: true
-  loop:
-    - snapd.socket
-    - snapd.service
-
-- name: Create classic snap symlink
-  ansible.builtin.file:
-    src: /var/lib/snapd/snap
-    dest: /snap
-    state: link
-  when: ansible_os_family != "Debian"
-
-- name: Install core snap
-  community.general.snap:
-    name: core
-    state: present
+- name: Snap Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+  when: snap_state | default('present') == 'absent'

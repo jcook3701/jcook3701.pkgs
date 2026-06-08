@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure snapd service is started and enabled
+  ansible.builtin.service:
+    name: "{{ service }}"
+    state: stopped
+    enabled: false
+  loop:
+    - snapd.socket
+    - snapd.service
+  loop_control:
+    loop_var: service
+
+- name: Uninstall snap package.
+  ansible.builtin.package:
+    name: "{{ snap_pkgs }}"
+    state: absent

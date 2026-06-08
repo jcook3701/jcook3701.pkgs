@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart named via systemctl
-  ansible.builtin.systemd:
-    name: named
+- name: Restart Plex
+  ansible.builtin.service:
+    name: "{{ plex_service }}"
     state: restarted
-    enabled: true

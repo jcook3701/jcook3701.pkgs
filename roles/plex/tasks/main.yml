@@ -1,24 +1,24 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Download the official Plex V2 GPG key
-  ansible.builtin.get_url:
-    url: "https://downloads.plex.tv/plex-keys/PlexSign.v2.key"
-    dest: /etc/apt/keyrings/plexmediaserver.asc
-    mode: "0644"
+- name: Load Plex OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Add the official Plex repository with folded formatting for linting
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [signed-by=/etc/apt/keyrings/plexmediaserver.asc]
-      https://repo.plex.tv/deb/
-      public
-      main
-    state: present
-    filename: plexmediaserver
-    update_cache: yes
+- name: Prepare Plex repositories for {{ ansible_distribution }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo-{{ ansible_os_family | lower }}.yml"
+    - "repo-default.yml"
+  when:
+    - ansible_os_family in ['Debian']
+    - plex_state | default('present') == 'present'
 
-- name: Install Plex Media Server
-  ansible.builtin.apt:
-    name: plexmediaserver
-    state: present
+- name: Plex Install
+  ansible.builtin.include_tasks: install.yml
+  when: plex_state | default('present') == 'present'
+
+- name: Plex Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+  when: plex_state | default('present') == 'absent'

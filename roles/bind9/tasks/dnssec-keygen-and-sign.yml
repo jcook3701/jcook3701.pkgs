@@ -1,34 +1,33 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Manage DNSSEC for zone {{ zone }}
+- name: "Manage DNSSEC for zone {{ zone.name }}"
   block:
-
     - name: Ensure key directory exist
       ansible.builtin.file:
         path: "{{ zone.key_directory }}"
         state: directory
-        owner: bind
-        group: bind
+        owner: "{{ bind9_user }}"
+        group: "{{ bind9_user }}"
         mode: "0750"
 
     - name: Generate ZSK (Zone Signing Key)
       ansible.builtin.command: >-
-        dnssec-keygen -a {{ bind9_zsk_algorithm }} -b {{ bind9_zsk_size }} -n ZONE zsk-{{ zone.name }}
+        dnssec-keygen -a {{ bind9_zsk_algorithm }} -n ZONE {{ zone.name }}
       args:
         chdir: "{{ zone.key_directory }}"
       when: >-
         (lookup('fileglob', zone.key_directory +
-        '/Kzsk-' + zone.name + '.+008+*.key', errors='ignore') | list | length) == 0
+        '/K' + zone.name + '.*.key', errors='ignore') | list | length) == 0
 
     - name: Generate KSK (Key Signing Key)
       ansible.builtin.command: >-
-        dnssec-keygen -a {{ bind9_ksk_algorithm }} -b {{ bind9_ksk_size }} -n ZONE -f KSK ksk-{{ zone.name }}
+        dnssec-keygen -a {{ bind9_ksk_algorithm }} -n ZONE -f KSK {{ zone.name }}
       args:
         chdir: "{{ zone.key_directory }}"
       when: >-
         (lookup('fileglob', zone.key_directory +
-        '/Kksk-' + zone.name + '.+008+*.key', errors='ignore') | list | length) == 0
+        '/K' + zone.name + '.*.key', errors='ignore') | list | length) == 0
 
     - name: Sign zone with DNS dnssec-signzone
       ansible.builtin.command: >-
@@ -43,13 +42,13 @@
         dest: "{{ zone.path }}/{{ zone.signed_zone_file }}"
         remote_src: true
         owner: root
-        group: bind
+        group: "{{ bind9_user }}"
         mode: "0644"
 
     - name: Find KSK public key file for zone
       ansible.builtin.find:
         paths: "{{ zone.key_directory }}"
-        patterns: "K{{ zone.name }}.+008+*.key"
+        patterns: "K{{ zone.name }}.*.key"
         contains: "KSK"
       register: ksk_keys
       when: bind9_enable_public_access | bool
@@ -58,12 +57,17 @@
       ansible.builtin.command: >-
         dnssec-dsfromkey {{ ksk_keys.files[0].path }}
       register: ds_records
-      when: (bind9_enable_public_access | bool) and (ksk_keys.files | length > 0)
+      when:
+        - bind9_enable_public_access | bool
+        - ksk_keys.files | length > 0
 
     - name: Save DS record for registrar/parent
       ansible.builtin.copy:
         content: "{{ ds_records.stdout }}"
         dest: "{{ zone.key_directory }}/dsset-{{ zone.name }}"
+        owner: root
+        group: "{{ bind9_user }}"
         mode: "0644"
-        loop: "{{ ds_records.results }}"
-      when: (bind9_enable_public_access | bool) and (ds_records.stdout is defined)
+      when:
+        - bind9_enable_public_access | bool
+        - ds_records.stdout is defined

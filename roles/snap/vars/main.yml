@@ -3,3 +3,5 @@
 ---
 snap_pkgs:
   - snapd
+
+snap_service: snapd

@@ -1,4 +1,52 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-bind9_service: bind9
+# Lifecycle Management
+bind9_state: present
+
+# Architecture & Cluster Topology
+bind9_is_primary: true
+bind9_primary_servers: []
+bind9_secondary_servers: []
+bind9_zone_records: []
+
+# Domain Configurations
+bind9_top_level_domain: "com"
+bind9_second_level_domain: "example"
+bind9_domain_name: "{{ bind9_second_level_domain }}.{{ bind9_top_level_domain }}"
+
+# Feature Switches
+bind9_enable_dnssec: true
+bind9_enable_public_access: false
+
+# Dynamic DNS (DyDNS) Settings
+bind9_enable_dydns: false
+bind9_dydns_update_servers: []
+
+# Transaction Signatures (TSIG) Settings
+bind9_enable_tsig: false
+
+# Network & Listening Ports
+bind9_dns_port: 53
+bind9_rndc_port: 953
+
+# Cryptographic Key Specifications
+bind9_ksk_algorithm: "ECDSAP256SHA256"
+bind9_zsk_algorithm: "ECDSAP256SHA256"
+bind9_tsig_algorithm: "hmac-sha256"
+
+### Network IP Layout ###
+# ip_address_space - Standard Options 10.0.0 and 192.168.0
+bind9_ip_address_space: "192.168.0"
+bind9_reverse_ip_address_space: "0.168.192"
+
+# Static IP of new (DNS) server
+bind9_dns_server_ip_address: "{{ bind9_ip_address_space }}.2"
+
+# prefix_length - Standard Options: 8, 12, 16, 24
+bind9_prefix_length: "24"
+
+# Upstream DNS Forwarders
+bind9_forwarders:
+  - 1.1.1.1
+  - 8.8.8.8

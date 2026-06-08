@@ -3,23 +3,31 @@
 ---
 kerberos_state: present
 kerberos_is_server: false
+# Types: admin_master, kdc_replica, or client
+kerberos_node_type: client
 
-kerberos_default_realm: "EXAMPLE.COM"
+# Domain Naming Structure
+kerberos_top_level_domain: "com"
+kerberos_second_level_domain: "jcook3701"
+kerberos_domain_name: "{{ kerberos_second_level_domain }}.{{ kerberos_top_level_domain }}"
+
+# Dynamic Global Security Settings
+kerberos_default_realm: "{{ kerberos_domain_name | upper }}"
 kerberos_dns_lookup_realm: "false"
 kerberos_dns_lookup_kdc: "false"
 kerberos_ticket_lifetime: "24h"
 kerberos_renew_lifetime: "7d"
 kerberos_forwardable: "true"
 
-# List of KDCs and Admin servers for your realm(s)
-kerberos_realms:
-  - name: "EXAMPLE.COM"
-    kdc: "kerberos.example.com"
-    admin_server: "kerberos.example.com"
-
 # Mapping local domain strings to Kerberos realms
 kerberos_domain_realms:
-  - domain: "example.com"
-    realm: "EXAMPLE.COM"
-  - domain: ".example.com"
-    realm: "EXAMPLE.COM"
+  - domain: "{{ kerberos_domain_name }}"
+    realm: "{{ kerberos_default_realm }}"
+  - domain: ".{{ kerberos_domain_name }}"
+    realm: "{{ kerberos_default_realm }}"
+
+# Fallback defaults if groups['kerberos_servers'] is ever missing from inventory
+kerberos_realms:
+  - name: "{{ kerberos_default_realm }}"
+    kdc: "kerberos.{{ kerberos_domain_name }}"
+    admin_server: "kerberos.{{ kerberos_domain_name }}"

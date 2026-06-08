@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Plex service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ plex_service }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Uninstall Plex packages
+  ansible.builtin.package:
+    name: "{{ plex_pkgs }}"
+    state: absent

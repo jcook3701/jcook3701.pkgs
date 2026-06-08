@@ -8,9 +8,6 @@ kerberos_server_pkgs:
 
 kerberos_client_pkgs:
   - krb5-user
-  - libpam-krb5
-  - libpam-ccreds
 
-kerberos_services:
-  - krb5-kdc
-  - krb5-admin-server
+kerberos_kdc_service: "krb5-kdc"
+kerberos_admin_service: "krb5-admin-server"

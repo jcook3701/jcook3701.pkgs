@@ -5,3 +5,7 @@
   ansible.builtin.service:
     name: "{{ bind9_service }}"
     state: restarted
+
+- name: RNDC Reload
+  ansible.builtin.command: rndc reload
+  changed_when: false

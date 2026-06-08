@@ -4,6 +4,8 @@
 vsftpd_pkgs:
   - vsftpd
 
+vsftpd_service: "vsftpd"
+
 # TODO: create map for true==YES, false==NO
 vsftpd_conf:
   anonymous_enable: "YES"

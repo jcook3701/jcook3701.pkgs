@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure key directory exist for each zone
+  ansible.builtin.file:
+    path: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}"
+    state: directory
+    owner: "{{ bind9_user }}"
+    group: "{{ bind9_user }}"
+    mode: "0775"
+  loop: "{{ groups['all'] }}"
+  loop_control:
+    loop_var: host
+
+- name: Generate TSIG key (only if it doesn't exist)
+  ansible.builtin.command: >-
+    tsig-keygen -a {{ bind9_tsig_algorithm }} {{ hostvars[host].hostname | default(host) }}
+  args:
+    chdir: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}"
+    creates: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}/{{ hostvars[host].hostname | default(host) }}-tsig.key"
+  register: tsig_keygen_output
+  loop: "{{ groups['all'] }}"
+  loop_control:
+    loop_var: host
+
+- name: Save each TSIG key to file
+  ansible.builtin.copy:
+    content: "{{ key.stdout }}"
+    dest: >-
+      {{ bind9_key_directory.tsig }}/{{ hostvars[key.host].hostname | default(key.host) }}/{{
+      hostvars[key.host].hostname | default(key.host) }}-tsig.key
+    owner: "{{ bind9_user }}"
+    group: "{{ bind9_user }}"
+    mode: "0640"
+  loop: "{{ tsig_keygen_output.results }}"
+  loop_control:
+    loop_var: key
+  when: key.stdout is defined
+
+- name: Generate named.conf.keys from saved TSIG keys
+  ansible.builtin.template:
+    src: "{{ ansible_facts['os_family'] | lower }}/named.conf.keys.j2"
+    dest: "{{ bind9_file.named_conf_keys }}"
+    owner: "{{ bind9_user }}"
+    group: "{{ bind9_user }}"
+    mode: "0640"
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+
+  # TODO: Need to setup template options for RHEL.
