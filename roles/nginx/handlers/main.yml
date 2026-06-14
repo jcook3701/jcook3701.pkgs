@@ -3,5 +3,5 @@
 ---
 - name: Reload NGINX
   ansible.builtin.service:
-    name: nginx
+    name: "{{ nginx_service }}"
     state: reloaded

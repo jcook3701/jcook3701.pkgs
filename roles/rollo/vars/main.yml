@@ -41,5 +41,5 @@ rollo_url: >-
     {{- rollo_src_url -}}
   {% endif %}
 
-rollo_pkg:
+rollo_pkg_names:
   - rollo-cups-driver

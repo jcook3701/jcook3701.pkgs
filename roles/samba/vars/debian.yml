@@ -1,3 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+samba_service: smbd
+
+samba_pkg_names:
+  - samba
+  - smbclient
+  - samba-common
+
+samba_directory:
+  conf: "/etc/samba"
+
+samba_file:
+  samba_conf: "{{ samba_directory.conf }}/smb.conf"

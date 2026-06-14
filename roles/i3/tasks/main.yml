@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load i3 OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+        - "{{ ansible_os_family | lower }}.yml"
+
+- name: Install i3
+  ansible.builtin.include_tasks: install.yml
+  when: i3_state | default('present') == 'present'
+
+- name: Uninstall i3
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - i3_state | default('present') == 'absent'
+    - i3_pkg_names[0] in ansible_facts.packages

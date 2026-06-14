@@ -4,5 +4,5 @@
 - name: Install Ctop in /usr/local/bin
   ansible.builtin.get_url:
     url: "{{ ctop_url }}"
-    dest: "{{ ctop_bin }}"
+    dest: "{{ ctop_file.bin }}"
     mode: "0755"

@@ -3,7 +3,7 @@
 ---
 - name: Uninstall Rollo generically across distributions
   ansible.builtin.package:
-    name: "{{ rollo_pkg }}"
+    name: "{{ rollo_pkg_names }}"
     state: absent
 
 - name: Remove the Rollo printer configuration mapping from CUPS backend

@@ -10,10 +10,8 @@
   ansible.builtin.include_tasks: install.yml
   when: vsftpd_state | default('present') == 'present'
 
-- name: Configure vsftpd
-  ansible.builtin.include_tasks: configure.yml
-  when: vsftpd_state | default('present') == 'present'
-
 - name: Uninstall vsftpd
   ansible.builtin.include_tasks: uninstall.yml
-  when: vsftpd_state | default('present') == 'absent'
+  when:
+    - vsftpd_state | default('present') == 'absent'
+    - vsftpd_pkg_names[0] in ansible_facts.packages

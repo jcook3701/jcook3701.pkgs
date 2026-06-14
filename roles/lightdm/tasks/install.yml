@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install LightDM and Greeter
+  ansible.builtin.package:
+    name: "{{ lightdm_pkg_names }}"
+    state: present
+
+- name: Enable and start LightDM service
+  ansible.builtin.systemd:
+    name: lightdm
+    enabled: true
+    state: started
+
+- name: Configure LightDM service
+  ansible.builtin.include_tasks: configure.yml

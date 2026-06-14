@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+systemd_resolved_directory:
+  conf: "{{ systemd_resolved_os_directory.conf }}"
+  runtime: "{{ systemd_resolved_os_directory.runtime }}"
+
+systemd_resolved_file:
+  main_config: "{{ systemd_resolved_os_file.main_config }}"
+  stub_resolv: "{{ systemd_resolved_os_file.stub_resolv }}"
+  static_resolv: "{{ systemd_resolved_os_file.static_resolv }}"
+  system_resolv: "{{ systemd_resolved_os_file.system_resolv }}"

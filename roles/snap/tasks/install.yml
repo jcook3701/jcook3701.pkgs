@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Manage snap package.
+- name: Install snap package.
   ansible.builtin.package:
-    name: "{{ snap_pkgs }}"
+    name: "{{ snap_pkg_names }}"
     state: present
 
 - name: Ensure snapd service is started and enabled

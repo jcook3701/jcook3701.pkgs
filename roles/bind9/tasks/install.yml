@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install Bind9 package and dependencies
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ bind9_pkg_names }}"
     state: present
 
@@ -15,7 +15,9 @@
   loop_control:
     loop_var: zone
     label: "{{ zone.name }}"
-  when: not zone.inline_signing | bool
+  when:
+    - bind9_is_primary | bool
+    - not zone.inline_signing | bool
 
 - name: Bind9 TSIG keygen
   ansible.builtin.include_tasks: tsig-keygen.yml

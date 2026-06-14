@@ -16,6 +16,6 @@
 
 - name: Ensure SSSD service is started and enabled
   ansible.builtin.systemd:
-    name: "{{ sssd_services }}"
+    name: "{{ sssd_service }}"
     state: started
     enabled: true

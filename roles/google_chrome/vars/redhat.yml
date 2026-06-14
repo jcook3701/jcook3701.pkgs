@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-google_chrome_pkg: google-chrome-stable_current_x86_64.rpm
-google_chrome_repo_url: "https://dl.google.com/linux/direct/{{ google_chrome_pkg }}"
+google_chrome_pkg_names:
+  - google-chrome-stable
 
-google_chrome_file:
-  package: "/tmp/{{ google_chrome_pkg }}"
+google_chrome_os_slug: "google-chrome-stable_current_x86_64.rpm"

@@ -3,8 +3,8 @@
 ---
 samba_state: present
 
-samba_port: ""
+samba_port: "445"
 
 # Domain Options
 samba_top_level_domain: "com"
-samba_second_level_domain: "jcook3701"
+samba_second_level_domain: "example"

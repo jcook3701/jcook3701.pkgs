@@ -6,10 +6,16 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Bind9 Install
   ansible.builtin.include_tasks: install.yml
   when: bind9_state | default('present') == 'present'
 
 - name: Bind9 Uninstall
   ansible.builtin.include_tasks: uninstall.yml
-  when: bind9_state | default('present') == 'absent'
+  when:
+    - bind9_state | default('present') == 'absent'
+    - bind9_pkg_names[0] in ansible_facts.packages

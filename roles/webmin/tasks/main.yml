@@ -16,4 +16,6 @@
 
 - name: Webmin Uninstall
   ansible.builtin.include_tasks: uninstall.yml
-  when: webmin_state | default('present') == 'absent'
+  when:
+    - webmin_state | default('present') == 'absent'
+    - webmin_pkg_names[0] in ansible_facts.packages

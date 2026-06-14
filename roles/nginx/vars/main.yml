@@ -1,18 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-nginx_package_state: present
-nginx_service_state: started
-nginx_service_enabled: yes
-
-nginx_top_level_domain: "com"
-nginx_second_level_domain: "jcook3701"
-nginx_domain_name: "{{ nginx_second_level_domain }}.{{ nginx_top_level_domain }}"
-
 nginx_sites_available_dir: /etc/nginx/sites-available
 nginx_sites_enabled_dir: /etc/nginx/sites-enabled
 
-nginx_enabled_sites: []
+# A master list of all sites your role knows how to build
+nginx_sites:
+  - { server_vars: default.yml }
+  - { server_vars: pxeboot.yml }
+  - { server_vars: plex.yml }
+  - { server_vars: mixxx.yml }
 
 nginx_main_config:
   user: www-data

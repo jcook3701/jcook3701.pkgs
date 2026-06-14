@@ -8,6 +8,6 @@
     enabled: false
 
 - name: Uninstall DHCPD package and dependencies
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ dhcpd_pkg_names }}"
     state: absent

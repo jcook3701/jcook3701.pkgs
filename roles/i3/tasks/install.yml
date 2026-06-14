@@ -1,3 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Install i3
+  ansible.builtin.package:
+    name: "{{ i3_pkg_names }}"
+    state: present
+
+- name: Generate i3 configuration files
+  ansible.builtin.template:
+    src: "conf.j2"
+    dest: "/home/{{ user }}/.config/i3/config"
+    group: "{{ user }}"
+    owner: "{{ user }}"
+    mode: "0644"
+    backup: true
+  loop: "{{ i3_users }}"
+  loop_control:
+    loop_var: user

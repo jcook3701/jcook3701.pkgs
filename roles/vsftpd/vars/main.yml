@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-vsftpd_pkgs:
-  - vsftpd
+vsftpd_directory:
+  conf: "{{ vsftpd_os_directory.conf }}"
+  root: "{{ vsftpd_os_directory.root }}"
 
-vsftpd_service: "vsftpd"
+vsftpd_file:
+  conf: "{{ vsftpd_os_file.conf }}"
 
 # TODO: create map for true==YES, false==NO
 vsftpd_conf:

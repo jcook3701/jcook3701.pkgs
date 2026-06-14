@@ -15,3 +15,11 @@
   when:
     - ansible_os_family == "RedHat"
   failed_when: false
+
+- name: VirtualBox Extension Pack
+  ansible.builtin.include_tasks: extension-pack.yml
+  when: virtualbox_state | default('present') == 'present'
+
+- name: VirtualBox Configure
+  ansible.builtin.include_tasks: configure.yml
+  when: virtualbox_state | default('present') == 'present'

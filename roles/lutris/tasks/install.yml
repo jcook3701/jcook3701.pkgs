@@ -3,5 +3,5 @@
 ---
 - name: Install lutris
   ansible.builtin.package:
-    name: "{{ lutris_pkgs }}"
-    state: "{{ lutris_state }}"
+    name: "{{ lutris_pkg_names }}"
+    state: present

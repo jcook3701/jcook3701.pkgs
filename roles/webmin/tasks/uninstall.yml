@@ -10,5 +10,5 @@
 
 - name: Uninstall Webmin
   ansible.builtin.package:
-    name: "{{ webmin_pkgs }}"
+    name: "{{ webmin_pkg_names }}"
     state: "absent"

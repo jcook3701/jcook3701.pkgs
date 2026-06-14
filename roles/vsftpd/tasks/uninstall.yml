@@ -1,7 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Ensure vsftpd service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ vsftpd_service }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Remove vsftpd configuration file
+  ansible.builtin.file:
+    path: "{{ vsftpd_file.conf }}"
+    state: absent
+
 - name: Uninstall vsftpd package and dependencies.
   ansible.builtin.package:
-    name: "{{ vsftpd_pkgs }}"
+    name: "{{ vsftpd_pkg_names }}"
     state: absent

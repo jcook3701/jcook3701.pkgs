@@ -12,4 +12,6 @@
 
 - name: Uninstall Mutt
   ansible.builtin.include_tasks: uninstall.yml
-  when: mutt_state | default('present') == 'absent'
+  when:
+    - mutt_state | default('present') == 'absent'
+    - mutt_pkg_names[0] in ansible_facts.packages

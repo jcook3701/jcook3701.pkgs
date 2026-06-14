@@ -1,12 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Collect running user facts
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: sudo_user_facts.yml
-  when: sudo_user is not defined
-
 - name: Installing necessary packages for rbenv
   ansible.builtin.package:
     name: "{{ rbenv_pkg_deps }}"
@@ -27,9 +21,13 @@
     marker: "{{ rbenv_marker }}"
     block: "{{ rbenv_bashrc }}"
     state: present
-  when: sudo_user != "root" and rbenv_bashrc is defined
+  notify: Rbenv shell reload
+  when:
+    - sudo_user != "root"
+    - rbenv_bashrc is defined
 
-- name: Reload Shell
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: reload-shell.yml
+- name: Force system changes to apply
+  ansible.builtin.meta: flush_handlers
+
+- name: Rbenv Plugins
+  ansible.builtin.include_tasks: plugins.yml

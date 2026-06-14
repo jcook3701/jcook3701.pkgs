@@ -74,6 +74,12 @@
         backup: true
       notify: Restart bind9 DNS
 
+    - name: debug zone records
+      ansible.builtin.debug:
+        msg: "{{ bind9_zone_records }}"
+      tags:
+        - never
+
     - name: Generate forward zone configuration file
       ansible.builtin.template:
         src: "{{ ansible_facts['os_family'] | lower }}/db.forward.zone.j2"
@@ -83,6 +89,7 @@
         mode: "{{ (bind9_enable_dydns | bool) | ternary('0775', '0664') }}"
         backup: true
       notify: RNDC Reload
+      when: bind9_is_primary | bool
 
     - name: Generate reverse zone configuration file
       ansible.builtin.template:
@@ -93,5 +100,6 @@
         mode: "{{ (bind9_enable_dydns | bool) | ternary('0775', '0664') }}"
         backup: true
       notify: RNDC Reload
+      when: bind9_is_primary | bool
 
 # TODO: Need to eventually setup template block for RHEL.

@@ -4,5 +4,5 @@
 webmin_dependency_pkgs:
   - python3-pexpect
 
-webmin_pkgs:
+webmin_pkg_names:
   - webmin

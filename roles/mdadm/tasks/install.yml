@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install mdadm package and dependencies.
+  ansible.builtin.package:
+    name: "{{ mdadm_pkg_names }}"
+    state: present
+
+- name: Ensure mdadm service is started and enabled
+  ansible.builtin.service:
+    name: "{{ mdadm_service }}"
+    state: started
+    enabled: true

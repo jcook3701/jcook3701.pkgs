@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+xfce_state: present
+
+xfce_user: "{{ sudo_user }}"
+xfce_theme: "Arc-Dark"
+xfce_icon_theme: "Papirus-Dark"
+xfce_button_layout: "O|SHMC"
+xfce_interface_font: "Noto Sans 10"
+xfce_mono_font: "JetBrains Mono 10"
+
+xfce_autostart_apps:
+  - { name: 'ctrl:nocaps', exec: '/usr/bin/setxkbmap -option "ctrl:nocaps' }

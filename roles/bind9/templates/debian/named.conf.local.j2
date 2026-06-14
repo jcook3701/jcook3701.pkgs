@@ -45,7 +45,7 @@ zone "{{ zone.name }}" IN {
             {{ zone.allow_update }};
         {% endif %}
     };
-    {% endif -%}
+    {% endif %}
 
     {% if zone.type == 'slave' and zone.masters_list is defined and zone.masters_list %}
     masters {
@@ -63,7 +63,7 @@ zone "{{ zone.name }}" IN {
     {% if zone.inline_signing is defined and zone.type == 'master' -%}
     inline-signing {{ zone.inline_signing }};
     {% endif -%}
-    };
+};
 
 {% endfor -%}
 

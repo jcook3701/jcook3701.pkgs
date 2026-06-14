@@ -9,4 +9,6 @@
 - name: Uninstall nano package
   ansible.builtin.include_tasks:
     file: uninstall.yml
-  when: nano_state | default('present') == 'absent'
+  when:
+    - nano_state | default('present') == 'absent'
+    - nano_pkg_names[0] in ansible_facts.packages

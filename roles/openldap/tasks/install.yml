@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure UTF-8 locale is generated and set
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+  block:
+    - name: Generate en_US.UTF-8 locale
+      community.general.locale_gen:
+        name: en_US.UTF-8
+        state: present
+
+    - name: Set system-wide locale
+      ansible.builtin.debconf:
+        name: locales
+        question: locales/default_environment_locale
+        value: en_US.UTF-8
+        vtype: select
+
+- name: Install openldap package and dependencies.
+  ansible.builtin.package:
+    name: "{{ openldap_pkg_names }}"
+    state: present
+
+- name: Openldap key generation
+  ansible.builtin.include_tasks: keys.yml
+
+- name: Openldap configuration
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Openldap database
+  ansible.builtin.include_tasks: database.yml
+
+- name: Ensure OpenLDAP service is started and enabled
+  ansible.builtin.service:
+    name: "{{ slapd_service }}"
+    state: started
+    enabled: yes

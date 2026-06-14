@@ -3,7 +3,7 @@
 ---
 - name: Installing Webmin
   ansible.builtin.package:
-    name: "{{ webmin_pkgs }}"
+    name: "{{ webmin_pkg_names }}"
     state: "present"
 
 - name: Ensure Webmin service is started and enabled

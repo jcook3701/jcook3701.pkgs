@@ -24,7 +24,10 @@
     owner: root
     group: root
     content: "{{ lutris_repo_line }}"
-  notify: Run apt-get update
+
+- name: Run apt-get update
+  ansible.builtin.apt:
+    update_cache: true
 
 # - name: Convert Lutris armored text to binary GPG format
 #  ansible.builtin.command:

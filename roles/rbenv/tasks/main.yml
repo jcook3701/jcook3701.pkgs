@@ -1,13 +1,29 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Collect running user facts
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
+  when: sudo_user is not defined
+
 - name: Load rbenv OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: Check if Rbenv directory exists
+  ansible.builtin.stat:
+    path: "{{ sudo_user_home }}/.rbenv"
+  register: dir_status
+
 - name: Rbenv Install
   ansible.builtin.include_tasks: install.yml
+  when: rbenv_state | default('present') == 'present'
 
-- name: Rbenv Plugins
-  ansible.builtin.include_tasks: plugins.yml
+- name: Rbenv Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - rbenv_state | default('present') == 'absent'
+    - dir_status.stat.exists
+    - dir_status.stat.isdir

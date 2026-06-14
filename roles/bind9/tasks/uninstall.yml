@@ -8,7 +8,7 @@
     enabled: false
 
 - name: Uninstall Bind9 package and dependencies
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ bind9_pkg_names }}"
     state: absent
 

@@ -3,5 +3,44 @@
 ---
 - name: Install vsftpd package and dependencies.
   ansible.builtin.package:
-    name: "{{ vsftpd_pkgs }}"
+    name: "{{ vsftpd_pkg_names }}"
     state: present
+
+- name: Ensure target configuration directories exist
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ vsftpd_directory.values() | list }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Generate self-signed SSL/TLS cryptographic keys
+  ansible.builtin.command: >-
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048
+    -keyout {{ vsftpd_ssl_key_path }}
+    -out {{ vsftpd_ssl_cert_path }}
+    -subj "/CN={{ ansible_facts['fqdn'] | default('localhost') }}"
+  args:
+    creates: "{{ vsftpd_ssl_cert_path }}"
+  when:
+    - vsftpd_ssl_enable == "YES"
+    - vsftpd_ssl_self_signed | bool
+
+- name: Generate vsftpd configuration file from template
+  ansible.builtin.template:
+    src: "vsftpd.conf.j2"
+    dest: "{{ vsftpd_file.conf }}"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart vsftpd
+
+- name: Ensure vsftpd service is started and enabled
+  ansible.builtin.service:
+    name: "{{ vsftpd_service }}"
+    state: started
+    enabled: true

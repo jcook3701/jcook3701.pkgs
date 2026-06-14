@@ -1,3 +1,17 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Load Wireguard OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Install Wireguard
+  ansible.builtin.include_tasks: install.yml
+  when: wireguard_state | default('present') == 'present'
+
+- name: Uninstall Wireguard
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - wireguard_state | default('present') == 'absent'
+    - wireguard_pkg_names[0] in ansible_facts.packages

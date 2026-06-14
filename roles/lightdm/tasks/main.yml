@@ -6,16 +6,16 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Install LightDM and Greeter
-  ansible.builtin.package:
-    name: "{{ lightdm_pkgs }}"
-    state: present
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
 
-- name: Enable and start LightDM service
-  ansible.builtin.systemd:
-    name: lightdm
-    enabled: yes
-    state: started
+- name: LightDM Install
+  ansible.builtin.include_tasks: install.yml
+  when: lightdm_state | default('present') == 'present'
 
-- name: Configure LightDM service
-  ansible.builtin.include_tasks: configure.yml
+- name: LightDM Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - lightdm_state | default('present') == 'absent'
+    - lightdm_pkg_names[0] in ansible_facts.packages

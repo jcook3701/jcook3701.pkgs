@@ -38,27 +38,26 @@ ns2 IN A {{ bind9_secondary_servers[0] }}
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
 {%- for host in bind9_zone_records | default([]) %}
-  {%- if host.ip is defined and host.hostname is defined %}
-    {%- set ip_parts = host.ip.split('.') %}
-    {%- if ip_parts | length == 4 %}
-      {%- if host.hostname not in ['ns1', 'ns2'] %}
+    {%- if host.ip is defined and host.hostname is defined %}
+        {%- set ip_parts = host.ip.split('.') %}
+        {%- if ip_parts | length == 4 %}
+            {%- if host.hostname not in ['ns1', 'ns2'] %}
+                {#- Add main hostname address -#}
+                {%- set _ = ptr_records.append({
+                    'octet': ip_parts[3] | int,
+                    'record': host.hostname ~ '\t\t\tIN\tA\t' ~ host.ip
+                }) %}
 
-        {#- Add main hostname address -#}
-        {%- set _ = ptr_records.append({
-          'octet': ip_parts[3] | int,
-          'record': host.hostname ~ '\t\t\tIN\tA\t' ~ host.ip
-        }) %}
-
-        {#- Add address for each alias -#}
-        {%- for alias in host.aliases | default([]) %}
-          {%- set _ = ptr_records.append({
-            'octet': ip_parts[3] | int,
-            'record': alias ~ '\t\t\tIN\tA\t' ~ host.ip
-          }) %}
-        {%- endfor %}
-      {%- endif %}
+                {#- Add address for each alias -#}
+                {%- for alias in host.aliases | default([]) %}
+                    {%- set _ = ptr_records.append({
+                        'octet': ip_parts[3] | int,
+                        'record': alias ~ '\t\t\tIN\tA\t' ~ host.ip
+                    }) %}
+                {%- endfor %}
+            {%- endif %}
+        {%- endif %}
     {%- endif %}
-  {%- endif %}
 {%- endfor %}
 
 # --- Static Custom Zone Records ---

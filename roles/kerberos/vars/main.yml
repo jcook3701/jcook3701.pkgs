@@ -11,9 +11,9 @@ kerberos_pkgs: >-
 # 1. Compile the service structure as a raw YAML text block
 kerberos_raw_services: >-
   {% if kerberos_node_type == 'admin_master' %}
-    {{ [service_kdc_daemon, service_admin_daemon] | to_yaml }}
+    {{ [kerberos_kdc_service, kerberos_admin_service] | to_yaml }}
   {% elif kerberos_node_type == 'kdc_replica' %}
-    {{ [service_kdc_daemon] | to_yaml }}
+    {{ [kerberos_kdc_service] | to_yaml }}
   {% else %}
     {{ [] | to_yaml }}
   {% endif %}
@@ -21,6 +21,19 @@ kerberos_raw_services: >-
 # 2. Convert it immediately into a native, true executable data list
 kerberos_services: "{{ kerberos_raw_services | from_yaml }}"
 
+# Dynamic references mapping directly to loaded OS variables
 kerberos_directory:
-  conf: "/etc/sssd"
-  log: "/var/log/"
+  conf: "{{ kerberos_os_directory.conf }}"
+  kdc_conf: "{{ kerberos_os_directory.kdc_conf }}"
+  log: "{{ kerberos_os_directory.log }}"
+  state: "{{ kerberos_os_directory.state }}"
+
+kerberos_file:
+  global_config: "{{ kerberos_os_file.global_config }}"
+  kdc_config: "{{ kerberos_os_file.kdc_config }}"
+  acl: "{{ kerberos_os_file.acl }}"
+  stash: "{{ kerberos_os_file.stash }}"
+  keytab: "{{ kerberos_os_file.keytab }}"
+  default_log: "{{ kerberos_os_file.default_log }}"
+  kdc_log: "{{ kerberos_os_file.kdc_log }}"
+  admin_log: "{{ kerberos_os_file.admin_log }}"

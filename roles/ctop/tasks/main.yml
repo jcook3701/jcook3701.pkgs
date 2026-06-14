@@ -3,3 +3,10 @@
 ---
 - name: Install ctop if not present
   ansible.builtin.include_tasks: install.yml
+  when: ctop_state | default('present') == 'present'
+
+- name: Uninstall ctop if not present
+  ansible.builtin.file:
+    path: "{{ ctop_file.bin }}"
+    state: absent
+  when: ctop_state | default('present') == 'absent'

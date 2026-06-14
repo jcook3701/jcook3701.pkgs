@@ -10,7 +10,12 @@ bind9_ip_loopback_address: "{{ bind9_ip_loopback_space }}.1"
 
 bind9_directory:
   conf: "{{ bind9_os_directory.conf }}"
-  zone: "{{ bind9_os_directory.cache if not (bind9_is_primary | bool) else (bind9_os_directory.dynamic if bind9_enable_dydns | bool else bind9_os_directory.zone) }}"
+  zone: >-
+    {{ bind9_os_directory.slaves
+      if not (bind9_is_primary | bool)
+      else (bind9_os_directory.dynamic
+        if bind9_enable_dydns | bool
+        else bind9_os_directory.zone) }}
   zone_keys: "{{ bind9_os_directory.dynamic_keys if (bind9_enable_dydns | bool) else bind9_os_directory.zone_keys }}"
   options: "{{ bind9_os_directory.options }}"
   data: "{{ bind9_os_directory.data }}"
@@ -37,8 +42,15 @@ bind9_file:
   named_conf_default_zones: "{{ bind9_directory.conf }}/named.conf.default-zones"
   rfc1918_zone: "{{ bind9_directory.conf }}/{{ bind9_rfc1918 }}"
 
-  forward_zone: "{{ bind9_directory.zone }}/{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.{{ bind9_second_level_domain }}.zone"
-  reverse_zone: "{{ bind9_directory.zone }}/{{ '' if (bind9_is_primary | bool) else 'bak.' }}db.reverse-{{ bind9_reverse_ip_address_space }}.zone"
+  forward_zone: >-
+    {{ bind9_directory.zone }}/{{
+    '' if (bind9_is_primary | bool) else 'bak.'
+    }}db.{{ bind9_second_level_domain }}.zone
+
+  reverse_zone: >-
+    {{ bind9_directory.zone }}/{{
+    '' if (bind9_is_primary | bool) else 'bak.'
+    }}db.reverse-{{ bind9_reverse_ip_address_space }}.zone
 
   secroots_file: "{{ bind9_directory.data }}/named.secroots"
   dump_file: "{{ bind9_directory.data }}/cache_dump.db"

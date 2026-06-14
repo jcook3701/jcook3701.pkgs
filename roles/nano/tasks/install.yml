@@ -3,7 +3,7 @@
 ---
 - name: Install nano package
   ansible.builtin.apt:
-    name: "{{ nano_pkgs }}"
+    name: "{{ nano_pkg_names }}"
     state: present
 
 - name: Filter interactive users

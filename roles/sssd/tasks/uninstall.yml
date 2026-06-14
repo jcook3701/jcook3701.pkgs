@@ -3,7 +3,7 @@
 ---
 - name: Ensure SSSD service is stopped and disabled
   ansible.builtin.systemd:
-    name: "{{ sssd_services }}"
+    name: "{{ sssd_service }}"
     state: stopped
     enabled: false
   failed_when: false

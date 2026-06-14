@@ -18,4 +18,6 @@
 
 - name: Uninstall Rollo
   ansible.builtin.include_tasks: uninstall.yml
-  when: rollo_state | default('present') == 'absent'
+  when:
+    - rollo_state | default('present') == 'absent'
+    - rollo_pkg_names[0] in ansible_facts.packages

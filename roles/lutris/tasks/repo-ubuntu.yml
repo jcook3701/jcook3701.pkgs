@@ -14,4 +14,7 @@
   ansible.builtin.apt_repository:
     repo: ppa:lutris-team/lutris
     state: "{{ lutris_state }}"
-  notify: Run apt-get update
+
+- name: Run apt-get update
+  ansible.builtin.apt:
+    update_cache: true

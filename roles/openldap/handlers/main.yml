@@ -3,5 +3,5 @@
 ---
 - name: Restart slapd
   ansible.builtin.service:
-    name: slapd
+    name: "{{ openldap_service }}"
     state: restarted

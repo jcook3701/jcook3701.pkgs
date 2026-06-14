@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure files needed for Kerberos configuration
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ dir }}"
+    force: false
+    group: "root"
+    owner: "root"
+    mode: "0664"
+  loop:
+    - "{{ kerberos_file.default_log }}"
+    - "{{ kerberos_file.kdc_log }}"
+    - "{{ kerberos_file.admin_log }}"
+  loop_control:
+    loop_var: dir
+
+- name: Deploy global Kerberos configuration file
+  ansible.builtin.template:
+    src: krb5.conf.j2
+    dest: "{{ kerberos_file.global_config }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Kerberos Services
+
+- name: Deploy KDC configuration
+  ansible.builtin.template:
+    src: kdc.conf.j2
+    dest: "{{ kerberos_file.kdc_config }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: kerberos_node_type in ['master', 'replica']
+  notify: Restart Kerberos Services
+
+- name: Deploy administrative ACL rules
+  ansible.builtin.template:
+    src: kadm5.acl.j2
+    dest: "{{ kerberos_file.acl }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: kerberos_node_type == 'master'
+  notify: Restart Kerberos Services

@@ -1,5 +1,5 @@
 {#
-# client.conf.j2 for jcook3701.pkgs
+# krb5.conf.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro kerberos() -%}
+{%- macro krb5() -%}
 [libdefaults]
     default_realm = {{ kerberos_default_realm | upper }}
     dns_lookup_realm = {{ kerberos_dns_lookup_realm }}
@@ -42,9 +42,9 @@
 {% endfor %}
 
 [logging]
-    default = FILE:/var/log/krb5libs.log
-    kdc = FILE:/var/log/krb5kdc.log
-    admin_server = FILE:/var/log/kadmind.log
+    default = FILE:{{ kerberos_file.default_log }}
+    kdc = FILE:{{ kerberos_file.kdc_log }}
+    admin_server = FILE:{{ kerberos_file.admin_log }}
 {%- endmacro -%}
 
-{{- kerberos() -}}
+{{- krb5() -}}

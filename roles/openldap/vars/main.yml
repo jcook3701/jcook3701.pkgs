@@ -3,6 +3,8 @@
 ---
 openldap_domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
 
+openldap_service: "slapd"
+
 openldap_conf:
   # Port Options
   # Port Options: 389 (ldap) or 636 (ldaps)

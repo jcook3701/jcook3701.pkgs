@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop and disable Openldap service
+  ansible.builtin.systemd:
+    name: "{{ openldap_service }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Uninstall Openldap package and dependencies.
+  ansible.builtin.package:
+    name: "{{ openldap_pkg_names }}"
+    state: absent

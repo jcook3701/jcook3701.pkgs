@@ -7,4 +7,6 @@
 
 - name: Snap Uninstall
   ansible.builtin.include_tasks: uninstall.yml
-  when: snap_state | default('present') == 'absent'
+  when:
+    - snap_state | default('present') == 'absent'
+    - snap_pkg_names[0] in ansible_facts.packages

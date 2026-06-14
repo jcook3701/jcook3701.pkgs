@@ -8,3 +8,10 @@
 
 - name: Google Chrome Install
   ansible.builtin.include_tasks: install.yml
+  when: google_chrome_state | default('present') == 'present'
+
+- name: Uninstall Google Chrome
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - google_chrome_state | default('present') == 'absent'
+    - google_chrome_pkg_names[0] in ansible_facts.packages

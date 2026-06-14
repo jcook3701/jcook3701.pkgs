@@ -31,34 +31,34 @@ $TTL 86400
 @ IN NS ns2.{{ bind9_domain_name }}.
 
 {{ bind9_dns_server_ip_address.split('.')[3] }} IN PTR ns1.{{ bind9_domain_name }}.
-{% if bind9_secondary_servers is defined and bind9_secondary_servers %}
-{{ bind9_secondary_servers.split('.')[3] }} IN PTR ns2.{{ bind9_domain_name }}.
-{% endif %}
+
+{% for secondary_ip in bind9_secondary_servers | default([]) %}
+{{ secondary_ip.split('.')[3] }} IN PTR ns2.{{ bind9_domain_name }}.
+{% endfor %}
 
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
 {%- for host in bind9_zone_records | default([]) %}
-  {%- if host.ip is defined and host.hostname is defined %}
-    {%- set ip_parts = host.ip.split('.') %}
-    {%- if ip_parts | length == 4 %}
-      {%- if host.hostname not in ['ns1', 'ns2'] %}
+    {%- if host.ip is defined and host.hostname is defined %}
+        {%- set ip_parts = host.ip.split('.') %}
+        {%- if ip_parts | length == 4 %}
+            {%- if host.hostname not in ['ns1', 'ns2'] %}
+                {#- Add main hostname PTR -#}
+                {%- set _ = ptr_records.append({
+                    'octet': ip_parts[3] | int,
+                    'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ host.hostname ~ '.' ~ bind9_domain_name ~ '.'
+                }) %}
 
-        {#- Add main hostname PTR -#}
-        {%- set _ = ptr_records.append({
-          'octet': ip_parts[3] | int,
-          'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ host.hostname ~ '.' ~ bind9_domain_name ~ '.'
-        }) %}
-
-        {#- Add PTRs for each alias -#}
-        {%- for alias in host.aliases | default([]) %}
-          {%- set _ = ptr_records.append({
-            'octet': ip_parts[3] | int,
-            'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ alias ~ '.' ~ bind9_domain_name ~ '.'
-          }) %}
-        {%- endfor %}
-      {%- endif %}
+                {#- Add PTRs for each alias -#}
+                {%- for alias in host.aliases | default([]) %}
+                    {%- set _ = ptr_records.append({
+                        'octet': ip_parts[3] | int,
+                        'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ alias ~ '.' ~ bind9_domain_name ~ '.'
+                    }) %}
+                {%- endfor %}
+            {%- endif %}
+        {%- endif %}
     {%- endif %}
-  {%- endif %}
 {%- endfor %}
 
 # --- Dynamic Reverse Zone Pointers ---

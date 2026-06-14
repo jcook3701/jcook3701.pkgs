@@ -39,49 +39,50 @@ acl "clients" {
 	reduce such attack surface
 #}
 options {
-	listen-on  {{ bind9_options.listen_on }}; ### Master DNS IP ###
-	listen-on-v6 {{ bind9_options.listen_on_v6 }};
+    listen-on  {{ bind9_options.listen_on }}; ### Master DNS IP ###
+    listen-on-v6 {{ bind9_options.listen_on_v6 }};
 
-	directory "{{ bind9_options.directory }}";
-	dump-file "{{ bind9_options.dump_file }}";
-	statistics-file "{{ bind9_options.statistics_file }}";
-	memstatistics-file "{{ bind9_options.memstatistics_file }}";
-	secroots-file "{{ bind9_options.secroots_file }}";
+    directory "{{ bind9_options.directory }}";
+    dump-file "{{ bind9_options.dump_file }}";
+    statistics-file "{{ bind9_options.statistics_file }}";
+    memstatistics-file "{{ bind9_options.memstatistics_file }}";
+    secroots-file "{{ bind9_options.secroots_file }}";
 
-	allow-query { {{ bind9_options.allow_query }}; };
+    allow-query { {{ bind9_options.allow_query }}; };
     allow-transfer {
-        {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
-        {% for secondary in bind9_secondary_servers %}
+    {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
+    {% for secondary in bind9_secondary_servers %}
         {{ secondary }};
-        {% endfor %}
-        {% else %}
+    {% endfor %}
+
+    {% else %}
         none;
-        {% endif %}
+    {% endif %}
     };
 
     {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
     also-notify {
-        {% for secondary in bind9_secondary_servers %}
+    {% for secondary in bind9_secondary_servers %}
         {{ secondary }};
-        {% endfor %}
+    {% endfor %}
     };
     {% endif %}
 
     {% if bind9_forwarders is defined and bind9_forwarders %}
     forwarders {
-        {% for forwarder in bind9_forwarders %}
+    {% for forwarder in bind9_forwarders %}
         {{ forwarder }};
-        {% endfor %}
+    {% endfor %}
     };
     forward first;
     {% endif %}
 
-	recursion {{ bind9_options.recursion }};
-	dnssec-validation {{ bind9_options.dnssec_validation }};
+    recursion {{ bind9_options.recursion }};
+    dnssec-validation {{ bind9_options.dnssec_validation }};
     bindkeys-file "{{ bind9_options.bindkeys_file }}";
-	managed-keys-directory "{{ bind9_options.managed_keys_directory }}";
-	pid-file "{{ bind9_options.pid_file }}";
-	session-keyfile "{{ bind9_options.session_keyfile }}";
+    managed-keys-directory "{{ bind9_options.managed_keys_directory }}";
+    pid-file "{{ bind9_options.pid_file }}";
+    session-keyfile "{{ bind9_options.session_keyfile }}";
 };
 {%- endmacro -%}
 

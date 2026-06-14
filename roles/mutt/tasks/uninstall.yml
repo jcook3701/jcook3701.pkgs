@@ -3,5 +3,5 @@
 ---
 - name: Uninstall Mutt package and dependencies.
   ansible.builtin.apt:
-    name: "{{ mutt_pkgs }}"
+    name: "{{ mutt_pkg_names }}"
     state: absent

@@ -1,12 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# A master list of all sites your role knows how to build
-nginx_sites:
-  - { server_vars: default.yml }
-  - { server_vars: pxeboot.yml }
-  - { server_vars: plex.yml }
-  - { server_vars: mixxx.yml }
+nginx_state: present
+
+nginx_top_level_domain: "com"
+nginx_second_level_domain: "example"
+nginx_domain_name: "{{ nginx_second_level_domain }}.{{ nginx_top_level_domain }}"
 
 # The selector: This is what you override in your playbook or env vars
 # By default, it's empty so nothing happens by accident

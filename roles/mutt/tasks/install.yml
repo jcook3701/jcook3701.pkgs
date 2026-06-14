@@ -3,7 +3,7 @@
 ---
 - name: Install Mutt package and dependencies.
   ansible.builtin.apt:
-    name: "{{ mutt_pkgs }}"
+    name: "{{ mutt_pkg_names }}"
     state: present
 
 - name: Deploy .muttrc configuration

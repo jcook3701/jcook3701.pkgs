@@ -3,12 +3,14 @@
 ---
 kerberos_state: present
 kerberos_is_server: false
-# Types: admin_master, kdc_replica, or client
+# Node Role Configuration (Options: master, replica, client)
 kerberos_node_type: client
+
+kerberos_port: "88"
 
 # Domain Naming Structure
 kerberos_top_level_domain: "com"
-kerberos_second_level_domain: "jcook3701"
+kerberos_second_level_domain: "example"
 kerberos_domain_name: "{{ kerberos_second_level_domain }}.{{ kerberos_top_level_domain }}"
 
 # Dynamic Global Security Settings

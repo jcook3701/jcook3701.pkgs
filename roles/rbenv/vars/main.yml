@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+rbenv_plugins:
+  - "{{ rbenv_ruby_build_plugin }}"
+  - "{{ rbenv_rbenv_vars_plugin }}"
+  - "{{ rbenv_rbenv_default_gems_plugin }}"
+
 rbenv_marker: "# {mark} Ansible - rbenv initialization"
 rbenv_bashrc: |
   # rbenv initialization
