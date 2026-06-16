@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Kerberos OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Ensure Kerberos service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: stopped
+    enabled: false
+  loop:
+    - "{{ kerberos_kdc_service }}"
+    - "{{ kerberos_admin_service }}"
+    - "{{ kerberos_kprop_service }}"
+  loop_control:
+    loop_var: service
+  failed_when: false
+
+- name: Purge physical database backends and synchronization logs
+  ansible.builtin.file:
+    path: "{{ db_file }}"
+    state: absent
+  loop:
+    - "{{ kerberos_file.principal }}"
+    - "{{ kerberos_file.principal }}.db"
+    - "{{ kerberos_file.principal }}.ok"
+    - "{{ kerberos_file.principal_ulog }}"
+    - "{{ kerberos_file.replica_ulog }}"
+    - "{{ kerberos_file.unlimited_ulog }}"
+  loop_control:
+    loop_var: db_file
+
+- name: Delete system identity keytab files
+  ansible.builtin.file:
+    path: "{{ kerberos_file.keytab }}"
+    state: absent
+
+- name: Clean out all role-generated configuration matrices
+  ansible.builtin.file:
+    path: "{{ conf_file }}"
+    state: absent
+  loop:
+    - "{{ kerberos_file.global_config }}"
+    - "{{ kerberos_file.kdc_config }}"
+    - "{{ kerberos_file.admin_acl }}"
+    - "{{ kerberos_file.kprop_acl }}"
+    - "{{ kerberos_file.stash }}"
+  loop_control:
+    loop_var: conf_file
+
+- name: Drop custom Systemd storage sandboxing directories (Ubuntu Only)
+  ansible.builtin.file:
+    path: "{{ kerberos_directory.systemd }}/{{ file_name }}.service.d"
+    state: absent
+  loop:
+    - krb5-kdc
+    - krb5-admin-server
+    - krb5-kpropd
+  loop_control:
+    loop_var: file_name
+  when: ansible_distribution == "Ubuntu"
+
+- name: Reload systemd manager daemon to apply sandbox drops
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: Erase temporary local controller transit caches
+  ansible.builtin.file:
+    path: "{{ cache_file }}"
+    state: absent
+  loop:
+    - /tmp/kerberos_stash_file
+    - "/tmp/ansible_transit_{{ ansible_hostname }}.keytab"
+  loop_control:
+    loop_var: cache_file
+  delegate_to: localhost
+  run_once: true
+
+- name: Uninstall Kerberos packages
+  ansible.builtin.package:
+    name: "{{ kerberos_server_pkgs + kerberos_replica_pkgs + kerberos_client_pkgs }}"
+    state: absent

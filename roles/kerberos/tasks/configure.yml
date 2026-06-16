@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Configure Ubuntu Systemd Storage Sandbox Overrides
+  block:
+    - name: Create systemd override directories for active node services
+      ansible.builtin.file:
+        path: "/etc/systemd/system/{{ item }}.service.d"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
+
+    - name: Inject systemd log path write overrides
+      ansible.builtin.copy:
+        dest: "/etc/systemd/system/{{ item }}.service.d/override.conf"
+        content: |
+          [Service]
+          ReadWritePaths=/var/log/krb5/
+        mode: "0644"
+        owner: root
+        group: root
+      loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
+      register: systemd_override
+
+    - name: Reload systemd daemon to commit sandboxing changes
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      when: systemd_override.changed
+
+  # This block will ONLY run on Ubuntu systems
+  when: ansible_distribution == "Ubuntu"

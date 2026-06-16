@@ -7,29 +7,21 @@
     tasks_from: sudo_user_facts.yml
   when: sudo_user is not defined
 
-- name: Check if Vagrant is installed
-  ansible.builtin.shell: command -v vagrant
-  register: vagrant_check
-  ignore_errors: true
-  changed_when: false
+- name: Load Vagrant OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Install Vagrant if not present
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install Vagrant
   ansible.builtin.include_tasks: install.yml
-  when: vagrant_check.rc != 0
+  when: vagrant_state | default('present') == 'present'
 
-- name: Install Vagrant plugins
-  ansible.builtin.include_tasks: plugins.yml
-
-- name: Inspect the current Vagrant item being processed
-  ansible.builtin.debug:
-    msg: "Processing box with variables from: {{ vagrant_enabled_boxes }}"
-
-- name: Provision and Configure VMs
-  vars:
-    # Filter the list once at the block level for readability
-    enabled_vms: >-
-      {{ vagrant_boxes | selectattr('server_vars', 'in', vagrant_enabled_boxes | map(attribute='server_vars')) | list }}
-  ansible.builtin.include_tasks: process-vm.yml
-  loop: "{{ enabled_vms }}"
-  loop_control:
-    loop_var: vagrant_item
+- name: Uninstall Vagrant
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - vagrant_state | default('present') == 'absent'
+    - vagrant_pkg_names[0] in ansible_facts.packages

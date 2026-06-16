@@ -3,26 +3,17 @@
 ---
 - name: Install Kerberos packages
   ansible.builtin.package:
-    name: "{{ kerberos_pkgs }}"
+    name: "{{ kerberos_pkg_names }}"
     state: present
 
 - name: Create Kerberos configuration files
   ansible.builtin.include_tasks: file-generation.yml
 
-- name: Check if Kerberos principal database exists
-  ansible.builtin.stat:
-    path: /var/lib/krb5kdc/principal
-  register: kdc_db_stat
-  when: kerberos_node_type == 'admin_master'
+- name: Configure Kerberos
+  ansible.builtin.include_tasks: configure.yml
 
-- name: Create initial Kerberos Realm Database and Stash file (Master Only)
-  ansible.builtin.command:
-    cmd: >-
-      kdb5_util create -s -P {{ kerberos_master_password | default('SecretPassword123') }}
-    creates: "{{ kerberos_file.stash }}"
-  when:
-    - kerberos_node_type == 'admin_master'
-    - not kdc_db_stat.stat.exists
+- name: Generate Kerberos Keys
+  ansible.builtin.include_tasks: keys.yml
 
 - name: Ensure Kerberos service is started and enable
   ansible.builtin.systemd:
@@ -32,3 +23,4 @@
   loop: "{{ kerberos_services }}"
   loop_control:
     loop_var: service
+  when: kerberos_node_type in ['master', 'replica']

@@ -4,8 +4,34 @@
 kerberos_server_packages:
   - krb5-server
   - krb5-workstation
+
+kerberos_replica_packages:
+  - "krb5-server"
+
 kerberos_client_packages:
   - krb5-workstation
 
 kerberos_kdc_service: "krb5kdc"
 kerberos_admin_service: "kadmin"
+kerberos_kprop_service: "kpropd"
+
+kerberos_os_directory:
+  conf: "/etc"
+  kdc_conf: "/var/kerberos/krb5kdc"
+  log: "/var/log"
+  state: "/var/kerberos/krb5kdc"
+
+kerberos_os_file:
+  global_config: "{{ kerberos_os_directory.conf }}/krb5.conf"
+  kdc_config: "{{ kerberos_os_directory.kdc_conf }}/kdc.conf"
+  admin_acl: "{{ kerberos_os_directory.kdc_conf }}/kadm5.acl"
+  kprop_acl: "{{ kerberos_os_directory.kdc_conf }}/kpropd.acl"
+  stash: "{{ kerberos_os_directory.kdc_conf }}/.k5.{{ kerberos_realm | default('REALM') }}"
+  keytab: "{{ kerberos_os_directory.kdc_conf }}/kadm5.keytab"
+  principal: "{{ kerberos_os_directory.state }}/principal"
+  default_log: "{{ kerberos_os_directory.log }}/krb5libs.log"
+  kdc_log: "{{ kerberos_os_directory.log }}/krb5kdc.log"
+  admin_log: "{{ kerberos_os_directory.log }}/kadmind.log"
+  principal_ulog: "{{ kerberos_os_directory.state }}/principal.ulog"
+  replica_ulog: "{{ kerberos_os_directory.state }}/replica.ulog"
+  unlimited_ulog:  "{{ kerberos_os_directory.state }}/unlimited.ulog"

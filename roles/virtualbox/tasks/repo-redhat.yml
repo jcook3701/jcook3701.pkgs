@@ -4,12 +4,12 @@
 - name: Install EPEL repository (required for dkms)
   ansible.builtin.dnf:
     name: epel-release
-    state: "{{ virtualbox_state | default('present') }}"
+    state: present
 
 - name: Install kernel headers and build dependencies
   ansible.builtin.dnf:
     name: "{{ virtualbox_pkg_deps }}"
-    state: "{{ virtualbox_state | default('present') }}"
+    state: present
 
 - name: Add VirtualBox official repository
   ansible.builtin.get_url:
@@ -19,3 +19,6 @@
     owner: root
     group: root
   notify: Update dnf cache
+
+- name: Force system changes to apply
+  ansible.builtin.meta: flush_handlers

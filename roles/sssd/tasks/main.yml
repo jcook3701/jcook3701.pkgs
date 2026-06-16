@@ -1,13 +1,21 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Load sssd OS-specific variables
+- name: Load SSSD OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Install sssd Community
-  ansible.builtin.include_tasks: install.yml
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
 
-- name: Configure sssd Community
-  ansible.builtin.include_tasks: configure.yml
+- name: Install SSSD packages
+  ansible.builtin.include_tasks: install.yml
+  when: sssd_state | default('present') == 'present'
+
+- name: Uninstall SSSD packages
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - sssd_state | default('present') == 'absent'
+    - sssd_pkg_names[0] in ansible_facts.packages

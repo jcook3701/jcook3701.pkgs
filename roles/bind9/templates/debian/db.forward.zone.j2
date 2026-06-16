@@ -60,7 +60,7 @@ ns2 IN A {{ bind9_secondary_servers[0] }}
     {%- endif %}
 {%- endfor %}
 
-# --- Static Custom Zone Records ---
+; --- Static Custom Zone Records ---
 {# Sort the list by the numeric octet #}
 {% for item in ptr_records | sort(attribute='octet') %}
 {{ item.record }}

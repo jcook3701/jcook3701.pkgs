@@ -20,21 +20,24 @@
 
 {%- macro krb5() -%}
 [libdefaults]
-    default_realm = {{ kerberos_default_realm | upper }}
+    default_realm = {{ kerberos_realm | upper }}
     dns_lookup_realm = {{ kerberos_dns_lookup_realm }}
     dns_lookup_kdc = {{ kerberos_dns_lookup_kdc }}
     ticket_lifetime = {{ kerberos_ticket_lifetime }}
     renew_lifetime = {{ kerberos_renew_lifetime }}
     forwardable = {{ kerberos_forwardable }}
+    dns_canonicalize_hostname = false
     rdns = false
 
 [realms]
-    {{ kerberos_default_realm | upper }} = {
-    {% for realm in kerberos_realms %}
-        kdc = {{ realm.kdc }}
+{% for realm in kerberos_realms %}
+    {{ realm.name }} = {
+    {% for kdc_server in realm.kdc %}
+        kdc = {{ kdc_server }}
     {% endfor %}
-        admin_server = {{ (kerberos_realms | first).admin_server | default('kerberos.' ~ kerberos_domain_name) }}
+        admin_server = {{ realm.admin_server }}
     }
+{% endfor %}
 
 [domain_realm]
 {% for item in kerberos_domain_realms %}

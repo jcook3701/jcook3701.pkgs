@@ -6,7 +6,14 @@ kerberos_is_server: false
 # Node Role Configuration (Options: master, replica, client)
 kerberos_node_type: client
 
+kerberos_admin_servers: []
+kerberos_replica_servers: []
+
+kerberos_propagation_servers: "{{ kerberos_admin_servers + kerberos_replica_servers }}"
+
 kerberos_port: "88"
+
+kerberos_master_password: "SecretPassword123"
 
 # Domain Naming Structure
 kerberos_top_level_domain: "com"
@@ -14,7 +21,7 @@ kerberos_second_level_domain: "example"
 kerberos_domain_name: "{{ kerberos_second_level_domain }}.{{ kerberos_top_level_domain }}"
 
 # Dynamic Global Security Settings
-kerberos_default_realm: "{{ kerberos_domain_name | upper }}"
+kerberos_realm: "{{ kerberos_domain_name | upper }}"
 kerberos_dns_lookup_realm: "false"
 kerberos_dns_lookup_kdc: "false"
 kerberos_ticket_lifetime: "24h"
@@ -23,13 +30,13 @@ kerberos_forwardable: "true"
 
 # Mapping local domain strings to Kerberos realms
 kerberos_domain_realms:
-  - domain: "{{ kerberos_domain_name }}"
-    realm: "{{ kerberos_default_realm }}"
   - domain: ".{{ kerberos_domain_name }}"
-    realm: "{{ kerberos_default_realm }}"
+    realm: "{{ kerberos_realm }}"
+  - domain: "{{ kerberos_domain_name }}"
+    realm: "{{ kerberos_realm }}"
 
 # Fallback defaults if groups['kerberos_servers'] is ever missing from inventory
 kerberos_realms:
-  - name: "{{ kerberos_default_realm }}"
-    kdc: "kerberos.{{ kerberos_domain_name }}"
-    admin_server: "kerberos.{{ kerberos_domain_name }}"
+  - name: "{{ kerberos_realm }}"
+    kdc: "{{ kerberos_admin_servers + kerberos_replica_servers }}"
+    admin_server: "{{ kerberos_admin_servers | first | default('kerberos') }}"

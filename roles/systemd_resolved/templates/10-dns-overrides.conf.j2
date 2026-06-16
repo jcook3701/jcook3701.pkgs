@@ -18,9 +18,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
+{# Formats lists or strings into space-separated values #}
+{%- macro format_dns_servers(servers) -%}
+    {%- if servers is string -%}
+        {{- servers -}}
+    {%- elif servers is iterable -%}
+        {{- servers | join(' ') -}}
+    {%- else -%}
+        192.168.1.2 192.168.0.3
+    {%- endif -%}
+{%- endmacro -%}
+
+{# Generates the actual systemd configuration #}
 {%- macro dns_overrides() -%}
 [Resolve]
-DNS={{ systemd_resolved_dns_servers | default('192.168.1.2 192.168.0.3') }}
+DNS={{ format_dns_servers(systemd_resolved_dns_servers) }}
 Domains={{ systemd_resolved_domain_name | default('example.com') }}
 {%- endmacro -%}
 

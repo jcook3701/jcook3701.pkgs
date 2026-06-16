@@ -1,6 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Ensure directories needed for configuration
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    group: "root"
+    owner: "root"
+    mode: "0755"
+  loop:
+    - "{{ kerberos_directory.log }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
 - name: Ensure files needed for Kerberos configuration
   ansible.builtin.copy:
     content: ""
@@ -35,12 +48,22 @@
   when: kerberos_node_type in ['master', 'replica']
   notify: Restart Kerberos Services
 
-- name: Deploy administrative ACL rules
+- name: Deploy administrative ACL rules on Master
   ansible.builtin.template:
     src: kadm5.acl.j2
-    dest: "{{ kerberos_file.acl }}"
+    dest: "{{ kerberos_file.admin_acl }}"
     owner: root
     group: root
     mode: "0600"
   when: kerberos_node_type == 'master'
+  notify: Restart Kerberos Services
+
+- name: Deploy kpropd ACL rules on Replicas
+  ansible.builtin.template:
+    src: kpropd.acl.j2
+    dest: "{{ kerberos_file.kprop_acl }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: kerberos_node_type == 'replica'
   notify: Restart Kerberos Services

@@ -6,11 +6,15 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Validate kerberos_node_type variable
   ansible.builtin.assert:
     that:
-      - kerberos_node_type in ['admin_master', 'kdc_replica', 'client']
-    fail_msg: "Invalid node type. Choose admin_master, kdc_replica, or client."
+      - kerberos_node_type in ['master', 'replica', 'client']
+    fail_msg: "Invalid node type. Choose master, replica, or client."
 
 - name: Install Kerberos
   ansible.builtin.include_tasks: install.yml
@@ -18,4 +22,6 @@
 
 - name: Uninstall Kerberos
   ansible.builtin.include_tasks: uninstall.yml
-  when: kerberos_state | default('present') == 'absent'
+  when:
+    - kerberos_state | default('present') == 'absent'
+    - kerberos_pkg_names[0] in ansible_facts.packages

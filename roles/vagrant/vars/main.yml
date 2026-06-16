@@ -1,10 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-vagrant_top_level_domain: "com"
-vagrant_second_level_domain: "jcook3701"
-vagrant_domain_name: "{{ vagrant_second_level_domain }}.{{ vagrant_top_level_domain }}"
-
 vagrant_plugins:
   - "vagrant-vbguest"
 
@@ -26,5 +22,3 @@ vagrant_guest_prep_commands:
   redhat: "dnf install -y gcc make dkms kernel-devel kernel-headers elfutils-libelf-devel"
   arch: "pacman -Sy --noconfirm base-devel linux-headers"
   suse: "zypper install -y -t pattern devel_kernel devel_basis"
-
-vagrant_enabled_boxes: []

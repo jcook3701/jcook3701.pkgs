@@ -3,7 +3,7 @@
 ---
 - name: "Include specific server variables from {{ vagrant_item.server_vars }}"
   ansible.builtin.include_vars:
-    file: "{{ vagrant_item.server_vars }}"
+    file: "vms/{{ vagrant_item.server_vars }}"
 
 - name: Vagrant directory creation
   ansible.builtin.include_tasks: directory-creation.yml

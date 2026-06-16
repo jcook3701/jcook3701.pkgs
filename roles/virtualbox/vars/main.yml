@@ -21,6 +21,8 @@ virtualbox_selector:
 
 virtualbox_info: "{{ virtualbox_selector[virtualbox_selected] }}"
 
+virtualbox_group: vboxusers
+
 # Determine the correct filename prefix based on the version
 # Legacy (6.1, 7.0): Oracle_VM_VirtualBox_Extension_Pack-
 # Modern (7.1+): Oracle_VirtualBox_Extension_Pack-

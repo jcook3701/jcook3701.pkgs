@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: --- MASTER DATABASE INITIALIZATION ---
+  block:
+    - name: Check if Kerberos principal database exists
+      ansible.builtin.stat:
+        path: "{{ kerberos_os_file.principal }}"
+      register: kdc_db_stat
+
+    - name: Create initial Kerberos Realm Database and Stash file (Master Only)
+      ansible.builtin.command:
+        cmd: >-
+          kdb5_util create -s -P {{ kerberos_master_password | default('SecretPassword123') }}
+        creates: "{{ kerberos_file.stash }}"
+      when: not kdc_db_stat.stat.exists
+
+    - name: Extract KDC administrative keys to local service keytab
+      ansible.builtin.command:
+        cmd: >-
+          kadmin.local -q 'ktadd -k {{ kerberos_file.keytab }} kadmin/admin kadmin/changepw'
+        creates: "{{ kerberos_file.keytab }}"
+
+    - name: Ensure Master KDC has its own kiprop principal and keys
+      ansible.builtin.command:
+        cmd: "kadmin.local -q 'addprinc -randkey kiprop/{{ ansible_hostname }}.{{ domain_name }}'"
+      ignore_errors: true
+
+    - name: Extract Master kiprop keys into system keytab
+      ansible.builtin.command:
+        cmd: "kadmin.local -q 'ktadd kiprop/{{ ansible_hostname }}.{{ domain_name }}'"
+      ignore_errors: true
+
+    - name: Fetch master stash file to Ansible controller
+      ansible.builtin.fetch:
+        src: "{{ kerberos_file.stash }}"
+        dest: /tmp/kerberos_stash_file
+        flat: true
+  when: kerberos_node_type == 'master'
+
+- name: --- REPLICA KEY PROVISIONING ---
+  block:
+    - name: Push master stash file to Replicas
+      ansible.builtin.copy:
+        src: /tmp/kerberos_stash_file
+        dest: "{{ kerberos_file.stash }}"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Create replica host and kiprop principals in master database
+      ansible.builtin.command:
+        cmd: "kadmin.local -q 'addprinc -randkey {{ item }}/{{ ansible_hostname }}.{{ domain_name }}'"
+      loop:
+        - "host"
+        - "kiprop"
+      delegate_to: "{{ groups['linux_nodes'] | select('match', '.*modern-times.*') | first }}"
+      ignore_errors: true
+
+    - name: Export replica credentials to a temporary transit keytab file on master
+      ansible.builtin.command:
+        cmd: "kadmin.local -q 'ktadd -k /tmp/{{ ansible_hostname }}.keytab host/{{ ansible_hostname }}.{{ domain_name }} kiprop/{{ ansible_hostname }}.{{ domain_name }}'"
+      delegate_to: "{{ groups['linux_nodes'] | select('match', '.*modern-times.*') | first }}"
+
+    - name: Fetch the temporary replica keytab back to the Ansible controller
+      ansible.builtin.fetch:
+        src: "/tmp/{{ ansible_hostname }}.keytab"
+        dest: "/tmp/ansible_transit_{{ ansible_hostname }}.keytab"
+        flat: true
+      delegate_to: "{{ groups['linux_nodes'] | select('match', '.*modern-times.*') | first }}"
+
+    - name: Securely deliver transit keytab to the targeted replica node
+      ansible.builtin.copy:
+        src: "/tmp/ansible_transit_{{ ansible_hostname }}.keytab"
+        dest: "/tmp/{{ ansible_hostname }}.keytab"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Merge transit keys natively into the replica default system keytab
+      ansible.builtin.shell:
+        cmd: |
+          printf "read_kt /etc/krb5.keytab\nread_kt /tmp/{{ ansible_hostname }}.keytab\nwrite_kt /etc/krb5.keytab\nquit\n" | ktutil
+
+    - name: Clean up temporary transit files
+      ansible.builtin.file:
+        path: "/tmp/{{ ansible_hostname }}.keytab"
+        state: absent
+  when: kerberos_node_type == 'replica'

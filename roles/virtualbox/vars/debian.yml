@@ -18,7 +18,7 @@ virtualbox_pkg_deps:
   - dkms
   - "linux-headers-{{ ansible_kernel }}"
 
-virtualbox_pkgs:
+virtualbox_pkg_names:
   - "{{ virtualbox_info.debian_pkg }}"
 
 virtualbox_directory:

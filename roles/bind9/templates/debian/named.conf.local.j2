@@ -26,32 +26,31 @@
 {% for zone in bind9_zones %}
 zone "{{ zone.name }}" IN {
     type {{ zone.type }};
-    {#
-        # NOTE: PRIMARY vs COMPANION RESOLUTION
+    {#  # NOTE: PRIMARY vs COMPANION RESOLUTION
         # If the server is a secondary slave, BIND9 automatically appends the 'bak.' prefix
-        # to the path and file strings via your vars/main.yml tracking rules.
-    #}
+        # to the path and file strings via your vars/main.yml tracking rules. #}
+
     file "{{ zone.path }}/{{ zone.filename }}";
 
-    {% if zone.allow_update is defined -%}
+    {% if zone.type == 'master' and zone.allow_update is defined -%}
     allow-update {
-        {% if bind9_enable_dydns | bool %}
+        {% if bind9_enable_dydns | bool -%}
             {%- for server in bind9_dydns_update_servers | default([]) -%}
                 {%- set keyname = server + '-tsig.key' -%}
 	            key "{{ keyname }}";
-            {%- endfor -%}
+            {% endfor -%}
             {# This might require another if statement to handle tsig between primary/secondary without dydns #}
-        {% else %}
+        {% else -%}
             {{ zone.allow_update }};
         {% endif %}
     };
     {% endif %}
 
-    {% if zone.type == 'slave' and zone.masters_list is defined and zone.masters_list %}
+    {% if zone.type == 'slave' and zone.masters_list is defined and zone.masters_list -%}
     masters {
-        {% for master_ip in zone.masters_list %}
-        {{ master_ip }};
-        {% endfor %}
+        {% for master_ip in zone.masters_list -%}
+            {{ master_ip }};
+        {% endfor -%}
     };
     {% endif %}
 
@@ -62,7 +61,7 @@ zone "{{ zone.name }}" IN {
 
     {% if zone.inline_signing is defined and zone.type == 'master' -%}
     inline-signing {{ zone.inline_signing }};
-    {% endif -%}
+    {% endif %}
 };
 
 {% endfor -%}

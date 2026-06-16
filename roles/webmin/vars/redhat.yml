@@ -6,3 +6,8 @@ webmin_dependency_pkgs:
 
 webmin_pkg_names:
   - webmin
+  - perl-Net-LDAP
+  - perl-DBD-Pg
+  - perl-DBD-MySQL
+  - fail2ban
+  - certbot

@@ -13,12 +13,9 @@
     - "{{ ansible_os_family | lower }}.yml"
     - "default.yml"
 
-- name: Prepare Virtualbox repositories for {{ ansible_distribution }}
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - "repo-{{ ansible_os_family | lower }}.yml"
-    - "repo-default.yml"
-  when: ansible_os_family in ['Debian', 'RedHat']
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
 
 - name: VirtualBox Install
   ansible.builtin.include_tasks: install.yml
@@ -26,4 +23,6 @@
 
 - name: VirtualBox Uninstall
   ansible.builtin.include_tasks: uninstall.yml
-  when: virtualbox_state | default('present') == 'absent'
+  when:
+    - virtualbox_state | default('present') == 'absent'
+    - virtualbox_pkg_names[0] in ansible_facts.packages

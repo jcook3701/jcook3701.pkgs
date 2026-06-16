@@ -9,5 +9,5 @@
 
 - name: Uninstall systemd-resolved package and dependencies
   ansible.builtin.package:
-    name: "{{ systemd_resolved_pkgs }}"
+    name: "{{ systemd_resolved_pkg_names }}"
     state: absent

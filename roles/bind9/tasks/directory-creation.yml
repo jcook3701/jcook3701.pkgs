@@ -10,7 +10,7 @@
         group: "{{ bind9_user }}"
         owner: "{{ bind9_user }}"
         mode: "0775"
-      loop: "{{ bind9_os_directory.values() | list }}"
+      loop: "{{ bind9_directory.values() | list }}"
       loop_control:
         loop_var: dir
         label: "{{ dir }}"

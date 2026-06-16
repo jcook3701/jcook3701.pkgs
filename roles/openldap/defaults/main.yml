@@ -3,7 +3,7 @@
 ---
 openldap_state: present
 
-openldap_admin_password: "admin"
+openldap_admin_password: "SecretPassword123"
 
 # Domain Options
 openldap_top_level_domain: "com"

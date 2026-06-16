@@ -14,7 +14,7 @@ virtualbox_pkg_deps:
   - dkms
   - qt5-qtbase-devel
 
-virtualbox_pkgs:
+virtualbox_pkg_names:
   - "{{ virtualbox_info.redhat_pkg }}"
 
 virtualbox_directory:

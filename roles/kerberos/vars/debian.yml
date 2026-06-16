@@ -1,29 +1,39 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-
 kerberos_server_pkgs:
   - krb5-kdc
   - krb5-admin-server
+
+kerberos_replica_pkgs:
+  - krb5-kdc
+  - krb5-kpropd
 
 kerberos_client_pkgs:
   - krb5-user
 
 kerberos_kdc_service: "krb5-kdc"
 kerberos_admin_service: "krb5-admin-server"
+kerberos_kprop_service: "krb5-kpropd"
 
 kerberos_os_directory:
   conf: "/etc"
   kdc_conf: "/etc/krb5kdc"
   log: "/var/log/krb5"
   state: "/var/lib/krb5kdc"
+  systemd: "/etc/systemd/system"
 
 kerberos_os_file:
   global_config: "{{ kerberos_os_directory.conf }}/krb5.conf"
   kdc_config: "{{ kerberos_os_directory.kdc_conf }}/kdc.conf"
-  acl: "{{ kerberos_os_directory.kdc_conf }}/kadm5.acl"
+  admin_acl: "{{ kerberos_os_directory.kdc_conf }}/kadm5.acl"
+  kprop_acl: "{{ kerberos_os_directory.kdc_conf }}/kpropd.acl"
   stash: "{{ kerberos_os_directory.kdc_conf }}/stash"
   keytab: "{{ kerberos_os_directory.kdc_conf }}/kadm5.keytab"
+  principal: "{{ kerberos_os_directory.state }}/principal"
   default_log: "{{ kerberos_os_directory.log }}/krb5libs.log"
   kdc_log: "{{ kerberos_os_directory.log }}/krb5kdc.log"
   admin_log: "{{ kerberos_os_directory.log }}/kadmind.log"
+  principal_ulog: "{{ kerberos_os_directory.state }}/principal.ulog"
+  replica_ulog: "{{ kerberos_os_directory.state }}/replica.ulog"
+  unlimited_ulog: "{{ kerberos_os_directory.state }}/unlimited.ulog"

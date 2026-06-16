@@ -1,9 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: Ensure NSCD (name service cache daemon) service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_nscd_service }}"
+    state: stopped
+    enabled: false
+  when: "'nscd.service' in ansible_facts.services"
+
 - name: Install SSSD package and dependencies.
   ansible.builtin.package:
-    name: "{{ sssd_pkgs }}"
+    name: "{{ sssd_pkg_names }}"
     state: present
 
 - name: Generate sssd.conf configuration file
@@ -12,7 +22,8 @@
     dest: "{{ sssd_file.sssd_conf }}"
     group: root
     owner: root
-    mode: "0555"
+    mode: "0600"
+  notify: Restart sssd
 
 - name: Ensure SSSD service is started and enabled
   ansible.builtin.systemd:

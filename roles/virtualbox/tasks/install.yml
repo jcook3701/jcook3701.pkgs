@@ -1,9 +1,16 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Prepare Virtualbox repositories for {{ ansible_distribution }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo-{{ ansible_os_family | lower }}.yml"
+    - "repo-default.yml"
+  when: ansible_os_family in ['Debian', 'RedHat']
+
 - name: Install VirtualBox
   ansible.builtin.package:
-    name: "{{ virtualbox_pkgs }}"
+    name: "{{ virtualbox_pkg_names }}"
     state: present
 
 - name: Ensure VirtualBox kernel modules are loaded (RedHat)
@@ -18,8 +25,6 @@
 
 - name: VirtualBox Extension Pack
   ansible.builtin.include_tasks: extension-pack.yml
-  when: virtualbox_state | default('present') == 'present'
 
 - name: VirtualBox Configure
   ansible.builtin.include_tasks: configure.yml
-  when: virtualbox_state | default('present') == 'present'

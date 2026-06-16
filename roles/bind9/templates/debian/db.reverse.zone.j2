@@ -61,7 +61,7 @@ $TTL 86400
     {%- endif %}
 {%- endfor %}
 
-# --- Dynamic Reverse Zone Pointers ---
+; --- Dynamic Reverse Zone Pointers ---
 {# Sort the list by the numeric octet #}
 {% for item in ptr_records | sort(attribute='octet') %}
 {{ item.record }}

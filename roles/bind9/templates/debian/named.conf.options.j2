@@ -50,30 +50,30 @@ options {
 
     allow-query { {{ bind9_options.allow_query }}; };
     allow-transfer {
-    {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
-    {% for secondary in bind9_secondary_servers %}
-        {{ secondary }};
-    {% endfor %}
-
-    {% else %}
-        none;
-    {% endif %}
+        {% if bind9_secondary_servers is defined and bind9_secondary_servers -%}
+            {% for secondary in bind9_secondary_servers -%}
+                {{ secondary }};
+            {% endfor -%}
+        {% else -%}
+                none;
+        {% endif %}
     };
 
-    {% if bind9_secondary_servers is defined and bind9_secondary_servers %}
+    {% if bind9_secondary_servers is defined and bind9_secondary_servers -%}
     also-notify {
-    {% for secondary in bind9_secondary_servers %}
-        {{ secondary }};
-    {% endfor %}
+        {% for secondary in bind9_secondary_servers -%}
+            {{ secondary }};
+        {% endfor -%}
     };
     {% endif %}
 
-    {% if bind9_forwarders is defined and bind9_forwarders %}
+    {% if bind9_forwarders is defined and bind9_forwarders -%}
     forwarders {
-    {% for forwarder in bind9_forwarders %}
-        {{ forwarder }};
-    {% endfor %}
+        {% for forwarder in bind9_forwarders -%}
+            {{ forwarder }};
+        {% endfor -%}
     };
+
     forward first;
     {% endif %}
 

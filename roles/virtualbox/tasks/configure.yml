@@ -3,12 +3,12 @@
 ---
 - name: Ensure VirtualBox group exists
   ansible.builtin.group:
-    name: vboxusers
+    name: "{{ virtualbox_group }}"
     state: present
 
 - name: Add sudo_user to the VirtualBox group
   ansible.builtin.user:
     name: "{{ sudo_user }}"
-    groups: vboxusers
+    groups: "{{ virtualbox_group }}"
     append: true
   become: true

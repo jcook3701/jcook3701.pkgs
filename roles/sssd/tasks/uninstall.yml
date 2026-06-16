@@ -10,5 +10,7 @@
 
 - name: Uninstall SSSD package and dependencies.
   ansible.builtin.package:
-    name: "{{ sssd_pkgs }}"
+    name: "{{ sssd_pkg_names }}"
     state: absent
+
+# TODO: Remove sssd configuration files

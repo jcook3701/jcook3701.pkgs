@@ -21,13 +21,17 @@
 {%- macro sssd_conf() -%}
 [sssd]
 debug_level = {{ sssd_debug_level }}
-services = nss, pam{% if sssd_enable_ssh | bool %}, ssh{% endif %}{% if sssd_enable_autofs | bool %}, autofs{% endif %}{% if sssd_enable_sudo | bool %}, sudo{% endif %}
+{% set sssd_services = ['nss', 'pam'] %}
+{% if sssd_enable_ssh | bool %}{% set _ = sssd_services.append('ssh') %}{% endif %}
+{% if sssd_enable_autofs | bool %}{% set _ = sssd_services.append('autofs') %}{% endif %}
+{% if sssd_enable_sudo | bool %}{% set _ = sssd_services.append('sudo') %}{% endif %}
+services = {{ sssd_services | join(', ') }}
 config_file_version = 2
 domains = {{ sssd_domain_name }}
 
 [domain/{{ sssd_domain_name }}]
 # --- IDENTITY PROVIDER (OpenLDAP Core) ---
-id_provider = ldep
+id_provider = ldap
 ldap_schema = {{ sssd_ldap_schema }}
 ldap_uri = {{ sssd_ldap_uri }}
 ldap_search_base = {{ sssd_ldap_search_base }}

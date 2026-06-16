@@ -18,6 +18,91 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
+{%- macro build_static_location(site) -%}
+    location {{ site.location_path | default('/') }} {
+        autoindex {{ site.autoindex | default('on') }};
+        autoindex_exact_size {{ site.autoindex_exact_size | default('off') }};
+        autoindex_localtime {{ site.autoindex_localtime | default('on') }};
+    }
+{%- endmacro -%}
+
+
+{%- macro build_proxy_location(site) -%}
+    location {{ site.location_path | default('/') }} {
+        proxy_pass {{ site.proxy_pass }};
+        proxy_set_header Host $host{% if site.append_port | default(false) %}:$server_port{% endif %};
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        {# Handle WebSockets for Cockpit #}
+        {% if site.is_websocket | default(false) %}
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        {% endif %}
+    }
+{%- endmacro -%}
+
+
+{%- macro build_restricted_location(site) -%}
+    location {{ site.location_path | default('/') }} {
+        {% if site.allowed_ips is defined %}
+            {% for ip in site.allowed_ips %}
+        allow {{ ip }};
+            {% endfor %}
+        {% else %}
+        allow {{ site.allowed_subnet | default('192.168.1.0/24') }};
+        {% endif %}
+        deny all;
+
+        {% if site.proxy_pass is defined %}
+        proxy_pass {{ site.proxy_pass }};
+        proxy_set_header Host $host{% if site.append_port | default(false) %}:$server_port{% endif %};
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        {% if site.is_websocket | default(false) %}
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        {% endif %}
+
+        {% else %}
+        autoindex {{ site.autoindex | default('on') }};
+        autoindex_exact_size {{ site.autoindex_exact_size | default('off') }};
+        autoindex_localtime {{ site.autoindex_localtime | default('on') }};
+        {% endif %}
+    }
+{%- endmacro -%}
+
+
+{%- macro build_fastcgi_location(site) -%}
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass {{ site.fastcgi_pass | default('unix:/run/php/php-fpm.sock') }};
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+{%- endmacro -%}
+
+
+{%- macro build_redirect_location(site) -%}
+    location {{ site.location_path | default('/') }} {
+        return {{ site.redirect_code | default(301) }} {{ site.redirect_target }};
+    }
+{%- endmacro -%}
+
+
+{%- macro build_acme_location(site) -%}
+    location /.well-known/acme-challenge/ {
+        root {{ site.acme_root | default('/var/www/html') }};
+        try_files $uri =404;
+    }
+{%- endmacro -%}
+
 
 {%- macro build_nginx_site(site) -%}
     {#
@@ -42,15 +127,33 @@
 server {
     listen {{ site.listen | default(80) }};
     server_name {{ site.server_name ~ "." ~ nginx_domain_name | default('_') }};
-    root {{ site.root | default('/var/www/html') }};
 
-    location {{ site.location_path | default('/') }} {
-        autoindex {{ site.autoindex | default('on') }};
-        autoindex_exact_size {{ site.autoindex_exact_size | default('off') }};
-        autoindex_localtime {{ site.autoindex_localtime | default('on') }};
-    }
+    {# 1. Check if this is a restricted firewall zone #}
+    {% if site.restricted | default(false) %}
+        {{ build_restricted_location(site) | indent(4) }}
+
+    {# 2. Check if this is a reverse proxy target #}
+    {% elif site.proxy_pass is defined %}
+        {{ build_proxy_location(site) | indent(4) }}
+
+    {# 3. Check if this is an external redirect / forward #}
+    {% elif site.redirect_target is defined %}
+        {{ build_redirect_location(site) | indent(4) }}
+
+    {# 4. Check if this is a PHP application running FastCGI #}
+    {% elif site.fastcgi_pass is defined %}
+        root {{ site.root | default('/var/www/html') }};
+        {{ build_fastcgi_location(site) | indent(4) }}
+
+    {# 5. Default fallback to standard static files (PXE, etc.) #}
+    {% else %}
+        root {{ site.root | default('/var/www/html') }};
+        {{ build_static_location(site) | indent(4) }}
+    {% endif %}
 }
 {%- endmacro -%}
 
 {# Call the macro for the specific item being looped by Ansible #}
-{{- build_nginx_site(nginx_site) }}
+{% for site in nginx_sites %}
+{{ build_nginx_site(site) }}
+{% endfor %}

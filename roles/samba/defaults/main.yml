@@ -8,3 +8,5 @@ samba_port: "445"
 # Domain Options
 samba_top_level_domain: "com"
 samba_second_level_domain: "example"
+
+samba_admin_password: "SecretPassword123"

@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Uninstall Vagrant package and dependencies
+  ansible.builtin.package:
+    name: "{{ vagrant_pkg_names }}"
+    state: absent
+  become: true
+
+# TODO: Clear vagrant configuration files.

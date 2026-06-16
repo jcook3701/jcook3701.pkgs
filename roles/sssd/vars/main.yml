@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 sssd_service: sssd
+sssd_nscd_service: "nscd"
 
 sssd_directory:
   conf: "/etc/sssd"
@@ -31,7 +32,8 @@ sssd_ldap_uri: >-
   {% for host in sssd_ldap_hosts %}
     {% set _ = uris.append(sssd_ldap_protocol ~ '://' ~ host ~ ':' ~ sssd_ldap_port) %}
   {% endfor %}
-  {{ uris | join(' ') }}
+  {{ uris | join(', ') }}
+
 sssd_ldap_search_base: "dc={{ sssd_second_level_domain }},dc={{ sssd_top_level_domain }}"
 sssd_ldap_user_search_base: "ou=People,ou=Users,{{ sssd_ldap_search_base }}"
 sssd_ldap_group_search_base: "ou=Group,{{ sssd_ldap_search_base }}"

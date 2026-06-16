@@ -1,19 +1,23 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-kerberos_pkgs: >-
-  {{
-    (kerberos_node_type in ['admin_master', 'kdc_replica']) | ternary(
-      kerberos_server_pkgs + kerberos_client_pkgs,
-      kerberos_client_pkgs)
-  }}
+kerberos_raw_packages: >-
+  {% if kerberos_node_type == 'master' %}
+    {{ (kerberos_server_pkgs + kerberos_client_pkgs) | to_json }}
+  {% elif kerberos_node_type == 'replica' %}
+    {{ (kerberos_replica_pkgs + kerberos_client_pkgs) | to_json }}
+  {% else %}
+    {{ kerberos_client_pkgs | to_json }}
+  {% endif %}
+
+kerberos_pkg_names: "{{ kerberos_raw_packages | from_json }}"
 
 # 1. Compile the service structure as a raw YAML text block
 kerberos_raw_services: >-
-  {% if kerberos_node_type == 'admin_master' %}
+  {% if kerberos_node_type == 'master' %}
     {{ [kerberos_kdc_service, kerberos_admin_service] | to_yaml }}
-  {% elif kerberos_node_type == 'kdc_replica' %}
-    {{ [kerberos_kdc_service] | to_yaml }}
+  {% elif kerberos_node_type == 'replica' %}
+    {{ [kerberos_kdc_service, kerberos_kprop_service] | to_yaml }}
   {% else %}
     {{ [] | to_yaml }}
   {% endif %}
@@ -27,13 +31,19 @@ kerberos_directory:
   kdc_conf: "{{ kerberos_os_directory.kdc_conf }}"
   log: "{{ kerberos_os_directory.log }}"
   state: "{{ kerberos_os_directory.state }}"
+  systemd: "{{ kerberos_os_directory.systemd | default('/etc/systemd/system') }}"
 
 kerberos_file:
   global_config: "{{ kerberos_os_file.global_config }}"
   kdc_config: "{{ kerberos_os_file.kdc_config }}"
-  acl: "{{ kerberos_os_file.acl }}"
+  admin_acl: "{{ kerberos_os_file.admin_acl }}"
+  kprop_acl: "{{ kerberos_os_file.kprop_acl }}"
   stash: "{{ kerberos_os_file.stash }}"
   keytab: "{{ kerberos_os_file.keytab }}"
+  principal: "{{ kerberos_os_file.principal }}"
   default_log: "{{ kerberos_os_file.default_log }}"
   kdc_log: "{{ kerberos_os_file.kdc_log }}"
   admin_log: "{{ kerberos_os_file.admin_log }}"
+  principal_ulog: "{{ kerberos_os_file.principal_ulog }}"
+  replica_ulog: "{{ kerberos_os_file.replica_ulog }}"
+  unlimited_ulog: "{{ kerberos_os_file.unlimited_ulog }}"

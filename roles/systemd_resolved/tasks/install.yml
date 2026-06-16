@@ -3,7 +3,7 @@
 ---
 - name: Install systemd-resolved package
   ansible.builtin.package:
-    name: "{{ systemd_resolved_pkgs }}"
+    name: "{{ systemd_resolved_pkg_names }}"
     state: present
 
 - name: Create systemd-resolved drop-in directory

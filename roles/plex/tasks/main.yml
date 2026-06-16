@@ -6,6 +6,10 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Prepare Plex repositories for {{ ansible_distribution }}
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
@@ -21,4 +25,6 @@
 
 - name: Plex Uninstall
   ansible.builtin.include_tasks: uninstall.yml
-  when: plex_state | default('present') == 'absent'
+  when:
+    - plex_state | default('present') == 'absent'
+    - plex_pkg_names[0] in ansible_facts.packages

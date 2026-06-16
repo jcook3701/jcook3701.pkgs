@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-virtualbox_selected: "virtualbox_7_1"
 virtualbox_state: present
+
+virtualbox_selected: "virtualbox_7_1"
 virtualbox_download_url: "https://download.virtualbox.org"
 
 # virtualbox_conf:

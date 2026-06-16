@@ -6,6 +6,7 @@ openldap_pkg_names:
   - ldap-utils
   - python3-cryptography
   - libsasl2-modules-gssapi-mit
+  - libnet-ldap-perl
 
 openldap_directory:
   conf: "/etc/ldap"

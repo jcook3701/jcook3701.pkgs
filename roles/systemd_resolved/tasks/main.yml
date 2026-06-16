@@ -4,6 +4,7 @@
 - name: Load systemd-resolved OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
+    - "{{ ansible_distribution | lower }}.yml"
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
 - name: Systemd-resolved Install
@@ -14,6 +15,6 @@
   ansible.builtin.include_tasks: uninstall.yml
   when:
     - systemd_resolved_state | default('present') == 'absent'
-    - systemd_resolved_pkgs[0] in ansible_facts.packages
+    - systemd_resolved_pkg_names[0] in ansible_facts.packages
   tags:
     - never

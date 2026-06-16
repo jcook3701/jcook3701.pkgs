@@ -20,6 +20,7 @@
 
 {%- macro kadm5() -%}
 */admin@{{ kerberos_domain_name | upper }} *
+kiprop/*@{{ kerberos_domain_name | upper }} p
 {%- endmacro -%}
 
 {{- kadm5() -}}

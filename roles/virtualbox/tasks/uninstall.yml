@@ -3,10 +3,10 @@
 ---
 - name: Uninstall VirtualBox
   ansible.builtin.package:
-    name: "{{ virtualbox_pkgs }}"
+    name: "{{ virtualbox_pkg_names }}"
     state: absent
 
 - name: Remove VirtualBox group
   ansible.builtin.group:
-    name: vboxusers
+    name: "{{ virtualbox_group }}"
     state: absent

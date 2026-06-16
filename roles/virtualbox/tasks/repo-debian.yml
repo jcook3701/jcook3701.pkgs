@@ -4,7 +4,7 @@
 - name: Install VirtualBox dependencies
   ansible.builtin.apt:
     pkg: "{{ virtualbox_pkg_deps }}"
-    state: "{{ virtualbox_state | default('present') }}"
+    state: present
 
 - name: Ensure {{ virtualbox_directory.keyrings }} directory exists
   ansible.builtin.file:
@@ -30,3 +30,6 @@
     group: root
     content: "{{ virtualbox_repo_line }}"
   notify: Run apt-get update
+
+- name: Force system changes to apply
+  ansible.builtin.meta: flush_handlers
