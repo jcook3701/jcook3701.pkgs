@@ -4,7 +4,7 @@
 galaxy_info:
   author: Jared Cook
   description: >-
-    Installs, sets up, or removes gh, Github commandline utility,
+    Installs, sets up, or removes Github CLI,
     ensuring all dependencies and configurations are managed.
   # company: "Optional Company Name"
 

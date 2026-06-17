@@ -27,6 +27,8 @@
     - "{{ kerberos_file.principal }}"
     - "{{ kerberos_file.principal }}.db"
     - "{{ kerberos_file.principal }}.ok"
+    - "{{ kerberos_file.principal }}.kadm5"
+    - "{{ kerberos_file.principal }}.kadm5.lock"
     - "{{ kerberos_file.principal_ulog }}"
     - "{{ kerberos_file.replica_ulog }}"
     - "{{ kerberos_file.unlimited_ulog }}"
@@ -35,8 +37,13 @@
 
 - name: Delete system identity keytab files
   ansible.builtin.file:
-    path: "{{ kerberos_file.keytab }}"
+    path: "{{ keytab }}"
     state: absent
+  loop:
+    - "{{ kerberos_file.keytab }}"
+    - "{{ kerberos_file.admin_keytab }}"
+  loop_control:
+    loop_var: keytab
 
 - name: Clean out all role-generated configuration matrices
   ansible.builtin.file:

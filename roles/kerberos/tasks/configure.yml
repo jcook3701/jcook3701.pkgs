@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# This block will ONLY run on Ubuntu systems
 - name: Configure Ubuntu Systemd Storage Sandbox Overrides
+  when: ansible_distribution == "Ubuntu"
   block:
     - name: Create systemd override directories for active node services
       ansible.builtin.file:
@@ -22,12 +24,4 @@
         owner: root
         group: root
       loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
-      register: systemd_override
-
-    - name: Reload systemd daemon to commit sandboxing changes
-      ansible.builtin.systemd:
-        daemon_reload: yes
-      when: systemd_override.changed
-
-  # This block will ONLY run on Ubuntu systems
-  when: ansible_distribution == "Ubuntu"
+      notify: Reload systemd daemon

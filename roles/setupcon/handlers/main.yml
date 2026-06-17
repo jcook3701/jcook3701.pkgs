@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Run setupcon
+  ansible.builtin.command: setupcon
+
+- name: Restart vconsole service
+  ansible.builtin.systemd:
+    name: systemd-vconsole-setup.service
+    state: restarted

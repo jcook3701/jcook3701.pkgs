@@ -20,7 +20,7 @@
 
 {%- macro render_kdc_realm_defaults() -%}
 database_name = {{ kerberos_file.principal }}
-admin_keytab = {{ kerberos_file.keytab }}
+admin_keytab = {{ kerberos_file.admin_keytab }}
 acl_file = {{ kerberos_file.admin_acl }}
 key_stash_file = {{ kerberos_file.stash }}
 max_life = 10h 0m 0s
@@ -32,7 +32,7 @@ iprop_enable = true
 iprop_port = 754
 
 {% if kerberos_node_type == 'master' %}
-iprop_logfile = {{ kerberos_file.iprop_ulog }}
+iprop_logfile = {{ kerberos_file.unlimited_ulog }}
 {% elif kerberos_node_type == 'replica' %}
 iprop_replica_poll = 2m
 {# This must be a local file path where the replica tracks its own sync states #}
@@ -46,6 +46,8 @@ iprop_master_ulog_spec = {{ kerberos_directory.state }}/principal.ulog
 [kdcdefaults]
     kdc_ports = {{ kerberos_port }}
     kdc_tcp_ports = {{ kerberos_port }}
+
+    kdc_keytab_name = {{ kerberos_file.keytab }}
 
 [realms]
     {{ kerberos_realm }} = {

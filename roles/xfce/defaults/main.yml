@@ -11,4 +11,4 @@ xfce_interface_font: "Noto Sans 10"
 xfce_mono_font: "JetBrains Mono 10"
 
 xfce_autostart_apps:
-  - { name: 'ctrl:nocaps', exec: '/usr/bin/setxkbmap -option "ctrl:nocaps' }
+  - { name: "ctrl:nocaps", exec: "/usr/bin/setxkbmap -option ctrl:nocaps" }

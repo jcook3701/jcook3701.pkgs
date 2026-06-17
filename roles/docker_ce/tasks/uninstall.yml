@@ -3,7 +3,7 @@
 ---
 - name: Ensure Docker service is stopped and disabled
   ansible.builtin.systemd:
-    name: "{{ docker_service }}"
+    name: "{{ docker_ce_service }}"
     state: stopped
     enabled: false
   failed_when: false

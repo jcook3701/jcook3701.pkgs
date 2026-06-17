@@ -8,3 +8,7 @@
   loop: "{{ kerberos_services }}"
   loop_control:
     loop_var: service
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes

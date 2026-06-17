@@ -8,6 +8,7 @@
 
 - name: Stop XFCE config daemon before editing XML files
   ansible.builtin.command: xfconfd --quit
+  become: true
   become_user: "{{ xfce_user }}"
   failed_when: false
   changed_when: false
@@ -18,10 +19,10 @@
     dest: "/home/{{ xfce_user }}/.config/xfce4/xfconf/xfce-perchannel-xml/{{ xml_file.dest }}"
     owner: "{{ xfce_user }}"
     group: "{{ xfce_user }}"
-    mode: '0644'
+    mode: "0644"
   loop:
-    - { src: 'xfwm4.xml.j2', dest: 'xfwm4.xml' }
-    - { src: 'xsettings.xml.j2', dest: 'xsettings.xml' }
+    - { src: "xfwm4.xml.j2", dest: "xfwm4.xml" }
+    - { src: "xsettings.xml.j2", dest: "xsettings.xml" }
   loop_control:
     loop_var: xml_file
     label: "{{ xml_file.dest }}"
@@ -42,6 +43,7 @@
     export DISPLAY=:0
     xfwm4 --replace &
     xfce4-panel --restart
+  become: true
   become_user: "{{ xfce_user }}"
   failed_when: false
   changed_when: false

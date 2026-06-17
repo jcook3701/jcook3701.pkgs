@@ -10,7 +10,7 @@
 - name: Load i3 OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
-        - "{{ ansible_os_family | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
 
 - name: Install i3
   ansible.builtin.include_tasks: install.yml

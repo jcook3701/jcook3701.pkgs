@@ -2,7 +2,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Get installed VirtualBox version for Extension Pack
-  ansible.builtin.shell: "VBoxManage --version | cut -d'r' -f1"
+  ansible.builtin.shell: |
+    set -o pipefail
+    "VBoxManage --version | cut -d'r' -f1"
+  args:
+    executable: /bin/bash
   register: virtualbox_vboxmanage_output
   changed_when: false
 

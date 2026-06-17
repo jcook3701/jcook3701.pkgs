@@ -2,3 +2,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 ssh_state: present
+
+ssh_port: "22"

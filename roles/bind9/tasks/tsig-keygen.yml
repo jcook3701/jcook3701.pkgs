@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# TODO: Fix groups['all'] -> Needs to be swapped with default variable that is a list.
 - name: Ensure key directory exist for each zone
   ansible.builtin.file:
     path: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}"
@@ -14,10 +15,13 @@
 
 - name: Generate TSIG key (only if it doesn't exist)
   ansible.builtin.command: >-
-    tsig-keygen -a {{ bind9_tsig_algorithm }} {{ hostvars[host].hostname | default(host) }}
+    tsig-keygen -a {{ bind9_tsig_algorithm }} {{ current_host }}
+  vars:
+    current_host: "{{ hostvars[host].hostname | default(host) }}"
+    key_dir: "{{ bind9_key_directory.tsig }}/{{ current_host }}"
   args:
-    chdir: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}"
-    creates: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}/{{ hostvars[host].hostname | default(host) }}-tsig.key"
+    chdir: "{{ key_dir }}"
+    creates: "{{ key_dir }}/{{ current_host }}-tsig.key"
   register: tsig_keygen_output
   loop: "{{ groups['all'] }}"
   loop_control:

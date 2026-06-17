@@ -40,6 +40,7 @@ kerberos_file:
   kprop_acl: "{{ kerberos_os_file.kprop_acl }}"
   stash: "{{ kerberos_os_file.stash }}"
   keytab: "{{ kerberos_os_file.keytab }}"
+  admin_keytab: "{{ kerberos_os_file.admin_keytab }}"
   principal: "{{ kerberos_os_file.principal }}"
   default_log: "{{ kerberos_os_file.default_log }}"
   kdc_log: "{{ kerberos_os_file.kdc_log }}"

@@ -4,14 +4,14 @@
 galaxy_info:
   author: Jared Cook
   description: >-
-    Installs, sets up, or removes console-setup,
+    Installs, sets up, or removes fail2ban,
     ensuring all dependencies and configurations are managed.
   # company: "Optional Company Name"
 
   license: "AGPL-3.0-or-later"
 
   min_ansible_version: ">=2.10"
-  role_name: console_setup
+  role_name: fail2ban
 
   platforms:
     - name: EL
