@@ -24,3 +24,6 @@
   loop_control:
     loop_var: service
   when: kerberos_node_type in ['master', 'replica']
+
+- name: Cleanup transfer files.
+  ansible.builtin.include_tasks: cleanup.yml

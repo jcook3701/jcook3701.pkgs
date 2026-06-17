@@ -11,27 +11,78 @@
 
     - name: Create initial Kerberos Realm Database and Stash file (Master Only)
       ansible.builtin.command:
-        cmd: >-
-          kdb5_util create -s -P {{ kerberos_master_password | default('SecretPassword123') }}
-        creates: "{{ kerberos_file.stash }}"
+        cmd: "{{ command }}"
+        # creates: "{{ kerberos_file.stash }}"
+      vars:
+        master_pass: "{{ kerberos_master_password | default('SecretPassword123') }}"
+        command: "kdb5_util create -s -P {{ master_pass }}"
+      register: db_create_cmd
+      failed_when: >-
+        db_create_cmd.rc != 0 or
+        'error' in db_create_cmd.stderr | lower or
+        'failed' in db_create_cmd.stderr | lower
       when: not kdc_db_stat.stat.exists
 
     - name: Extract KDC administrative keys to local service keytab
       ansible.builtin.command:
-        cmd: >-
-          kadmin.local -q 'ktadd -k {{ kerberos_file.admin_keytab }} kadmin/admin kadmin/changepw'
-        creates: "{{ kerberos_file.admin_keytab }}"
+        cmd: "{{ command }}"
+        # creates: "{{ kerberos_file.admin_keytab }}"
+      vars:
+        admin_principal: "kadmin/admin"
+        changepw_principal: "kadmin/changepw"
+        ktadd_query: "{{ admin_principal }} {{ changepw_principal }}"
+        command: "kadmin.local -q 'ktadd -k {{ kerberos_file.admin_keytab }} {{ ktadd_query }}'"
+      register: admin_kt_cmd
+      failed_when: >-
+        admin_kt_cmd.rc != 0 or
+        'error' in admin_kt_cmd.stderr | lower or
+        'failed' in admin_kt_cmd.stderr | lower
 
     - name: Ensure Master KDC has its own kiprop principal and keys
       ansible.builtin.command:
-        cmd: "kadmin.local -q 'addprinc -randkey kiprop/{{ ansible_hostname }}.{{ domain_name }}'"
-      ignore_errors: true
+        cmd: "{{ command }}"
+      vars:
+        master_sync_principal: "kiprop/{{ ansible_hostname }}.{{ domain_name }}"
+        command: "kadmin.local -q 'addprinc -randkey {{ master_sync_principal }}'"
+      register: master_princ_cmd
+      failed_when: >-
+        master_princ_cmd.rc != 0 or
+        ('add_principal:' in master_princ_cmd.stderr and 'already exists' not in master_princ_cmd.stderr)
+
+    - name: Ensure Master KDC has its own host principal and keys
+      ansible.builtin.command:
+        cmd: "{{ command }}"
+      vars:
+        master_host_principal: "host/{{ ansible_hostname }}.{{ domain_name }}"
+        command: "kadmin.local -q 'addprinc -randkey {{ master_host_principal }}'"
+      register: master_host_create_cmd
+      changed_when: "'Principal already exists' not in master_host_create_cmd.stderr"
+      failed_when: >-
+        master_host_create_cmd.rc != 0 or
+        ('add_principal:' in master_host_create_cmd.stderr and 'already exists' not in master_host_create_cmd.stderr)
 
     - name: Extract Master kiprop keys into system keytab
       ansible.builtin.command:
-        cmd: >-
-          kadmin.local -q 'ktadd -k {{ kerberos_file.keytab }} kiprop/{{ ansible_hostname }}.{{ domain_name }}'
-      ignore_errors: true
+        cmd: "{{ command }}"
+      vars:
+        master_sync_principal: "kiprop/{{ ansible_hostname }}.{{ domain_name }}"
+        command: "kadmin.local -q 'ktadd -k {{ kerberos_file.keytab }} {{ master_sync_principal }}'"
+      register: master_key_cmd
+      failed_when: >-
+        master_key_cmd.rc != 0 or
+        ('ktadd:' in master_key_cmd.stderr and 'already exists' not in master_key_cmd.stderr)
+
+    - name: Extract Master host keys into system keytab for outbound authentication
+      ansible.builtin.command:
+        cmd: "{{ command }}"
+      vars:
+        master_host_principal: "host/{{ ansible_hostname }}.{{ domain_name }}"
+        command: "kadmin.local -q 'ktadd -k {{ kerberos_file.keytab }} {{ master_host_principal }}'"
+      register: master_host_cmd
+      failed_when: >-
+        master_host_cmd.rc != 0 or
+        "does not exist" in master_host_cmd.stderr | lower or
+        ('ktadd:' in master_host_cmd.stderr and 'already exists' not in master_host_cmd.stderr)
 
     - name: Fetch master stash file to Ansible controller
       ansible.builtin.fetch:
@@ -41,54 +92,60 @@
 
     - name: Create replica principals in master database
       ansible.builtin.command:
-        cmd: >-
-          kadmin.local -q
-            'addprinc -randkey {{ item.0 }}/{{ item.1 }}'
-      loop: "{{ kerberos_replica_servers | product(['host', 'kiprop']) | list }}"
-      ignore_errors: true
-
-    - name: Export replica credentials to a temporary transit keytab file on master
-      ansible.builtin.command:
-        cmd: >-
-          kadmin.local -q
-            'ktadd -k /tmp/{{ ansible_hostname }}.keytab
-            host/{{ fqdn }}
-            kiprop/{{ fqdn }}'
+        cmd: "{{ command }}"
+      loop: "{{ kerberos_replica_servers | unique | product(['host', 'kiprop']) | list }}"
+      loop_control:
+        loop_var: princ_pair
+        label: "{{ command }}"
+      register: replica_princ_cmd
       vars:
-        fqdn: "{{ ansible_hostname }}.{{ domain_name }}"
+        task_result: "{{ replica_princ_cmd.results[-1] if replica_princ_cmd.results is defined else none }}"
+        command: kadmin.local -q 'addprinc -randkey {{ princ_pair.1 }}/{{ princ_pair.0 }}'
+      failed_when: >-
+        task_result is not none and (
+        task_result.rc != 0 or
+        ('add_principal:' in task_result.stderr and 'already exists' not in task_result.stderr)
+        )
+
+    - name: Export replica credentials to local transit files on master
+      ansible.builtin.command:
+        cmd: "{{ command }}"
+      vars:
+        transit_file: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.transit.keytab"
+        replica_host_principal: "host/{{ replica_fqdn }}"
+        replica_sync_principal: "kiprop/{{ replica_fqdn }}"
+        ktadd_query: "{{ replica_host_principal }} {{ replica_sync_principal }}"
+        command: kadmin.local -q 'ktadd -k {{ transit_file }} {{ ktadd_query }}'
+      loop: "{{ kerberos_replica_servers }}"
+      loop_control:
+        loop_var: replica_fqdn
+        label: "cmd -> {{ command }}"
+      register: export_cmd
+      failed_when: >-
+        export_cmd.rc != 0 or
+        'error' in export_cmd.stderr | lower or
+        'failed' in export_cmd.stderr | lower or
+        'does not exist' in export_cmd.stdout | lower
 
     - name: Fetch the temporary replica keytab back to the Ansible controller
       ansible.builtin.fetch:
-        src: "/tmp/{{ ansible_hostname }}.keytab"
-        dest: "/tmp/ansible_transit_{{ ansible_hostname }}.keytab"
+        src: "{{ transit_file }}"
+        dest: "{{ tmp_file }}"
         flat: true
+      vars:
+        transit_file: "{{ kerberos_directory.kdc_conf }}/{{ transit_fqdn }}.transit.keytab"
+        tmp_file: "/tmp/ansible_transit_{{ transit_fqdn }}.keytab"
+      loop: "{{ kerberos_replica_servers }}"
+      loop_control:
+        loop_var: transit_fqdn
+        label: "{{ transit_file }} -> {{ tmp_file }}"
 
-    - name: Securely deliver transit keytab to the targeted replica node
-      ansible.builtin.copy:
-        src: "/tmp/ansible_transit_{{ ansible_hostname }}.keytab"
-        dest: "/tmp/{{ ansible_hostname }}.keytab"
-        owner: root
-        group: root
-        mode: "0600"
+    - name: Ensure Master KDC service is running before propagation
+      ansible.builtin.service:
+        name: "{{ kerberos_kdc_service }}"
+        state: started
 
-    - name: Merge transit keys natively into the replica default system keytab
-      ansible.builtin.shell:
-        cmd: |
-          set -o pipefail
-          ktutil <<EOF
-          read_kt {{ kerberos_file.keytab }}
-          read_kt /tmp/{{ ansible_hostname }}.keytab
-          write_kt {{ kerberos_file.keytab }}
-          quit
-          EOF
-      args:
-        executable: /bin/bash
-      register: read_kt_output
 
-    - name: Clean up temporary transit files
-      ansible.builtin.file:
-        path: "/tmp/{{ ansible_hostname }}.keytab"
-        state: absent
 
 - name: --- REPLICA KEY PROVISIONING ---
   when: kerberos_node_type == 'replica'
@@ -100,3 +157,76 @@
         owner: root
         group: root
         mode: "0600"
+
+    - name: Securely deliver transit keytab to the targeted replica node
+      ansible.builtin.copy:
+        src: "{{ tmp_file }}"
+        dest: "{{ replica_keytab }}"
+        owner: root
+        group: root
+        mode: "0600"
+      vars:
+        tmp_file: "/tmp/ansible_transit_{{ replica_fqdn }}.keytab"
+        replica_keytab: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab"
+      loop: "{{ kerberos_replica_servers }}"
+      loop_control:
+        loop_var: replica_fqdn
+        label: "{{ replica_keytab }} -> {{ tmp_file }}"
+
+    - name: Merge transit keys natively into the replica default system keytab
+      ansible.builtin.shell:
+        cmd: |
+          ktutil <<EOF
+          read_kt {{ kerberos_file.keytab }}
+          read_kt {{ kerberos_directory.kdc_conf }}/{{ ansible_fqdn }}.keytab
+          write_kt {{ kerberos_file.keytab }}
+          quit
+          EOF
+      args:
+        executable: /bin/bash
+      register: read_kt_output
+
+    - name: Ensure Replica update server daemon is active
+      ansible.builtin.service:
+        name: "{{ kerberos_kprop_service }}"
+        state: started
+        enabled: true
+
+- name: --- MASTER DATABASE PROPAGATION ---
+  when: kerberos_node_type == 'master'
+  block:
+
+    - name: Dump the master Kerberos database for propagation
+      ansible.builtin.command:
+        cmd: "{{ command }}"
+      vars:
+        dump_file: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
+        command: "kdb5_util dump {{ dump_file }}"
+
+    - name: Propagate the database to the replica nodes
+      ansible.builtin.command:
+        cmd: "{{ command }}"
+      vars:
+        dump_file: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
+        command: "kprop -f {{ dump_file }} {{ replica_fqdn }}"
+        task_result: "{{ kprop_cmd.results[-1] if kprop_cmd.results is defined else none }}"
+      register: kprop_cmd
+      loop: "{{ kerberos_replica_servers }}"
+      loop_control:
+        loop_var: replica_fqdn
+        label: "Propagating database -> {{ replica_fqdn }}"
+      failed_when: >-
+        task_result is not none and (
+        task_result.rc != 0 or
+        'connection refused' in task_result.stderr | lower or
+        'cannot contact' in task_result.stderr | lower
+        )
+
+- name: --- REPLICA SERVICE ACTIVATION ---
+  when: kerberos_node_type == 'replica'
+  block:
+    - name: Ensure Replica KDC server engine is started and enabled
+      ansible.builtin.service:
+        name: krb5-kdc
+        state: started
+        enabled: true

@@ -20,7 +20,6 @@
 
 {%- macro krb5() -%}
 [libdefaults]
-    default_keytab_name = FILE:{{ kerberos_file.keytab }}
     default_realm = {{ kerberos_realm | upper }}
     dns_lookup_realm = {{ kerberos_dns_lookup_realm }}
     dns_lookup_kdc = {{ kerberos_dns_lookup_kdc }}

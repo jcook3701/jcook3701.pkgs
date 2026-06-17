@@ -20,6 +20,7 @@
 
 {%- macro kpropd() -%}
 {% for server in kerberos_propagation_servers %}
+host/{{ server | lower }}@{{ kerberos_realm | upper }}
 kiprop/{{ server | lower }}@{{ kerberos_realm | upper }}
 {% endfor %}
 {%- endmacro -%}

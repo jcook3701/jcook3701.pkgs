@@ -91,6 +91,8 @@
 - name: Verify loaded LDAP schemas
   ansible.builtin.shell: |
     ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" "(objectClass=olcSchemaConfig)" cn
+  args:
+    executable: /bin/bash
   register: ldap_schema_list
   changed_when: false
 
@@ -114,26 +116,32 @@
     - "'Already exists' not in base_dn_result.stderr"
   changed_when: "'adding new entry' in base_dn_result.stdout"
 
+# TODO: Review
+# https://www.google.com/search?q=syntax-check%5Bspecific%5D%3A+Invalid+options+for+ansible.builtin.include_role%3A+task_from&gs_lcrp=EgZjaHJvbWUyBggAEEUYOdIBBzMxOWowajSoAgOwAgHxBWx6lMMir5Td8QVsepTDIq-U3Q&sourceid=chrome&ie=UTF-8&fbs=ADc_l-aN0CWEZBOHjofHoaMMDiKp9lEhFAN_4ain3HSNQWw-mCdteDOdu-whizqull19J697Hd2DjFbIIkobt5MxzWRrbQzH3_BR0OTUD3HedzAmCN3eh4gdIWpbgdT4j-CUlUQzYrt88O8hmC4QDI-zJCzuennUckWqegLxB4d2UMv2V853ZU5nVZT7nDCio3gzXByIoK9D8gkH41ug3yvRx_o0Bwg4OQ&aep=10&ntc=1&mstk=AUtExfAAyqoyz4qWW0-nVP0nTOatJndhBLPKGzDz69iXj3itrFs9JpMkAXpDpILQGx9RiqQT-ckGMjwbqhQdQ5PElUM0nocLCohsidcKZLXYY8K_eq3-DNLzalFiMO0Sb0q2nfy7I-wdn9aeBLmcBbo-1t2XNkT8rbzOLed0UOeTXkdbi3mFfxSASIDP6K3QGQbSakUmm-TyLpzFDinTDdicyeMztkUSUp8NU-CMn7VLoxThuZXvQDmSHrFUzZWvAi01Iqv_ImNqlGaC0g&aioh=3&csuir=1&cs=0&ccb=1&hl=en-US&biw=1548&bih=720.7999877929688&mtid=MxgyaufCNeiO8L0PhIHYwAk&udm=50
 - name: Test LDAP Bind (Login) as Admin
-  ansible.builtin.shell: >-
-    ldapsearch -x
-    -H ldap://localhost
-    -D "cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
-    -w "{{ openldap_admin_password }}"
-    -b "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
-    -s base
+  ansible.builtin.command:
+    cmd: >-
+      ldapsearch -x -H ldap://localhost
+      -D "{{ bind_dn }}" -w "{{ openldap_admin_password }}"
+      -b "{{ base_dn }}" -s base
+    vars:
+      base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+      bind_dn: "cn=admin,{{ base_dn }}"
   register: ldap_bind_test
   changed_when: false
-  no_log: true # Keeps your password out of the Ansible logs
+  no_log: true # Keeps password out of the Ansible logs
 
 - name: Verify Secure LDAPS Bind (Port 636)
-  ansible.builtin.shell: >-
-    LDAPTLS_REQCERT=allow ldapsearch -x
-    -H ldaps://localhost
-    -D "cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
-    -w "{{ openldap_admin_password }}"
-    -b "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
-    -s base
+  ansible.builtin.command:
+    cmd: >-
+      ldapsearch -x -H ldaps://localhost
+      -D "{{ bind_dn }}" -w "{{ openldap_admin_password }}"
+      -b "{{ base_dn }}" -s base
+    vars:
+      base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+      bind_dn: "cn=admin,{{ base_dn }}"
+  environment:
+    LDAPTLS_REQCERT: allow
   register: ldaps_test
   changed_when: false
-  no_log: true
+  no_log: true # Keeps password out of the Ansible logs

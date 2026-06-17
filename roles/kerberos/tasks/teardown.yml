@@ -19,6 +19,7 @@
     loop_var: service
   failed_when: false
 
+# TODO: Add replica_datatrans to directory list
 - name: Purge physical database backends and synchronization logs
   ansible.builtin.file:
     path: "{{ db_file }}"
@@ -32,6 +33,8 @@
     - "{{ kerberos_file.principal_ulog }}"
     - "{{ kerberos_file.replica_ulog }}"
     - "{{ kerberos_file.unlimited_ulog }}"
+    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
+    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.dump_ok"
   loop_control:
     loop_var: db_file
 

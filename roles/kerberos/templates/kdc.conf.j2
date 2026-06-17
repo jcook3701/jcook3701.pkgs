@@ -46,8 +46,7 @@ iprop_master_ulog_spec = {{ kerberos_directory.state }}/principal.ulog
 [kdcdefaults]
     kdc_ports = {{ kerberos_port }}
     kdc_tcp_ports = {{ kerberos_port }}
-
-    kdc_keytab_name = {{ kerberos_file.keytab }}
+    {# kdc_keytab_name = {{ kerberos_file.keytab }} #}
 
 [realms]
     {{ kerberos_realm }} = {

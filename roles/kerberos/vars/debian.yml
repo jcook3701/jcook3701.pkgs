@@ -29,7 +29,7 @@ kerberos_os_file:
   admin_acl: "{{ kerberos_os_directory.kdc_conf }}/kadm5.acl"
   kprop_acl: "{{ kerberos_os_directory.kdc_conf }}/kpropd.acl"
   stash: "{{ kerberos_os_directory.kdc_conf }}/stash"
-  keytab: "{{ kerberos_os_directory.kdc_conf }}/krb5.keytab"
+  keytab: "{{ kerberos_os_directory.conf }}/krb5.keytab"
   admin_keytab: "{{ kerberos_os_directory.kdc_conf }}/kadm5.keytab"
   principal: "{{ kerberos_os_directory.state }}/principal"
   default_log: "{{ kerberos_os_directory.log }}/krb5libs.log"
