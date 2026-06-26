@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop OpenLDAP service — Uninstall and Purge
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Completely wipe active OpenLDAP schema and database data directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  loop:
+    - "{{ openldap_directory.conf }}"
+    - "{{ openldap_directory.database }}"
+    - "{{ openldap_directory.certs }}"
+  loop_control:
+    loop_var: directory
+    label: "removed: {{ directory }}"
+
+- name: Clear lingering local controller staging backup files
+  ansible.builtin.file:
+    path: "/tmp/ldap_bootstrap_import.ldif"
+    state: absent
+  delegate_to: localhost
+  run_once: true

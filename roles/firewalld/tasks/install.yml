@@ -3,5 +3,5 @@
 ---
 - name: Install firewalld package and dependencies.
   ansible.builtin.package:
-    name: "{{ firewalld_packages }}"
+    name: "{{ firewalld_pkg_names }}"
     state: present

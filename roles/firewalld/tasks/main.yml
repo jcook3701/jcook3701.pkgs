@@ -6,10 +6,21 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Install Firewalld
   ansible.builtin.include_tasks: install.yml
   when: firewalld_state | default('present') == 'present'
 
 - name: Uninstall Firewalld
   ansible.builtin.include_tasks: uninstall.yml
-  when: firewalld_state | default('present') == 'absent'
+  when:
+    - firewalld_state | default('present') == 'absent'
+    - firewalld_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown Firewalld
+  ansible.builtin.include_tasks: teardown.yml
+  when:
+    - firewalld_state | default('present') == 'teardown'

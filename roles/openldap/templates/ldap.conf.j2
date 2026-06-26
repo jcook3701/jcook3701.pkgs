@@ -34,14 +34,14 @@
 #DEREF		never
 
 # Turning this off breaks GSSAPI used with krb5 when rdns = false
-SASL_NOCANON	{{ openldap_conf.sasl_nocanon }}
-URI {{ 'ldaps' if openldap_conf.port == '636' else 'ldap' }}://{{ ansible_hostname }}.{{ openldap_domain_name }}/
-BASE dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+SASL_NOCANON	{{ openldap_sasl_nocanon }}
 
-# TLS_CACERT /etc/openldap/certs/cert.pem
-TLS_CERT {{ openldap_key.tls_cert }}
-TLS_KEY {{ openldap_key.tls_key }}
-TLS_REQCERT {{ openldap_conf.tls_reqcert }}
+# Core Client Mappings
+BASE dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+URI {{ 'ldaps' if openldap_use_ssl else 'ldap' }}://{{ ansible_hostname }}.{{ openldap_domain_name }}/
+
+TLS_CACERT {{ openldap_tls_ca_cert }}
+TLS_REQCERT {{ openldap_tls_reqcert }}
 {%- endmacro -%}
 
 {{- ldap_conf() }}

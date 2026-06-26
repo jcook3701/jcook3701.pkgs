@@ -1,3 +1,20 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+fail2ban_dep_pkg_names:
+  - python3-systemd
+
+fail2ban_pkg_names:
+  - fail2ban
+
+fail2ban_directory:
+  conf: "/etc/fail2ban/fail2ban.d"
+  jail: "/etc/fail2ban/jail.d"
+  filter: "/etc/fail2ban/filter.d"
+  action: "/etc/fail2ban/action.d"
+  data: "/var/lib/fail2ban"
+  run: "/var/run/fail2ban"
+  log: "/var/log/"
+
+fail2ban_file:
+  log: "{{ fail2ban_directory.log }}/fail2ban.log"

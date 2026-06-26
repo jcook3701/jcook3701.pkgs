@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+anydesk_pkg_names:
+  - anydesk
+
+anydesk_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d/"
+
+anydesk_file:
+  gpg: "{{ anydesk_directory.keyrings }}/anydesk.asc"
+  list: "{{ anydesk_directory.sources }}/anydesk-stable.list"
+
+anydesk_repo_url: "http://deb.anydesk.com/"
+
+anydesk_gpg_url: "https://keys.anydesk.com/repos/DEB-GPG-KEY"
+
+anydesk_repo_line: >-
+    deb [signed-by={{ anydesk_file.gpg }}]
+    {{ anydesk_repo_url }} all main

@@ -45,10 +45,10 @@ olcDbIndex: uid pres,eq,sub
 dn: cn=config
 changetype: modify
 replace: olcTLSCertificateFile
-olcTLSCertificateFile: {{ openldap_key.tls_cert }}
+olcTLSCertificateFile: {{ openldap_tls_cert }}
 -
 replace: olcTLSCertificateKeyFile
-olcTLSCertificateKeyFile: {{ openldap_key.tls_key }}
+olcTLSCertificateKeyFile: {{ openldap_tls_key }}
 {%- endmacro %}
 
 {{- db_config() }}

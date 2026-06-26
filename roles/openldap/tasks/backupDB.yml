@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Backup OpenLDAP core database to local staging file
+  ansible.builtin.command:
+    cmd: "{{ command }}"
+  vars:
+    backup_file: "/tmp/ldap_backup_{{ ansible_date_time.date }}.ldif"
+    config_dir: "{{ openldap_directory.slapd }}"
+    base_dn: "dc={{ openldap_top_level_domain  }},dc={{ openldap_second_level_domain }}"
+    command: "slapcat -F {{ config_dir }} -b {{ base_dn }} -l {{ backup_file }}"
+  register: ldap_backup_cmd
+  failed_when:
+    - ldap_backup_cmd.rc != 0
+    - "'checksum error' not in ldap_backup_cmd.stderr | lower and 'error' in ldap_backup_cmd.stderr | lower"
+  when: kerberos_node_type == 'master'

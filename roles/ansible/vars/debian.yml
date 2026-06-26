@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+ansible_pkg_names:
+  - python3-dev
+  - libffi-dev
+  - libssl-dev
+  - build-essential
+  - python3-cffi
+  - python3-cffi-backend

@@ -17,18 +17,18 @@
         value: en_US.UTF-8
         vtype: select
 
-- name: Install openldap package and dependencies.
+- name: Install OpenLDAP package and dependencies.
   ansible.builtin.package:
-    name: "{{ openldap_pkg_names }}"
+    name: "{{ openldap_pkg_names + openldap_shared_libs }}"
     state: present
 
-- name: Openldap key generation
+- name: OpenLDAP key generation
   ansible.builtin.include_tasks: keys.yml
 
-- name: Openldap configuration
+- name: OpenLDAP configuration
   ansible.builtin.include_tasks: configure.yml
 
-- name: Openldap database
+- name: OpenLDAP database
   ansible.builtin.include_tasks: database.yml
 
 - name: Ensure OpenLDAP service is started and enabled

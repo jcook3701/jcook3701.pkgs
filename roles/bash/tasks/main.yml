@@ -28,5 +28,6 @@
 - name: Set {{ editor_bashrc }} to specified $EDITOR within ~/.bashrc
   ansible.builtin.lineinfile:
     path: "{{ sudo_user_home }}/.bashrc"
-    line: 'export EDITOR="{{ editor_bashrc }}"'
+    line: >-
+      export EDITOR="{{ editor_bashrc }}"
     state: present

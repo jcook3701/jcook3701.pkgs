@@ -2,14 +2,53 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 openldap_state: present
+# Node Role Configuration (Options: master, slave)
+openldap_node_type: master
+openldap_admin_servers: []
+openldap_slave_servers: []
 
+## Domain Options ##
+openldap_top_level_domain: "com"
+openldap_second_level_domain: "example"
+openldap_domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
+
+openldap_organization_name: "Example IT Services"
+
+openldap_admin_user: admin
 openldap_admin_password: "SecretPassword123"
 
-# Domain Options
-openldap_top_level_domain: "com"
-openldap_second_level_domain: "jcook3701"
+## Network & Service Access Binding ##
+openldap_port: 389
+openldap_ssl_port: 636
 
+## Replication Parameters ##
+# Unique ID number for each slave replica (Must be unique per host if looping)
+openldap_replica_id: "001"
+
+# Replication account credentials used by slaves to query the master
+openldap_replication_user: syncrepluser
+openldap_replication_password: "SecretPassword123"
+
+## Security & Encryption (TLS) ##
+# TODO: Swap ssl here with tsl
 openldap_use_ssl: false # TODO: Use this in vars/main.yml
+
+openldap_tls_ca_cert: ""
+openldap_tls_cert: "{{ openldap_directory.certs }}/cert.pem"
+openldap_tls_key: "{{ openldap_directory.certs }}/priv.pem"
+openldap_tls_cipher_suite: "HIGH:MEDIUM:+SSLv3"
+
+openldap_sasl_nocanon: "on"
+openldap_tls_reqcert: "allow"
+
+## Core Database & Performance Tuning ##
+# Database engine type (MDB is standard for modern OpenLDAP installs)
+openldap_database_backend: mdb
+openldap_database_maxsize: 1073741824  # Max DB size in bytes (1 GB default)
+
+# Database caching and entry index limits
+openldap_size_limit: 500
+openldap_time_limit: 3600
 
 # Extra Schemas
 openldap_autofs: false

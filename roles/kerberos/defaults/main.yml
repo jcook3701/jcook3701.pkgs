@@ -13,7 +13,8 @@ kerberos_propagation_servers: "{{ kerberos_admin_servers + kerberos_replica_serv
 
 kerberos_port: "88"
 
-kerberos_master_password: "SecretPassword123"
+kerberos_admin_user: admin
+kerberos_admin_password: "SecretPassword123"
 
 # Domain Naming Structure
 kerberos_top_level_domain: "com"

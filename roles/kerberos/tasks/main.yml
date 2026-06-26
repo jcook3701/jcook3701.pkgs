@@ -10,11 +10,8 @@
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Validate kerberos_node_type variable
-  ansible.builtin.assert:
-    that:
-      - kerberos_node_type in ['master', 'replica', 'client']
-    fail_msg: "Invalid node type. Choose master, replica, or client."
+- name: Validate Kerberos Role Variables
+  ansible.builtin.include_tasks: validate.yml
 
 - name: Install Kerberos
   ansible.builtin.include_tasks: install.yml
@@ -25,3 +22,8 @@
   when:
     - kerberos_state | default('present') == 'absent'
     - kerberos_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown Kerberos
+  ansible.builtin.include_tasks: teardown.yml
+  when:
+    - kerberos_state | default('present') == 'teardown'

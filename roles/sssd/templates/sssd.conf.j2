@@ -18,6 +18,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
+{%- macro determine_start_tls(uri) -%}
+{{ 'False' if 'ldaps://' in uri | lower else 'True' }}
+{%- endmacro -%}
+
 {%- macro sssd_conf() -%}
 [sssd]
 debug_level = {{ sssd_debug_level }}
@@ -60,8 +64,9 @@ sudo_provider = ldap
 
 # --- NETWORK & TLS TIMEOUTS ---
 {% if sssd_ldap_tls | bool %}
-ldap_id_use_start_tls = True
+ldap_id_use_start_tls = {{ determine_start_tls(sssd_ldap_uri) }}
 ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert }}
+ldap_tls_cacert = {{ sssd_ldap_tls_cacert | default('/etc/ssl/certs/ca-certificates.crt') }}
 ldap_tls_cert = {{ sssd_ldap_tls_cert }}
 ldap_tls_key = {{ sssd_ldap_tls_key }}
 {% else %}

@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute baseline software uninstallation routine
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Scrub configuration directory overrides from system
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - "{{ fail2ban_directory.conf }}"
+    - "{{ fail2ban_directory.jail }}"
+  loop_control:
+    loop_var: file
+    label: "teardown: {{ file }}"
+
+- name: Remove local persistence states and persistent databases
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - "{{ fail2ban_directory.data }}"
+    - "{{ fail2ban_directory.run }}"
+    - "{{ fail2ban_file.log }}"
+  loop_control:
+    loop_var: file
+    label: "teardown: {{ file }}"

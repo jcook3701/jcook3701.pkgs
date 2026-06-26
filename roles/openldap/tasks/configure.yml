@@ -5,8 +5,8 @@
   ansible.builtin.file:
     path: "{{ openldap_directory.conf }}"
     state: directory
-    owner: openldap
-    group: openldap
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
     mode: "0750"
 
 - name: Deploy client configuration (ldap.conf)
@@ -16,16 +16,16 @@
     owner: root
     group: root
     mode: "0644"
-  notify: Restart slapd
+  notify: Restart openldap service
 
-- name: Ensure slapd listens on LDAPS (636)
+- name: Ensure openldap listens on Port ({{ openldap_port }})
   ansible.builtin.lineinfile:
     path: "{{ openldap_directory.defaults }}"
     regexp: >-
-      ^SLAPD_SERVICES=
+      ^{{ openldap_sysconfig_variable }}=
     line: >-
-      SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"
-  notify: Restart slapd
+      {{ openldap_sysconfig_variable }}="{{ openldap_final_daemon_args }}"
+  notify: Restart openldap service
 
-- name: Flush handlers to ensure slapd is ready
+- name: Flush handlers to ensure openldap running with new ports
   ansible.builtin.meta: flush_handlers

@@ -1,3 +1,29 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+fail2ban_state: present
+
+fail2ban_core_conf:
+  DEFAULT:
+    loglevel: "INFO"
+    logtarget: "SYSLOG"
+    dbpurgeage: "7d"
+
+  Thread:
+    stacksize: 0
+
+fail2ban_jail_conf:
+  DEFAULT:
+    backend: systemd
+    ignore_ips:
+    - "192.168.1.50"
+    bantime: "4h"
+    findtime: "15m"
+    maxretry: 3
+  sshd:
+    enabled: "true"
+    maxretry: 2
+    level: 10
+  nginx-http-auth:
+    enabled: "true"
+    port: "http,https"

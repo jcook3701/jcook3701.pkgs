@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: --- OPENLDAP RESTORATION AND DATABASE IMPORT ---
+  block:
+    - name: Ensure targeted node has the required directory layout
+      ansible.builtin.file:
+        path: "{{ openldap_directory.database }}"
+        state: directory
+        owner: "{{ openldap_user }}"
+        group: "{{ openldap_group }}"
+        mode: "0700"
+
+    - name: Securely stage the backup database file onto the targeted node
+      ansible.builtin.copy:
+        src: "/tmp/ldap_bootstrap_import.ldif"
+        dest: "/tmp/ldap_restore.ldif"
+        owner: "{{ openldap_user }}"
+        group: "{{ openldap_group }}"
+        mode: "0600"
+
+    - name: Inject the raw backup records into the uninitialized MDB storage backend
+      ansible.builtin.command:
+        cmd: "{{ command }}"
+      vars:
+        config_dir: "{{ openldap_directory.slapd }}/etc/ldap/slapd.d"
+        import_file: "/tmp/ldap_restore.ldif"
+        base_dn: "dc={{ openldap_top_level_domain }},dc={{ openldap_second_level_domain }}"
+        command: "slapadd -F {{ config_dir }} -b '{{ base_dn }}' -l {{ import_file }}"
+      register: slapadd_cmd
+      changed_when: true
+      failed_when:
+        - slapadd_cmd.rc != 0
+        - "'error' in slapadd_cmd.stderr | lower"
+
+    - name: Correct storage directory backend file permissions after raw import
+      ansible.builtin.file:
+        path: "{{ openldap_directory.database }}"
+        state: directory
+        owner: "{{ openldap_user }}"
+        group: "{{ openldap_group }}"
+        recurse: true
+
+    - name: Safely boot up the slapd directory engine now that data is present
+      ansible.builtin.service:
+        name: "{{ openldap_service }}"
+        state: started
+        enabled: true
+
+    - name: Clean up temporary recovery files from system /tmp directory
+      ansible.builtin.file:
+        path: "/tmp/ldap_restore.ldif"
+        state: absent

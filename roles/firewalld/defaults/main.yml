@@ -2,3 +2,20 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 firewalld_state: present
+
+firewalld_zones:
+  public:
+    services:
+      - ssh
+      - http
+      - https
+    ports:
+      - "8443/tcp"
+    masquerade: "no"
+
+  internal:
+    services:
+      - dhcp
+      - dns
+    sources:
+      - "192.168.1.0/24"

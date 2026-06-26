@@ -1,10 +1,17 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Load Openldap OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Validate Openldap Role Variables
+  ansible.builtin.include_tasks: validate.yml
 
 - name: Install Openldap
   ansible.builtin.include_tasks: install.yml
@@ -15,3 +22,8 @@
   when:
     - openldap_state | default('present') == 'absent'
     - openldap_pkg_names[0] in ansible_facts.packages
+
+- name: Complete Purge and Tear-Down of OpenLDAP Environment
+  ansible.builtin.include_tasks: teardown.yml
+  when:
+    - openldap_state | default('present') == 'teardown'

@@ -1,3 +1,21 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Prepare Grafana repositories for {{ ansible_distribution }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo/{{ ansible_os_family | lower }}.yml"
+    - "repo/default.yml"
+
+- name: Install Grafana
+  ansible.builtin.package:
+    name: "{{ grafana_pkg_names }}"
+    state: present
+
+- name: Ensure Grafana service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ grafana_service }}"
+    state: started
+    enabled: true
+
+# TODO: Configure Grafana

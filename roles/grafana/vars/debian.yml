@@ -1,3 +1,23 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+grafana_service: grafana-server
+
+grafana_pkg_names:
+  - grafana
+
+grafana_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d/"
+
+grafana_file:
+  gpg: "{{ grafana_directory.keyrings }}/grafana.asc"
+  list: "{{ grafana_directory.sources }}/grafana.list"
+
+grafana_repo_url: "https://apt.grafana.com"
+
+grafana_gpg_url: "https://apt.grafana.com/gpg.key"
+
+grafana_repo_line: >-
+    deb [signed-by={{ grafana_file.gpg }}]
+    {{ grafana_repo_url }} stable main

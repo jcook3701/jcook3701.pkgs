@@ -14,7 +14,7 @@
         cmd: "{{ command }}"
         # creates: "{{ kerberos_file.stash }}"
       vars:
-        master_pass: "{{ kerberos_master_password | default('SecretPassword123') }}"
+        master_pass: "{{ kerberos_admin_password | default('SecretPassword123') }}"
         command: "kdb5_util create -s -P {{ master_pass }}"
       register: db_create_cmd
       failed_when: >-
@@ -145,7 +145,10 @@
         name: "{{ kerberos_kdc_service }}"
         state: started
 
-
+    - name: Ensure Master Administration server is running before propagation
+      ansible.builtin.service:
+        name: "{{ kerberos_admin_service }}"
+        state: started
 
 - name: --- REPLICA KEY PROVISIONING ---
   when: kerberos_node_type == 'replica'
@@ -227,6 +230,6 @@
   block:
     - name: Ensure Replica KDC server engine is started and enabled
       ansible.builtin.service:
-        name: krb5-kdc
+        name: "{{ kerberos_kdc_service }}"
         state: started
         enabled: true

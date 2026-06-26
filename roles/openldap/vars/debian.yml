@@ -1,10 +1,13 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+openldap_sysconfig_variable: SLAPD_SERVICES
+
 openldap_pkg_names:
   - slapd
   - ldap-utils
-  - python3-cryptography
+
+openldap_shared_libs:
   - libsasl2-modules-gssapi-mit
   - libnet-ldap-perl
 
@@ -18,4 +21,5 @@ openldap_directory:
   run: "/run/slapd"
   defaults: "/etc/default/slapd"
 
+openldap_user: "openldap"
 openldap_group: openldap

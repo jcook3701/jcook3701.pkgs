@@ -22,7 +22,9 @@ sssd_sudo_debug_level: 5
 sssd_ssh_debug_level: 5
 
 # LDAP TLS Configurations
-sssd_ldap_tls_reqcert: "allow"
+# options are allow or never
+sssd_ldap_tls_reqcert: "never"
+sssd_ldap_tls_cacert: "/etc/ssl/certs/ca-certificates.crt"
 sssd_ldap_tls_cert: "/etc/openldap/certs/cert.pem"
 sssd_ldap_tls_key: "/etc/openldap/certs/priv.pem"
 

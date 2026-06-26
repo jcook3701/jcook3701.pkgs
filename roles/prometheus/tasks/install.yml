@@ -1,3 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Install Prometheus
+  ansible.builtin.package:
+    name: "{{ prometheus_pkg_names }}"
+    state: present
+
+- name: Ensure Prometheus service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ prometheus_service }}"
+    state: started
+    enabled: true
+
+# TODO: Configure Prometheus Tasks

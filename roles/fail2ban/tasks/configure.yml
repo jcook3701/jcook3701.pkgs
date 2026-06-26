@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy Core Daemon Configuration overrides
+  ansible.builtin.template:
+    src: fail2ban.conf.j2
+    dest: "{{ output }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    f2b_target_header: "{{ configuration.key }}"
+    f2b_target_data: "{{ configuration.value }}"
+    output: >-
+      {{ fail2ban_directory.conf }}/10-{{ configuration.key }}.conf
+  loop: "{{ fail2ban_core_conf | dict2items }}"
+  loop_control:
+    loop_var:
+      configuration
+    label: "Deployed configuration: {{ output }}"
+  notify: Restart fail2ban
+
+- name: Deploy Traffic Jail Configuration overrides
+  ansible.builtin.template:
+    src: jail.conf.j2
+    dest: "{{ output }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    f2b_target_header: "{{ jail.key }}"
+    f2b_target_data: "{{ jail.value }}"
+    output: >-
+      {{ fail2ban_directory.jail }}/{{
+        '00-' if jail.key == 'DEFAULT' else '10-'
+      }}{{ jail.key }}.conf
+  loop: "{{ fail2ban_jail_conf | dict2items }}"
+  loop_control:
+    loop_var: jail
+    label: "Deployed jail: {{ output }}"
+  notify: Restart fail2ban

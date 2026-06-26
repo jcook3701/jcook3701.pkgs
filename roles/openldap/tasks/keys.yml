@@ -5,33 +5,41 @@
   ansible.builtin.file:
     path: "{{ openldap_directory.certs }}"
     state: directory
-    owner: openldap
-    group: openldap
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
     mode: "0700"
 
 - name: Generate private key for OpenLDAP
   community.crypto.openssl_privatekey:
-    path: "{{ openldap_key.tls_key }}"
-    owner: openldap
-    group: openldap
+    path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
     mode: "0600"
 
 - name: Generate Certificate Signing Request (CSR)
   community.crypto.openssl_csr:
     path: "{{ openldap_directory.certs }}/ldap.csr"
-    privatekey_path: "{{ openldap_key.tls_key }}"
+    privatekey_path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
     common_name: "{{ ansible_hostname }}.{{ openldap_domain_name }}"
-    owner: openldap
-    group: openldap
-    mode: "0600"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
 
 - name: Generate self-signed certificate
   community.crypto.x509_certificate:
-    path: "{{ openldap_key.tls_cert }}"
+    path: "{{ openldap_tls_cert }}"
     csr_path: "{{ openldap_directory.certs }}/ldap.csr"
-    privatekey_path: "{{ openldap_key.tls_key }}"
+    privatekey_path: "{{ openldap_tls_key }}"
     provider: selfsigned
+    select_crypto_backend: cryptography
     selfsigned_not_after: "+365d"
-    owner: openldap
-    group: openldap
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
     mode: "0644"
+
+- name: Map self-signed cert as CA bundle if undefined
+  ansible.builtin.set_fact:
+    openldap_tls_ca_cert: "{{ openldap_tls_cert }}"
+  when: openldap_tls_ca_cert | length == 0

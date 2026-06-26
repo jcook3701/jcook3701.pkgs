@@ -1,4 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-prometheus_service: "prometheus"
+prometheus_service: prometheus
+
+prometheus_pkg_names: []
+prometheus_exporters: []

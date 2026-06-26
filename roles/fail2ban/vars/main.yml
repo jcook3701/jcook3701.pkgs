@@ -1,3 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+fail2ban_service: fail2ban
+
+fail2ban_dep_pkg_names: []
+fail2ban_pkg_names: []

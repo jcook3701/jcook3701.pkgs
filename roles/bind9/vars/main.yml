@@ -76,7 +76,8 @@ bind9_options:
   statistics_file: "{{ bind9_file.statistics_file }}"
   memstatistics_file: "{{ bind9_file.memstatistics_file }}"
   secroots_file: "{{ bind9_file.secroots_file }}"
-  allow_query: '"clients"'
+  allow_query: >-
+    "clients"
   recursion: "yes"
   dnssec_validation: "{{ 'auto' if (bind9_enable_dnssec | bool) else 'no' }}"
   managed_keys_directory: "{{ bind9_directory.options }}"

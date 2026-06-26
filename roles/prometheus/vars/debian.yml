@@ -3,3 +3,25 @@
 ---
 prometheus_pkg_names:
   - prometheus
+
+prometheus_exporters:
+- name: node
+  package: prometheus-node-exporter
+  port: 9100
+  enabled: true
+- name: mysql,
+  package: prometheus-mysqld-exporter
+  port: 9104
+  enabled: false
+- name: postgresql,
+  package: prometheus-postgres-exporter
+  port: 9187
+  enabled: false
+- name: nginx_vts,
+  package: prometheus-nginx-vts-exporter
+  port: 9913
+  enabled: false
+- name: blackbox,
+  package: prometheus-blackbox-exporter
+  port: 9115
+  enabled: false

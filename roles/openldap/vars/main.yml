@@ -1,23 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-openldap_domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
-
 openldap_service: "slapd"
 
-openldap_conf:
-  # Port Options
-  # Port Options: 389 (ldap) or 636 (ldaps)
-  port: "636"
-  sasl_nocanon: "on"
-  tls_reqcert: "allow"
+# Place holders for OS-specific variables
+openldap_sysconfig_variable: SLAPD_SERVICES
 
-openldap_key:
-  # Key Options
-  tls_cacert: ""
-  tls_cert: "{{ openldap_directory.certs }}/cert.pem"
-  tls_key: "{{ openldap_directory.certs }}/priv.pem"
+openldap_pkg_names: []
+openldap_shared_libs: []
+openldap_directory: []
 
+openldap_user: "openldap"
+openldap_group: openldap
+
+#
 openldap_schemas_base:
   - core
   - cosine
@@ -42,3 +38,20 @@ openldap_schemas: >-
     ( ['autofs'] if (openldap_autofs | default(false)) else [] ) +
     ( ['guacConfigGroup'] if (openldap_guac | default(false)) else [] )
   }}
+
+openldap_raw_listen_protocols: >-
+  {% if openldap_use_ssl | bool %}
+    {{ ['ldap', 'ldaps'] | to_yaml }}
+  {% else %}
+    {{ ['ldap'] | to_yaml }}
+  {% endif %}
+
+openldap_listen_protocols: "{{ openldap_raw_listen_protocols | from_yaml }}"
+
+# 1. Your input list:       ['ldap', 'ldaps']
+# 2. After mapping ':///':  ['ldap:///', 'ldaps:///']
+# 3. After join and append: "ldap:/// ldaps:/// ldapi:///"
+openldap_final_daemon_args: >-
+  {{ openldap_listen_protocols |
+      map('regex_replace', '$', ':///') |
+      join(' ') }} ldapi:///
