@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Manage base audio group permissions
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: audio
+    append: true
+  become: true
+
+- name: Manage system-wide groups and permissions
+  block:
+    - name: Ensure system-wide pulse service user exists
+      ansible.builtin.user:
+        name: pulse
+        groups: audio
+        append: true
+      become: true
+
+    - name: Add deployment user to pulse-access group
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        groups: pulse-access
+        append: true
+      become: true
+
+    - name: Deploy custom system-wide PulseAudio systemd unit
+      ansible.builtin.template:
+        src: pulseaudio.service.j2
+        dest: "{{ pulseaudio_file.service }}"
+        owner: "{{ pulseaudio_file_owner }}"
+        mode: "0644"
+      become: true
+      notify: Reload systemd daemon
+  when: pulseaudio_system_wide
+
+- name: Create PulseAudio configuration directory
+  ansible.builtin.file:
+    path: "{{ pulseaudio_directory.conf }}"
+    state: directory
+    owner: "{{ pulseaudio_file_owner if pulseaudio_system_wide else omit }}"
+    mode: "{{ '0755' if pulseaudio_system_wide else '0700' }}"
+  become: "{{ pulseaudio_system_wide }}"
+
+# ==================== SHARED CONFIGURATION DEPLOYMENT ====================
+- name: Deploy PulseAudio daemon configuration
+  ansible.builtin.template:
+    src: daemon.conf.j2
+    dest: "{{ pulseaudio_file.daemon }}"
+    owner: "{{ pulseaudio_file_owner if pulseaudio_system_wide else omit }}"
+    mode: "{{ '0644' if pulseaudio_system_wide else '0600' }}"
+  become: "{{ pulseaudio_system_wide }}"
+  notify: Restart pulseaudio
+
+- name: Deploy PulseAudio default script configuration
+  ansible.builtin.template:
+    src: default.pa.j2
+    dest: "{{ pulseaudio_file.conf }}"
+    owner: "{{ pulseaudio_file_owner if pulseaudio_system_wide else omit }}"
+    mode: "{{ '0644' if pulseaudio_system_wide else '0600' }}"
+  become: "{{ pulseaudio_system_wide }}"
+  notify: Restart pulseaudio
+
+# ==================== SERVER SERVICE START & COOKIE GENERATION ====================
+- name: Start PulseAudio server instance to generate runtime authorization cookie
+  ansible.builtin.systemd:
+    name: "{{ pulseaudio_service }}"
+    scope: "{{ pulseaudio_systemd_scope }}"
+    state: started
+    enabled: true
+  become: "{{ pulseaudio_system_wide }}"
+  when: pulseaudio_is_server
+
+- name: Fetch authentication cookie from Server to local Ansible controller
+  ansible.builtin.fetch:
+    src: "{{ pulseaudio_file.cookie }}"
+    dest: "/tmp/pulse_cookie"
+    flat: true
+  become: "{{ pulseaudio_system_wide }}"
+  when: pulseaudio_is_server
+
+# ==================== CLIENT COOKIE SYNC & CLIENT SERVICE START ====================
+- name: Copy authentication cookie from Ansible controller to Clients
+  ansible.builtin.copy:
+    src: "/tmp/pulse_cookie"
+    dest: "{{ pulseaudio_file.cookie }}"
+    owner: "{{ pulseaudio_file_owner if pulseaudio_system_wide else omit }}"
+    mode: "{{ '0644' if pulseaudio_system_wide else '0600' }}"
+  become: "{{ pulseaudio_system_wide }}"
+  when: not pulseaudio_is_server
+
+- name: Ensure PulseAudio client service is running and enabled in target scope
+  ansible.builtin.systemd:
+    name: "{{ pulseaudio_service }}"
+    scope: "{{ pulseaudio_systemd_scope }}"
+    enabled: true
+    state: started
+  become: "{{ pulseaudio_system_wide }}"
+  when: not pulseaudio_is_server

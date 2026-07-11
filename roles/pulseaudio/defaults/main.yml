@@ -2,3 +2,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 pulseaudio_state: present
+
+# Set to true if you want to allow network streaming
+pulseaudio_enable_network: true
+pulseaudio_auth_anonymous: 1
+
+# Server/Client routing configuration
+pulseaudio_is_server: false
+pulseaudio_server_ip: ""
+pulseaudio_port: "4713"
+
+# System-wide vs user mode (False is highly recommended by PulseAudio)
+pulseaudio_system_wide: false

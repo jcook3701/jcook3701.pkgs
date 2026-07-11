@@ -7,4 +7,8 @@ Authors Notes:
 
 # https://gist.github.com/xarinatan/c415341ff34eab445cfb073988dcf6c1
 
+Future Ideas:
+* Setting up automatic service discovery (Avahi/mDNS) so we don't have to hardcode IP addresses.
+* Mapping microphones and input devices to stream audio back the other way.
+* Adding real-time CPU prioritization rules to prevent audio stuttering when the network gets busy.
 -->

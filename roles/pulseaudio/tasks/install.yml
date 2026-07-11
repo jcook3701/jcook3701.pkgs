@@ -3,11 +3,8 @@
 ---
 - name: Install Pulse Audio package and dependencies
   ansible.builtin.package:
-    name: "{{ pulseaudio_pkg_names }}"
+    name: "{{ pulseaudio_pkg_names + pulseaudio_dep_pkg_names }}"
     state: present
 
-- name: Ensure Pulse Audio service is started and enable
-  ansible.builtin.systemd:
-    name: "{{ pulseaudio_service }}"
-    state: started
-    enabled: true
+- name: Configure Pulse Audio
+  ansible.builtin.include_tasks: "configure.yml"

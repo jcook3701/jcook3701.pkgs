@@ -7,7 +7,7 @@ fail2ban_dep_pkg_names:
 fail2ban_pkg_names:
   - fail2ban
 
-fail2ban_directory:
+fail2ban_os_directory:
   conf: "/etc/fail2ban/fail2ban.d"
   jail: "/etc/fail2ban/jail.d"
   filter: "/etc/fail2ban/filter.d"
@@ -15,6 +15,3 @@ fail2ban_directory:
   data: "/var/lib/fail2ban"
   run: "/var/run/fail2ban"
   log: "/var/log/"
-
-fail2ban_file:
-  log: "{{ fail2ban_directory.log }}/fail2ban.log"

@@ -1,0 +1,45 @@
+{#
+# uxplay-toggle.sh.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro uxplay_toggle(user_home) -%}
+#!/bin/bash
+# XFCE Genmon Toggle Script for UxPlay
+
+# If the script was clicked, toggle the state
+if [ "$1" = "click" ]; then
+    if pgrep -x "uxplay" > /dev/null; then
+        pkill -x "uxplay"
+    else
+        # Runs in background, but handles rendering safely
+        uxplay -avdec > /dev/null 2>&1 &
+    fi
+    # Small delay to let the process register before updating the icon
+    sleep 0.5
+fi
+
+# Update the taskbar display based on whether it is running
+if pgrep -x "uxplay" > /dev/null; then
+    echo "<txt>🖥️ 🟢</txt><txtclick>{{ user_home }}/.local/bin/uxplay-toggle.sh click</txtclick><tool>UxPlay is RUNNING. Click monitor to stop.</tool>"
+else
+    echo "<txt>🖥️ 📺</txt><txtclick>{{ user_home }}/.local/bin/uxplay-toggle.sh click</txtclick><tool>UxPlay is IDLE. Click monitor to start.</tool>"
+fi
+{%- endmacro -%}
+
+{{- uxplay_toggle(sudo_user_home) }}

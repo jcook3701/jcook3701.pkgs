@@ -12,7 +12,9 @@
 
 - name: Install AnyDesk
   ansible.builtin.include_tasks: install.yml
-  when: anydesk_state | default('present') == 'present'
+  when:
+    - anydesk_state | default('present') == 'present'
+    - anydesk_pkg_names[0] not in ansible_facts.packages
 
 - name: Uninstall AnyDesk
   ansible.builtin.include_tasks: uninstall.yml

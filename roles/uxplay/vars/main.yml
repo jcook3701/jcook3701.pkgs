@@ -1,8 +1,5 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-prometheus_state: present
-
-promethus_exporter: prometheus-node-exporter
-
-promethus_port: 9100
+uxplay_dep_pkg_names: []
+uxplay_pkg_names: []

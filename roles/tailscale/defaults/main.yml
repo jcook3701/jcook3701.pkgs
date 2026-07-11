@@ -4,3 +4,5 @@
 tailscale_state: present
 tailscale_repo_url: https://tailscale.com/install.sh
 tailscale_auth_key: null
+
+tailscale_is_server: false

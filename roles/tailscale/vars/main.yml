@@ -5,3 +5,6 @@ tailscale_service: tailscale
 
 tailscale_file:
   script: /tmp/tailscale-install.sh
+
+tailscale_pkg_names:
+  - tailscale

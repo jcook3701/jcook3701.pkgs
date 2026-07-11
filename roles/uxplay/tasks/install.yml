@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install UxPlay package and dependencies
+  ansible.builtin.package:
+    name: "{{ uxplay_pkg_names + uxplay_dep_pkg_names }}"
+    state: present
+
+- name: Ensure local bin directory exists
+  ansible.builtin.file:
+    path: "{{ sudo_user_home }}/.local/bin"
+    state: directory
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0755"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Deploy UxPlay Taskbar Toggle Script from Template
+  ansible.builtin.template:
+    src: uxplay-toggle.sh.j2
+    dest: "{{ sudo_user_home }}/.local/bin/uxplay-toggle.sh"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0755"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Create System Menu Entry with Icon for the Toggle Utility
+  ansible.builtin.template:
+    src: uxplay.desktop.j2
+    dest: "{{ sudo_user_home }}/.local/share/applications/uxplay-toggle.desktop"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0644"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"

@@ -21,6 +21,14 @@
 
 - name: Authenticate Tailscale (Non-interactive)
   ansible.builtin.command:
-    cmd: "tailscale up --authkey={{ tailscale_auth_key }}"
-  when: tailscale_auth_key is defined
+    cmd: "{{ command }}"
+  vars:
+    authkey: "--authkey={{ tailscale_auth_key }}"
+    command: "tailscale up {{ authkey }} --reset"
+  register: tailscale_auth_result
+  changed_when: tailscale_auth_result.rc == 0
+  failed_when:
+    - tailscale_auth_result.rc != 0
+    - "'already authenticated' not in tailscale_auth_result.stderr"
   become: true
+  when: tailscale_auth_key is defined

@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+uxplay_state: present
+
+# Create desktop icon
+uxplay_desktop_icon: true
+
+# Choose your desktop: (e.g., 'xfce', 'gnome')
+uxplay_desktop_gui: "xfce"
+
+# Choose your firewall backend (e.g., 'ufw', 'firewalld', or 'none')
+uxplay_firewall_backend: "ufw"
+
+uxplay_firewall_rules:
+  - port: 7000
+    proto: "tcp"
+    comment: "UxPlay AirPlay control"
+  - port: 7100
+    proto: "tcp"
+    comment: "UxPlay AirPlay mirror stream"
+  - port: 8612
+    proto: "udp"
+    comment: "UxPlay AirPlay event/audio timing"
+  - port: 5353
+    proto: "udp"
+    comment: "mDNS / Bonjour discovery"

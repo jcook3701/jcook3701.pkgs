@@ -1,7 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
 - name: Restart pulseaudio
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: "{{ pulseaudio_service }}"
+    scope: "{{ pulseaudio_systemd_scope }}"
     state: restarted
+  become: "{{ pulseaudio_system_wide }}"
