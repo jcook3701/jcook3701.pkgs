@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+jellyfin_service: jellyfin
+jellyfin_pkg_names:
+  - jellyfin
+
+# OS Repository specifics
+jellyfin_repo_url: "https://repo.jellyfin.org/{{ ansible_distribution | lower }}"
+jellyfin_gpg_url: "https://repo.jellyfin.org/jellyfin_team.gpg.key"
+jellyfin_codename: "{{ ansible_distribution_release }}"
+jellyfin_component: "main"

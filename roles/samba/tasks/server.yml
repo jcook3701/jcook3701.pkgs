@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure shared storage directories exist
+  ansible.builtin.file:
+    path: "{{ share.path }}"
+    state: directory
+    mode: "0775"
+  loop: "{{ samba_shares }}"
+  loop_control:
+    loop_var: share
+    label: "Share path exists for {{ share.name }}"
+
+- name: Deploy Samba server configuration
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: "{{ samba_file.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Samba Services

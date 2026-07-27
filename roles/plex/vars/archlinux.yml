@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+plex_pkg_names:
+  - plex-media-server
+
 plex_user_groups:
+  - video
   - render
 
 plex_directory:
-  repo_config: "/etc/yum.repos.d"
   data: "/var/lib/plexmediaserver"
-
-plex_redhat_baseurl: "https://repo.plex.tv/rpm/"
-plex_redhat_gpgkey: "https://downloads.plex.tv/plex-keys/PlexSign.v2.key"

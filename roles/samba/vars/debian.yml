@@ -3,13 +3,26 @@
 ---
 samba_service: smbd
 
-samba_pkg_names:
+samba_server_pkg_names:
   - samba
   - smbclient
   - samba-common
+  - samba-common-bin
+  - samba-dsdb-modules
+  - samba-vfs-modules
+  - samba-testsuite
 
-samba_directory:
+samba_client_pkg_names:
+  - smbclient
+  - cifs-utils
+
+samba_pkg_names: "{{ samba_server_pkg_names if samba_is_server | bool else samba_client_pkg_names }}"
+
+samba_os_directory:
   conf: "/etc/samba"
-
-samba_file:
-  samba_conf: "{{ samba_directory.conf }}/smb.conf"
+  spool: "/var/spool/samba"
+  log: "/var/log/samba"
+  lib: "/var/lib/samba"
+  cache: "/var/cache/samba"
+  run: "/run/samba"
+  assets: "/usr/share/samba"

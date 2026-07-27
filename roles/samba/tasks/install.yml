@@ -5,3 +5,11 @@
   ansible.builtin.package:
     name: "{{ samba_pkg_names }}"
     state: present
+
+- name: Execute Samba Server configuration
+  ansible.builtin.include_tasks: server.yml
+  when: samba_is_server | bool
+
+- name: Execute Samba Client configuration
+  ansible.builtin.include_tasks: client.yml
+  when: not samba_is_server | bool

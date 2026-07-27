@@ -24,16 +24,16 @@ dn: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 objectClass: top
 objectClass: dcObject
 objectClass: organization
-o: {{ openldap_second_level_domain }}
+o: {{ openldap_organization_name }}
 dc: {{ openldap_second_level_domain }}
 
 # Create Admin Role
-dn: cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+dn: cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 objectClass: simpleSecurityObject
 objectClass: organizationalRole
-cn: admin
+cn: {{ openldap_admin_user }}
 description: LDAP Administrator
-userPassword: {{ openldap_admin_password_hashed }}
+userPassword: "{{ openldap_admin_password_hashed }}"
 {%- endmacro -%}
 
 {{- base_structure_config() }}

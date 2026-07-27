@@ -18,11 +18,134 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro smb_conf() -%}
+{%- set smb_header -%}
 # See smb.conf.example for a more detailed config file or
 # read the smb.conf manpage.
 # Run 'testparm' to verify the config is correct after
 # you modified it.
+{%- endset -%}
+
+{%- set smb_global_settings %}
+[global]
+    ## Browsing/Identification ##
+    workgroup = {{ samba_workgroup }}
+    netbios name = {{ samba_netbios_name }}
+    wins support = {{ samba_wins_support }}
+
+    ## Debugging/Accounting ##
+    log file = {{ samba_directory.log }}/log.%m
+    max log size = 1000
+    logging = file
+    panic action = {{ samba_directory.assets }}/panic-action %d
+
+    ## Authentication ##
+    server role = standalone server
+    obey pam restrictions = yes
+    unix password sync = yes
+    passwd program = /usr/bin/passwd %u
+    passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+    pam password change = yes
+    map to guest = bad user
+    usershare allow guests = yes
+
+    ## Domains & LDAP ##
+    ldap suffix = {{ samba_ldap_suffix }}
+    ldap user suffix = {{ samba_ldap_user_suffix }}
+    ldap group suffix = {{ samba_ldap_group_suffix }}
+    ldap machine suffix = {{ samba_ldap_machine_suffix }}
+    ldap idmap suffix = {{ samba_ldap_idmap_suffix }}
+    ldap admin dn = {{ samba_ldap_admin_dn }}
+    ldap delete dn = no
+    ldap ssl = no
+
+    add user script = /usr/sbin/smbldap-useradd -m '%u' -t 1
+    rename user script = /usr/sbin/smbldap-usermod -r '%unew' '%uold'
+    delete user script = /usr/sbin/smbldap-userdel '%u'
+    set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
+    add group script = /usr/sbin/smbldap-groupadd -p '%g'
+    delete group script = /usr/sbin/smbldap-groupdel '%g'
+    add user to group script = /usr/sbin/smbldap-groupmod -m '%u' '%g'
+    delete user from group script = /usr/sbin/smbldap-groupmod -x '%u' '%g'
+    add machine script = /usr/sbin/smbldap-useradd -w '%u' -t 1
+
+    ## Security & Protocols ##
+    server signing = {{ samba_server_signing }}
+    smb encrypt = {{ samba_smb_encrypt }}
+    server min protocol = {{ samba_server_min_protocol }}
+    server max protocol = {{ samba_server_max_protocol }}
+    client min protocol = {{ samba_client_min_protocol }}
+    client max protocol = {{ samba_client_max_protocol }}
+    unix extensions = no
+
+    ## Winbind / ID Mapping ##
+    idmap config * : backend = tdb
+    idmap config * : range = 1000000-1999999
+
+    ## Printing ##
+    load printers = yes
+    printing = cups
+    printcap name = cups
+    cups options = raw
+
+{%- endset -%}
+
+{%- set smb_default_shares %}
+[homes]
+   comment = Home Directories
+   path = /media/raid10/samba_shares/samba_home_directories/%S
+   valid users = %S, %D%w%S, @"{{ samba_workgroup }}\Domain Users"
+   browseable = no
+   read only = no
+   writable = yes
+   inherit acls = yes
+   follow symlinks = yes
+   wide links = yes
+   force user = %S
+   force group = "Domain Users"
+   create mask = 0660
+   force create mode = 0660
+   force directory mode = 0770
+
+[printers]
+   comment = All Printers
+   path = {{ samba_directory.spool }}
+   browseable = yes
+   writable = yes
+   printable = yes
+   create mask = 0600
+
+[print$]
+   comment = Printer Drivers
+   path = {{ samba_directory.lib }}/drivers
+   writable = yes
+   write list = @printadmin, root
+   force group = @printadmin
+   create mask = 0664
+   directory mask = 0775
+{%- endset %}
+
+{%- macro smb_conf() -%}
+{{ smb_header }}
+{{ smb_global_settings }}
+{{ smb_default_shares }}
+{% for share in samba_shares %}
+[{{ share.name }}]
+[{{ share.name }}]
+    {% if share.comment is defined %}comment = {{ share.comment }}{% endif %}
+    path = {{ share.path }}
+    {% if share.public is defined %}public = {{ share.public }}{% endif %}
+    {% if share.valid_users is defined %}valid users = {{ share.valid_users }}{% endif %}
+    {% if share.force_user is defined %}force user = {{ share.force_user }}{% endif %}
+    {% if share.force_group is defined %}force group = {{ share.force_group }}{% endif %}
+    {% if share.read_only is defined %}read only = {{ share.read_only }}{% endif %}
+    {% if share.writable is defined %}writable = {{ share.writable }}{% endif %}
+    {% if share.browsable is defined %}browseable = {{ share.browsable }}{% endif %}
+    {% if share.guest_ok is defined %}guest ok = {{ share.guest_ok }}{% endif %}
+    {% if share.create_mask is defined %}create mask = {{ share.create_mask }}{% endif %}
+    {% if share.force_create_mode is defined %}force create mode = {{ share.force_create_mode }}{% endif %}
+    {% if share.directory_mask is defined %}directory mask = {{ share.directory_mask }}{% endif %}
+    {% if share.force_directory_mode is defined %}force directory mode = {{ share.force_directory_mode }}{% endif %}
+{% endfor %}
 {%- endmacro -%}
 
 {{- smb_conf() }}

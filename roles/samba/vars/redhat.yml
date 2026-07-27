@@ -3,7 +3,25 @@
 ---
 samba_service: smb
 
-samba_pkg_names:
-  - samba
+samba_server_pkg_names:
+  - "samba"
+  - "samba-client"
+  - "samba-common"
+  - "samba-common-tools"
+  - "samba-dc-libs"
+  - "samba-vfs-idmap-mitkrb5"
+  - "samba-test"
+
+samba_client_pkg_names:
   - samba-client
-  - samba-common
+  - cifs-utils
+
+samba_pkg_names: "{{ samba_server_pkg_names if samba_is_server | bool else samba_client_pkg_names }}"
+
+samba_os_directory:
+  conf: "/etc/samba"
+  spool: "/var/spool/samba"
+  log: "/var/log/samba"
+  lib: "/var/lib/samba"
+  cache: "/var/cache/samba"
+  run: "/run/samba"

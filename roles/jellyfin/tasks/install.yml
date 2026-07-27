@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Setup Jellyfin Package Repository across infrastructure
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ jellyfin_repo_id }}"
+    repo_add_name: "{{ jellyfin_repo_name }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ jellyfin_repo_url | default(omit) }}"
+    repo_add_debian_suites: "{{ jellyfin_codename | default(omit) }}"
+    repo_add_debian_components: "{{ jellyfin_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ jellyfin_gpg_url | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ jellyfin_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ jellyfin_arch_server | default(omit) }}"
+  when:
+    - ansible_os_family in ['Debian', 'Redhat']
+
+- name: Install Jellyfin Media Server
+  ansible.builtin.package:
+    name: "{{ jellyfin_pkg_names }}"
+    state: present
+  notify: Restart jellyfin
+
+- name: Ensure Jellyfin service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ jellyfin_service }}"
+    enabled: true
+    state: started

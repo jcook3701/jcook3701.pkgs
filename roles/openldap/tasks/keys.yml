@@ -39,7 +39,79 @@
     group: "{{ openldap_group }}"
     mode: "0644"
 
-- name: Map self-signed cert as CA bundle if undefined
+# ====================================================================
+# SCENARIO 1: NO EXTERNAL CA SPECIFIED (Use Master Cert for Slaves)
+# ====================================================================
+- name: Map master self-signed cert as CA bundle on master node
   ansible.builtin.set_fact:
     openldap_tls_ca_cert: "{{ openldap_tls_cert }}"
-  when: openldap_tls_ca_cert | length == 0
+  when:
+    - openldap_node_type == 'master'
+    - openldap_tls_ca_cert == "" or "master_ca.pem" in openldap_tls_ca_cert or openldap_tls_ca_cert == openldap_tls_cert
+
+- name: DEBUG - Print absolute path strings and inventory role types
+  ansible.builtin.debug:
+    msg:
+      - "Hostname: {{ ansible_hostname }}"
+      - "Node Type: {{ openldap_node_type }}"
+      - "Raw Directory Object: {{ openldap_directory | to_json }}"
+      - "Calculated Cert Variable: {{ openldap_tls_cert }}"
+
+- name: Fetch master certificate to the controller
+  ansible.builtin.fetch:
+    src: "{{ openldap_tls_cert }}"
+    dest: "/tmp/openldap_master_cert.pem"
+    flat: true
+  when:
+    - openldap_node_type == 'master'
+    - openldap_tls_ca_cert == openldap_tls_cert
+
+- name: Enforce execution fence until master cert file is cached on controller
+  ansible.builtin.wait_for:
+    path: "/tmp/openldap_master_cert.pem"
+    timeout: 30
+  delegate_to: localhost
+  when:
+    - openldap_node_type == 'slave'
+    - openldap_tls_ca_cert == "" or "master_ca.pem" in openldap_tls_ca_cert
+
+- name: Distribute master certificate to slave nodes as a trusted CA
+  ansible.builtin.copy:
+    src: "/tmp/openldap_master_cert.pem"
+    dest: "{{ openldap_directory.certs }}/master_ca.pem"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  when:
+    - openldap_node_type == 'slave'
+    - openldap_tls_ca_cert == "" or "master_ca.pem" in openldap_tls_ca_cert
+
+- name: Override CA path on slave nodes to point to master cert
+  ansible.builtin.set_fact:
+    openldap_tls_ca_cert: "{{ openldap_directory.certs }}/master_ca.pem"
+  when:
+    - openldap_node_type == 'slave'
+    - openldap_tls_ca_cert == "" or "master_ca.pem" in openldap_tls_ca_cert
+
+# ====================================================================
+# SCENARIO 2: EXTERNAL CA SPECIFIED (Verify file presence across nodes)
+# ====================================================================
+- name: Check if the provided external CA file exists on target node
+  ansible.builtin.stat:
+    path: "{{ openldap_tls_ca_cert }}"
+  register: external_ca_file
+  when:
+    - openldap_tls_ca_cert != ""
+    - openldap_tls_ca_cert != openldap_tls_cert
+    - '"master_ca.pem" not in openldap_tls_ca_cert'
+
+- name: Fail if external CA file is missing from target filesystem
+  ansible.builtin.fail:
+    msg: >
+      The specified external CA path '{{ openldap_tls_ca_cert }}' was not found on this system.
+      Please ensure the CA file is securely provisioned before running the playbook.
+  when:
+    - openldap_tls_ca_cert != ""
+    - openldap_tls_ca_cert != openldap_tls_cert
+    - '"master_ca.pem" not in openldap_tls_ca_cert'
+    - not external_ca_file.stat.exists | default(false)

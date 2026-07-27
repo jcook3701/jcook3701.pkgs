@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create temporary LDIF file to load replication module (Master Only)
+  ansible.builtin.copy:
+    content: |
+      dn: cn=module{0},cn=config
+      changetype: modify
+      add: olcModuleLoad
+      olcModuleLoad: syncprov.la
+    dest: /tmp/load_syncprov.ldif
+    mode: "0600"
+  when: openldap_node_type == 'master'
+
+- name: Apply online module loading configuration (Master Only)
+  ansible.builtin.command:
+    cmd: ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/load_syncprov.ldif
+  when: openldap_node_type == 'master'
+  register: load_result
+  failed_when:
+    - load_result.rc != 0
+    - load_result.rc != 20  # Code 20 means it is already loaded, which is safe on reruns
+
+- name: Generate type-specific replication configuration file from template
+  ansible.builtin.template:
+    src: replication.ldif.j2
+    dest: /tmp/replication.config.ldif
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply Replication Config to OpenLDAP online (Master & Slaves)
+  ansible.builtin.command:
+    cmd: ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/replication.config.ldif
+  register: replication_result
+  failed_when:
+    - replication_result.rc != 0
+    - replication_result.rc != 80  # Code 80 means it is already configured
+
+- name: Clean up temporary replication configuration files
+  ansible.builtin.file:
+    path: "{{ tmp_file }}"
+    state: absent
+  loop:
+    - /tmp/load_syncprov.ldif
+    - /tmp/replication.config.ldif
+  loop_control:
+    loop_var: tmp_file
+    label: "Removing: {{ tmp_file }}"

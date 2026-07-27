@@ -1,0 +1,193 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: Input validation specifications for the OpenLDAP server role.
+    description: >-
+      Natively enforces data types, structural constraints,
+      and allowed string choices across all role variables.
+
+    options:
+
+      openldap_state:
+        type: str
+        default: present
+        choices:
+          - present
+          - absent
+          - teardown
+        description: The targeted deployment status of the OpenLDAP services on the nodes.
+
+      openldap_node_type:
+        type: str
+        default: master
+        choices:
+          - master
+          - slave
+        description: Identifies if the node operates as a primary writer or a replication consumer.
+
+      openldap_admin_servers:
+        type: list
+        elements: str
+        default: []
+        description: List of primary database writer server hostnames or IP addresses.
+
+      openldap_slave_servers:
+        type: list
+        elements: str
+        default: []
+        description: List of directory replication consumer nodes.
+
+      openldap_top_level_domain:
+        type: str
+        default: com
+        description: The top-level component of your targeted directory base domain (e.g., com, net, org).
+
+      openldap_second_level_domain:
+        type: str
+        default: example
+        description: The second-level corporate component of your base domain.
+
+      openldap_domain_name:
+        type: str
+        description: The fully combined base directory domain name.
+
+      openldap_organization_name:
+        type: str
+        default: "Example IT Services"
+        description: >-
+          The standard company identity string applied to the
+          base organizational unit structure.
+
+      openldap_admin_user:
+        type: str
+        default: admin
+        description: The root administrative username used to manage directory nodes.
+
+      openldap_admin_password:
+        type: str
+        default: "SecretPassword123"
+        description: Plaintext administrative password string (overridden or hashed at runtime).
+
+      openldap_replica_id:
+        type: str
+        default: "001"
+        description: Unique numerical integer identifier required for each synchronized replication host.
+
+      openldap_replication_user:
+        type: str
+        default: syncrepluser
+        description: Service account username used specifically to securely bind replication streams.
+
+      openldap_replication_password:
+        type: str
+        default: "SecretPassword123"
+        description: Shared authentication password for replication binding paths.
+
+      openldap_use_tls:
+        type: bool
+        default: false
+        description: Enforces secure TLS/SSL data wrapping over network sockets.
+
+      openldap_tls_ca_cert:
+        type: str
+        default: ""
+        description: File path pointing to your trusted corporate Root Certificate Authority file.
+
+      openldap_tls_cert:
+        type: str
+        description: Target filesystem deployment destination path for the node's server certificate.
+
+      openldap_tls_key:
+        type: str
+        description: Target filesystem path for the node's private server security key.
+
+      openldap_tls_cipher_suite:
+        type: str
+        default: "HIGH:MEDIUM:+SSLv3"
+        description: The allowed cryptographic algorithm profile string for network handshakes.
+
+      openldap_sasl_nocanon:
+        type: str
+        default: "on"
+        choices:
+          - "on"
+          - "off"
+        description: Toggles canonicalization parameters for underlying SASL authentication pipelines.
+
+      openldap_tls_reqcert:
+        type: str
+        default: allow
+        choices:
+          - never
+          - allow
+          - try
+          - demand
+        description: Strictness flag dictating client-side certificate verification workflows.
+
+      openldap_custom_port:
+        type: int
+        default: null
+        required: false
+        description: Custom port override string to bypass standard 389/636 network layouts.
+
+      openldap_database_backend:
+        type: str
+        default: mdb
+        choices:
+          - mdb
+          - ldif
+          - wiredtiger
+          - ldap
+          - meta
+          - asyncmeta
+          - passwd
+          - monitor
+        description: The directory indexing architecture module type.
+
+      openldap_database_maxsize:
+        type: int
+        default: 1073741824
+        description: The absolute upper allocator size limit bound for transactional MDB files in bytes.
+
+      openldap_size_limit:
+        type: int
+        default: 500
+        description: Max entries returned from a single search query transaction.
+
+      openldap_time_limit:
+        type: int
+        default: 3600
+        description: Strict execution window timeout ceiling for a query execution in seconds.
+
+      openldap_autofs:
+        type: bool
+        default: false
+        description: Dynamically appends Automount network maps schemas when true.
+
+      openldap_guac:
+        type: bool
+        default: false
+        description: Injects Apache Guacamole management extensions schema maps when true.
+
+      openldap_ppolicy:
+        type: bool
+        default: false
+        description: Mounts default OpenLDAP password policy enforcement schemas when true.
+
+      openldap_samba:
+        type: bool
+        default: false
+        description: Appends Samba active directory account compatibility templates when true.
+
+      openldap_sudo:
+        type: bool
+        default: false
+        description: Integrates centralized sudo privilege command access restriction schemas when true.
+
+      openldap_backup_dir:
+        type: str
+        default: "/var/backups/openldap"
+        description: >-
+          Custom directory path on the Ansible controller where final backup files are stored.

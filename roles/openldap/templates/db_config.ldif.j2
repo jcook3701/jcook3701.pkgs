@@ -19,23 +19,30 @@
 #}
 
 {%- macro db_config() -%}
-# Load the MDB Module into the existing module list
-dn: cn=module{0},cn=config
-changetype: modify
-add: olcModuleLoad
-olcModuleLoad: back_mdb
-
 # Create the brand new Database
-dn: olcDatabase={1}mdb,cn=config
+dn: olcDatabase={1}{{ openldap_database_backend }},cn=config
 changetype: add
 objectClass: olcDatabaseConfig
+{% if openldap_database_backend == 'mdb' %}
 objectClass: olcMdbConfig
-olcDatabase: {1}mdb
+{% elif openldap_database_backend == 'wiredtiger' %}
+objectClass: olcWiredTigerConfig
+{% elif openldap_database_backend == 'ldif' %}
+objectClass: olcLdifConfig
+{% elif openldap_database_backend == 'asyncmeta' %}
+objectClass: olcAsyncMetaConfig
+{% else %}
+objectClass: olc{{ openldap_database_backend | upper }}Config
+{% endif %}
+olcDatabase: {1}{{ openldap_database_backend }}
 olcDbDirectory: {{ openldap_directory.database }}
+{% if openldap_database_backend in ['mdb', 'wiredtiger'] %}
+olcDbMaxsize: {{ openldap_database_maxsize }}
+{% endif %}
 olcSuffix: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
-olcRootDN: cn=admin,dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+olcRootDN: cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
 olcRootPW: {{ openldap_admin_password_hashed }}
-olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * read
+olcAccess: to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * read
 # Basic indexing for performance and stability
 olcDbIndex: objectClass eq
 olcDbIndex: cn,sn,mail pres,eq,sub
@@ -44,6 +51,9 @@ olcDbIndex: uid pres,eq,sub
 # Configure TLS/SSL
 dn: cn=config
 changetype: modify
+replace: olcTLSCACertificateFile
+olcTLSCACertificateFile: {{ openldap_tls_ca_cert }}
+-
 replace: olcTLSCertificateFile
 olcTLSCertificateFile: {{ openldap_tls_cert }}
 -

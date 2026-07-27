@@ -1,7 +1,54 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# Control switches
 samba_state: present
+samba_is_server: false
+# Server Configuration Defaults
+samba_workgroup: "WORKGROUP"
+samba_netbios_name: "HOSTNAME"
+samba_wins_support: "yes"
+
+# Authentication & Domain Architecture
+samba_server_role: "classic primary domain controller"
+samba_domain_logons: "yes"
+samba_domain_master: "yes"
+samba_passdb_backend: "ldapsam:ldaps://://example.com"
+
+# OpenLDAP Schema Offsets
+samba_ldap_suffix: "dc=example,dc=com"
+samba_ldap_user_suffix: "ou=People"
+samba_ldap_group_suffix: "ou=Group"
+samba_ldap_machine_suffix: "ou=Computers"
+samba_ldap_idmap_suffix: "ou=Idmap"
+samba_ldap_admin_dn: "cn=ldap_admin,dc=example,dc=com"
+
+# Protocol Security Engine
+samba_server_signing: "mandatory"
+samba_smb_encrypt: "mandatory"
+samba_server_min_protocol: "SMB2_10"
+samba_server_max_protocol: "SMB3"
+samba_client_min_protocol: "SMB2_10"
+samba_client_max_protocol: "SMB3"
+
+samba_shares: []
+# Example structure for samba_shares:
+#   - name: "media"
+#     path: "/media/media_share/"
+#     valid_users: "user"
+#     read_only: "no"
+#     guest_ok: "no"
+
+# Client Configuration Defaults
+samba_client_mounts: []
+# Example structure for samba_client_mounts:
+#   - src: "//://example.com"
+#     path: "/media/remote-media"
+#     username: "user"
+#     password: "secretpassword"
+#     owner_uid: "jellyfin"
+#     owner_gid: "jellyfin"
+
 
 samba_port: "445"
 

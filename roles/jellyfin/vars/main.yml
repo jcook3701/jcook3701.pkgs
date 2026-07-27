@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+jellyfin_service: jellyfin
+
+jellyfin_pkg_names:
+  - jellyfin
+
+# Repository Specifics
+jellyfin_repo_id: "jellyfin"
+jellyfin_repo_name: "Jellyfin Media Server"

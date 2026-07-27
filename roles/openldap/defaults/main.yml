@@ -17,10 +17,6 @@ openldap_organization_name: "Example IT Services"
 openldap_admin_user: admin
 openldap_admin_password: "SecretPassword123"
 
-## Network & Service Access Binding ##
-openldap_port: 389
-openldap_ssl_port: 636
-
 ## Replication Parameters ##
 # Unique ID number for each slave replica (Must be unique per host if looping)
 openldap_replica_id: "001"
@@ -30,16 +26,17 @@ openldap_replication_user: syncrepluser
 openldap_replication_password: "SecretPassword123"
 
 ## Security & Encryption (TLS) ##
-# TODO: Swap ssl here with tsl
-openldap_use_ssl: false # TODO: Use this in vars/main.yml
+openldap_use_tls: false
 
-openldap_tls_ca_cert: ""
+openldap_tls_ca_cert: "{{ openldap_directory.certs }}/master_ca.pem"
 openldap_tls_cert: "{{ openldap_directory.certs }}/cert.pem"
 openldap_tls_key: "{{ openldap_directory.certs }}/priv.pem"
 openldap_tls_cipher_suite: "HIGH:MEDIUM:+SSLv3"
 
 openldap_sasl_nocanon: "on"
 openldap_tls_reqcert: "allow"
+
+openldap_custom_port: null
 
 ## Core Database & Performance Tuning ##
 # Database engine type (MDB is standard for modern OpenLDAP installs)
@@ -56,3 +53,6 @@ openldap_guac: false
 openldap_ppolicy: false
 openldap_samba: false
 openldap_sudo: false
+
+# The persistent directory path where users want backups to sit on the controller
+openldap_backup_dir: "/var/backups/openldap"

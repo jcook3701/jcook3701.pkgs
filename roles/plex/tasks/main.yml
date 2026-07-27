@@ -10,15 +10,6 @@
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Prepare Plex repositories for {{ ansible_distribution }}
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - "repo-{{ ansible_os_family | lower }}.yml"
-    - "repo-default.yml"
-  when:
-    - ansible_os_family in ['Debian']
-    - plex_state | default('present') == 'present'
-
 - name: Plex Install
   ansible.builtin.include_tasks: install.yml
   when: plex_state | default('present') == 'present'

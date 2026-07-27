@@ -34,6 +34,7 @@ dn: cn=module{0},cn=config
 objectClass: olcModuleList
 cn: module{0}
 olcModulePath: {{ openldap_directory.modules }}
+olcModuleLoad: back_{{ openldap_database_backend }}.la
 
 # 3. Config Database (GRANTS LOCAL ROOT PERMISSIONS)
 dn: olcDatabase={0}config,cn=config

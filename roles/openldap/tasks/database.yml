@@ -13,24 +13,61 @@
   ansible.builtin.set_fact:
     openldap_admin_password_hashed: "{{ openldap_hashed_pass_cmd.stdout }}"
 
-- name: Stop openldap for initial setup
-  ansible.builtin.service:
-    name: "{{ openldap_service }}"
-    state: stopped
+- name: Initialize and Bootstrap OpenLDAP Database Files Offline
+  when: not openldap_existing_config.stat.exists
   become: true
+  block:
+    - name: Stop openldap for initial setup
+      ansible.builtin.service:
+        name: "{{ openldap_service }}"
+        state: stopped
 
-- name: Clear LDAP config for clean bootstrap
-  ansible.builtin.file:
-    path: "{{ openldap_directory.slapd }}"
-    state: "{{ state }}"
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0750"
-  loop: [absent, directory]
-  loop_control:
-    loop_var: state
-    label: "{{ openldap_directory.slapd }} -> state -- {{ state }}"
-  become: true
+    - name: Clear LDAP config for clean bootstrap
+      ansible.builtin.file:
+        path: "{{ openldap_directory.slapd }}"
+        state: "{{ state }}"
+        owner: "{{ openldap_user }}"
+        group: "{{ openldap_group }}"
+        mode: "0750"
+      loop: [absent, directory]
+      loop_control:
+        loop_var: state
+        label: "{{ openldap_directory.slapd }} -> state -- {{ state }}"
+
+    - name: Ensure backend storage directories exist with strict permissions
+      ansible.builtin.file:
+        path: "{{ directory }}"
+        state: directory
+        owner: "{{ openldap_user }}"
+        group: "{{ openldap_group }}"
+        mode: "0700"
+      loop:
+        - "{{ openldap_directory.database }}"
+      loop_control:
+        loop_var: directory
+        label: "Creating: {{ directory }}"
+
+    - name: Deploy bootstrap configuration from J2 template
+      ansible.builtin.template:
+        src: bootstrap_config.ldif.j2
+        dest: /tmp/bootstrap_config.ldif
+        owner: "{{ openldap_user }}"
+        group: "{{ openldap_group }}"
+        mode: "0600"
+
+    - name: Initialize OpenLDAP configuration offline
+      ansible.builtin.command: "{{ command }}"
+      vars:
+        command: >-
+          slapadd -v -n 0 -F {{ openldap_directory.slapd }}
+          -l /tmp/bootstrap_config.ldif
+        ansible_remote_tmp: /tmp
+      become_user: "{{ openldap_user }}"
+
+    - name: Start OpenLDAP service
+      ansible.builtin.service:
+        name: "{{ openldap_service }}"
+        state: started
 
 - name: Upload custom LDIF schemas to the guest
   ansible.builtin.copy:
@@ -57,60 +94,22 @@
     label: "setting permissions: {{ directory }}"
   become: true
 
-- name: Deploy bootstrap configuration from J2 template
-  ansible.builtin.template:
-    src: bootstrap_config.ldif.j2
-    dest: /tmp/bootstrap_config.ldif
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0600"
-
-- name: Initialize OpenLDAP configuration offline
-  ansible.builtin.command: "{{ command }}"
-  vars:
-    command: >-
-      slapadd -v -n 0 -F {{ openldap_directory.slapd }}
-      -l /tmp/bootstrap_config.ldif
-  become: true
-  become_user: "{{ openldap_user }}"
-
-- name: Start OpenLDAP service
-  ansible.builtin.service:
-    name: "{{ openldap_service }}"
-    state: started
-  become: true
-
-- name: Deploy Database On-Line Configuration LDIF
-  ansible.builtin.template:
-    src: db_config.ldif.j2
-    dest: "/tmp/db_config.ldif"
-    owner: root
-    group: root
-    mode: "0600"
-
-- name: Apply On-Line Configuration to OpenLDAP
-  ansible.builtin.command: "{{ command }}"
-  vars:
-    command: >-
-      ldapmodify -Y EXTERNAL -H ldapi:///
-      -f /tmp/db_config.ldif
-  register: ldap_modify_result
-  failed_when:
-    - ldap_modify_result.rc != 0
-    - "'Already exists' not in ldap_modify_result.stderr"
-  changed_when: "'modifying entry' in ldap_modify_result.stdout"
-
-- name: Load schemas offline (In Order)
+- name: Load schemas online (In Order)
   ansible.builtin.command: "{{ command }}"
   vars:
     command: >-
       ldapadd -Y EXTERNAL -H ldapi:///
-      -f {{ openldap_directory.schema }}/{{ schema }}.ldif=
+      -f {{ openldap_directory.schema }}/{{ schema }}.ldif
   loop: "{{ openldap_schemas }}"
   loop_control:
     loop_var: schema
     label: "loading: {{ schema }}"
   become: true
+  register: schema_load_result
+  failed_when:
+    - schema_load_result.rc != 0
+    - "'Already exists' not in schema_load_result.stderr"
+  changed_when: "'adding new entry' in schema_load_result.stdout"
 
 - name: Verify loaded LDAP schemas
   ansible.builtin.command: "{{ command }}"
@@ -128,6 +127,26 @@
       The following schemas are active:
       {{ ldap_schema_list.stdout_lines | select('match', '^cn:.*') | list }}
 
+- name: Deploy Database Online Configuration LDIF
+  ansible.builtin.template:
+    src: db_config.ldif.j2
+    dest: "/tmp/db_config.ldif"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply Online Configuration to OpenLDAP
+  ansible.builtin.command: "{{ command }}"
+  vars:
+    command: >-
+      ldapmodify -Y EXTERNAL -H ldapi:///
+      -f /tmp/db_config.ldif
+  register: ldap_modify_result
+  failed_when:
+    - ldap_modify_result.rc != 0
+    - "'Already exists' not in ldap_modify_result.stderr"
+  changed_when: "'modifying entry' in ldap_modify_result.stdout"
+
 - name: Deploy base domain structure LDIF
   ansible.builtin.template:
     src: base_structure.ldif.j2
@@ -135,18 +154,20 @@
     owner: root
     group: root
     mode: "0600"
+  when: openldap_node_type == 'master'
 
 - name: Create base domain structure
   ansible.builtin.command: "{{ command }}"
   vars:
     base_structure_file: /tmp/base_structure.ldif
-    command: "ldapadd -Y EXTERNAL -H ldapi:/// -f {{ creates }}"
+    command: "ldapadd -Y EXTERNAL -H ldapi:/// -f {{ base_structure_file }}"
   register: base_dn_result
   failed_when:
     - base_dn_result.rc != 0
     - "'Already exists' not in base_dn_result.stderr"
   changed_when: "'adding new entry' in base_dn_result.stdout"
   become: true
+  when: openldap_node_type == 'master'
 
 # TODO: Review
 # https://www.google.com/search?q=syntax-check%5Bspecific%5D%3A+Invalid+options+for+ansible.builtin.include_role%3A+task_from&gs_lcrp=EgZjaHJvbWUyBggAEEUYOdIBBzMxOWowajSoAgOwAgHxBWx6lMMir5Td8QVsepTDIq-U3Q&sourceid=chrome&ie=UTF-8&fbs=ADc_l-aN0CWEZBOHjofHoaMMDiKp9lEhFAN_4ain3HSNQWw-mCdteDOdu-whizqull19J697Hd2DjFbIIkobt5MxzWRrbQzH3_BR0OTUD3HedzAmCN3eh4gdIWpbgdT4j-CUlUQzYrt88O8hmC4QDI-zJCzuennUckWqegLxB4d2UMv2V853ZU5nVZT7nDCio3gzXByIoK9D8gkH41ug3yvRx_o0Bwg4OQ&aep=10&ntc=1&mstk=AUtExfAAyqoyz4qWW0-nVP0nTOatJndhBLPKGzDz69iXj3itrFs9JpMkAXpDpILQGx9RiqQT-ckGMjwbqhQdQ5PElUM0nocLCohsidcKZLXYY8K_eq3-DNLzalFiMO0Sb0q2nfy7I-wdn9aeBLmcBbo-1t2XNkT8rbzOLed0UOeTXkdbi3mFfxSASIDP6K3QGQbSakUmm-TyLpzFDinTDdicyeMztkUSUp8NU-CMn7VLoxThuZXvQDmSHrFUzZWvAi01Iqv_ImNqlGaC0g&aioh=3&csuir=1&cs=0&ccb=1&hl=en-US&biw=1548&bih=720.7999877929688&mtid=MxgyaufCNeiO8L0PhIHYwAk&udm=50
@@ -154,9 +175,9 @@
   ansible.builtin.command: "{{ command }}"
   vars:
     base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
-    bind_dn: "cn=admin,{{ base_dn }}"
+    bind_dn: "cn={{ openldap_admin_user }},{{ base_dn }}"
     command: >-
-      ldapsearch -x -H ldap://localhost
+      ldapsearch -x -H ldap://localhost:{{ openldap_port }}
       -D "{{ bind_dn }}" -w "{{ openldap_admin_password }}"
       -b "{{ base_dn }}" -s base
   register: ldap_bind_test
@@ -167,9 +188,9 @@
   ansible.builtin.command: "{{ command }}"
   vars:
     base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
-    bind_dn: "cn=admin,{{ base_dn }}"
+    bind_dn: "cn={{ openldap_admin_user }},{{ base_dn }}"
     command: >-
-      ldapsearch -x -H ldaps://localhost
+      ldapsearch -x -H ldaps://localhost:{{ openldap_port }}
       -D "{{ bind_dn }}" -w "{{ openldap_admin_password }}"
       -b "{{ base_dn }}" -s base
   environment:
@@ -177,4 +198,4 @@
   register: ldaps_test
   changed_when: false
   no_log: true # Keeps password out of the Ansible logs
-  when: openldap_use_ssl | bool
+  when: openldap_use_tls | bool

@@ -1,19 +1,28 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+openldap_user: "openldap"
+openldap_group: "openldap"
+
 openldap_service: "slapd"
 
 # Place holders for OS-specific variables
-openldap_sysconfig_variable: SLAPD_SERVICES
+openldap_sysconfig_variable: "SLAPD_SERVICES"
 
 openldap_pkg_names: []
 openldap_shared_libs: []
-openldap_directory: []
 
-openldap_user: "openldap"
-openldap_group: openldap
+openldap_directory:
+  conf: "{{ (openldap_os_directory | default({'conf': '/etc/ldap'})).conf }}"
+  slapd: "{{ (openldap_os_directory | default({'slapd': '/etc/ldap/slapd.d'})).slapd }}"
+  certs: "{{ (openldap_os_directory | default({'certs': '/etc/ldap/certs'})).certs }}"
+  database: "{{ (openldap_os_directory | default({'database': '/var/lib/ldap'})).database }}"
+  modules: "{{ (openldap_os_directory | default({'modules': '/usr/lib/ldap'})).modules }}"
+  schema: "{{ (openldap_os_directory | default({'schema': '/etc/ldap/schema'})).schema }}"
+  run: "{{ (openldap_os_directory | default({'run': '/run/slapd'})).run }}"
+  defaults: "{{ (openldap_os_directory | default({'defaults': '/etc/default/slapd'})).defaults }}"
+  backup: "{{ openldap_backup_dir }}"
 
-#
 openldap_schemas_base:
   - core
   - cosine
@@ -39,19 +48,33 @@ openldap_schemas: >-
     ( ['guacConfigGroup'] if (openldap_guac | default(false)) else [] )
   }}
 
-openldap_raw_listen_protocols: >-
-  {% if openldap_use_ssl | bool %}
-    {{ ['ldap', 'ldaps'] | to_yaml }}
+## Network & Service Access Binding ##
+openldap_raw_port: >-
+  {% if openldap_use_tls | bool %}
+    {{ 636 | to_json }}
   {% else %}
-    {{ ['ldap'] | to_yaml }}
+    {{ 389 | to_json }}
   {% endif %}
 
-openldap_listen_protocols: "{{ openldap_raw_listen_protocols | from_yaml }}"
+openldap_port: "{{ openldap_custom_port | default(openldap_raw_port | from_json, true) }}"
 
-# 1. Your input list:       ['ldap', 'ldaps']
-# 2. After mapping ':///':  ['ldap:///', 'ldaps:///']
-# 3. After join and append: "ldap:/// ldaps:/// ldapi:///"
+openldap_raw_listen_protocols: >-
+  {% if openldap_use_tls | bool %}
+    {{ ['ldap', 'ldaps'] | to_json }}
+  {% else %}
+    {{ ['ldap'] | to_json }}
+  {% endif %}
+
+openldap_listen_protocols: "{{ openldap_raw_listen_protocols | from_json }}"
+
 openldap_final_daemon_args: >-
-  {{ openldap_listen_protocols |
-      map('regex_replace', '$', ':///') |
-      join(' ') }} ldapi:///
+  {% set links = [] %}
+  {% for proto in openldap_listen_protocols %}
+    {% if proto == 'ldap' %}
+      {% set _ = links.append('ldap://0.0.0.0:' ~ openldap_port) %}
+    {% elif proto == 'ldaps' %}
+      {% set _ = links.append('ldaps://0.0.0.0:' ~ openldap_port) %}
+    {% endif %}
+  {% endfor %}
+  {% set _ = links.append('ldapi:///') %}
+  {{ links | join(' ') | trim }}

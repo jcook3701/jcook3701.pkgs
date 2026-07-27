@@ -18,14 +18,17 @@
     mode: "0644"
   notify: Restart openldap service
 
-- name: Ensure openldap listens on Port ({{ openldap_port }})
+- name: Ensure OpenLDAP daemon system settings are fully populated
   ansible.builtin.lineinfile:
     path: "{{ openldap_directory.defaults }}"
-    regexp: >-
-      ^{{ openldap_sysconfig_variable }}=
-    line: >-
-      {{ openldap_sysconfig_variable }}="{{ openldap_final_daemon_args }}"
+    regexp: "^{{ item.variable }}="
+    line: '{{ item.variable }}="{{ item.value }}"'
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - { variable: "{{ openldap_sysconfig_variable }}", value: "{{ openldap_final_daemon_args }}" }
+    - { variable: "SLAPD_OPTIONS", value: "" }
   notify: Restart openldap service
-
-- name: Flush handlers to ensure openldap running with new ports
-  ansible.builtin.meta: flush_handlers
+  become: true

@@ -1,0 +1,59 @@
+{#
+# replication.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro replication() -%}
+# Set the unique server ID for this node
+dn: cn=config
+changetype: modify
+replace: olcServerID
+olcServerID: {{ openldap_replica_id }}
+
+{% if openldap_node_type == 'master' %}
+# Configure Master Engine Overlay
+dn: olcOverlay=syncprov,olcDatabase={1}{{ openldap_database_backend }},cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpCheckpoint: 100 10
+{% endif %}
+
+{% if openldap_node_type == 'slave' %}
+# Configure Slave Consumer Synchronization Pipeline
+dn: olcDatabase={1}{{ openldap_database_backend }},cn=config
+changetype: modify
+add: olcSyncrepl
+olcSyncrepl: {0}rid={{ openldap_replica_id }}
+  provider=ldap://{{ openldap_admin_servers[0] | default('://jcook3701.com') }}:{{ openldap_port }}
+  binddn="cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+  bindmethod=simple
+  credentials={{ openldap_admin_password }}
+  searchbase="dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+  type=refreshAndPersist
+  interval=00:00:00:10
+  retry="5 5 300 5"
+  timeout=1
+-
+add: olcUpdateRef
+olcUpdateRef: ldap://{{ openldap_admin_servers[0] | default('://jcook3701.com') }}:{{ openldap_port }}
+{% endif %}
+{%- endmacro -%}
+
+{{- replication() }}
