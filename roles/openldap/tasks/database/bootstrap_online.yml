@@ -1,0 +1,111 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Start OpenLDAP service
+  ansible.builtin.service:
+    name: "{{ openldap_service }}"
+    state: started
+
+- name: Set permissions for OpenLDAP directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0750"
+    recurse: true
+  loop:
+    - "{{ openldap_directory.slapd }}"
+    - "{{ openldap_directory.database }}"
+  loop_control:
+    loop_var: directory
+    label: "setting permissions: {{ directory }}"
+  become: true
+
+- name: Load base core schemas online (In Order)
+  ansible.builtin.shell:
+    cmd: "{{ command }}"
+  args:
+    executable: /bin/bash
+  vars:
+    command: >-
+      set -o pipefail && iconv -f UTF-8 -t UTF-8
+      -c {{ openldap_directory.schema }}/{{ schema }}.ldif 2>&1 |
+      ldapadd -Y EXTERNAL -H ldapi:///
+  loop: "{{ openldap_schemas_base }}"
+  loop_control:
+    loop_var: schema
+    label: "loading: {{ schema }}"
+  register: schema_load_result
+  failed_when:
+    - schema_load_result.rc != 0
+    - "'duplicate ' not in schema_load_result.stderr | lower"
+    - "'already exists' not in schema_load_result.stderr | lower"
+  changed_when: "'adding new entry' in schema_load_result.stdout | lower"
+  become: true
+
+- name: Verify loaded LDAP schemas
+  ansible.builtin.command: "{{ command }}"
+  vars:
+    command: >-
+      ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:///
+      -b "cn=schema,cn=config" "(objectClass=olcSchemaConfig)" cn
+  register: ldap_schema_list
+  changed_when: false
+  become: true
+
+- name: Display active LDAP schemas
+  ansible.builtin.debug:
+    msg: >-
+      The following schemas are active:
+      {{ ldap_schema_list.stdout_lines | select('match', '^cn:.*') | list }}
+
+- name: Deploy Database Online Configuration LDIF
+  ansible.builtin.template:
+    src: 01_config_database.ldif.j2
+    dest: "/tmp/01_config_database.ldif"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply Online Configuration to OpenLDAP
+  ansible.builtin.command: "{{ command }}"
+  vars:
+    config_database_file: "/tmp/01_config_database.ldif"
+    command: >-
+      ldapmodify -Y EXTERNAL -H ldapi:///
+      -f {{ config_database_file }}
+  register: ldap_modify_result
+  failed_when:
+    - ldap_modify_result.rc != 0
+    - "'already exists' not in ldap_modify_result.stderr | lower"
+    - "'type or value exists' not in ldap_modify_result.stderr | lower"
+  changed_when: "'modifying entry' in ldap_modify_result.stdout | lower"
+
+- name: Deploy base domain structure LDIF
+  ansible.builtin.template:
+    src: 02_data_structure.ldif.j2
+    dest: "/tmp/02_data_structure.ldif"
+    owner: root
+    group: root
+    mode: "0600"
+  when: openldap_node_type == 'master'
+
+- name: Create base domain structure
+  ansible.builtin.command: "{{ command }}"
+  vars:
+    data_structure_file: /tmp/02_data_structure.ldif
+    base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    bind_dn: "cn={{ openldap_admin_user }},{{ base_dn }}"
+    command: >-
+      ldapmodify -x -H ldapi:///
+      -D "{{ bind_dn }}"
+      -w "{{ openldap_admin_password }}"
+      -f {{ data_structure_file }}
+  register: base_dn_result
+  failed_when:
+    - base_dn_result.rc != 0
+    - "'already exists' not in base_dn_result.stderr | lower"
+  changed_when: "'adding new entry' in base_dn_result.stdout | lower"
+  become: true
+  when: openldap_node_type == 'master'

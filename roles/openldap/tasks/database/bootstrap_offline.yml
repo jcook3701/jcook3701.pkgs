@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop openldap for initial setup
+  ansible.builtin.service:
+    name: "{{ openldap_service }}"
+    state: stopped
+
+- name: Clear LDAP config for clean bootstrap
+  ansible.builtin.file:
+    path: "{{ openldap_directory.slapd }}"
+    state: "{{ state }}"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0750"
+  loop: [absent, directory]
+  loop_control:
+    loop_var: state
+    label: "{{ openldap_directory.slapd }} -> state -- {{ state }}"
+
+- name: Ensure backend storage directories exist with strict permissions
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0700"
+  loop:
+    - "{{ openldap_directory.database }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating: {{ directory }}"
+
+- name: Deploy bootstrap configuration from J2 template
+  ansible.builtin.template:
+    src: "01_config_bootstrap.ldif.j2"
+    dest: "/tmp/01_config_bootstrap.ldif"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0600"
+
+- name: Initialize OpenLDAP configuration offline
+  ansible.builtin.command: "{{ command }}"
+  vars:
+    config_bootstrap_file: "/tmp/01_config_bootstrap.ldif"
+    command: >-
+      slapadd -v -n 0 -F {{ openldap_directory.slapd }}
+      -l {{ config_bootstrap_file }}
+    ansible_remote_tmp: /tmp
+  become_user: "{{ openldap_user }}"
