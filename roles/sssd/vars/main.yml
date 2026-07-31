@@ -1,67 +1,41 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-sssd_service: sssd
+sssd_service: "sssd"
 sssd_nscd_service: "nscd"
+sssd_systemd_login_service: "systemd-logind"
 
 sssd_directory:
-  conf: "/etc/sssd"
+  conf: "{{ sssd_os_directory.conf | default('/etc/sssd') }}"
+  cacerts: "{{ sssd_os_directory.cacerts | default('/etc/ssl/certs/') }}"
+  certs: "{{ sssd_os_directory.certs | default('/etc/ldap/certs') }}"
+  db: "{{ sssd_os_directory.db | default('/var/lib/sss/db') }}"
+  mc: "{{ sssd_os_directory.mc | default('/var/lib/sss/mc') }}"
+  pipes: "{{ sssd_os_directory.pipes | default('/var/lib/sss/pipes') }}"
 
 sssd_file:
   sssd_conf: "{{ sssd_directory.conf }}/sssd.conf"
 
-# Dynamically switch ports: 636 for ldaps, 389 for plain ldap
+# Dynamic transmission ports calculations
 sssd_ldap_port: "{{ (sssd_ldap_protocol == 'ldaps') | ternary(636, 389) }}"
 
-# Logging Options
-sssd_debug_level: 7
-sssd_pam_debug_level: 10
-sssd_autofs_debug_level: 10
-sssd_ldap_debug_level: 6
-sssd_sudo_debug_level: 5
-sssd_ssh_debug_level: 5
-
-# LDAP TLS Configurations
-# options are allow or never
-sssd_ldap_tls_reqcert: "never"
-sssd_ldap_tls_cacert: "/etc/ssl/certs/ca-certificates.crt"
-sssd_ldap_tls_cert: "/etc/openldap/certs/cert.pem"
-sssd_ldap_tls_key: "/etc/openldap/certs/priv.pem"
-
-# LDAP Infrastructure Defaults
+# Multi-Master Client Failover URI Constructor Loop Pass
 sssd_ldap_uri: >-
   {% set uris = [] %}
   {% for host in sssd_ldap_hosts %}
     {% set _ = uris.append(sssd_ldap_protocol ~ '://' ~ host ~ ':' ~ sssd_ldap_port) %}
   {% endfor %}
-  {{ uris | join(', ') }}
+  {{ uris | join(',') | trim }}
 
+# Base Data Target Search Branches
 sssd_ldap_search_base: "dc={{ sssd_second_level_domain }},dc={{ sssd_top_level_domain }}"
-sssd_ldap_user_search_base: "ou=People,ou=Users,{{ sssd_ldap_search_base }}"
-sssd_ldap_group_search_base: "ou=Group,{{ sssd_ldap_search_base }}"
-sssd_ldap_access_filter: "(objectClass=posixAccount)"
-sssd_ldap_schema: "rfc2307bis"
+sssd_ldap_user_search_base: "ou={{ sssd_ldap_people_child_ou | trim }},ou={{ sssd_ldap_users_parent_ou | trim }},{{ sssd_ldap_search_base }}"
+sssd_ldap_group_search_base: "ou={{ sssd_ldap_groups_ou | trim }},{{ sssd_ldap_search_base }}"
 
-# Kerberos Integration Defaults
+# MIT Kerberos Interception Construction
 sssd_krb5_server: "{{ sssd_krb5_hosts | join(',') }}"
 sssd_krb5_realm: "{{ sssd_domain_name | upper }}"
-sssd_krb5_validate: "true"
-sssd_cache_credentials: "true"
 
-# Service Options
-sssd_nss_homedir_substring: "/home"
-sssd_ldap_search_timeout: 90
-sssd_ldap_network_timeout: 90
-sssd_timeout: 30
-
-# Autofs LDAP Settings
-sssd_ldap_autofs_search_base: "cn=AutoMount,{{ sssd_ldap_search_base }}"
-sssd_ldap_autofs_map_object_class: "automountMap"
-sssd_ldap_autofs_entry_object_class: "automount"
-sssd_ldap_autofs_map_name: "automountMapName"
-sssd_ldap_autofs_entry_key: "automountKey"
-sssd_ldap_autofs_entry_value: "automountInformation"
-
-# SSH & SUDO LDAP Settings
-sssd_ldap_sudo_search_base: "ou=SUDOers,{{ sssd_ldap_search_base }}"
-sssd_ssh_hash_known_hosts: "true"
+# Advanced Application Search Anchors
+sssd_ldap_autofs_search_base: "cn={{ sssd_ldap_automount_ou | trim }},{{ sssd_ldap_search_base }}"
+sssd_ldap_sudo_search_base: "ou={{ sssd_ldap_sudoers_ou | trim }},{{ sssd_ldap_search_base }}"

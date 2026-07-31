@@ -31,10 +31,12 @@ SASL_NOCANON	{{ openldap_sasl_nocanon }}
 
 # Core Client Mappings
 BASE dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
-URI {{ 'ldaps' if openldap_use_tls else 'ldap' }}://{{ openldap_admin_servers[0] | default(ansible_hostname + '.' + openldap_domain_name) }}:{{ openldap_port }}
+URI {{ 'ldaps' if openldap_use_tls else 'ldap' }}://{{ openldap_admin_servers | first | default(ansible_hostname + '.' + openldap_domain_name) }}:{{ openldap_port }}
 
+{% if openldap_use_tls | bool %}
 TLS_CACERT {{ openldap_tls_ca_cert }}
 TLS_REQCERT {{ openldap_tls_reqcert }}
+{% endif %}
 {%- endmacro -%}
 
 {{- ldap_conf() }}

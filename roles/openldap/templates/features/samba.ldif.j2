@@ -1,0 +1,241 @@
+{#
+# samba.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro samba_ldif() -%}
+# 1. WINBIND CROSS-PLATFORM ID-MAPPING CONTAINER
+dn: ou={{ openldap_idmap_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+ou: {{ openldap_idmap_ou | trim }}
+
+# 2. DYNAMIC ID ALLOCATOR SYSTEM TRACKER FACTORY
+dn: cn=NextFreeUnixId,dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+cn: NextFreeUnixId
+sn: NextFreeUnixId
+objectClass: sambaUnixIdPool
+objectClass: inetOrgPerson
+gidNumber: 1200
+uidNumber: 1208
+
+# 2b. FOUNDATIONAL SAMBA NETBIOS DOMAINS CONTAINER
+dn: ou=Domains,dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+ou: Domains
+
+# 3. CLASSIC SAMBA NT4-STYLE REGISTRATION DOMAIN
+dn: sambaDomainName={{ openldap_samba_domain | default(openldap_second_level_domain | upper) | trim }},ou=Domains,dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+sambaSID: {{ openldap_system_domain_sid | trim }}
+sambaAlgorithmicRidBase: 1000
+sambaNextUserRid: 1000
+sambaMinPwdLength: 5
+sambaPwdHistoryLength: 0
+sambaLogonToChgPwd: 0
+sambaMaxPwdAge: -1
+sambaMinPwdAge: 0
+sambaLockoutDuration: 30
+sambaLockoutObservationWindow: 30
+sambaLockoutThreshold: 0
+sambaForceLogoff: -1
+sambaRefuseMachinePwdChange: 0
+objectClass: sambaDomain
+objectClass: sambaUnixIdPool
+objectClass: top
+uidNumber: 1000
+gidNumber: 1000
+sambaDomainName: {{ openldap_samba_domain | default(openldap_second_level_domain | upper) | trim }}
+sambaNextRid: 1001
+
+# 4. SAMBA DOMAIN SECURITY GROUP ARCHITECTURE BUILDERS
+dn: cn=Domain Admins,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Domain Admins
+gidNumber: 512
+memberUid: samba-admin
+memberUid: root
+description: Netbios Domain Administrators
+sambaSID: {{ openldap_system_domain_sid | trim }}-512
+sambaGroupType: 2
+displayName: Domain Admins
+
+dn: cn=Domain Users,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Domain Users
+gidNumber: 513
+description: Netbios Domain Users
+sambaSID: {{ openldap_system_domain_sid | trim }}-513
+sambaGroupType: 2
+displayName: Domain Users
+{% for user in openldap_bootstrap_users | default([]) %}
+memberUid: {{ user.username | trim }}
+{% endfor %}
+
+dn: cn=Domain Guests,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Domain Guests
+gidNumber: 514
+description: Netbios Domain Guests Users
+sambaSID: {{ openldap_system_domain_sid | trim }}-514
+sambaGroupType: 2
+displayName: Domain Guests
+
+dn: cn=Domain Computers,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Domain Computers
+gidNumber: 515
+description: Netbios Domain Computers accounts
+sambaSID: {{ openldap_system_domain_sid | trim }}-515
+sambaGroupType: 2
+displayName: Domain Computers
+
+dn: cn=Administrators,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Administrators
+gidNumber: 544
+description: Netbios Domain Members can fully administer the computers
+sambaGroupType: 4
+displayName: Administrators
+sambaSID: {{ openldap_system_domain_sid | trim }}-544
+
+dn: cn=Account Operators,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Account Operators
+gidNumber: 548
+description: Netbios Domain Users to manipulate users accounts
+sambaGroupType: 4
+displayName: Account Operators
+sambaSID: {{ openldap_system_domain_sid | trim }}-548
+
+dn: cn=Print Operators,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Print Operators
+gidNumber: 550
+description: Netbios Domain Print Operators
+sambaGroupType: 4
+displayName: Print Operators
+sambaSID: {{ openldap_system_domain_sid | trim }}-550
+
+dn: cn=Backup Operators,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Backup Operators
+gidNumber: 551
+description: Netbios Domain Members can bypass file security to back up files
+sambaGroupType: 4
+displayName: Backup Operators
+sambaSID: {{ openldap_system_domain_sid | trim }}-551
+
+dn: cn=Replicators,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Replicators
+gidNumber: 552
+description: Netbios Domain Supports file replication in a domain
+sambaGroupType: 4
+displayName: Replicators
+sambaSID: {{ openldap_system_domain_sid | trim }}-552
+
+# 5. DYNAMIC WINDOWS NT DATA ATTRIBUTE MODIFICATION LOOP
+{% for user in openldap_bootstrap_users | default([]) %}
+{% if user.is_pxe_worker | default(false) | bool %}
+# Isolated PXE Utility Account Setup Block (Injected here inside Samba layer since it uses the sambaSamAccount schema)
+dn: uid={{ user.username | trim }},ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+uid: {{ user.username | trim }}
+sambaSID: {{ openldap_system_domain_sid | trim }}-{{ user.uid | string | trim }}
+objectClass: sambaSamAccount
+objectClass: account
+{# sambaNTPassword: {{ user.password | string | password_hash('ntlm') | upper }} #}
+sambaPasswordHistory: 0000000000000000000000000000000000000000000000000000000000000000
+sambaPwdLastSet: 1771400092
+sambaAcctFlags: [U ]
+
+{% else %}
+dn: uid={{ user.username | trim }},ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: modify
+add: objectClass
+objectClass: sambaSamAccount
+-
+add: sambaSID
+sambaSID: {{ openldap_system_domain_sid | trim }}-{{ user.uid | string | trim }}
+-
+add: sambaPrimaryGroupSID
+sambaPrimaryGroupSID: {{ openldap_system_domain_sid | trim }}-513
+-
+add: sambaLogonScript
+sambaLogonScript: logon.bat
+-
+add: sambaProfilePath
+sambaProfilePath: \\PDC-SRV\profiles\{{ user.username | trim }}
+-
+add: sambaHomePath
+sambaHomePath: \\PDC-SRV\{{ user.username | trim }}
+-
+add: sambaHomeDrive
+sambaHomeDrive: H:
+-
+add: sambaLMPassword
+sambaLMPassword: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+-
+add: sambaAcctFlags
+sambaAcctFlags: [U]
+{# -
+add: sambaNTPassword
+sambaNTPassword: {{ user.password | string | password_hash('ntlm') | upper }} #}
+-
+add: sambaPwdLastSet
+sambaPwdLastSet: 1609496130
+-
+add: sambaPwdMustChange
+sambaPwdMustChange: 1613384130
+
+{% endif %}
+{% endfor %}
+
+{%- endmacro -%}
+
+{{- samba_ldif() }}

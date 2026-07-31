@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart ssh
+- name: Restart SSH Service
   ansible.builtin.service:
     name: "{{ ssh_service }}"
     state: restarted
+  become: true

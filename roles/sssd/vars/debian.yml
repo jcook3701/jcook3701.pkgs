@@ -8,3 +8,11 @@ sssd_pkg_names:
   - sssd-krb5
   - libpam-sss
   - libnss-sss
+
+sssd_os_directory:
+  conf: "/etc/sssd"
+  cacerts: "/etc/ssl/certs/"
+  certs: "/etc/ldap/certs"
+  db: "/var/lib/sss/db"
+  mc: "/var/lib/sss/mc"
+  pipes: "/var/lib/sss/pipes"

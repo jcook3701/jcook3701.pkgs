@@ -25,8 +25,11 @@ objectClass: olcGlobal
 cn: config
 olcPidFile: {{ openldap_directory.run }}/slapd.pid
 olcArgsFile: {{ openldap_directory.run }}/slapd.args
+{% if openldap_use_tls | bool %}
 olcTLSCertificateFile: {{ openldap_tls_cert }}
 olcTLSCertificateKeyFile: {{ openldap_tls_key }}
+olcSecurity: ssf=64
+{% endif %}
 olcLogLevel: stats
 
 # 2. Module Container (Allows online module loading later)

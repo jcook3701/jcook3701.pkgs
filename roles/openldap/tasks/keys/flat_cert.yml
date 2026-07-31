@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate private key for standalone OpenLDAP workers
+  community.crypto.openssl_privatekey:
+    path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0600"
+
+- name: Generate Certificate Signing Request (CSR) for local hosts
+  community.crypto.openssl_csr:
+    path: "{{ openldap_tls_csr }}"
+    privatekey_path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    common_name: "{{ ansible_hostname }}.{{ openldap_domain_name }}"
+    subject_alt_name:
+      - "DNS:{{ ansible_fqdn }}"
+      - "DNS:{{ ansible_hostname }}"
+      - "IP:{{ ansible_default_ipv4.address }}"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+
+- name: Generate standalone flat self-signed directory certificate
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_cert }}"
+    csr_path: "{{ openldap_tls_csr }}"
+    privatekey_path: "{{ openldap_tls_key }}"
+    provider: selfsigned
+    select_crypto_backend: cryptography
+    selfsigned_not_after: "+365d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+
+- name: Force local CA string verification paths to match native server certificates
+  ansible.builtin.set_fact:
+    openldap_tls_ca_cert: "{{ openldap_tls_cert }}"

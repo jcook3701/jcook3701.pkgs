@@ -12,5 +12,3 @@
   ansible.builtin.package:
     name: "{{ sssd_pkg_names }}"
     state: absent
-
-# TODO: Remove sssd configuration files

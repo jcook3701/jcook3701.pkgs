@@ -30,8 +30,11 @@
     - { question: "slapd/root_password_again", value: "{{ openldap_admin_password }}", vtype: "password" }
   loop_control:
     loop_var: config
+  no_log: true
   become: true
-  when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - not openldap_existing_config.stat.exists
 
 - name: Install OpenLDAP package and dependencies.
   ansible.builtin.package:
@@ -42,8 +45,10 @@
   become: true
 
 - name: OpenLDAP key generation
-  ansible.builtin.include_tasks: keys.yml
-  when: not openldap_existing_config.stat.exists
+  ansible.builtin.include_tasks: "keys/keys.yml"
+  when:
+    - not openldap_existing_config.stat.exists
+    - openldap_use_tls | bool
 
 - name: OpenLDAP configuration
   ansible.builtin.include_tasks: configure.yml

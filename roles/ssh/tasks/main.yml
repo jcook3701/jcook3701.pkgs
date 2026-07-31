@@ -1,21 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Load SSH OS-specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Gather target host package facts
-  ansible.builtin.package_facts:
-    manager: auto
-
 - name: Install SSH packages
   ansible.builtin.include_tasks: install.yml
   when: ssh_state | default('present') == 'present'
 
-- name: Uninstall SSH packages
-  ansible.builtin.include_tasks: uninstall.yml
-  when:
-    - ssh_state | default('present') == 'absent'
-    - ssh_pkg_names[0] in ansible_facts.packages
+- name: Safe Reversion and Recovery of Baseline SSH Configurations
+  ansible.builtin.include_tasks: teardown.yml
+  when: ssh_state | default('present') == 'teardown'

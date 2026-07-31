@@ -14,6 +14,7 @@
 
 - name: Generate Kerberos Keys
   ansible.builtin.include_tasks: keys.yml
+  when: kerberos_node_type in ['master', 'replica']
 
 - name: Ensure Kerberos service is started and enable
   ansible.builtin.systemd:
@@ -23,7 +24,10 @@
   loop: "{{ kerberos_services }}"
   loop_control:
     loop_var: service
-  when: kerberos_node_type in ['master', 'replica']
+  when:
+    - kerberos_node_type in ['master', 'replica']
+    - kerberos_services is defined
+    - kerberos_services | length > 0
 
 - name: Cleanup transfer files.
   ansible.builtin.include_tasks: cleanup.yml

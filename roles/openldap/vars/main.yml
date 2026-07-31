@@ -13,14 +13,15 @@ openldap_pkg_names: []
 openldap_shared_libs: []
 
 openldap_directory:
-  conf: "{{ (openldap_os_directory | default({'conf': '/etc/ldap'})).conf }}"
-  slapd: "{{ (openldap_os_directory | default({'slapd': '/etc/ldap/slapd.d'})).slapd }}"
-  certs: "{{ (openldap_os_directory | default({'certs': '/etc/ldap/certs'})).certs }}"
-  database: "{{ (openldap_os_directory | default({'database': '/var/lib/ldap'})).database }}"
-  modules: "{{ (openldap_os_directory | default({'modules': '/usr/lib/ldap'})).modules }}"
-  schema: "{{ (openldap_os_directory | default({'schema': '/etc/ldap/schema'})).schema }}"
-  run: "{{ (openldap_os_directory | default({'run': '/run/slapd'})).run }}"
-  defaults: "{{ (openldap_os_directory | default({'defaults': '/etc/default/slapd'})).defaults }}"
+  conf: "{{ openldap_os_directory.conf | default('/etc/ldap') }}"
+  slapd: "{{ openldap_os_directory.slapd | default('/etc/ldap/slapd.d') }}"
+  cacerts: "{{ openldap_os_directory.cacerts | default('/etc/ssl/certs') }}"
+  certs: "{{ openldap_os_directory.certs | default('/etc/ldap/certs') }}"
+  database: "{{ openldap_os_directory.database | default('/var/lib/ldap') }}"
+  modules: "{{ openldap_os_directory.modules | default('/usr/lib/ldap') }}"
+  schema: "{{ openldap_os_directory.schema | default('/etc/ldap/schema') }}"
+  run: "{{ openldap_os_directory.run | default('/run/slapd') }}"
+  defaults: "{{ openldap_os_directory.defaults | default('/etc/default/slapd') }}"
   backup: "{{ openldap_backup_dir }}"
 
 openldap_schemas_base:
@@ -49,14 +50,7 @@ openldap_schemas: >-
   }}
 
 ## Network & Service Access Binding ##
-openldap_raw_port: >-
-  {% if openldap_use_tls | bool %}
-    {{ 636 | to_json }}
-  {% else %}
-    {{ 389 | to_json }}
-  {% endif %}
-
-openldap_port: "{{ openldap_custom_port | default(openldap_raw_port | from_json, true) }}"
+openldap_port: "{{ openldap_secure_port if (openldap_use_tls | bool) else openldap_cleartext_port }}"
 
 openldap_raw_listen_protocols: >-
   {% if openldap_use_tls | bool %}
@@ -71,9 +65,9 @@ openldap_final_daemon_args: >-
   {% set links = [] %}
   {% for proto in openldap_listen_protocols %}
     {% if proto == 'ldap' %}
-      {% set _ = links.append('ldap://0.0.0.0:' ~ openldap_port) %}
+      {% set _ = links.append('ldap://0.0.0.0:' ~ openldap_cleartext_port) %}
     {% elif proto == 'ldaps' %}
-      {% set _ = links.append('ldaps://0.0.0.0:' ~ openldap_port) %}
+      {% set _ = links.append('ldaps://0.0.0.0:' ~ openldap_secure_port) %}
     {% endif %}
   {% endfor %}
   {% set _ = links.append('ldapi:///') %}

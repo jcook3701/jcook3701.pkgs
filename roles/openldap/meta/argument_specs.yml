@@ -90,14 +90,30 @@ argument_specs:
         default: false
         description: Enforces secure TLS/SSL data wrapping over network sockets.
 
+      openldap_generate_ca:
+        type: "bool"
+        required: false
+        default: true
+        description: "Enforces true multi-tier Certificate Authority (true) or falls back to flat standalone self-signed routing (false)."
+
       openldap_tls_ca_cert:
         type: str
         default: ""
         description: File path pointing to your trusted corporate Root Certificate Authority file.
 
+      openldap_tls_ca_key:
+        type: "path"
+        required: false
+        description: "Absolute filesystem destination path tracking your internal Root CA private key file asset."
+
       openldap_tls_cert:
         type: str
         description: Target filesystem deployment destination path for the node's server certificate.
+
+      openldap_tls_csr:
+        type: "path"
+        required: false
+        description: "Absolute filesystem destination path tracking your intermediate Certificate Signing Request (CSR) asset."
 
       openldap_tls_key:
         type: str
@@ -126,11 +142,15 @@ argument_specs:
           - demand
         description: Strictness flag dictating client-side certificate verification workflows.
 
-      openldap_custom_port:
+      openldap_cleartext_port:
         type: int
-        default: null
-        required: false
-        description: Custom port override string to bypass standard 389/636 network layouts.
+        default: 389
+        description: "The baseline network port allocated for standard unencrypted LDAP communication loops. Automatically hardened when combined with STARTTLS upgrades."
+
+      openldap_secure_port:
+        type: int
+        default: 636
+        description: "The explicit cryptographic network port allocated for direct, implicit LDAPS communication loops, ensuring encryption from the initial connection frame."
 
       openldap_database_backend:
         type: str

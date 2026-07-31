@@ -1,0 +1,57 @@
+{#
+# ppolicy.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro ppolicy_ldif() -%}
+# 1. Centralized Organizational Container for Password Policies
+dn: ou=Policies,dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+ou: Policies
+
+dn: cn=default,ou=Policies,dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: device
+objectClass: pwdPolicy
+cn: default
+# Minimum character length restriction
+pwdMinLength: {{ openldap_ppolicy_min_length | string | trim }}
+# Number of old unique passwords to store to prevent reuse
+pwdInHistory: {{ openldap_ppolicy_history_count | string | trim }}
+# Allow users to change their own passwords anytime
+pwdAllowUserChange: TRUE
+# Maximum consecutive login failures allowed before locking out the user
+pwdMaxFailure: {{ openldap_ppolicy_max_failure | string | trim }}
+# Duration to lock the account out (in seconds)
+pwdLockout: TRUE
+pwdLockoutDuration: {{ openldap_ppolicy_lockout_duration | string | trim }}
+# Time window tracking counter to reset bad login attempts (in seconds)
+pwdFailureCountInterval: 0
+# Grace logins allowed after password expiration
+pwdGraceAuthNLimit: 0
+# Seconds before an account password forces an expiration rollover
+pwdMaxAge: 0
+# Pre-expiration warning notification threshold (in seconds)
+pwdExpireWarning: {{ openldap_ppolicy_expire_warning | string | trim }}
+# Safely store internal account status attributes in memory handles
+pwdAttribute: 2.5.4.35
+{%- endmacro -%}
+
+{{- ppolicy_ldif() }}

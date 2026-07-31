@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if a factory-original backup file exists on host disk space
+  ansible.builtin.find:
+    paths: "{{ ssh_directory.conf }}"
+    patterns: "sshd_config.*"
+  register: ssh_backup_files
+
+- name: Restore standard system factory-default configuration baseline
+  ansible.builtin.copy:
+    src: "{{ ssh_backup_files.files | sort(attribute='ctime') | first | attr('path') }}"
+    dest: "{{ ssh_file.conf }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  when: ssh_backup_files.matched > 0
+  notify: Restart SSH Service
+
+- name: Fallback Safety Configuration Pass (Executed only if original backup is missing)
+  ansible.builtin.copy:
+    content: |
+      # Safe Fallback Restoration Baseline
+      Port {{ ssh_port | default(22) }}
+      Protocol 2
+      HostKey {{ ssh_directory.conf }}/ssh_host_rsa_key
+      HostKey {{ ssh_directory.conf }}/ssh_host_ed25519_key
+      PermitRootLogin prohibit-password
+      PubkeyAuthentication yes
+      PasswordAuthentication yes
+      ChallengeResponseAuthentication yes
+      UsePAM yes
+      Subsystem sftp {{ ssh_file.sftp_server }}
+    dest: "{{ ssh_file.conf }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: ssh_backup_files.matched == 0
+  notify: Restart SSH Service

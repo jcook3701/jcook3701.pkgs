@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create LDAP certificate directory
+  ansible.builtin.file:
+    path: "{{ openldap_directory.certs }}"
+    state: directory
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0700"
+
+- name: Execute formal multi-tier Certificate Authority pipeline
+  ansible.builtin.include_tasks: root_ca_cert.yml
+  when: openldap_generate_ca | bool
+
+- name: Execute standalone flat self-signed certificate pipeline
+  ansible.builtin.include_tasks: flat_cert.yml
+  when: not openldap_generate_ca | bool

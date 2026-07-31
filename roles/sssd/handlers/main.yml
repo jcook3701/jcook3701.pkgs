@@ -1,7 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart sssd
-  ansible.builtin.service:
+- name: Restart SSSD Service
+  ansible.builtin.systemd:
     name: "{{ sssd_service }}"
     state: restarted
+  become: true
+
+- name: Restart Systemd Logind Service
+  ansible.builtin.systemd:
+    name: "{{ sssd_systemd_login_service }}"
+    state: restarted
+  become: true

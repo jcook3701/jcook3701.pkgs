@@ -18,40 +18,41 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro determine_start_tls(uri) -%}
-{{ 'False' if 'ldaps://' in uri | lower else 'True' }}
-{%- endmacro -%}
-
 {%- macro sssd_conf() -%}
 [sssd]
+config_file_version = 2
+domains = {{ sssd_domain_name | trim }}
 debug_level = {{ sssd_debug_level }}
+
+{# Native services routing builder #}
 {% set sssd_services = ['nss', 'pam'] %}
 {% if sssd_enable_ssh | bool %}{% set _ = sssd_services.append('ssh') %}{% endif %}
 {% if sssd_enable_autofs | bool %}{% set _ = sssd_services.append('autofs') %}{% endif %}
 {% if sssd_enable_sudo | bool %}{% set _ = sssd_services.append('sudo') %}{% endif %}
-services = {{ sssd_services | join(', ') }}
-config_file_version = 2
-domains = {{ sssd_domain_name }}
+services = {{ sssd_services | join(',') }}
 
-[domain/{{ sssd_domain_name }}]
+[domain/{{ sssd_domain_name | trim }}]
+subdomains_provider = none
+
 # --- IDENTITY PROVIDER (OpenLDAP Core) ---
 id_provider = ldap
-ldap_schema = {{ sssd_ldap_schema }}
-ldap_uri = {{ sssd_ldap_uri }}
-ldap_search_base = {{ sssd_ldap_search_base }}
-ldap_user_search_base = {{ sssd_ldap_user_search_base }}
-ldap_group_search_base = {{ sssd_ldap_group_search_base }}
-ldap_access_filter = {{ sssd_ldap_access_filter }}
+ldap_schema = {{ sssd_ldap_schema | trim }}
+ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert | trim }}
+ldap_uri = {{ sssd_ldap_uri | trim }}
+ldap_search_base = {{ sssd_ldap_search_base | trim }}
+ldap_user_search_base = {{ sssd_ldap_user_search_base | trim }}
+ldap_group_search_base = {{ sssd_ldap_group_search_base | trim }}
+ldap_access_filter = {{ sssd_ldap_access_filter | trim }}
 
 # --- AUTHENTICATION PROVIDER (Kerberos) ---
 auth_provider = krb5
 chpass_provider = krb5
-krb5_server = {{ sssd_krb5_server }}
-krb5_realm = {{ sssd_krb5_realm | upper }}
+krb5_server = {{ sssd_krb5_server | trim }}
+krb5_realm = {{ sssd_krb5_realm | upper | trim }}
 
 # Security hardening for Kerberos
-krb5_validate = {{ sssd_krb5_validate }}
-cache_credentials = {{ sssd_cache_credentials }}
+krb5_validate = {{ sssd_krb5_validate | string | lower }}
+cache_credentials = {{ sssd_cache_credentials | string | lower }}
 
 # --- OTHER PROVIDERS ---
 access_provider = ldap
@@ -64,13 +65,10 @@ sudo_provider = ldap
 
 # --- NETWORK & TLS TIMEOUTS ---
 {% if sssd_ldap_tls | bool %}
-ldap_id_use_start_tls = {{ determine_start_tls(sssd_ldap_uri) }}
-ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert }}
-ldap_tls_cacert = {{ sssd_ldap_tls_cacert | default('/etc/ssl/certs/ca-certificates.crt') }}
-ldap_tls_cert = {{ sssd_ldap_tls_cert }}
-ldap_tls_key = {{ sssd_ldap_tls_key }}
+ldap_id_use_start_tls = {{ ('false' if 'ldaps' in sssd_ldap_protocol | lower else 'true') | string | lower  }}
+ldap_tls_cacert = {{ sssd_ldap_tls_cacert | trim }}
 {% else %}
-ldap_id_use_start_tls = False
+ldap_id_use_start_tls = false
 {% endif %}
 ldap_search_timeout = {{ sssd_ldap_search_timeout }}
 ldap_network_timeout = {{ sssd_ldap_network_timeout }}
@@ -79,22 +77,22 @@ debug_level = {{ sssd_ldap_debug_level }}
 
 # --- AUTOFS LDAP CONFIGURATION ---
 {% if sssd_enable_autofs | bool %}
-ldap_autofs_search_base = {{ sssd_ldap_autofs_search_base }}
-ldap_autofs_map_object_class = {{ sssd_ldap_autofs_map_object_class }}
-ldap_autofs_entry_object_class = {{ sssd_ldap_autofs_entry_object_class }}
-ldap_autofs_map_name = {{ sssd_ldap_autofs_map_name }}
-ldap_autofs_entry_key = {{ sssd_ldap_autofs_entry_key }}
-ldap_autofs_entry_value = {{ sssd_ldap_autofs_entry_value }}
+ldap_autofs_search_base = {{ sssd_ldap_autofs_search_base | trim }}
+ldap_autofs_map_object_class = {{ sssd_ldap_autofs_map_object_class | trim }}
+ldap_autofs_entry_object_class = {{ sssd_ldap_autofs_entry_object_class | trim }}
+ldap_autofs_map_name = {{ sssd_ldap_autofs_map_name | trim }}
+ldap_autofs_entry_key = {{ sssd_ldap_autofs_entry_key | trim }}
+ldap_autofs_entry_value = {{ sssd_ldap_autofs_entry_value | trim }}
 {% endif %}
 
 # --- SUDO LDAP CONFIGURATION ---
 {% if sssd_enable_sudo | bool %}
-ldap_sudo_search_base = {{ sssd_ldap_sudo_search_base }}
+ldap_sudo_search_base = {{ sssd_ldap_sudo_search_base | trim }}
 {% endif %}
 
 # --- SYSTEM SERVICES BLOCKS ---
 [nss]
-homedir_substring = {{ sssd_nss_homedir_substring }}
+homedir_substring = {{ sssd_nss_homedir_substring | trim }}
 
 [pam]
 debug_level = {{ sssd_pam_debug_level }}
@@ -115,11 +113,7 @@ debug_level = {{ sssd_ssh_debug_level }}
 {% endif %}
 
 [pac]
-
 [ifp]
-
-[secrets]
-
 [session_recording]
 {%- endmacro -%}
 

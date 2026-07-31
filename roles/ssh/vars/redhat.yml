@@ -4,4 +4,9 @@
 ssh_service: "sshd"
 
 ssh_pkg_names:
-  - ssh
+  - "openssh-server"
+
+ssh_os_directory:
+  conf: "/etc/ssh"
+  pid: "/var/run"
+  bin: "/usr/libexec/openssh"

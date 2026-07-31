@@ -22,8 +22,6 @@
   loop_control:
     loop_var: replica_fqdn
     label: "removed -> {{ tmp_file }}"
-  # DEBIAN FILE IMPACT:
-  # - Deletes the master-generated transit files inside /etc/krb5kdc/
   when: kerberos_node_type == 'master'
 
 - name: Clean up the replica staging directory
@@ -31,13 +29,8 @@
     path: "{{ tmp_file }}"
     state: absent
   vars:
+    replica_fqdn: "{{ ansible_hostname }}.{{ kerberos_domain_name }}"
     tmp_file: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab"
-  loop: "{{ kerberos_replica_servers }}"
-  loop_control:
-    loop_var: replica_fqdn
-    label: "removed -> {{ tmp_file }}"
-  # DEBIAN FILE IMPACT:
-  # - Deletes the master-generated transit files inside /etc/krb5kdc/
   when: kerberos_node_type == 'replica'
 
 - name: Clean up local controller staging cache

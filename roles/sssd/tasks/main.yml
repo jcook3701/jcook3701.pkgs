@@ -1,17 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Load SSSD OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_facts['os_family'] | lower }}.yml"
-
 - name: Gather target host package facts
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Validate SSSD Role Variables
-  ansible.builtin.include_tasks: validate.yml
+- name: Load SSSD OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
 
 - name: Install SSSD packages
   ansible.builtin.include_tasks: install.yml

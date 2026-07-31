@@ -1,8 +1,0 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
----
-- name: Validate sssd variable
-  ansible.builtin.assert:
-    that:
-      - sssd_state in ['present', 'absent', 'teardown']
-    fail_msg: "Invalid state type. Choose present, absent, or teardown."

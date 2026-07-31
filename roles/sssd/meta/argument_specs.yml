@@ -1,0 +1,214 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Enterprise system access orchestration specification blueprint for SSSD."
+    description: "Enforces typechecking, strict choices, and default parameters for linking OpenLDAP identity vectors with MIT Kerberos security realms across all clients."
+    author: "Jared Cook"
+    options:
+      sssd_state:
+        type: str
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The intended configuration state of the SSSD client infrastructure."
+
+      sssd_enable_autofs:
+        type: bool
+        default: true
+        description: "Toggles dynamic network storage mounting capabilities via the autofs daemon connection pipe."
+
+      sssd_enable_ssh:
+        type: bool
+        default: true
+        description: "Toggles centralized key authorization retrieval filters for secure SSH access control rules."
+
+      sssd_enable_sudo:
+        type: bool
+        default: true
+        description: "Toggles centralized directory-driven root authorization rule caching models."
+
+      sssd_top_level_domain:
+        type: str
+        default: "com"
+        description: "The primary internet routing suffix component (e.g., net, org, com)."
+
+      sssd_second_level_domain:
+        type: str
+        default: "example"
+        description: "The main company organizational domain text label string handle."
+
+      sssd_domain_name:
+        type: str
+        default: "{{ sssd_second_level_domain }}.{{ sssd_top_level_domain }}"
+        description: "The dynamically constructed full corporate domain name string."
+
+      sssd_ldap_users_parent_ou:
+        type: str
+        default: "Users"
+        description: "The parent organizational unit branch container identifier for all directory users."
+
+      sssd_ldap_people_child_ou:
+        type: str
+        default: "People"
+        description: "The precise nested sub-container tracking human user accounts."
+
+      sssd_ldap_groups_ou:
+        type: str
+        default: "Group"
+        description: "The safety group container tracking group listings."
+
+      sssd_ldap_sudoers_ou:
+        type: str
+        default: "SUDOers"
+        description: "The container storing centralized sudo permissions rules."
+
+      sssd_ldap_automount_ou:
+        type: str
+        default: "AutoMount"
+        description: "The container branch managing autofs network path shares maps."
+
+      sssd_ldap_protocol:
+        type: str
+        default: "ldaps"
+        choices: ["ldap", "ldaps"]
+        description: "The underlying transmission layer encryption architecture model deployed."
+
+      sssd_ldap_tls:
+        type: bool
+        default: true
+        description: "Forces TLS validation routines over communication sockets."
+
+      sssd_ldap_hosts:
+        type: list
+        elements: str
+        required: true
+        description: "An array of fully qualified domain names mapping to active identity directory cluster pools."
+
+      sssd_krb5_hosts:
+        type: list
+        elements: str
+        required: true
+        description: "An array of fully qualified domain names mapping to targeted verification realm key distribution centers."
+
+      sssd_debug_level:
+        type: int
+        default: 7
+        description: "Global diagnostics logging level for the primary SSSD daemon engine."
+
+      sssd_pam_debug_level:
+        type: int
+        default: 10
+        description: "Diagnostics logging level for the PAM validation module responder subsystem."
+
+      sssd_autofs_debug_level:
+        type: int
+        default: 10
+        description: "Diagnostics logging level for the Autofs storage map responder daemon socket."
+
+      sssd_ldap_debug_level:
+        type: int
+        default: 6
+        description: "Diagnostics logging level for the back-end LDAP protocol handler layers."
+
+      sssd_sudo_debug_level:
+        type: int
+        default: 5
+        description: "Diagnostics logging level for the centralized privilege escalation parser."
+
+      sssd_ssh_debug_level:
+        type: int
+        default: 5
+        description: "Diagnostics logging level for the secure shell authorized key retrieval engine."
+
+      sssd_ldap_tls_reqcert:
+        type: str
+        default: "never"
+        choices: ["never", "allow", "try", "demand", "hard"]
+        description: "Strictness constraint controls for confirming the authority of the LDAP server SSL certificate."
+
+      sssd_ldap_tls_cacert:
+        type: str
+        default: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/master_ca.pem"
+        description: "The absolute file pathway point to the trusted Certificate Authority verification bundle."
+
+      sssd_ldap_tls_cert:
+        type: str
+        default: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/cert.pem"
+        description: "The absolute file path mapping to the local client system certificate file."
+
+      sssd_ldap_tls_key:
+        type: str
+        default: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/priv.pem"
+        description: "The absolute file path locating the unencrypted local system client private key."
+
+      sssd_ldap_access_filter:
+        type: str
+        default: "(objectClass=posixAccount)"
+        description: "The exact search criteria token string mandatory for allowing an identity object to initialize system logins."
+
+      sssd_ldap_schema:
+        type: str
+        default: "rfc2307"
+        choices: ["rfc2307", "rfc2307bis", "IPA", "AD"]
+        description: "The schema protocol architecture ruleset used for directory data parsing."
+
+      sssd_krb5_validate:
+        type: bool
+        default: true
+        description: "Toggles mutual authentication routines against the KDC using local machine host keytabs."
+
+      sssd_cache_credentials:
+        type: bool
+        default: true
+        description: "Toggles local offline caching capabilities for credential access during infrastructure drops."
+
+      sssd_nss_homedir_substring:
+        type: str
+        default: "/home"
+        description: "The root fallback folder namespace handle for network user directory shells."
+
+      sssd_ldap_search_timeout:
+        type: int
+        default: 90
+        description: "The lifespan window boundary allowed for waiting on directory queries before aborting."
+
+      sssd_ldap_network_timeout:
+        type: int
+        default: 90
+        description: "The communication buffer maximum wait state constraint for sluggish TCP socket channels."
+
+      sssd_timeout:
+        type: int
+        default: 30
+        description: "The global operational baseline timer threshold parameter for cached records sweeps."
+
+      sssd_ldap_autofs_map_object_class:
+        type: str
+        default: "automountMap"
+        description: "The target object class structural identity tracking root automount mount configurations."
+
+      sssd_ldap_autofs_entry_object_class:
+        type: str
+        default: "automount"
+        description: "The schema object identity matching active path configuration blocks records."
+
+      sssd_ldap_autofs_map_name:
+        type: str
+        default: "automountMapName"
+        description: "The system attribute key string identifying the explicit mapping namespace."
+
+      sssd_ldap_autofs_entry_key:
+        type: str
+        default: "automountKey"
+        description: "The attribute tracking the physical network share name location target."
+
+      sssd_ldap_autofs_entry_value:
+        type: str
+        default: "automountInformation"
+        description: "The attribute holding the transmission flags and backend storage path mappings properties."
+
+      sssd_ssh_hash_known_hosts:
+        type: bool
+        default: true
+        description: "Toggles cryptographic obfuscation processing parameters for cached SSH client identity tracking matrices."

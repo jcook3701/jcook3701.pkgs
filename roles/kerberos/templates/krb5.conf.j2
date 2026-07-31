@@ -28,6 +28,9 @@
     forwardable = {{ kerberos_forwardable }}
     dns_canonicalize_hostname = false
     rdns = false
+    default_tgs_enctypes = {{ kerberos_encryption_types }}
+    default_tkt_enctypes = {{ kerberos_encryption_types }}
+    permitted_enctypes = {{ kerberos_encryption_types }}
 
 [realms]
 {% for realm in kerberos_realms %}

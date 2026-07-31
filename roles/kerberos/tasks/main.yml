@@ -10,14 +10,10 @@
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Validate Kerberos Role Variables
-  ansible.builtin.include_tasks: validate.yml
-
 - name: Install Kerberos
   ansible.builtin.include_tasks: install.yml
   when:
     - kerberos_state | default('present') == 'present'
-    - kerberos_pkg_names[0] not in ansible_facts.packages
 
 - name: Uninstall Kerberos
   ansible.builtin.include_tasks: uninstall.yml

@@ -48,6 +48,7 @@ olcDbIndex: objectClass eq
 olcDbIndex: cn,sn,mail pres,eq,sub
 olcDbIndex: uid pres,eq,sub
 
+{% if openldap_use_tls | bool %}
 # Configure TLS/SSL
 dn: cn=config
 changetype: modify
@@ -59,6 +60,7 @@ olcTLSCertificateFile: {{ openldap_tls_cert }}
 -
 replace: olcTLSCertificateKeyFile
 olcTLSCertificateKeyFile: {{ openldap_tls_key }}
+{% endif %}
 {%- endmacro %}
 
 {{- db_config() }}

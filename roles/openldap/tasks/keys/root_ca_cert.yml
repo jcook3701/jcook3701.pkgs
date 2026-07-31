@@ -1,0 +1,153 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# STEP 1: ROOT CA KEYPAIR & CA SPECIFICATION GENERATION (MASTER ONLY)
+# ====================================================================
+- name: Generate private key for the internal Root Certificate Authority
+  community.crypto.openssl_privatekey:
+    path: "{{ openldap_tls_ca_key }}"
+    select_crypto_backend: cryptography
+    size: 4096
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0600"
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Create temporary Certificate Signing Request for Root CA specifications
+  community.crypto.openssl_csr:
+    path: "{{ openldap_tls_ca_csr }}"
+    privatekey_path: "{{ openldap_tls_ca_key }}"
+    select_crypto_backend: cryptography
+    common_name: "{{ openldap_domain_name | string | lower }} Core Root CA"
+    basic_constraints:
+      - "CA:TRUE"
+    basic_constraints_critical: true
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Create public Root CA certificate asset (master_ca.pem)
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_ca_cert }}"
+    csr_path: "{{ openldap_tls_ca_csr }}"
+    privatekey_path: "{{ openldap_tls_ca_key }}"
+    provider: selfsigned
+    select_crypto_backend: cryptography
+    selfsigned_not_after: "+3650d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'master'
+
+# ====================================================================
+# STEP 2: IMMEDIATE FLEET CA DISTRIBUTION (EXECUTES BEFORE SIGNING PASSES)
+# ====================================================================
+- name: Fetch master Root CA certificate file to the controller staging space
+  ansible.builtin.fetch:
+    src: "{{ openldap_tls_ca_cert }}"
+    dest: "/tmp/openldap_master_root_ca.pem"
+    flat: true
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Enforce execution fence until Root CA file is cached on controller
+  ansible.builtin.wait_for:
+    path: "/tmp/openldap_master_root_ca.pem"
+    timeout: 30
+  delegate_to: localhost
+  when: openldap_node_type == 'slave'
+
+- name: Distribute master Root CA certificate to replica slave nodes
+  ansible.builtin.copy:
+    src: "/tmp/openldap_master_root_ca.pem"
+    dest: "{{ openldap_tls_ca_cert }}"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'slave'
+
+# ====================================================================
+# STEP 3: LOCAL HOST WORKER GENERATION (ALL NODES)
+# ====================================================================
+- name: Generate private key for OpenLDAP server workers
+  community.crypto.openssl_privatekey:
+    path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0600"
+  become: true
+
+- name: Generate Certificate Signing Request (CSR) for local hosts
+  community.crypto.openssl_csr:
+    path: "{{ openldap_tls_csr }}"
+    privatekey_path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    common_name: "{{ ansible_hostname }}.{{ openldap_domain_name }}"
+    subject_alt_name:
+      - "DNS:{{ ansible_fqdn }}"
+      - "DNS:{{ ansible_hostname }}"
+      - "IP:{{ ansible_default_ipv4.address }}"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+
+# ====================================================================
+# STEP 4: SEPARATED LOCAL-HOST SIGNING ENGINE
+# ====================================================================
+- name: Generate signed directory server certificate for the master node locally
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_cert }}"
+    csr_path: "{{ openldap_tls_csr }}"
+    ownca_path: "{{ openldap_tls_ca_cert }}"
+    ownca_privatekey_path: "{{ openldap_tls_ca_key }}"
+    provider: ownca
+    select_crypto_backend: cryptography
+    ownca_not_after: "+1095d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Slurp the private Root CA key from the master node into secure memory
+  ansible.builtin.slurp:
+    src: "{{ openldap_tls_ca_key }}"
+  register: master_root_ca_key_raw
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Use the slurped CA key payload to sign the slave certificate natively on the slave node
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_cert }}"
+    csr_path: "{{ openldap_tls_csr }}"
+    ownca_path: "{{ openldap_tls_ca_cert }}"
+    ownca_privatekey_content: "{{ hostvars[openldap_admin_servers | first | default(ansible_play_hosts | first)]['master_root_ca_key_raw']['content'] | b64decode }}"
+    provider: ownca
+    select_crypto_backend: cryptography
+    ownca_not_after: "+1095d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'slave'
+
+# ====================================================================
+# STEP 5: FINAL IDEMPOTENT WORKSPACE CLEANUP (ALL FLEET NODES)
+# ====================================================================
+- name: Clean up temporary Root CA certificate signing request file from master
+  ansible.builtin.file:
+    path: "{{ openldap_tls_ca_csr }}"
+    state: absent
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Clean up operational local server host certificate signing request files
+  ansible.builtin.file:
+    path: "{{ openldap_tls_csr }}"
+    state: absent
+  become: true

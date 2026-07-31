@@ -1,32 +1,51 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Populate service facts
-  ansible.builtin.service_facts:
-
 - name: Ensure NSCD (name service cache daemon) service is stopped and disabled
   ansible.builtin.systemd:
     name: "{{ sssd_nscd_service }}"
     state: stopped
     enabled: false
-  when: "'nscd.service' in ansible_facts.services"
+  when: ansible_facts.services is not defined or sssd_nscd_service in ansible_facts.services
+  failed_when: false
 
 - name: Install SSSD package and dependencies.
   ansible.builtin.package:
     name: "{{ sssd_pkg_names }}"
     state: present
 
-- name: Generate sssd.conf configuration file
+- name: Load client security certificate assets
+  ansible.builtin.include_tasks: keys.yml
+
+- name: Deploy System Security Services Daemon text configuration file
   ansible.builtin.template:
     src: sssd.conf.j2
     dest: "{{ sssd_file.sssd_conf }}"
     group: root
     owner: root
     mode: "0600"
-  notify: Restart sssd
+  notify:
+    - Restart SSSD Service
+    - Restart Systemd Logind Service
 
 - name: Ensure SSSD service is started and enabled
   ansible.builtin.systemd:
     name: "{{ sssd_service }}"
     state: started
     enabled: true
+
+- name: Forcefully enable SSSD profiles within the system PAM authentication stacks
+  ansible.builtin.command: "pam-auth-update --package --enable sss"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: pam_enable_cmd
+  changed_when: pam_enable_cmd.rc == 0
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Forcefully select SSSD profile within Red Hat system authselect stacks
+  ansible.builtin.command: "authselect select sssd with-mkhomedir --force"
+  register: authselect_cmd
+  changed_when: authselect_cmd.rc == 0
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'

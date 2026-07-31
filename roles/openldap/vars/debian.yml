@@ -14,10 +14,13 @@ openldap_pkg_names:
 openldap_shared_libs:
   - libsasl2-modules-gssapi-mit
   - libnet-ldap-perl
+  - python3-passlib
+  - python3-ldap
 
 openldap_os_directory:
   conf: "/etc/ldap"
   slapd: "/etc/ldap/slapd.d"
+  cacerts: "/etc/ssl/certs"
   certs: "/etc/ldap/certs"
   database: "/var/lib/ldap"
   modules: "/usr/lib/ldap"

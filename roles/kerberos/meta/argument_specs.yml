@@ -1,0 +1,90 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Self-contained identity and authentication validation matrix for MIT Kerberos."
+    description: "Enforces strict typechecking, baseline requirements, and default configurations for Kerberos clusters."
+    author: "Jared Cook"
+    options:
+      kerberos_state:
+        type: str
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The structural target state of the Kerberos deployment."
+
+      kerberos_node_type:
+        type: str
+        default: "client"
+        choices: ["master", "replica", "client"]
+        description: "The operational operational layer profile assigned to the cluster node."
+
+      kerberos_admin_servers:
+        type: list
+        elements: str
+        required: false
+        description: "A self-contained list array pointing to your primary Master KDC administration nodes."
+
+      kerberos_replica_servers:
+        type: list
+        elements: str
+        default: []
+        description: "A list array tracking secondary replica KDC infrastructure propagation endpoints."
+
+      kerberos_client_nodes:
+        type: list
+        elements: str
+        default: []
+        description: "An array of fully qualified domain names tracking the system client access workforce nodes that require unique machine host keytabs provisioned by the master KDC."
+
+      kerberos_port:
+        type: str
+        default: "88"
+        description: "The primary operational network connection port for the KDC daemon service."
+
+      kerberos_admin_user:
+        type: str
+        default: "admin"
+        description: "The root administrative principal username string identifier."
+
+      kerberos_admin_password:
+        type: str
+        default: "SecretPassword123"
+        description: "The plain-text staging credential target used during master database creation flags."
+
+      kerberos_top_level_domain:
+        type: str
+        default: "com"
+        description: "The core internet routing suffix layer (e.g., net, org, com)."
+
+      kerberos_second_level_domain:
+        type: str
+        default: "example"
+        description: "The main corporate domain text label string anchor."
+
+      kerberos_dns_lookup_realm:
+        type: str
+        default: "false"
+        choices: ["true", "false"]
+        description: "Toggles whether client machines resolve Kerberos names via network DNS record lookups."
+
+      kerberos_dns_lookup_kdc:
+        type: str
+        default: "false"
+        choices: ["true", "false"]
+        description: "Toggles whether client machines discover KDC IP targets via network DNS record lookups."
+
+      kerberos_ticket_lifetime:
+        type: str
+        default: "24h"
+        description: "The maximum continuous activation lifespan window for a standard user session token ticket."
+
+      kerberos_renew_lifetime:
+        type: str
+        default: "7d"
+        description: "The maximum allowable renewal limit range for a validated ticket signature handle."
+
+      kerberos_encryption_types:
+        type: str
+        default: "aes256-cts-hmac-sha1-96"
+        description: "The secure cryptographic encryption type pinned to avoid legacy NTLM/MD4 hashing road blocks."

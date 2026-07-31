@@ -1,0 +1,52 @@
+{#
+# autofs.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro autofs_ldif() -%}
+# 1. FOUNDATIONAL AUTOMOUNT ROOT CONTAINER
+dn: ou={{ openldap_automount_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+ou: AutoMount
+objectClass: organizationalUnit
+objectClass: top
+
+# 2. DYNAMIC AUTOMOUNT MAPS DISCOVERY PASS-THROUGH LOOP
+{% for map_container in openldap_autofs_mounts | map(attribute='map_name') | unique | list %}
+dn: automountMapName={{ map_container | trim }},ou={{ openldap_automount_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+automountMapName: {{ map_container | trim }}
+ou: {{ map_container | trim }}
+objectClass: automountMap
+objectClass: top
+
+{% endfor %}
+# 3. DYNAMIC AUTOMOUNT CONNECTION RULES LOOP
+{% for mount in openldap_autofs_mounts | default([]) %}
+dn: automountKey={{ mount.key | trim }},automountMapName={{ mount.map_name | trim }},ou={{ openldap_automount_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: automount
+objectClass: top
+automountInformation: {{ mount.info | trim }}
+automountKey: {{ mount.key | trim }}
+cn: {{ mount.key | trim }}
+
+{% endfor %}
+{%- endmacro -%}
+
+{{- autofs_ldif() }}

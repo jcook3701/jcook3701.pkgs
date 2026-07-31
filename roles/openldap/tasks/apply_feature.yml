@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Render optional feature extension profile LDIF
+  ansible.builtin.template:
+    src: "features/{{ feature.name }}.ldif.j2"
+    dest: "/tmp/feature_chunk_{{ feature.name }}.ldif"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply optional feature extension online to OpenLDAP configuration database
+  ansible.builtin.command: "ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/feature_chunk_{{ feature.name }}.ldif"
+  register: chunk_add_result
+  failed_when:
+    - chunk_add_result.rc != 0
+    - "'Already exists' not in chunk_add_result.stderr"
+  changed_when: "'adding new entry' in chunk_add_result.stdout"
+  become: true

@@ -2,17 +2,18 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 kerberos_state: present
-kerberos_is_server: false
+
 # Node Role Configuration (Options: master, replica, client)
 kerberos_node_type: client
 
+# Self-Contained Server Infrastructure Pointers
 kerberos_admin_servers: []
 kerberos_replica_servers: []
-
+kerberos_client_nodes: []
 kerberos_propagation_servers: "{{ kerberos_admin_servers + kerberos_replica_servers }}"
-
 kerberos_port: "88"
 
+# Administrative Directory Framework Credentials
 kerberos_admin_user: admin
 kerberos_admin_password: "SecretPassword123"
 
@@ -28,6 +29,9 @@ kerberos_dns_lookup_kdc: "false"
 kerberos_ticket_lifetime: "24h"
 kerberos_renew_lifetime: "7d"
 kerberos_forwardable: "true"
+
+# Modern Cryptographic Compliance Layout Parameters
+kerberos_encryption_types: "aes256-cts-hmac-sha1-96"
 
 # Mapping local domain strings to Kerberos realms
 kerberos_domain_realms:

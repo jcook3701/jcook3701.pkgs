@@ -1,22 +1,26 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# This block will ONLY run on Ubuntu systems
 - name: Configure Ubuntu Systemd Storage Sandbox Overrides
-  when: ansible_distribution == "Ubuntu"
+  when:
+    - ansible_distribution == "Ubuntu"
+    - kerberos_node_type in ['master', 'replica']
   block:
     - name: Create systemd override directories for active node services
       ansible.builtin.file:
-        path: "/etc/systemd/system/{{ item }}.service.d"
+        path: "/etc/systemd/system/{{ service }}.service.d"
         state: directory
         mode: "0755"
         owner: root
         group: root
       loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
+      loop_control:
+        loop_var: service
+        label: "Systemd Service Override Directory -> /etc/systemd/system/{{ service }}.service.d"
 
     - name: Inject systemd log path write overrides
       ansible.builtin.copy:
-        dest: "/etc/systemd/system/{{ item }}.service.d/override.conf"
+        dest: "/etc/systemd/system/{{ service }}.service.d/override.conf"
         content: |
           [Service]
           ReadWritePaths=/var/log/krb5/
@@ -24,4 +28,7 @@
         owner: root
         group: root
       loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
+      loop_control:
+        loop_var: service
+        label: "Systemd Storage Sandbox Configuration -> /etc/systemd/system/{{ service }}.service.d/override.conf"
       notify: Reload systemd daemon

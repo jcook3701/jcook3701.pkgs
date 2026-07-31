@@ -12,12 +12,12 @@
     - "{{ kerberos_directory.log }}"
   loop_control:
     loop_var: dir
-    label: "{{ dir }}"
+    label: "Creating directory: {{ dir }}"
 
 - name: Ensure files needed for Kerberos configuration
   ansible.builtin.copy:
     content: ""
-    dest: "{{ dir }}"
+    dest: "{{ file }}"
     force: false
     group: "root"
     owner: "root"
@@ -27,7 +27,8 @@
     - "{{ kerberos_file.kdc_log }}"
     - "{{ kerberos_file.admin_log }}"
   loop_control:
-    loop_var: dir
+    loop_var: file
+    label: "Creating file: {{ file }}"
 
 - name: Deploy global Kerberos configuration file
   ansible.builtin.template:
