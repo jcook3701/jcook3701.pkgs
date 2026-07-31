@@ -19,6 +19,29 @@
   become: true
   when: ansible_facts['os_family'] == 'Debian'
 
+- name: Revert system PAM and NSS hooks to local profiles via authselect (RedHat)
+  ansible.builtin.command: "authselect select minimal --force"
+  register: authselect_remove_cmd
+  changed_when: authselect_remove_cmd.rc == 0
+  failed_when: false
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Completely purge SSSD to start fresh
+  ansible.builtin.apt:
+    name: "{{ sssd_pkg_names }}"
+    state: absent
+    purge: yes
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Completely remove SSSD packages and cache histories (RedHat)
+  ansible.builtin.dnf:
+    name: "{{ sssd_pkg_names }}"
+    state: absent
+    autoremove: yes
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
 - name: Locate all leftover cache files and unix domain sockets dynamically
   ansible.builtin.find:
     paths:
@@ -49,12 +72,6 @@
 - name: Purge SSSD text configuration files from filesystem
   ansible.builtin.file:
     path: "{{ sssd_file.sssd_conf }}"
-    state: absent
-  become: true
-
-- name: Uninstall SSSD package and dependencies.
-  ansible.builtin.package:
-    name: "{{ sssd_pkg_names }}"
     state: absent
   become: true
 
