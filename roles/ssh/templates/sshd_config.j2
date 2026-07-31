@@ -51,6 +51,7 @@ KexAlgorithms {{ ssh_kex_algorithms | join(',') }}
 # Centralized Authentication Mechanisms Routing
 PubkeyAuthentication {{ ssh_pubkey_authentication }}
 AuthorizedKeysFile {{ ssh_authorized_keys_file }}
+
 PasswordAuthentication {{ ssh_password_authentication }}
 KbdInteractiveAuthentication {{ ssh_kbd_interactive_authentication }}
 

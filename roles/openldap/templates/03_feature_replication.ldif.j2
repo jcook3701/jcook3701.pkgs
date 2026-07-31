@@ -1,5 +1,5 @@
 {#
-# replication.ldif.j2 for jcook3701.pkgs
+# 03_feature_replication.ldif.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro replication() -%}
+{%- macro feature_replication_03() -%}
 # Set the unique server ID for this node
 dn: cn=config
 changetype: modify
@@ -41,10 +41,10 @@ dn: olcDatabase={1}{{ openldap_database_backend }},cn=config
 changetype: modify
 add: olcSyncrepl
 olcSyncrepl: {0}rid={{ openldap_replica_id }}
-  provider=ldap://{{ openldap_admin_servers[0] | default('://jcook3701.com') }}:{{ openldap_port }}
-  binddn="cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+  provider=ldap://{{ openldap_admin_servers | first }}:{{ openldap_port }}
+  binddn="cn={{ openldap_replication_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
   bindmethod=simple
-  credentials={{ openldap_admin_password }}
+  credentials={{ openldap_replication_password }}
   searchbase="dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
   type=refreshAndPersist
   interval=00:00:00:10
@@ -52,8 +52,8 @@ olcSyncrepl: {0}rid={{ openldap_replica_id }}
   timeout=1
 -
 add: olcUpdateRef
-olcUpdateRef: ldap://{{ openldap_admin_servers[0] | default('://jcook3701.com') }}:{{ openldap_port }}
+olcUpdateRef: ldap://{{ openldap_admin_servers | first }}:{{ openldap_port }}
 {% endif %}
 {%- endmacro -%}
 
-{{- replication() }}
+{{- feature_replication_03() }}

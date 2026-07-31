@@ -9,9 +9,6 @@ firewalld_dep_pkg_names:
 firewalld_pkg_names:
   - firewalld
 
-firewalld_directory:
+firewalld_os_directory:
   conf: "/etc/firewalld"
   services: "/etc/firewalld/services"
-
-firewalld_file:
-  conf: "{{ firewalld_directory.conf }}/"

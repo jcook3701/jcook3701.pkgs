@@ -1,17 +1,26 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Generate OpenLDAP admin password hash
-  ansible.builtin.command: "{{ command }}"
-  vars:
-    command: "slappasswd -s {{ openldap_admin_password }}"
-  register: openldap_hashed_pass_cmd
+- name: Generate OpenLDAP password hashes
+  ansible.builtin.command: "slappasswd -s {{ password.plain }}"
+  loop:
+    - { plain: "{{ openldap_admin_password }}", fact: "openldap_admin_password_hashed" }
+    - { plain: "{{ openldap_replication_password }}", fact: "openldap_replication_password_hashed" }
+  loop_control:
+    loop_var: password
+    label: "Generating hash for {{ password.fact }}"
+  register: openldap_hashed_pass_cmds
   no_log: true
   changed_when: false
 
-- name: Set hashed password as fact
+- name: Set OpenLDAP hashed passwords as facts
   ansible.builtin.set_fact:
-    openldap_admin_password_hashed: "{{ openldap_hashed_pass_cmd.stdout }}"
+    "{{ hash_result.password.fact }}": "{{ hash_result.stdout }}"
+  loop: "{{ openldap_hashed_pass_cmds.results }}"
+  loop_control:
+    loop_var: hash_result
+    label: "Setting fact: {{ hash_result.password.fact }}"
+  no_log: true
 
 # ====================================================================
 # --- 1. OFFLINE CONFIGURATION INITIALIZATION BLOCK ---
@@ -52,8 +61,8 @@
 
     - name: Deploy bootstrap configuration from J2 template
       ansible.builtin.template:
-        src: bootstrap_config.ldif.j2
-        dest: /tmp/bootstrap_config.ldif
+        src: "01_config_bootstrap.ldif.j2"
+        dest: "/tmp/01_config_bootstrap.ldif"
         owner: "{{ openldap_user }}"
         group: "{{ openldap_group }}"
         mode: "0600"
@@ -61,9 +70,10 @@
     - name: Initialize OpenLDAP configuration offline
       ansible.builtin.command: "{{ command }}"
       vars:
+        config_bootstrap_file: "/tmp/01_config_bootstrap.ldif"
         command: >-
           slapadd -v -n 0 -F {{ openldap_directory.slapd }}
-          -l /tmp/bootstrap_config.ldif
+          -l {{ config_bootstrap_file }}
         ansible_remote_tmp: /tmp
       become_user: "{{ openldap_user }}"
 
@@ -71,15 +81,6 @@
       ansible.builtin.service:
         name: "{{ openldap_service }}"
         state: started
-
-    - name: Upload custom LDIF schemas to the guest
-      ansible.builtin.copy:
-        src: "schema/"
-        dest: "{{ openldap_directory.schema }}/"
-        owner: "{{ openldap_user }}"
-        group: "{{ openldap_group }}"
-        mode: "0644"
-      become: true
 
     - name: Set permissions for OpenLDAP directories
       ansible.builtin.file:
@@ -97,7 +98,7 @@
         label: "setting permissions: {{ directory }}"
       become: true
 
-    - name: Load schemas online (In Order)
+    - name: Load base core schemas online (In Order)
       ansible.builtin.shell:
         cmd: "{{ command }}"
       args:
@@ -107,16 +108,16 @@
           set -o pipefail && iconv -f UTF-8 -t UTF-8
           -c {{ openldap_directory.schema }}/{{ schema }}.ldif 2>&1 |
           ldapadd -Y EXTERNAL -H ldapi:///
-      loop: "{{ openldap_schemas }}"
+      loop: "{{ openldap_schemas_base }}"
       loop_control:
         loop_var: schema
         label: "loading: {{ schema }}"
       register: schema_load_result
       failed_when:
         - schema_load_result.rc != 0
-        - "'Duplicate ' not in schema_load_result.stderr"
-        - "'Already exists' not in schema_load_result.stderr"
-      changed_when: "'adding new entry' in schema_load_result.stdout"
+        - "'duplicate ' not in schema_load_result.stderr | lower"
+        - "'already exists' not in schema_load_result.stderr | lower"
+      changed_when: "'adding new entry' in schema_load_result.stdout | lower"
       become: true
 
     - name: Verify loaded LDAP schemas
@@ -137,8 +138,8 @@
 
     - name: Deploy Database Online Configuration LDIF
       ansible.builtin.template:
-        src: db_config.ldif.j2
-        dest: "/tmp/db_config.ldif"
+        src: 01_config_database.ldif.j2
+        dest: "/tmp/01_config_database.ldif"
         owner: root
         group: root
         mode: "0600"
@@ -146,19 +147,21 @@
     - name: Apply Online Configuration to OpenLDAP
       ansible.builtin.command: "{{ command }}"
       vars:
+        config_database_file: "/tmp/01_config_database.ldif"
         command: >-
           ldapmodify -Y EXTERNAL -H ldapi:///
-          -f /tmp/db_config.ldif
+          -f {{ config_database_file }}
       register: ldap_modify_result
       failed_when:
         - ldap_modify_result.rc != 0
-        - "'Already exists' not in ldap_modify_result.stderr"
-      changed_when: "'modifying entry' in ldap_modify_result.stdout"
+        - "'already exists' not in ldap_modify_result.stderr | lower"
+        - "'type or value exists' not in ldap_modify_result.stderr | lower"
+      changed_when: "'modifying entry' in ldap_modify_result.stdout | lower"
 
     - name: Deploy base domain structure LDIF
       ansible.builtin.template:
-        src: base_structure.ldif.j2
-        dest: "/tmp/base_structure.ldif"
+        src: 02_data_structure.ldif.j2
+        dest: "/tmp/02_data_structure.ldif"
         owner: root
         group: root
         mode: "0600"
@@ -167,13 +170,19 @@
     - name: Create base domain structure
       ansible.builtin.command: "{{ command }}"
       vars:
-        base_structure_file: /tmp/base_structure.ldif
-        command: "ldapadd -Y EXTERNAL -H ldapi:/// -f {{ base_structure_file }}"
+        data_structure_file: /tmp/02_data_structure.ldif
+        base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+        bind_dn: "cn={{ openldap_admin_user }},{{ base_dn }}"
+        command: >-
+          ldapmodify -x -H ldapi:///
+          -D "{{ bind_dn }}"
+          -w "{{ openldap_admin_password }}"
+          -f {{ data_structure_file }}
       register: base_dn_result
       failed_when:
         - base_dn_result.rc != 0
-        - "'Already exists' not in base_dn_result.stderr"
-      changed_when: "'adding new entry' in base_dn_result.stdout"
+        - "'already exists' not in base_dn_result.stderr | lower"
+      changed_when: "'adding new entry' in base_dn_result.stdout | lower"
       become: true
       when: openldap_node_type == 'master'
 
@@ -195,20 +204,44 @@
     openldap_system_domain_sid: "{{ openldap_system_sid_raw.stdout | regex_search('S-1-5-21-[0-9\\-]+') | default('S-1-5-21-0000000000-0000000000-0000000000') | trim }}"
   when: openldap_node_type == 'master'
 
-- name: Ingest active schema feature component profiles sequentially
-  ansible.builtin.include_tasks: apply_feature.yml
-  loop:
-    - { name: "sudo", active: "{{ openldap_sudo }}" }
-    - { name: "autofs", active: "{{ openldap_autofs }}" }
-    - { name: "guac", active: "{{ openldap_guac }}" }
-    - { name: "ppolicy", active: "{{ openldap_ppolicy }}" }
-    - { name: "samba", active: "{{ openldap_samba }}" }
+- name: Ingest optional feature schema extensions online
+  ansible.builtin.include_tasks: features/load_schema.yml
+  loop: "{{ openldap_custom_schemas }}"
   loop_control:
-    loop_var: feature
-    label: "Processing active data profile layer: {{ feature.name }}"
-  when:
-    - openldap_node_type == 'master'
-    - feature.active | bool
+    loop_var: current_feature_name
+    label: "Loading schema extension: {{ current_feature_name }}"
+  when: openldap_node_type == 'master'
+
+- name: Deploy dynamic bootstrap users and groups data LDIF
+  ansible.builtin.template:
+    src: 02_data_seed.ldif.j2
+    dest: "/tmp/02_data_seed.ldif"
+    owner: root
+    group: root
+    mode: "0600"
+  when: openldap_node_type == 'master'
+
+- name: Seed bootstrap users and groups into the active directory tree
+  ansible.builtin.command: >-
+    ldapadd -x -H ldapi:///
+    -D "cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    -w "{{ openldap_admin_password }}"
+    -f /tmp/02_data_seed.ldif
+  register: user_seed_result
+  failed_when:
+    - user_seed_result.rc != 0
+    - "'already exists' not in user_seed_result.stderr | lower"
+  changed_when: "'adding new entry' in user_seed_result.stdout | lower"
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Apply active feature configuration data objects online
+  ansible.builtin.include_tasks: features/apply_data.yml
+  loop: "{{ openldap_custom_schemas }}"
+  loop_control:
+    loop_var: current_feature_name
+    label: "Injecting feature data entries: {{ current_feature_name }}"
+  when: openldap_node_type == 'master'
 
 - name: Test LDAP Bind (Login) as Admin
   ansible.builtin.command: "{{ command }}"

@@ -23,35 +23,48 @@
   failed_when: >-
     load_result.rc != 0 and
     load_result.rc != 20 and
-    'already exists' not in load_result.stderr | lower
-  changed_when: "'modifying entry' in load_result.stdout"
+    'already exists' not in load_result.stderr | lower and
+    'duplicate' not in load_result.stderr | lower
+  changed_when: "'modifying entry' in load_result.stdout | lower"
 
 # ====================================================================
-# 2. RUNTIME REPLICA CONFIGURATION PASS
+# 2. PROACTIVE MULTI-NODE SEQUENCING & PRE-FLIGHT CHECKS
+# ====================================================================
+- name: Ensure master server is accepting connections before configuring slave
+  ansible.builtin.wait_for:
+    host: "{{ openldap_admin_servers | first }}"
+    port: "{{ openldap_port | default(389) }}"
+    timeout: 30
+    state: started
+  when: openldap_node_type == 'slave'
+
+# ====================================================================
+# 3. RUNTIME REPLICA CONFIGURATION PASS
 # ====================================================================
 - name: Generate type-specific replication configuration file from template
   ansible.builtin.template:
-    src: replication.ldif.j2
-    dest: /tmp/replication.config.ldif
+    src: 03_feature_replication.ldif.j2
+    dest: /tmp/03_feature_replication.config.ldif
     owner: root
     group: root
     mode: "0600"
 
 - name: Apply Replication Config to OpenLDAP online (Master & Slaves)
   ansible.builtin.command:
-    cmd: ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/replication.config.ldif
+    cmd: ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/03_feature_replication.config.ldif
   register: replication_result
   failed_when: >-
     replication_result.rc != 0 and
     'type or value exists' not in replication_result.stderr | lower and
     'already exists' not in replication_result.stderr | lower and
-    'already in list' not in replication_result.stderr | lower
+    'already in list' not in replication_result.stderr | lower and
+    'attribute value is not unique' not in replication_result.stderr | lower
   changed_when: >-
-    'modifying entry' in replication_result.stdout or
-    'adding new entry' in replication_result.stdout
+    'modifying entry' in replication_result.stdout | lower or
+    'adding new entry' in replication_result.stdout | lower
 
 # ====================================================================
-# 3. HOUSEKEEPING CLEANUP
+# 4. HOUSEKEEPING CLEANUP
 # ====================================================================
 - name: Clean up temporary master replication configuration files
   ansible.builtin.file:

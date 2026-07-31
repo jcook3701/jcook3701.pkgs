@@ -3,211 +3,345 @@
 ---
 argument_specs:
   main:
-    short_description: Input validation specifications for the OpenLDAP server role.
+    short_description: "Configure and bootstrap an OpenLDAP directory server"
     description: >-
-      Natively enforces data types, structural constraints,
-      and allowed string choices across all role variables.
-
+      This role manages an OpenLDAP deployment, including multi-master or replica node types,
+      TLS encryption infrastructure, performance tuning, operational password policies,
+      organizational units, and standard directory group/user seeding.
     options:
-
+      # General Configuration
       openldap_state:
-        type: str
-        default: present
-        choices:
-          - present
-          - absent
-          - teardown
-        description: The targeted deployment status of the OpenLDAP services on the nodes.
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The targeted operational state of the OpenLDAP server components."
 
       openldap_node_type:
-        type: str
-        default: master
-        choices:
-          - master
-          - slave
-        description: Identifies if the node operates as a primary writer or a replication consumer.
+        type: "str"
+        default: "master"
+        choices: ["master", "slave"]
+        description: "Designates if this instance acts as a write-capable provider (master) or a read-only consumer (slave)."
 
       openldap_admin_servers:
-        type: list
-        elements: str
+        type: "list"
+        elements: "str"
         default: []
-        description: List of primary database writer server hostnames or IP addresses.
+        description: "A list of hostnames or IP addresses for administrative management servers."
 
       openldap_slave_servers:
-        type: list
-        elements: str
+        type: "list"
+        elements: "str"
         default: []
-        description: List of directory replication consumer nodes.
+        description: "A list of downstream replica consumer engines connected to this cluster."
 
+      # Domain Options
       openldap_top_level_domain:
-        type: str
-        default: com
-        description: The top-level component of your targeted directory base domain (e.g., com, net, org).
+        type: "str"
+        default: "com"
+        description: "The top-level domain suffix (TLD) for the root directory tree."
 
       openldap_second_level_domain:
-        type: str
-        default: example
-        description: The second-level corporate component of your base domain.
+        type: "str"
+        default: "example"
+        description: "The organization's primary domain string used for directory component structure mapping."
 
       openldap_domain_name:
-        type: str
-        description: The fully combined base directory domain name.
+        type: "str"
+        default: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
+        description: "The computed full domain string representing the absolute root of the directory tree."
 
       openldap_organization_name:
-        type: str
+        type: "str"
         default: "Example IT Services"
-        description: >-
-          The standard company identity string applied to the
-          base organizational unit structure.
+        description: "The display name representing the organization in the root directory entry."
 
       openldap_admin_user:
-        type: str
-        default: admin
-        description: The root administrative username used to manage directory nodes.
+        type: "str"
+        default: "admin"
+        description: "The common name (cn) identifier string for the root directory management user."
 
       openldap_admin_password:
-        type: str
+        type: "str"
         default: "SecretPassword123"
-        description: Plaintext administrative password string (overridden or hashed at runtime).
+        description: "The cleartext password or hash used to secure the main administrative user."
 
+      openldap_backup_dir:
+        type: "str"
+        default: "/var/backups/openldap"
+        description: "The persistent directory path where directory data backups and dumps are archived."
+
+      # Replication Parameters
       openldap_replica_id:
-        type: str
+        type: "str"
         default: "001"
-        description: Unique numerical integer identifier required for each synchronized replication host.
+        description: "A unique, three-digit numeric string identifier for tracking active slave consumers."
 
       openldap_replication_user:
-        type: str
-        default: syncrepluser
-        description: Service account username used specifically to securely bind replication streams.
+        type: "str"
+        default: "syncrepluser"
+        description: "The service account identity used by downstream replica engines to authenticate against the master provider."
 
       openldap_replication_password:
-        type: str
+        type: "str"
         default: "SecretPassword123"
-        description: Shared authentication password for replication binding paths.
+        description: "The cleartext or hashed password protecting the replication service account."
 
+      # Security & Encryption (TLS)
       openldap_use_tls:
-        type: bool
-        default: false
-        description: Enforces secure TLS/SSL data wrapping over network sockets.
+        type: "bool"
+        default: true
+        description: "Enables or disables forced TLS encryption wrappers across explicit communication ports."
 
       openldap_generate_ca:
         type: "bool"
-        required: false
         default: true
-        description: "Enforces true multi-tier Certificate Authority (true) or falls back to flat standalone self-signed routing (false)."
+        description: "Determines if the deployment engine should generate a self-signed root Certification Authority asset internally."
 
       openldap_tls_ca_cert:
-        type: str
-        default: ""
-        description: File path pointing to your trusted corporate Root Certificate Authority file.
+        type: "str"
+        default: "{{ openldap_directory.certs }}/master_ca.pem"
+        description: "The fully qualified path pointing to the active Certificate Authority public certificate file."
 
       openldap_tls_ca_key:
-        type: "path"
-        required: false
-        description: "Absolute filesystem destination path tracking your internal Root CA private key file asset."
+        type: "str"
+        default: "{{ openldap_directory.certs }}/master_ca_key.pem"
+        description: "The fully qualified path pointing to the secure Certificate Authority private cryptographic key."
+
+      openldap_tls_ca_csr:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/master_ca_ldap.csr"
+        description: "The destination path where the Certificate Authority certificate signing request file resides."
 
       openldap_tls_cert:
-        type: str
-        description: Target filesystem deployment destination path for the node's server certificate.
-
-      openldap_tls_csr:
-        type: "path"
-        required: false
-        description: "Absolute filesystem destination path tracking your intermediate Certificate Signing Request (CSR) asset."
+        type: "str"
+        default: "{{ openldap_directory.certs }}/cert.pem"
+        description: "The server-specific public identity certificate used to encrypt transport channels."
 
       openldap_tls_key:
-        type: str
-        description: Target filesystem path for the node's private server security key.
+        type: "str"
+        default: "{{ openldap_directory.certs }}/priv.pem"
+        description: "The server-specific private key verifying asymmetric transport encryption configurations."
+
+      openldap_tls_csr:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/ldap.csr"
+        description: "The target system path indicating where the server node identity certificate signing request file is saved."
 
       openldap_tls_cipher_suite:
-        type: str
+        type: "str"
         default: "HIGH:MEDIUM:+SSLv3"
-        description: The allowed cryptographic algorithm profile string for network handshakes.
+        description: "The cryptographic cipher priority engine definitions accepted during active TLS negotiations."
 
       openldap_sasl_nocanon:
-        type: str
+        type: "str"
         default: "on"
-        choices:
-          - "on"
-          - "off"
-        description: Toggles canonicalization parameters for underlying SASL authentication pipelines.
+        choices: ["on", "off"]
+        description: "Configures canonical host-to-identity evaluation parameters within internal SASL authentication pipelines."
 
       openldap_tls_reqcert:
-        type: str
-        default: allow
-        choices:
-          - never
-          - allow
-          - try
-          - demand
-        description: Strictness flag dictating client-side certificate verification workflows.
+        type: "str"
+        default: "allow"
+        choices: ["never", "allow", "try", "demand", "hard"]
+        description: "Defines peer certificate validation strictly enforced by the server on incoming client connection contexts."
 
       openldap_cleartext_port:
-        type: int
+        type: "int"
         default: 389
-        description: "The baseline network port allocated for standard unencrypted LDAP communication loops. Automatically hardened when combined with STARTTLS upgrades."
+        description: "The unencrypted listen port reserved for standard lookup operations and explicit StartTLS elevations."
 
       openldap_secure_port:
-        type: int
+        type: "int"
         default: 636
-        description: "The explicit cryptographic network port allocated for direct, implicit LDAPS communication loops, ensuring encryption from the initial connection frame."
+        description: "The legacy explicit SSL/TLS listening port handling immediate secure network handshakes."
 
+      # Core Database & Performance Tuning
       openldap_database_backend:
-        type: str
-        default: mdb
-        choices:
-          - mdb
-          - ldif
-          - wiredtiger
-          - ldap
-          - meta
-          - asyncmeta
-          - passwd
-          - monitor
-        description: The directory indexing architecture module type.
+        type: "str"
+        default: "mdb"
+        choices: ["mdb", "bdb", "hdb"]
+        description: "The underlying transactional storage database type powering the OpenLDAP environment."
 
       openldap_database_maxsize:
-        type: int
+        type: "int"
         default: 1073741824
-        description: The absolute upper allocator size limit bound for transactional MDB files in bytes.
+        description: "The absolute maximum size in bytes allocated for data memory map boundaries (Default: 1GB)."
 
       openldap_size_limit:
-        type: int
+        type: "int"
         default: 500
-        description: Max entries returned from a single search query transaction.
+        description: "The hard ceiling capping the total number of directory objects returned in a single search operation query."
 
       openldap_time_limit:
-        type: int
+        type: "int"
         default: 3600
-        description: Strict execution window timeout ceiling for a query execution in seconds.
+        description: "The absolute runtime duration execution ceiling in seconds permitted before forcing a lookup request cancellation."
 
+      # Feature Activations Matrix Switches
       openldap_autofs:
-        type: bool
+        type: "bool"
         default: false
-        description: Dynamically appends Automount network maps schemas when true.
+        description: "Toggles directory-based automount schema definitions enabling system file map tracking parameters over LDAP."
 
       openldap_guac:
-        type: bool
+        type: "bool"
         default: false
-        description: Injects Apache Guacamole management extensions schema maps when true.
+        description: "Enables configuration schema definitions handling client connection setups matching an Apache Guacamole engine."
 
       openldap_ppolicy:
-        type: bool
+        type: "bool"
         default: false
-        description: Mounts default OpenLDAP password policy enforcement schemas when true.
+        description: "Activates standard overlay management modules handling complex user password policies and lockout logic rules."
 
       openldap_samba:
-        type: bool
+        type: "bool"
         default: false
-        description: Appends Samba active directory account compatibility templates when true.
+        description: "Toggles schema extensions required for handling Windows NT/Active Directory network file shares and client data tracking."
 
       openldap_sudo:
-        type: bool
+        type: "bool"
         default: false
-        description: Integrates centralized sudo privilege command access restriction schemas when true.
+        description: "Injects explicit schema extensions designed to house and stream sudoers authorization policies via the centralized directory."
 
-      openldap_backup_dir:
-        type: str
-        default: "/var/backups/openldap"
-        description: >-
-          Custom directory path on the Ansible controller where final backup files are stored.
+      # Password Policy (ppolicy) Constraints
+      openldap_ppolicy_min_length:
+        type: "int"
+        default: 8
+        description: "The minimum character count enforced on user password change operations."
+
+      openldap_ppolicy_max_failure:
+        type: "int"
+        default: 5
+        description: "The continuous authentication failure limit permitted before triggering a target account lock state."
+
+      openldap_ppolicy_lockout_duration:
+        type: "int"
+        default: 1800
+        description: "The time duration in seconds an account remains completely locked following too many failure events (Default: 30 minutes)."
+
+      openldap_ppolicy_history_count:
+        type: "int"
+        default: 5
+        description: "The tracking ceiling of past passwords kept to block reuse sequences during updates."
+
+      openldap_ppolicy_expire_warning:
+        type: "int"
+        default: 432000
+        description: "The lead warning timeline in seconds reminding users of password expiry states (Default: 5 days)."
+
+      # Samba Policy Constraints
+      openldap_samba_domain:
+        type: "str"
+        default: "{{ openldap_second_level_domain | upper }}"
+        description: "The legacy uppercase NetBIOS domain identity string assigned for Windows client connectivity tracking."
+
+      # Directory Bootstrap Data Mapping
+      openldap_bootstrap_groups:
+        type: "list"
+        elements: "dict"
+        description: "The primary operational list used to create groups inside the directory structure."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The common name (cn) label specifying the security group."
+          gid:
+            type: "int"
+            required: true
+            description: "The explicit numeric group identifier assigned to the tracking element."
+          description:
+            type: "str"
+            required: false
+            description: "An open text line detailing the group's operational application boundaries."
+
+      openldap_bootstrap_users:
+        type: "list"
+        elements: "dict"
+        description: "A comprehensive seed list defining initial target users created during setup iterations."
+        options:
+          username:
+            type: "str"
+            required: true
+            description: "The localized account system sign-in string (uid attribute)."
+          firstname:
+            type: "str"
+            required: true
+            description: "The user's given name data metadata entry field (gn attribute)."
+          lastname:
+            type: "str"
+            required: true
+            description: "The user's formal surname element mapping line (sn attribute)."
+          uid:
+            type: "int"
+            required: true
+            description: "The unique system POSIX network numeric user tracking number."
+          gid:
+            type: "int"
+            required: true
+            description: "The primary POSIX network numeric group tracking identification number assigned."
+          password:
+            type: "str"
+            required: true
+            description: "The user account password token passed during bootstrapping actions."
+          groups:
+            type: "list"
+            elements: "str"
+            required: false
+            description: "A collection list linking supplemental group alignments assigned to this individual profile."
+          is_sudoer:
+            type: "bool"
+            required: false
+            default: false
+            description: "Explicit toggle determining whether user permissions should bridge system execution root access rights."
+          is_pxe_worker:
+            type: "bool"
+            required: false
+            default: false
+            description: "Determines if this service identity belongs to automated machine deployment and provisioning loops."
+
+      # External Plugin Configurations
+      openldap_autofs_mounts:
+        type: "list"
+        elements: "dict"
+        description: "Array defining standard dynamic automount maps mapped out to client nodes."
+        options:
+          key:
+            type: "str"
+            required: true
+            description: "The explicit mount target directory anchor tracking path."
+          map_name:
+            type: "str"
+            required: true
+            description: "The lookup configuration data map database matching file rules."
+          info:
+            type: "str"
+            required: false
+            description: "Operational mount flag variables tracking volume timeout values."
+
+      openldap_guac_connections:
+        type: "list"
+        elements: "dict"
+        description: "An environment mapping setup connecting central systems to Apache Guacamole portal tools."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The targeted human-readable remote environment layout entry label."
+          protocol:
+            type: "str"
+            required: true
+            choices: ["ssh", "rdp", "vnc", "telnet", "kubernetes"]
+            description: "The underlying protocol string assigned to build remote desktop links."
+          parent_ou:
+            type: "str"
+            required: true
+            description: "The explicit organizational subunit grouping these portal items."
+          parameters:
+            type: "list"
+            elements: "str"
+            required: false
+            description: "A string array configuring access connection variables like hostnames and target operational ports."
+          members:
+            type: "list"
+            elements: "str"
+            required: false
+            description: "A list of target account login strings given permission access routes over this endpoint channel."

@@ -39,9 +39,8 @@ openldap_schemas_base:
   - namedobject
   - pmi
 
-openldap_schemas: >-
+openldap_custom_schemas: >-
   {{
-    openldap_schemas_base +
     ( ['ppolicy'] if (openldap_ppolicy | default(false)) else [] ) +
     ( ['samba'] if (openldap_samba | default(false)) else [] ) +
     ( ['sudo'] if (openldap_sudo | default(false)) else [] ) +
@@ -72,3 +71,12 @@ openldap_final_daemon_args: >-
   {% endfor %}
   {% set _ = links.append('ldapi:///') %}
   {{ links | join(' ') | trim }}
+
+# Organizational Unit Name Customizations
+openldap_users_parent_ou: "Users"
+openldap_people_child_ou: "People"
+openldap_computers_child_ou: "Computers"
+openldap_groups_ou: "Groups"
+openldap_sudoers_ou: "SUDOers"
+openldap_automount_ou: "AutoMount"
+openldap_idmap_ou: "Idmap"

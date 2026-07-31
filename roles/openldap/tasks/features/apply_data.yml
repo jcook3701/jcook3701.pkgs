@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# 2. RUNTIME DATA OBJECT INJECTION
+# ====================================================================
+- name: Render optional feature extension profile LDIF
+  ansible.builtin.template:
+    src: "features/{{ current_feature_name }}.ldif.j2"
+    dest: "/tmp/feature_chunk_{{ current_feature_name }}.ldif"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply optional feature extension online to OpenLDAP data database
+  ansible.builtin.command: "{{ command }}"
+  vars:
+    base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    bind_dn: "cn={{ openldap_admin_user }},{{ base_dn }}"
+    command: >-
+      ldapadd -x -H ldapi:///
+      -D "{{ bind_dn }}"
+      -w "{{ openldap_admin_password }}"
+      -f "/tmp/feature_chunk_{{ current_feature_name }}.ldif"
+  register: chunk_add_result
+  failed_when:
+    - chunk_add_result.rc != 0
+    - "'already exists' not in chunk_add_result.stderr | lower"
+  changed_when: "'adding new entry' in chunk_add_result.stdout | lower"
+  become: true
+
+# ====================================================================
+# 3. HOUSEKEEPING CLEANUP
+# ====================================================================
+- name: Clean up feature configuration chunk files
+  ansible.builtin.file:
+    path: "/tmp/feature_chunk_{{ current_feature_name }}.ldif"
+    state: absent

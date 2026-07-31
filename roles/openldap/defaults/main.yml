@@ -56,24 +56,12 @@ openldap_database_maxsize: 1073741824  # Max DB size in bytes (1 GB default)
 openldap_size_limit: 500
 openldap_time_limit: 3600
 
-# Feature Activations Matrix Switches
-openldap_kerberos: false
-
 # Extra Schemas Activations Matrix Switches
 openldap_autofs: false
 openldap_guac: false
 openldap_ppolicy: false
 openldap_samba: false
 openldap_sudo: false
-
-# Organizational Unit Name Customizations
-openldap_users_parent_ou: "Users"
-openldap_people_child_ou: "People"
-openldap_computers_child_ou: "Computers"
-openldap_groups_ou: "Group"
-openldap_sudoers_ou: "SUDOers"
-openldap_automount_ou: "AutoMount"
-openldap_idmap_ou: "Idmap"
 
 ## Password Policy (ppolicy) Operational Constraints ##
 openldap_ppolicy_min_length: 8
@@ -84,6 +72,17 @@ openldap_ppolicy_expire_warning: 432000 # 5 days in seconds
 
 ## Samba Policy Operational Constraints ##
 openldap_samba_domain: "{{ openldap_second_level_domain | upper }}"
+
+openldap_bootstrap_groups:
+  - name: "Domain Admins"
+    gid: 512
+    description: "Privileged directory administrators with global system access"
+  - name: "Domain Users"
+    gid: 513
+    description: "Standard directory network user account container"
+  - name: "Samba Operators"
+    gid: 547
+    description: "Service accounts and managers handling filesystem shares"
 
 openldap_bootstrap_users:
   - username: "example"

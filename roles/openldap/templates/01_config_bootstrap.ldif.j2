@@ -1,5 +1,5 @@
 {#
-# bootstrap_config.ldif.j2 for jcook3701.pkgs
+# 01_config_bootstrap.ldif.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro bootstrap_config() -%}
+{%- macro config_bootstrap_01() -%}
 # 1. Global Config (TLS and General)
 dn: cn=config
 objectClass: olcGlobal
@@ -51,4 +51,4 @@ objectClass: olcSchemaConfig
 cn: schema
 {%- endmacro %}
 
-{{- bootstrap_config() }}
+{{- config_bootstrap_01() }}

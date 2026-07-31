@@ -1,12 +1,17 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-firewalld_packages:
-  - firewalld
+firewalld_service: firewalld
+
+firewalld_dep_pkg_names: []
+firewalld_pkg_names: []
 
 firewalld_directory:
-  conf: "/etc/firewalld"
-  services: "/etc/firewalld/services"
+  conf: "{{ firewalld_os_directory.conf | default('/etc/firewalld') }}"
+  services: "{{ firewalld_os_directory.services | default('/etc/firewalld/services') }}"
+
+firewalld_file:
+  conf: "{{ firewalld_directory.conf }}/"
 
 firewalld_native_services:
   - dns

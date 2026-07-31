@@ -34,10 +34,11 @@
     path: "{{ host_tmp_file }}"
     state: absent
   loop:
-    - /tmp/bootstrap_config.ldif
-    - /tmp/db_config.ldif
-    - /tmp/replication.config.ldif
-    - /tmp/base_structure.ldif
+    - /tmp/01_config_bootstrap.ldif
+    - /tmp/01_config_database.ldif
+    - /tmp/02_data_structure.ldif
+    - /tmp/02_data_seed.ldif
+    - /tmp/03_feature_replication.ldif
     - /tmp/load_syncprov.ldif
   loop_control:
     loop_var: host_tmp_file

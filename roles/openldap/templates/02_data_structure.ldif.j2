@@ -1,5 +1,5 @@
 {#
-# base_structure.ldif.j2 for jcook3701.pkgs
+# 02_data_structure.ldif.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,15 +18,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro base_structure() -%}
-# 1. Directory Administrator Role Object
-dn: cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+{%- macro data_structure_02() -%}
+# 1a. Root Domain Suffix Entry Object
+dn: dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: modify
+replace: o
+o: {{ openldap_organization_name | trim }}
+-
+replace: description
+description: Root entry for the {{ openldap_organization_name | trim }} directory structure.
+
+# 1b. Directory Administrator Role Object
+dn: cn={{ openldap_admin_user | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
 changetype: add
 objectClass: simpleSecurityObject
 objectClass: organizationalRole
-cn: {{ openldap_admin_user }}
+cn: {{ openldap_admin_user | trim }}
 description: LDAP Administrator
 userPassword: "{{ openldap_admin_password_hashed }}"
+
+# 1c. Restricted Syncrepl Replication Service Account
+dn: cn={{ openldap_replication_user | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: {{ openldap_replication_user | trim }}
+description: Syncrepl Replication Service Account
+userPassword: {{ openldap_replication_password_hashed }}
 
 # 2. Main Identity Organizational Unit Root
 dn: ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
@@ -54,51 +72,6 @@ changetype: add
 objectClass: organizationalUnit
 ou: {{ openldap_groups_ou | trim }}
 
-# 6. Automated Infrastructure User Account Provisioning
-{% for user in openldap_bootstrap_users | default([]) %}
-dn: uid={{ user.username | trim }},ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
-changetype: add
-objectClass: top
-objectClass: person
-objectClass: organizationalPerson
-objectClass: inetOrgPerson
-objectClass: posixAccount
-objectClass: shadowAccount
-cn: {{ user.firstname | trim }} {{ user.lastname | trim }}
-sn: {{ user.lastname | trim }}
-uid: {{ user.username | trim }}
-uidNumber: {{ user.uid | string | trim }}
-gidNumber: {{ user.gid | string | trim }}
-homeDirectory: /home/{{ user.username | trim }}
-loginShell: /bin/bash
-userPassword: {{ user.password | trim }}
-mail: {{ user.username | trim }}@{{ openldap_second_level_domain | trim }}.{{ openldap_top_level_domain | trim }}
-shadowMin: 0
-shadowMax: 99999
-shadowWarning: 7
-
-# Primary Group Creation for Individual User Objects
-dn: cn={{ user.username | trim }},ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
-changetype: add
-objectClass: top
-objectClass: posixGroup
-cn: {{ user.username | trim }}
-gidNumber: {{ user.gid | string | trim }}
-memberUid: {{ user.username | trim }}
-
-# Create any auxiliary groups defined for the user
-{% for group in user.groups | default([]) %}
-dn: cn={{ group | trim }},ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
-changetype: add
-objectClass: top
-objectClass: posixGroup
-cn: {{ group | trim }}
-gidNumber: {{ (6000 + loop.index) | string | trim }}
-memberUid: {{ user.username | trim }}
-
-{% endfor %}
-{% endfor %}
-
 {%- endmacro -%}
 
-{{- base_structure() }}
+{{- data_structure_02() }}
