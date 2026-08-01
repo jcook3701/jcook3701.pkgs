@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# --- UNCONDITIONAL GLOBAL CLIENT KEYTAB DELIVERY PASS ---
+# ====================================================================
+- name: Check if host principal keys are already present in system keytab
+  ansible.builtin.command: "klist -k {{ kerberos_file.keytab }}"
+  register: client_kt_check
+  changed_when: false
+  failed_when: false
+
+- name: Securely deliver unique host keytab file to the system target node
+  ansible.builtin.copy:
+    src: "/tmp/ansible_client_{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
+    dest: "{{ kerberos_file.keytab }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: "'host/' not in client_kt_check.stdout | lower"

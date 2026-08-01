@@ -19,7 +19,7 @@
 #}
 
 {%- macro kadm5() -%}
-{{ kerberos_admin_user | lower }}/admin@{{ kerberos_domain_name | upper }} *
+{{ kerberos_admin_user | lower }}@{{ kerberos_realm | upper }} *
 {% for server in kerberos_replica_servers %}
 kiprop/{{ server | lower }}@{{ kerberos_realm | upper }} p
 {% endfor %}

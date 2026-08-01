@@ -1,34 +1,22 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Configure Ubuntu Systemd Storage Sandbox Overrides
-  when:
-    - ansible_distribution == "Ubuntu"
-    - kerberos_node_type in ['master', 'replica']
-  block:
-    - name: Create systemd override directories for active node services
-      ansible.builtin.file:
-        path: "/etc/systemd/system/{{ service }}.service.d"
-        state: directory
-        mode: "0755"
-        owner: root
-        group: root
-      loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
-      loop_control:
-        loop_var: service
-        label: "Systemd Service Override Directory -> /etc/systemd/system/{{ service }}.service.d"
+# ====================================================================
+# PHASE 1: DIRECTORY PROVISIONING AND CORE TEMPLATE DEPLOYMENT
+# ====================================================================
+- name: Create Kerberos configuration files
+  ansible.builtin.include_tasks: configure/file-generation.yml
 
-    - name: Inject systemd log path write overrides
-      ansible.builtin.copy:
-        dest: "/etc/systemd/system/{{ service }}.service.d/override.conf"
-        content: |
-          [Service]
-          ReadWritePaths=/var/log/krb5/
-        mode: "0644"
-        owner: root
-        group: root
-      loop: "{{ ['krb5-kdc'] + ((kerberos_node_type == 'master') | ternary(['krb5-admin-server'], ['krb5-kpropd'])) }}"
-      loop_control:
-        loop_var: service
-        label: "Systemd Storage Sandbox Configuration -> /etc/systemd/system/{{ service }}.service.d/override.conf"
-      notify: Reload systemd daemon
+# ====================================================================
+# PHASE 2: CROSS-PLATFORM DAEMON NETWORK INTERFACE BINDING OVERRIDES
+# ====================================================================
+- name: Process administrative daemon network execution binding constraints
+  ansible.builtin.include_tasks: configure/admin-bind.yml
+  when: kerberos_node_type == 'master'
+
+# ====================================================================
+# PHASE 3: PLATFORM-SPECIFIC SECURITY SANDBOX OVERRIDES
+# ====================================================================
+- name: Apply explicit systemd storage sandbox configuration adjustments
+  ansible.builtin.include_tasks: configure/ubuntu.yml
+  when: ansible_distribution == "Ubuntu"

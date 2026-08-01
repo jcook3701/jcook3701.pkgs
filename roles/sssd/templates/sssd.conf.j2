@@ -35,7 +35,7 @@ services = {{ sssd_services | join(',') }}
 subdomains_provider = none
 
 # --- IDENTITY PROVIDER (OpenLDAP Core) ---
-id_provider = ldap
+id_provider = {{ sssd_id_provider | trim }}
 ldap_schema = {{ sssd_ldap_schema | trim }}
 ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert | trim }}
 ldap_uri = {{ sssd_ldap_uri | trim }}
@@ -45,8 +45,8 @@ ldap_group_search_base = {{ sssd_ldap_group_search_base | trim }}
 ldap_access_filter = {{ sssd_ldap_access_filter | trim }}
 
 # --- AUTHENTICATION PROVIDER (Kerberos) ---
-auth_provider = krb5
-chpass_provider = krb5
+auth_provider = {{ sssd_auth_provider | trim }}
+chpass_provider =  {{ sssd_chpass_provider | trim }}
 krb5_server = {{ sssd_krb5_server | trim }}
 krb5_realm = {{ sssd_krb5_realm | upper | trim }}
 
@@ -55,12 +55,12 @@ krb5_validate = {{ sssd_krb5_validate | string | lower }}
 cache_credentials = {{ sssd_cache_credentials | string | lower }}
 
 # --- OTHER PROVIDERS ---
-access_provider = ldap
+access_provider = {{ sssd_access_provider | trim }}
 {% if sssd_enable_autofs | bool %}
-autofs_provider = ldap
+autofs_provider = {{ sssd_autofs_provider | trim }}
 {% endif %}
 {% if sssd_enable_sudo | bool %}
-sudo_provider = ldap
+sudo_provider = {{ sssd_sudo_provider | trim }}
 {% endif %}
 
 # --- NETWORK & TLS TIMEOUTS ---

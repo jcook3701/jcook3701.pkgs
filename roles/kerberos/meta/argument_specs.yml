@@ -3,88 +3,238 @@
 ---
 argument_specs:
   main:
-    short_description: "Self-contained identity and authentication validation matrix for MIT Kerberos."
-    description: "Enforces strict typechecking, baseline requirements, and default configurations for Kerberos clusters."
+    short_description: "MIT Kerberos V5 cluster orchestration and client registration role."
+    description: >-
+      This role deploys, configures, and secures an MIT Kerberos V5 infrastructure.
+      It supports initializing master KDCs, secondary replicas, and automated
+      client node realm attachments with secure keytab generation on playbook re-runs.
     author: "Jared Cook"
     options:
       kerberos_state:
         type: str
         default: "present"
         choices: ["present", "absent", "teardown"]
-        description: "The structural target state of the Kerberos deployment."
+        description: "The operational state of the Kerberos deployment."
 
       kerberos_node_type:
         type: str
         default: "client"
         choices: ["master", "replica", "client"]
-        description: "The operational operational layer profile assigned to the cluster node."
+        description: "The structural role profile of the target host within the realm."
 
       kerberos_admin_servers:
         type: list
         elements: str
-        required: false
-        description: "A self-contained list array pointing to your primary Master KDC administration nodes."
+        default: []
+        description: "List of fully qualified domain names mapping to administrative master KDC nodes."
 
       kerberos_replica_servers:
         type: list
         elements: str
         default: []
-        description: "A list array tracking secondary replica KDC infrastructure propagation endpoints."
+        description: "List of fully qualified domain names mapping to secondary read-only database replicas."
 
       kerberos_client_nodes:
         type: list
         elements: str
         default: []
-        description: "An array of fully qualified domain names tracking the system client access workforce nodes that require unique machine host keytabs provisioned by the master KDC."
+        description: "List of client endpoints slated for realm registration and machine keytab generation."
 
       kerberos_port:
         type: str
         default: "88"
-        description: "The primary operational network connection port for the KDC daemon service."
+        description: "The network port utilized by the core Key Distribution Center (KDC) token service."
+
+      kerberos_admin_port:
+        type: str
+        default: "749"
+        description: "The network port utilized by the remote administration server daemon (kadmind)."
+
+      kerberos_admin_bind_all:
+        type: str
+        default: "false"
+        description: "Toggle string ('true' or 'false') to force kadmind to bind globally vs loopback."
+
+      kerberos_iprop_enable:
+        type: str
+        default: "true"
+        description: "Toggle string ('true' or 'false') to activate the incremental database replication engine."
+
+      kerberos_iprop_port:
+        type: str
+        default: "754"
+        description: "The dedicated network port utilized by the Master KDC to stream log updates to Replica nodes."
+
+      kerberos_iprop_replica_poll:
+        type: str
+        default: "2m"
+        description: "The interval frequency window at which Replica nodes poll the Master KDC for database logs."
 
       kerberos_admin_user:
         type: str
-        default: "admin"
-        description: "The root administrative principal username string identifier."
+        default: "kadmin"
+        description: "The primary root administrative principal username used for remote tree modifications."
 
       kerberos_admin_password:
         type: str
         default: "SecretPassword123"
-        description: "The plain-text staging credential target used during master database creation flags."
+        description: "The plaintext credential pairing used to secure the administrative kadmin principal account."
+
+      kerberos_use_stash_file:
+        type: bool
+        default: true
+        description: "Toggle to compile and write the local master database stash unlock key onto the storage tier."
+
+      kerberos_policy_min_length:
+        type: int
+        default: 8
+        description: "The minimum allowable character length for realm password policy profiles."
+
+      kerberos_policy_min_classes:
+        type: int
+        default: 3
+        description: "The minimum number of character classes required by the realm password complexity rules."
+
+      kerberos_policy_history_num:
+        type: int
+        default: 5
+        description: "The number of unique past passwords tracked to prevent standard credential recycling."
 
       kerberos_top_level_domain:
         type: str
         default: "com"
-        description: "The core internet routing suffix layer (e.g., net, org, com)."
+        description: "The topmost tier routing identifier component used to anchor the network domain name."
 
       kerberos_second_level_domain:
         type: str
         default: "example"
-        description: "The main corporate domain text label string anchor."
+        description: "The primary corporate domain namespace token used to evaluate structural naming fields."
 
       kerberos_dns_lookup_realm:
         type: str
         default: "false"
-        choices: ["true", "false"]
-        description: "Toggles whether client machines resolve Kerberos names via network DNS record lookups."
+        description: "Toggle string allowing clients to use DNS SRV records to discover realm parameters."
 
       kerberos_dns_lookup_kdc:
         type: str
         default: "false"
-        choices: ["true", "false"]
-        description: "Toggles whether client machines discover KDC IP targets via network DNS record lookups."
+        description: "Toggle string allowing clients to resolve KDC host nodes directly via standard DNS lookups."
 
       kerberos_ticket_lifetime:
         type: str
         default: "24h"
-        description: "The maximum continuous activation lifespan window for a standard user session token ticket."
+        description: "The operational duration limit mapped onto valid standard user Ticket Granting Tickets."
 
       kerberos_renew_lifetime:
         type: str
         default: "7d"
-        description: "The maximum allowable renewal limit range for a validated ticket signature handle."
+        description: "The absolute renewal boundary limit attached to standard structural ticket configurations."
+
+      kerberos_forwardable:
+        type: str
+        default: "true"
+        description: "Toggle string dictating whether issued tokens can be cleanly forwarded across distinct system boundaries."
+
+      kerberos_max_clock_skew:
+        type: str
+        default: "5m"
+        description: "The maximum timing drift window allowed before processing synchronization token requests."
 
       kerberos_encryption_types:
         type: str
         default: "aes256-cts-hmac-sha1-96"
-        description: "The secure cryptographic encryption type pinned to avoid legacy NTLM/MD4 hashing road blocks."
+        description: "The principal key types generated during the master cryptographic database compilation."
+
+      kerberos_permitted_enctypes:
+        type: str
+        default: "aes256-cts-hmac-sha1-96"
+        description: "The complete string listing of permitted cryptographic transaction formats allowed over the wire."
+
+      kerberos_default_tgs_enctypes:
+        type: str
+        default: "aes256-cts-hmac-sha1-96"
+        description: "The fallback encryption algorithms used when structuring Ticket Granting Server challenges."
+
+      kerberos_default_tkt_enctypes:
+        type: str
+        default: "aes256-cts-hmac-sha1-96"
+        description: "The baseline encryption algorithm assigned to standard endpoint user sessions."
+
+      kerberos_client_auto_register_host:
+        type: str
+        default: "true"
+        description: "Toggle string driving automated target host principal registration and local file keytab transfers."
+
+      kerberos_bootstrap_users:
+        type: list
+        elements: dict
+        description: "Array listing of core system accounts used to seed primary principals onto the storage database."
+        options:
+          username:
+            type: str
+            required: true
+            description: "The unique system login handle mapped to the target profile principal name."
+          firstname:
+            type: str
+            required: true
+            description: "The legal given first name value used to build systemic description parameters."
+          lastname:
+            type: str
+            required: true
+            description: "The corporate surname string value mapped into active account indices."
+          uid:
+            type: int
+            required: true
+            description: "The designated integer POSIX numeric identifier linked to the identity object."
+          gid:
+            type: int
+            required: true
+            description: "The primary group POSIX numeric identifier block tied to the profile layout."
+          password:
+            type: str
+            required: true
+            description: "The initial plain text credential password used to build key entries."
+          groups:
+            type: list
+            elements: str
+            description: "List of supplemental security groups the identity profile claims registration over."
+          is_sudoer:
+            type: bool
+            default: false
+            description: "Flag mapping privilege scaling authorization rights across endpoint configurations."
+          is_pxe_worker:
+            type: bool
+            default: false
+            description: "Custom system attribute tracking automated PXE provisioning configurations."
+
+      kerberos_domain_realms:
+        type: list
+        elements: dict
+        description: "Mapping configurations locking local network domain suffixes straight to valid realms."
+        options:
+          domain:
+            type: str
+            required: true
+            description: "The string text domain format string evaluated by client resolving layers."
+          realm:
+            type: str
+            required: true
+            description: "The corresponding target uppercase realm block identifier string mapping to the domain suffix."
+
+      kerberos_realms:
+        type: list
+        elements: dict
+        description: "Fallback configuration structs processed by client libraries when live inventory lookups collapse."
+        options:
+          name:
+            type: str
+            required: true
+            description: "The uppercase name token matching the designated target configuration tracking boundary."
+          kdc:
+            type: list
+            elements: str
+            description: "List of active fully qualified host targets acting as live key controllers."
+          admin_server:
+            type: str
+            required: true
+            description: "The designated fallback administration engine target mapping address."

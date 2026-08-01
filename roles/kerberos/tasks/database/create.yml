@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if Kerberos principal database exists on disk
+  ansible.builtin.stat:
+    path: "{{ kerberos_file.principal }}"
+  register: kdc_db_stat
+
+- name: Create initial Kerberos Realm Database and Stash file (Master Only)
+  ansible.builtin.command:
+    cmd: "{{ command }}"
+  vars:
+    master_pass: "{{ kerberos_admin_password | default('SecretPassword123') }}"
+    command: "kdb5_util create -s -P {{ master_pass }}"
+  register: db_create_cmd
+  failed_when: >-
+    db_create_cmd.rc != 0 or
+    'error' in db_create_cmd.stderr | lower or
+    'failed' in db_create_cmd.stderr | lower
+  when: not kdc_db_stat.stat.exists
+
+- name: Check if administrative keytab already exists
+  ansible.builtin.stat:
+    path: "{{ kerberos_file.admin_keytab }}"
+  register: admin_kt_stat
+
+- name: Extract KDC administrative keys to local service keytab
+  ansible.builtin.command:
+    cmd: "{{ command }}"
+  vars:
+    admin_principal: "kadmin/admin"
+    changepw_principal: "kadmin/changepw"
+    ktadd_query: "{{ admin_principal }} {{ changepw_principal }}"
+    command: "kadmin.local -q 'ktadd -k {{ kerberos_file.admin_keytab }} {{ ktadd_query }}'"
+  register: admin_kt_cmd
+  failed_when: >-
+    admin_kt_cmd.rc != 0 or
+    'error' in admin_kt_cmd.stderr | lower or
+    'failed' in admin_kt_cmd.stderr | lower
+  when: not admin_kt_stat.stat.exists
+
+- name: Fetch master stash file to Ansible controller
+  ansible.builtin.fetch:
+    src: "{{ kerberos_file.stash }}"
+    dest: /tmp/kerberos_stash_file
+    flat: true
+  when: kerberos_use_stash_file | bool

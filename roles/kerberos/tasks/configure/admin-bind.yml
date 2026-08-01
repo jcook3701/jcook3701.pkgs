@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# DEBIAN & RED HAT ENVIRONMENT FILE OVERRIDES
+# ====================================================================
+- name: Restrict administrative daemon network binding via OS environment configuration files
+  ansible.builtin.lineinfile:
+    path: "{{ kerberos_file.admin_defaults }}"
+    regexp: "{{ kerberos_os_admin_regexp }}"
+    line: "{{ kerberos_os_admin_line }}"
+  become: true
+  when:
+    - kerberos_node_type == 'master'
+    - ansible_facts['os_family'] in ['Debian', 'RedHat']
+    - not kerberos_admin_bind_all | bool
+  notify: Restart Kerberos Services
+
+# ====================================================================
+# ARCH LINUX SYSTEMD DROP-IN OVERRIDES
+# ====================================================================
+- name: Ensure systemd override configuration directory exists for Arch administrative daemon
+  ansible.builtin.file:
+    path: "{{ kerberos_directory.systemd }}/{{ kerberos_admin_service }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when:
+    - kerberos_node_type == 'master'
+    - ansible_facts['os_family'] == 'Archlinux'
+    - not kerberos_admin_bind_all | bool
+
+- name: Inject systemd local interface loopback binding parameters for Arch administrative daemon
+  ansible.builtin.copy:
+    dest: "{{ kerberos_directory.systemd }}/{{ kerberos_admin_service }}.service.d/bind_override.conf"
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/kadmind -N -nofork
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - kerberos_node_type == 'master'
+    - ansible_facts['os_family'] == 'Archlinux'
+    - not kerberos_admin_bind_all | bool
+  notify: Reload systemd daemon

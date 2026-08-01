@@ -1,10 +1,24 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# ====================================================================
+# PHASE 1: COMPONENT REMOVAL & INFRASTRUCTURE UNINSTALL
+# ====================================================================
 - name: Stop Kerberos Services and Uninstall
   ansible.builtin.include_tasks: uninstall.yml
 
-# TODO: This should be removed.  Handled replica_datatrans separately
+- name: Force deep purge of Kerberos packages and configuration database from the OS
+  ansible.builtin.apt:
+    name: "{{ kerberos_pkg_names }}"
+    state: absent
+    purge: true
+    autoremove: true
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+# ====================================================================
+# PHASE 2: PRIVILEGED FILER STATE PURGING
+# ====================================================================
 - name: Purge physical database backends and synchronization logs
   ansible.builtin.file:
     path: "{{ db_file }}"
@@ -22,6 +36,14 @@
     - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.dump_ok"
   loop_control:
     loop_var: db_file
+    label: "Purging backend storage asset: {{ db_file }}"
+  become: true
+
+- name: Verify if the Kerberos state directory exists on the filesystem
+  ansible.builtin.stat:
+    path: "{{ kerberos_directory.state }}"
+  register: teardown_state_dir_stat
+  become: true
 
 - name: Find all contents inside the Kerberos state directory
   ansible.builtin.find:
@@ -30,15 +52,18 @@
     hidden: true
     file_type: any
   register: directory_contents
+  become: true
+  when: teardown_state_dir_stat.stat.exists
 
 - name: Delete everything inside the directory
   ansible.builtin.file:
     path: "{{ file.path }}"
     state: absent
-  loop: "{{ directory_contents.files }}"
+  loop: "{{ directory_contents.files | default([]) }}"
   loop_control:
     loop_var: file
     label: "Deleted: {{ file.path }}"
+  become: true
 
 - name: Delete system identity keytab files
   ansible.builtin.file:
@@ -49,6 +74,8 @@
     - "{{ kerberos_file.admin_keytab }}"
   loop_control:
     loop_var: keytab
+    label: "Wiping identity keytab: {{ keytab }}"
+  become: true
 
 - name: Clean out all role-generated configuration matrices
   ansible.builtin.file:
@@ -62,6 +89,8 @@
     - "{{ kerberos_file.stash }}"
   loop_control:
     loop_var: conf_file
+    label: "Wiping text layout file: {{ conf_file }}"
+  become: true
 
 - name: Drop custom Systemd storage sandboxing directories (Ubuntu Only)
   ansible.builtin.file:
@@ -73,24 +102,7 @@
     - krb5-kpropd
   loop_control:
     loop_var: file_name
+    label: "Removing systemd sandbox path for: {{ file_name }}"
+  become: true
   when: ansible_distribution == "Ubuntu"
   notify: Reload systemd daemon
-
-- name: Erase temporary local controllers transit caches for each kdc
-  ansible.builtin.file:
-    path: "{{ cache_file }}"
-    state: absent
-  vars:
-    cache_file: "/tmp/ansible_transit_{{ replica_fqdn }}.keytab"
-  loop:
-    - "{{ kerberos_replica_servers }}"
-  loop_control:
-    loop_var: replica_fqdn
-    label: "removed -> {{ cache_file }}"
-  delegate_to: localhost
-  run_once: true
-  tags:
-    -never
-
-- name: Cleanup role generated temporary files
-  ansible.builtin.include_tasks: cleanup.yml

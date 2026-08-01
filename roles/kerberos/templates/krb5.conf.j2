@@ -26,11 +26,12 @@
     ticket_lifetime = {{ kerberos_ticket_lifetime }}
     renew_lifetime = {{ kerberos_renew_lifetime }}
     forwardable = {{ kerberos_forwardable }}
+    clockskew = {{ kerberos_max_clock_skew }}
     dns_canonicalize_hostname = false
     rdns = false
-    default_tgs_enctypes = {{ kerberos_encryption_types }}
-    default_tkt_enctypes = {{ kerberos_encryption_types }}
-    permitted_enctypes = {{ kerberos_encryption_types }}
+    default_tgs_enctypes = {{ kerberos_default_tgs_enctypes | join(' ') }}
+    default_tkt_enctypes = {{ kerberos_default_tkt_enctypes | join(' ') }}
+    permitted_enctypes = {{ kerberos_permitted_enctypes | join(' ') }}
 
 [realms]
 {% for realm in kerberos_realms %}

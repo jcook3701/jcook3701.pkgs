@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# MASTER NODE CLEANUP TASKS
+# ====================================================================
+- name: Clean up temporary transit files from all system nodes
+  ansible.builtin.file:
+    path: "/tmp/ansible_client_{{ client_fqdn }}.keytab"
+    state: absent
+  loop: "{{ kerberos_client_nodes | default([]) }}"
+  loop_control:
+    loop_var: client_fqdn
+    label: "Wiping master transit cache -> ansible_client_{{ client_fqdn }}.keytab"
+  become: true
+  when: kerberos_node_type == 'master'
+
+- name: Clean up the master staging directory
+  ansible.builtin.file:
+    path: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.transit.keytab"
+    state: absent
+  loop: "{{ kerberos_replica_servers | default([]) }}"
+  loop_control:
+    loop_var: replica_fqdn
+    label: "Wiping master replica cache -> {{ replica_fqdn }}.transit.keytab"
+  become: true
+  when: kerberos_node_type == 'master'
+
+# ====================================================================
+# REPLICA NODE CLEANUP TASKS
+# ====================================================================
+- name: Clean up the replica staging directory
+  ansible.builtin.file:
+    path: "{{ tmp_file }}"
+    state: absent
+  vars:
+    replica_fqdn: "{{ ansible_hostname }}.{{ kerberos_domain_name }}"
+    tmp_file: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab"
+  become: true
+  when: kerberos_node_type == 'replica'
+
+# ====================================================================
+# LOCAL CONTROLLER (LOCALHOST) CLEANUP TASKS
+# ====================================================================
+- name: Clean up local controller staging replica keytab cache
+  ansible.builtin.file:
+    path: "/tmp/ansible_transit_{{ replica_fqdn }}.keytab"
+    state: absent
+  loop: "{{ kerberos_replica_servers | default([]) }}"
+  loop_control:
+    loop_var: replica_fqdn
+    label: "Purging controller replica cache -> ansible_transit_{{ replica_fqdn }}.keytab"
+  delegate_to: localhost
+  run_once: true
+  become: false
+
+- name: Clean up local controller staging client keytab cache
+  ansible.builtin.file:
+    path: "/tmp/ansible_client_{{ client_fqdn }}.keytab"
+    state: absent
+  loop: "{{ kerberos_client_nodes | default([]) }}"
+  loop_control:
+    loop_var: client_fqdn
+    label: "Purging controller client cache -> ansible_client_{{ client_fqdn }}.keytab"
+  delegate_to: localhost
+  run_once: true
+  become: false
+
+- name: Erase temporary local controllers cached stash file
+  ansible.builtin.file:
+    path: "/tmp/kerberos_stash_file"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  become: false

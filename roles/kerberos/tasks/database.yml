@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# PHASE 1: Create backend files, stash parameters, and administrative rules
+# ====================================================================
+- name: Execute Master KDC core principal database initialization pass
+  ansible.builtin.include_tasks: database/create.yml
+  when: kerberos_node_type == 'master'
+
+# ====================================================================
+# PHASE 2: Seed machine-level identities and process cross-node propagation
+# ====================================================================
+- name: Execute cluster infrastructure principal provisioning and synchronization
+  ansible.builtin.include_tasks: database/provision_infrastructure.yml
+
+# ====================================================================
+# PHASE 3: Seed your core human user account principals natively via loop tools
+# ====================================================================
+- name: Execute source of truth identity principal seeding routines
+  ansible.builtin.include_tasks: database/provision_identities.yml
+  when: kerberos_node_type == 'master'
+
+# ====================================================================
+# PHASE 4: Pull transit keys out of staging memory and write down to local disks
+# ====================================================================
+- name: Execute unconditional global system keytab delivery passes
+  ansible.builtin.include_tasks: database/deploy_keytabs.yml
+
+# ====================================================================
+# PHASE 5: SECURE TRANSACTION HOUSEKEEPING CLEANUP
+# ====================================================================
+- name: Execute post-deployment temporary database transit file purge
+  ansible.builtin.include_tasks: database/cleanup.yml

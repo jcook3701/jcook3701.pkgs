@@ -1,6 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+kerberos_user: "root"
+kerberos_group: "root"
+
+kerberos_server_pkgs: []
+kerberos_replica_pkgs: []
+kerberos_client_pkgs: []
+kerberos_shared_libs: []
+
 kerberos_raw_packages: >-
   {% if kerberos_node_type == 'master' %}
     {{ (kerberos_server_pkgs + kerberos_client_pkgs) | to_json }}
@@ -32,6 +40,8 @@ kerberos_directory:
   log: "{{ kerberos_os_directory.log | default('/var/log/krb5') }}"
   state: "{{ kerberos_os_directory.state | default('/var/lib/krb5kdc') }}"
   systemd: "{{ kerberos_os_directory.systemd | default('/etc/systemd/system') }}"
+  dict: "{{ kerberos_os_directory.dict | default('/usr/share/dict') }}"
+  defaults: "{{ kerberos_os_directory.defaults | default('/etc/default') }}"
 
 kerberos_file:
   global_config: "{{ kerberos_directory.conf }}/krb5.conf"
@@ -48,3 +58,5 @@ kerberos_file:
   principal_ulog: "{{ kerberos_directory.state }}/principal.ulog"
   replica_ulog: "{{ kerberos_directory.state }}/replica.ulog"
   unlimited_ulog: "{{ kerberos_directory.state }}/unlimited.ulog"
+  dictionary: "{{ kerberos_directory.dict }}/words"
+  admin_defaults: "{{ kerberos_directory.defaults }}/{{ kerberos_os_admin_defaults_name | default('krb5-admin-server') }}"

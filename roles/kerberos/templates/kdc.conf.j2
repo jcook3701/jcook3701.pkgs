@@ -18,40 +18,63 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro render_kdc_realm_defaults() -%}
+{#
+  Macro: kdc_realm_properties
+  Purpose: Compiles the backend database parameters, security rules, and real-time
+           incremental database replication settings for the local directory partition.
+#}
+{%- macro kdc_realm_properties() -%}
+# Core Database Engine Paths
 database_name = {{ kerberos_file.principal }}
 admin_keytab = {{ kerberos_file.admin_keytab }}
 acl_file = {{ kerberos_file.admin_acl }}
+dict_file = {{ kerberos_file.dictionary }}
+{% if kerberos_use_stash_file | bool %}
 key_stash_file = {{ kerberos_file.stash }}
+{% endif %}
+
+# Ticket Lifetime Restrictions
 max_life = 10h 0m 0s
 max_renewable_life = 7d 0h 0m 0s
-master_key_type = aes256-cts-hmac-sha1-96
-supported_enctypes = aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal
 
-iprop_enable = true
-iprop_port = 754
+# Server-Side Master Cryptographic Key Configurations
+master_key_type = {{ kerberos_encryption_types | first }}
+supported_enctypes = {% for enc in kerberos_encryption_types %}{{ enc }}:normal {% endfor %}
 
+# Administrative Service Daemon Bind Port
+kadmind_port = {{ kerberos_admin_port }}
+
+# Incremental Replication (Iprop) Live Sync Logging Mechanics
+iprop_enable = {{ kerberos_iprop_enable }}
+iprop_port = {{ kerberos_iprop_port }}
 {% if kerberos_node_type == 'master' %}
 iprop_logfile = {{ kerberos_file.unlimited_ulog }}
 {% elif kerberos_node_type == 'replica' %}
-iprop_replica_poll = 2m
-{# This must be a local file path where the replica tracks its own sync states #}
-iprop_replica_ulog_spec = {{ kerberos_directory.state }}/replica.ulog
-{# This points to the expected file path of the ulog on the master side #}
-iprop_master_ulog_spec = {{ kerberos_directory.state }}/principal.ulog
+iprop_replica_poll = {{ kerberos_iprop_replica_poll }}
+iprop_replica_ulog_spec = file:{{ kerberos_file.replica_ulog }}:1000
+iprop_master_ulog_spec = file:{{ kerberos_file.principal_ulog }}
 {% endif %}
 {%- endmacro -%}
 
-{%- macro kdc() -%}
+
+{#
+  Macro: kdc_global_config
+  Purpose: Builds the root structural layout blocks for the MIT KDC engine, including
+           global port configurations and nested realm database blocks.
+#}
+{%- macro kdc_global_config() -%}
 [kdcdefaults]
     kdc_ports = {{ kerberos_port }}
     kdc_tcp_ports = {{ kerberos_port }}
-    {# kdc_keytab_name = {{ kerberos_file.keytab }} #}
 
 [realms]
     {{ kerberos_realm }} = {
-        {{ render_kdc_realm_defaults() | indent(8) }}
+        {{ kdc_realm_properties() | indent(8) }}
     }
+
+[logging]
+    kdc = FILE:{{ kerberos_file.kdc_log }}
+    admin_server = FILE:{{ kerberos_file.admin_log }}
 {%- endmacro -%}
 
-{{- kdc() -}}
+{{- kdc_global_config() -}}

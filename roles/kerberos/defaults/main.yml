@@ -3,19 +3,40 @@
 ---
 kerberos_state: present
 
-# Node Role Configuration (Options: master, replica, client)
+# Cluster Infrastructure Deployment Profile (Options: master, replica, client)
 kerberos_node_type: client
 
-# Self-Contained Server Infrastructure Pointers
+# Topology Inventory Mappings (Populated via play inventory definitions)
 kerberos_admin_servers: []
 kerberos_replica_servers: []
 kerberos_client_nodes: []
 kerberos_propagation_servers: "{{ kerberos_admin_servers + kerberos_replica_servers }}"
-kerberos_port: "88"
 
-# Administrative Directory Framework Credentials
-kerberos_admin_user: admin
+# ====================================================================
+# NETWORK DAEMON PORT BINDING & INTERFACE SECURITY
+# ====================================================================
+kerberos_port: "88"
+kerberos_admin_port: "749"
+kerberos_admin_bind_all: "true"
+
+# ====================================================================
+# INCREMENTAL REPLICATION (IPROP) CONFIGURATION PARAMETERS
+# ====================================================================
+kerberos_iprop_enable: "true"
+kerberos_iprop_port: "754"
+kerberos_iprop_replica_poll: "2m"
+
+# ====================================================================
+# ADMINISTRATIVE DIRECTORY FRAMEWORK CREDENTIALS & POLICIES
+# ====================================================================
+kerberos_admin_user: kadmin
 kerberos_admin_password: "SecretPassword123"
+kerberos_use_stash_file: true
+
+# Default Password Policy Constraints
+kerberos_policy_min_length: 8
+kerberos_policy_min_classes: 3
+kerberos_policy_history_num: 5
 
 # Domain Naming Structure
 kerberos_top_level_domain: "com"
@@ -29,9 +50,42 @@ kerberos_dns_lookup_kdc: "false"
 kerberos_ticket_lifetime: "24h"
 kerberos_renew_lifetime: "7d"
 kerberos_forwardable: "true"
+kerberos_max_clock_skew: "5m"
 
-# Modern Cryptographic Compliance Layout Parameters
-kerberos_encryption_types: "aes256-cts-hmac-sha1-96"
+# ====================================================================
+# MODERN CRYPTOGRAPHIC COMPLIANCE LAYOUT PARAMETERS
+# ====================================================================
+kerberos_encryption_types:
+  - "aes256-cts-hmac-sha1-96"
+  - aes128-cts-hmac-sha1-96
+
+kerberos_permitted_enctypes:
+  - "aes256-cts-hmac-sha1-96"
+  - "aes128-cts-hmac-sha1-96"
+
+kerberos_default_tgs_enctypes:
+  - "aes256-cts-hmac-sha1-96"
+  - "aes128-cts-hmac-sha1-96"
+
+kerberos_default_tkt_enctypes:
+  - "aes256-cts-hmac-sha1-96"
+  - "aes128-cts-hmac-sha1-96"
+
+# ====================================================================
+# AUTOMATED HOST IDENTIFY PROVISIONING (CLIENT KEYTABS)
+# ====================================================================
+kerberos_client_auto_register_host: "true"
+
+# Core Seeding Arrays
+kerberos_bootstrap_users:
+  - username: "example"
+    firstname: "Example"
+    lastname: "User"
+    uid: 5001
+    gid: 5001
+    password: "Password123!"
+    groups: ["engineering", "admins"]
+    is_sudoer: true
 
 # Mapping local domain strings to Kerberos realms
 kerberos_domain_realms:
@@ -40,7 +94,7 @@ kerberos_domain_realms:
   - domain: "{{ kerberos_domain_name }}"
     realm: "{{ kerberos_realm }}"
 
-# Fallback defaults if groups['kerberos_servers'] is ever missing from inventory
+# Fallback Structural Definitions utilized when inventory namespaces collapse
 kerberos_realms:
   - name: "{{ kerberos_realm }}"
     kdc: "{{ kerberos_admin_servers + kerberos_replica_servers }}"

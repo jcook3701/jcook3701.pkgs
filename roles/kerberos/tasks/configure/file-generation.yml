@@ -19,9 +19,9 @@
     content: ""
     dest: "{{ file }}"
     force: false
-    group: "root"
-    owner: "root"
-    mode: "0664"
+    group: "{{ kerberos_user }}"
+    owner: "{{ kerberos_group }}"
+    mode: "0660"
   loop:
     - "{{ kerberos_file.default_log }}"
     - "{{ kerberos_file.kdc_log }}"

@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+kerberos_user: "krb5kdc"
+kerberos_group: "krb5kdc"
+
 kerberos_server_pkgs:
   - krb5-kdc
   - krb5-admin-server
@@ -13,7 +16,7 @@ kerberos_client_pkgs:
   - krb5-user
 
 kerberos_shared_libs:
-  - python3-krb5
+  - python3-kerberos
   - python3-gssapi
   - python3-passlib
   - python3-cryptography
@@ -29,5 +32,11 @@ kerberos_os_directory:
   log: "/var/log/krb5"
   state: "/var/lib/krb5kdc"
   systemd: "/etc/systemd/system"
+  dict: "/usr/share/dict"
+  defaults: "/etc/default"
 
 kerberos_os_stash_name: "stash"
+kerberos_os_admin_defaults_name: "krb5-admin-server"
+
+kerberos_os_admin_regexp: '^DAEMON_ARGS='
+kerberos_os_admin_line: 'DAEMON_ARGS="-N"'

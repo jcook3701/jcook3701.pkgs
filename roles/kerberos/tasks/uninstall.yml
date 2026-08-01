@@ -1,20 +1,22 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Ensure Kerberos service is stopped and disabled
+- name: Ensure active Kerberos profile infrastructure services are stopped and disabled
   ansible.builtin.systemd:
     name: "{{ service }}"
     state: stopped
     enabled: false
-  loop:
-    - "{{ kerberos_kdc_service }}"
-    - "{{ kerberos_admin_service }}"
-    - "{{ kerberos_kprop_service }}"
+  loop: "{{ kerberos_services | default([]) }}"
   loop_control:
     loop_var: service
-  failed_when: false
+    label: "Deactivating and disabling daemon: {{ service }}"
+  become: true
+  when:
+    - kerberos_services is defined
+    - kerberos_services | length > 0
 
-- name: Uninstall Kerberos packages
+- name: Uninstall Kerberos packages and platform dependencies from the system
   ansible.builtin.package:
-    name: "{{ kerberos_server_pkgs + kerberos_replica_pkgs + kerberos_client_pkgs }}"
+    name: "{{ kerberos_pkg_names | default([]) }}"
     state: absent
+  become: true

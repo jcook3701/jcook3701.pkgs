@@ -3,23 +3,47 @@
 ---
 sssd_state: present
 
-# Dynamic Service Toggles
+# ====================================================================
+# DYNAMIC ENGINE SERVICE LIFECYCLE TOGGLES
+# ====================================================================
 sssd_enable_autofs: true
 sssd_enable_ssh: true
 sssd_enable_sudo: true
 
-# Domain Options
+# ====================================================================
+# CORE BACKEND PROVIDER DEFINITIONS
+# ====================================================================
+sssd_id_provider: "ldap"
+sssd_auth_provider: "krb5"
+sssd_chpass_provider: "krb5"
+sssd_access_provider: "ldap"
+
+sssd_autofs_provider: "ldap"
+sssd_sudo_provider: "ldap"
+
+# Anti-spoofing Kerberos KDC server token validation gate
+sssd_krb5_validate: true
+sssd_cache_credentials: true
+
+# ====================================================================
+# NETWORK DOMAIN NAMING & REALM STRUCTURAL DESIGNATIONS
+# ====================================================================
 sssd_top_level_domain: "com"
 sssd_second_level_domain: "example"
 sssd_domain_name: "{{ sssd_second_level_domain }}.{{ sssd_top_level_domain }}"
 
-# Directory Architecture Structural Object Tuners
+# ====================================================================
+# DIRECTORY INFORMATION TREE DISTINGUISHED NAME COMPARTMENTS
+# ====================================================================
 sssd_ldap_users_parent_ou: "Users"
 sssd_ldap_people_child_ou: "People"
 sssd_ldap_groups_ou: "Group"
 sssd_ldap_sudoers_ou: "SUDOers"
 sssd_ldap_automount_ou: "AutoMount"
 
+# ====================================================================
+# DIRECTORY BACKEND CONNECTION LAYER STRINGS & HOSTS
+# ====================================================================
 # LDAP Protocol (ldaps or ldap)
 sssd_ldap_protocol: "ldaps"
 
@@ -33,7 +57,9 @@ sssd_ldap_hosts:
 sssd_krb5_hosts:
   - "kerberos.{{ sssd_domain_name }}"
 
-# Deep Diagnostics Logging Levels Profiles Matrix
+# ====================================================================
+# SUBSYSTEM RUNTIME VERBOSITY & DEEP DIAGNOSTIC MATRICES
+# ====================================================================
 sssd_debug_level: 7
 sssd_pam_debug_level: 10
 sssd_autofs_debug_level: 10
@@ -41,26 +67,35 @@ sssd_ldap_debug_level: 6
 sssd_sudo_debug_level: 5
 sssd_ssh_debug_level: 5
 
-# LDAP TLS Configurations
+# ====================================================================
+# INDUSTRIAL CRYPTOGRAPHIC ENGINE PATH TRANSPORT PARAMETERS
+# ====================================================================
 sssd_ldap_tls_reqcert: "never"
 sssd_ldap_tls_cacert: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/master_ca.pem"
 sssd_ldap_tls_cert: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/cert.pem"
 sssd_ldap_tls_key: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/priv.pem"
 
-# Performance Tuning and Service Lifespans
-sssd_ldap_access_filter: "(objectClass=posixAccount)"
+
+# ====================================================================
+# ENGINE PERFORMANCE METRICS & CACHE TUNING TIMEOUTS
+# ====================================================================
 sssd_ldap_schema: "rfc2307"
-sssd_krb5_validate: "true"
-sssd_cache_credentials: "true"
 sssd_nss_homedir_substring: "/home"
 sssd_ldap_search_timeout: 90
 sssd_ldap_network_timeout: 90
 sssd_timeout: 30
 
-# Schema Structural Attribute Overrides Maps
+# ====================================================================
+# DYNAMIC EXTERNAL APPLICATION OBJECT ATTRIBUTE MAPS
+# ====================================================================
 sssd_ldap_autofs_map_object_class: "automountMap"
 sssd_ldap_autofs_entry_object_class: "automount"
 sssd_ldap_autofs_map_name: "automountMapName"
 sssd_ldap_autofs_entry_key: "automountKey"
 sssd_ldap_autofs_entry_value: "automountInformation"
 sssd_ssh_hash_known_hosts: "true"
+
+# ====================================================================
+# STRUCTURAL AUTHORIZATION SECURITY SEARCH LIMITING FILTERS
+# ====================================================================
+sssd_ldap_access_filter: "(objectClass=posixAccount)"
