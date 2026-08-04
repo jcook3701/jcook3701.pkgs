@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage systemd-resolved configuration."
+    description: "This role configures systemd-resolved DNS servers and domain settings."
+    author: "Your Name"
+    options:
+      systemd_resolved_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of the systemd-resolved configuration."
+
+      systemd_resolved_dns_servers:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "A list of IPv4 or IPv6 addresses for DNS servers."
+
+      systemd_resolved_top_level_domain:
+        type: "str"
+        required: false
+        default: "com"
+        description: "The top-level domain extension (e.g., com, org, net)."
+
+      systemd_resolved_second_level_domain:
+        type: "str"
+        required: false
+        default: "example"
+        description: "The second-level domain name."
+
+      systemd_resolved_domain_name:
+        type: "str"
+        required: false
+        default: "{{ systemd_resolved_second_level_domain }}.{{ systemd_resolved_top_level_domain }}"
+        description: "The fully qualified domain name, dynamically constructed by default."

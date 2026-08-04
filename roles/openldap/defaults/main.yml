@@ -62,6 +62,7 @@ openldap_guac: false
 openldap_ppolicy: false
 openldap_samba: false
 openldap_sudo: false
+openldap_openssh: false
 
 ## Password Policy (ppolicy) Operational Constraints ##
 openldap_ppolicy_min_length: 8
@@ -85,19 +86,44 @@ openldap_bootstrap_groups:
     description: "Service accounts and managers handling filesystem shares"
 
 openldap_bootstrap_users:
-  - username: "example"
+  - username: "example-admin"
     firstname: "Example"
-    lastname: "User"
+    lastname: "Admin"
+    description: "Primary Infrastructure Administrator Account"
+    title: "Systems Architect"
+    company: "Example Enterprises"
+    mail: "example-admin@example.com"
     uid: 5001
     gid: 5001
-    password: "Password123!"
-    groups: ["engineering", "admins"]
+    primary_group: "domain admins"
+    password: "SamplePassword123!"
+    groups: ["Domain Admins", "Domain Users"]
     is_sudoer: true
+    login_shell: "/bin/bash"
+    home_directory: "/home/example-admin"
+    password_must_change: false
+    account_disabled: false
+    ssh_public_keys: []
 
 openldap_autofs_mounts:
-  - key: "/share/example_path"
-    map_name: "auto.master"
-    info: "auto.data --timeout=60 --ghost"
+  # ============================================================================
+  # 1. Example Top-Level Master Junction Map (Equivalent to auto.master)
+  # ============================================================================
+  - ou: "/media/network_share"
+    objectClass:
+      - "top"
+      - "automountMap"
+    automountMapName: "/media/network_share"
+# ============================================================================
+  # 2. Example Child Storage Target Map Entry (Equivalent to an indirect map line)
+  # ============================================================================
+  - cn: "example_storage"
+    parent_map: "/media/network_share"
+    objectClass:
+      - "top"
+      - "automount"
+    automountKey: "example_storage"
+    automountInformation: "-fstype=nfs,rw,timeout=60,nfsvers=4,proto=tcp,soft example_hostname.{{ openldap_domain_name }}:/media/example_path"
 
 openldap_guac_connections:
   - name: "ssh-example-computer"

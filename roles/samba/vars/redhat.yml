@@ -1,22 +1,32 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-samba_service: smb
+samba_os_user_group: "wheel"
 
-samba_server_pkg_names:
-  - "samba"
-  - "samba-client"
-  - "samba-common"
-  - "samba-common-tools"
-  - "samba-dc-libs"
-  - "samba-vfs-idmap-mitkrb5"
-  - "samba-test"
+samba_os_service_nt4: ["smb, nmb"]
+samba_os_service_addc: ["samba"]
 
 samba_client_pkg_names:
   - samba-client
   - cifs-utils
 
-samba_pkg_names: "{{ samba_server_pkg_names if samba_is_server | bool else samba_client_pkg_names }}"
+samba_server_pkg_names_nt4:
+  - "samba"
+  - "samba-client"
+  - "samba-common"
+  - "samba-common-tools"
+  - "samba-vfs-modules"
+
+samba_server_pkg_names_addc:
+  - "samba"
+  - "samba-dc"
+  - "samba-client"
+  - "samba-common"
+  - "samba-common-tools"
+  - "samba-dc-libs"
+  - "samba-vfs-modules"
+  - "krb5-workstation"
+  - "samba-winbind"
 
 samba_os_directory:
   conf: "/etc/samba"
@@ -25,3 +35,4 @@ samba_os_directory:
   lib: "/var/lib/samba"
   cache: "/var/cache/samba"
   run: "/run/samba"
+  assets: "/usr/share/samba"

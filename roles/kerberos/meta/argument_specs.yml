@@ -171,41 +171,68 @@ argument_specs:
         description: "Array listing of core system accounts used to seed primary principals onto the storage database."
         options:
           username:
-            type: str
+            type: "str"
             required: true
-            description: "The unique system login handle mapped to the target profile principal name."
+            description: "Unique account logon identity string."
           firstname:
-            type: str
-            required: true
-            description: "The legal given first name value used to build systemic description parameters."
+            type: "str"
+            description: "Given name utilized for display formatting."
           lastname:
-            type: str
-            required: true
-            description: "The corporate surname string value mapped into active account indices."
+            type: "str"
+            description: "Surname field utilized for display formatting."
+          description:
+            type: "str"
+            description: "Administrative notation regarding the account purpose."
+          title:
+            type: "str"
+            description: "Organizational job title designation."
+          company:
+            type: "str"
+            description: "Corporate entity grouping descriptor."
+          mail:
+            type: "str"
+            description: "Primary electronic email mapping destination address."
           uid:
-            type: int
+            type: "int"
             required: true
-            description: "The designated integer POSIX numeric identifier linked to the identity object."
+            description: "Explicit corporate numeric POSIX User Identifier mapping."
           gid:
-            type: int
+            type: "int"
             required: true
-            description: "The primary group POSIX numeric identifier block tied to the profile layout."
+            description: "Explicit corporate numeric POSIX Group Identifier mapping."
+          primary_group:
+            type: "str"
+            description: "Default creation group ownership assignment parameter."
           password:
-            type: str
+            type: "str"
             required: true
-            description: "The initial plain text credential password used to build key entries."
+            description: "Passphrase verification security authentication token."
           groups:
-            type: list
-            elements: str
-            description: "List of supplemental security groups the identity profile claims registration over."
+            type: "list"
+            elements: "str"
+            description: "Collection array detailing supplementary security group memberships."
           is_sudoer:
-            type: bool
-            default: false
-            description: "Flag mapping privilege scaling authorization rights across endpoint configurations."
+            type: "bool"
+            description: "Controls privilege escalation assignments across client layers."
           is_pxe_worker:
-            type: bool
-            default: false
-            description: "Custom system attribute tracking automated PXE provisioning configurations."
+            type: "bool"
+            description: "Custom network lifecycle flag tagging infrastructure automation profiles."
+          login_shell:
+            type: "str"
+            description: "Target execution command interpreter binary location path."
+          home_directory:
+            type: "str"
+            description: "Absolute localized system path for user desktop profile storage."
+          password_must_change:
+            type: "bool"
+            description: "Forces mandatory interactive security credential updates upon first login."
+          account_disabled:
+            type: "bool"
+            description: "Toggles headless lockout status without destructive database pruning."
+          ssh_public_keys:
+            type: "list"
+            elements: "str"
+            description: "Cryptographic validation matrices for public key terminal connections."
 
       kerberos_domain_realms:
         type: list

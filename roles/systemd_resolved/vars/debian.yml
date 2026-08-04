@@ -3,7 +3,7 @@
 ---
 systemd_resolved_service: "systemd-resolved"
 
-systemd_resolved_pkg_names:
+systemd_resolved_os_pkg_names:
   - "systemd-resolved"
 
 systemd_resolved_os_directory:

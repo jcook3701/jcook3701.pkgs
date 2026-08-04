@@ -53,3 +53,21 @@
   when:
     - check_result.stderr is defined
     - "'principal does not exist' in check_result.stderr | lower"
+
+- name: Enforce dynamic lifecycle password modification and account lockout constraints
+  ansible.builtin.command: >-
+    kadmin.local -q "modify_principal
+    {{ user.password_must_change | bool | ternary('-pwexpire \"yesterday\"', '-pwexpire \"never\"') }}
+    {{ user.account_disabled | bool | ternary('-expire \"1 Jan 1970\"', '-expire \"never\"') }}
+    {{ user.username }}"
+  loop: "{{ kerberos_bootstrap_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Enforce Lifecycle Policies -> {{ user.username }}"
+  register: identity_policy_modify_cmd
+  changed_when: false
+  failed_when: >-
+    identity_policy_modify_cmd.rc != 0 or
+    ('error' in identity_policy_modify_cmd.stderr | lower or
+    'failed' in identity_policy_modify_cmd.stderr | lower)
+  become: true

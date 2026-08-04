@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-chrony_pkgs:
+chrony_pkg_names:
   - chrony
 
-chrony_directory:
+chrony_os_directory:
   conf: "/etc/chrony"
   log: "/var/log/chrony"
   var_state: "/var/lib/chrony"

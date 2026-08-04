@@ -43,15 +43,21 @@ objectClass: organizationalPerson
 objectClass: inetOrgPerson
 objectClass: posixAccount
 objectClass: shadowAccount
-cn: {{ user.firstname | trim }} {{ user.lastname | trim }}
-sn: {{ user.lastname | trim }}
+cn: {{ (user.firstname is defined and user.lastname is defined) | ternary(user.firstname | trim ~ ' ' ~ user.lastname | trim, user.username | trim) }}
+sn: {{ user.lastname | default(user.username, true) | trim }}
 uid: {{ user.username | trim }}
 uidNumber: {{ user.uid | string | trim }}
 gidNumber: {{ user.gid | string | trim }}
-homeDirectory: /home/{{ user.username | trim }}
-loginShell: /bin/bash
+homeDirectory: {{ user.home_directory | default('/home/' ~ user.username) | trim }}
+loginShell: {{ user.login_shell | default('/bin/bash') | trim }}
 userPassword: {{ user.password | trim }}
-mail: {{ user.username | trim }}@{{ openldap_second_level_domain | trim }}.{{ openldap_top_level_domain | trim }}
+mail: {{ user.mail | default(user.username ~ '@' ~ openldap_second_level_domain | trim ~ '.' ~ openldap_top_level_domain | trim) | trim }}
+{% if user.description is defined and user.description | length > 0 %}
+description: {{ user.description | trim }}
+{% endif %}
+{% if user.title is defined and user.title | length > 0 %}
+title: {{ user.title | trim }}
+{% endif %}
 shadowMin: 0
 shadowMax: 99999
 shadowWarning: 7

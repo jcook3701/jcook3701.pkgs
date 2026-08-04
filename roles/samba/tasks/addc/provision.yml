@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Determine if local Active Directory structural database is initialized
+  ansible.builtin.stat:
+    path: "{{ samba_file.samba_conf }}"
+  register: _samba_addc_conf_stat
+
+- name: Check for existing domain provisioning state via testparm
+  ansible.builtin.command: testparm -s --parameter-name="server role"
+  register: _samba_addc_role_check
+  changed_when: false
+  failed_when: false
+  when: _samba_addc_conf_stat.stat.exists
+
+- name: Provision Active Directory Domain Controller via samba-tool
+  ansible.builtin.command: >
+    samba-tool domain provision
+    --use-rfc2307
+    --realm="{{ samba_addc_realm | upper }}"
+    --domain="{{ samba_workgroup | upper }}"
+    --server-role=dc
+    --dns-backend="{{ samba_addc_dns_backend }}"
+    --adminpass="{{ samba_admin_password }}"
+  register: _samba_addc_provision_output
+  no_log: true
+  when:
+    - inventory_hostname == samba_primary_dc
+    - (not _samba_addc_conf_stat.stat.exists) or
+      ('active directory domain controller' not in _samba_addc_role_check.stdout | lower)
+  failed_when: >
+    (_samba_addc_provision_output.rc != 0) or
+    ('error' in _samba_addc_provision_output.stderr | lower) or
+    ('exception' in _samba_addc_provision_output.stdout | lower) or
+    ('failed' in _samba_addc_provision_output.stdout | lower)
+
+- name: Join Replica Nodes into existing Active Directory Domain Cluster
+  ansible.builtin.command: >
+    samba-tool domain join "{{ samba_addc_realm | lower }}" DC
+    -U"{{ samba_admin_user }}%{{ samba_admin_password }}"
+    --dns-backend="{{ samba_addc_dns_backend }}"
+  register: _samba_addc_join_output
+  no_log: true
+  when:
+    - inventory_hostname != samba_primary_dc
+    - inventory_hostname in samba_additional_dcs
+    - (not _samba_addc_conf_stat.stat.exists) or
+      ('active directory domain controller' not in _samba_addc_role_check.stdout | lower)
+  failed_when: >
+    (_samba_addc_join_output.rc != 0) or
+    ('error' in _samba_addc_join_output.stderr | lower) or
+    ('exception' in _samba_addc_join_output.stdout | lower) or
+    ('failed' in _samba_addc_join_output.stdout | lower)
+
+- name: Enforce operational state loop across system systemd services
+  ansible.builtin.systemd:
+    name: "{{ samba_service }}"
+    state: started
+    enabled: true

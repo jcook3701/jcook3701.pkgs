@@ -19,6 +19,7 @@
   ansible.builtin.include_tasks: uninstall.yml
   when:
     - kerberos_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
     - kerberos_pkg_names[0] in ansible_facts.packages
 
 - name: Teardown Kerberos

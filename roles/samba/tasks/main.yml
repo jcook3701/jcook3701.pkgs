@@ -18,9 +18,10 @@
   ansible.builtin.include_tasks: uninstall.yml
   when:
     - samba_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
     - samba_pkg_names[0] in ansible_facts.packages
 
 - name: Complete Purge and Tear-Down of Samba Environment
   ansible.builtin.include_tasks: teardown.yml
   when:
-    - openldap_state | default('present') == 'teardown'
+    - samba_state | default('present') == 'teardown'

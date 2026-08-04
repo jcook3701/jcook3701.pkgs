@@ -3,7 +3,7 @@
 ---
 - name: Install chrony package and dependencies.
   ansible.builtin.package:
-    name: "{{ chrony_pkgs }}"
+    name: "{{ chrony_pkg_names }}"
     state: present
 
 - name: Deploy chrony configuration file

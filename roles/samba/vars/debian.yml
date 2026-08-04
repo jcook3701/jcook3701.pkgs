@@ -1,9 +1,16 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-samba_service: smbd
+samba_os_user_group: "sambashare"
 
-samba_server_pkg_names:
+samba_os_service_nt4: ["smbd", nmbd]
+samba_os_service_addc: ["samba-ad-dc"]
+
+samba_client_pkg_names:
+  - smbclient
+  - cifs-utils
+
+samba_server_pkg_names_nt4:
   - samba
   - smbclient
   - samba-common
@@ -12,11 +19,17 @@ samba_server_pkg_names:
   - samba-vfs-modules
   - samba-testsuite
 
-samba_client_pkg_names:
-  - smbclient
-  - cifs-utils
-
-samba_pkg_names: "{{ samba_server_pkg_names if samba_is_server | bool else samba_client_pkg_names }}"
+samba_server_pkg_names_addc:
+  - "samba"
+  - "samba-ad-dc"
+  - "smbclient"
+  - "samba-common"
+  - "samba-common-bin"
+  - "samba-dsdb-modules"
+  - "samba-vfs-modules"
+  - "samba-testsuite"
+  - "krb5-user"
+  - "winbind"
 
 samba_os_directory:
   conf: "/etc/samba"

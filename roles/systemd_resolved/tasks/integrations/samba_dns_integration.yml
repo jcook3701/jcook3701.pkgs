@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create systemd-resolved configuration drop-in folder
+  file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    mode: "0755"
+
+- name: Configure systemd-resolved to disable its local stub listener
+  copy:
+    dest: /etc/systemd/resolved.conf.d/00-samba-dff.conf
+    content: |
+      [Resolve]
+      DNSStubListener=no
+    mode: "0644"
+  notify: Restart systemd-resolved
+
+- name: Flush handlers to free port 53 immediately
+  meta: flush_handlers
+
+- name: Configure static host DNS path directly to the local machine
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver {{ ansible_default_ipv4.address }}
+      search {{ samba_addc_realm | lower }}
+    mode: "0644"

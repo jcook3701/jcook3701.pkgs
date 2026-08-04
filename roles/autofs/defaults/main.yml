@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Control switches
+autofs_state: present
+
+# Set to true to disable local files and let SSSD pull mounts from OpenLDAP
+autofs_use_sssd: true
+
+# Centralized On-Demand File System Mount Array
+autofs_bootstrap_mounts: []

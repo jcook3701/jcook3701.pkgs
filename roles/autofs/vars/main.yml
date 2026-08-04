@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+autofs_service: "{{ autofs_os_service | default('autofs') }}"
+
+autofs_package_names: "{{ autofs_os_package_names | default([]) }}"
+
+autofs_directory:
+  conf: "{{ autofs_os_directory.conf | default('/etc') }}"
+
+autofs_file:
+  master_file: "{{ autofs_directory.conf }}/auto.master"

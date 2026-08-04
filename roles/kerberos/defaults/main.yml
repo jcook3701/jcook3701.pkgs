@@ -78,14 +78,24 @@ kerberos_client_auto_register_host: "true"
 
 # Core Seeding Arrays
 kerberos_bootstrap_users:
-  - username: "example"
+  - username: "example-admin"
     firstname: "Example"
-    lastname: "User"
+    lastname: "Admin"
+    description: "Primary Infrastructure Administrator Account"
+    title: "Systems Architect"
+    company: "Example Enterprises"
+    mail: "example-admin@example.com"
     uid: 5001
     gid: 5001
-    password: "Password123!"
-    groups: ["engineering", "admins"]
+    primary_group: "domain admins"
+    password: "SamplePassword123!"
+    groups: ["Domain Admins", "Domain Users"]
     is_sudoer: true
+    login_shell: "/bin/bash"
+    home_directory: "/home/example-admin"
+    password_must_change: false
+    account_disabled: false
+    ssh_public_keys: []
 
 # Mapping local domain strings to Kerberos realms
 kerberos_domain_realms:

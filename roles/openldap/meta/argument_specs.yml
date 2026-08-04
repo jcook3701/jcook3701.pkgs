@@ -8,6 +8,7 @@ argument_specs:
       This role manages an OpenLDAP deployment, including multi-master or replica node types,
       TLS encryption infrastructure, performance tuning, operational password policies,
       organizational units, and standard directory group/user seeding.
+    author: "Jared Cook"
     options:
       # General Configuration
       openldap_state:
@@ -202,6 +203,11 @@ argument_specs:
         default: false
         description: "Injects explicit schema extensions designed to house and stream sudoers authorization policies via the centralized directory."
 
+      openldap_openssh:
+        type: "bool"
+        default: false
+        description: "Extends the directory schema to store OpenSSH public keys centrally, enabling servers to securely fetch and validate user authentication keys at login."
+
       # Password Policy (ppolicy) Constraints
       openldap_ppolicy_min_length:
         type: "int"
@@ -261,42 +267,66 @@ argument_specs:
           username:
             type: "str"
             required: true
-            description: "The localized account system sign-in string (uid attribute)."
+            description: "Unique account logon identity string."
           firstname:
             type: "str"
-            required: true
-            description: "The user's given name data metadata entry field (gn attribute)."
+            description: "Given name utilized for display formatting."
           lastname:
             type: "str"
-            required: true
-            description: "The user's formal surname element mapping line (sn attribute)."
+            description: "Surname field utilized for display formatting."
+          description:
+            type: "str"
+            description: "Administrative notation regarding the account purpose."
+          title:
+            type: "str"
+            description: "Organizational job title designation."
+          company:
+            type: "str"
+            description: "Corporate entity grouping descriptor."
+          mail:
+            type: "str"
+            description: "Primary electronic email mapping destination address."
           uid:
             type: "int"
             required: true
-            description: "The unique system POSIX network numeric user tracking number."
+            description: "Explicit corporate numeric POSIX User Identifier mapping."
           gid:
             type: "int"
             required: true
-            description: "The primary POSIX network numeric group tracking identification number assigned."
+            description: "Explicit corporate numeric POSIX Group Identifier mapping."
+          primary_group:
+            type: "str"
+            description: "Default creation group ownership assignment parameter."
           password:
             type: "str"
             required: true
-            description: "The user account password token passed during bootstrapping actions."
+            description: "Passphrase verification security authentication token."
           groups:
             type: "list"
             elements: "str"
-            required: false
-            description: "A collection list linking supplemental group alignments assigned to this individual profile."
+            description: "Collection array detailing supplementary security group memberships."
           is_sudoer:
             type: "bool"
-            required: false
-            default: false
-            description: "Explicit toggle determining whether user permissions should bridge system execution root access rights."
+            description: "Controls privilege escalation assignments across client layers."
           is_pxe_worker:
             type: "bool"
-            required: false
-            default: false
-            description: "Determines if this service identity belongs to automated machine deployment and provisioning loops."
+            description: "Custom network lifecycle flag tagging infrastructure automation profiles."
+          login_shell:
+            type: "str"
+            description: "Target execution command interpreter binary location path."
+          home_directory:
+            type: "str"
+            description: "Absolute localized system path for user desktop profile storage."
+          password_must_change:
+            type: "bool"
+            description: "Forces mandatory interactive security credential updates upon first login."
+          account_disabled:
+            type: "bool"
+            description: "Toggles headless lockout status without destructive database pruning."
+          ssh_public_keys:
+            type: "list"
+            elements: "str"
+            description: "Cryptographic validation matrices for public key terminal connections."
 
       # External Plugin Configurations
       openldap_autofs_mounts:
@@ -304,18 +334,35 @@ argument_specs:
         elements: "dict"
         description: "Array defining standard dynamic automount maps mapped out to client nodes."
         options:
-          key:
-            type: "str"
-            required: true
-            description: "The explicit mount target directory anchor tracking path."
-          map_name:
-            type: "str"
-            required: true
-            description: "The lookup configuration data map database matching file rules."
-          info:
+          ou:
             type: "str"
             required: false
-            description: "Operational mount flag variables tracking volume timeout values."
+            description: "Organizational Unit attribute string used exclusively when initializing structural top-level automountMap records."
+          cn:
+            type: "str"
+            required: false
+            description: "Common Name structural key identifier applied to individual sub-map automount leaf records."
+          parent_map:
+            type: "str"
+            required: false
+            description: "Tracks the structural top-level mount junction folder location under which this specific record resides."
+          objectClass:
+            type: "list"
+            elements: "str"
+            required: true
+            description: "Strict schema definition tags (e.g., ['top', 'automountMap'] or ['top', 'automount']) dictating record traits inside the LDAP pool."
+          automountMapName:
+            type: "str"
+            required: false
+            description: "Explicit mapping name parameter defining the parent directory attachment point."
+          automountKey:
+            type: "str"
+            required: false
+            description: "The unique look-up folder name fragment searched for by the SSSD daemon kernel interface."
+          automountInformation:
+            type: "str"
+            required: false
+            description: "The absolute protocol connection flag string containing the fstype, timeouts, credentials paths, and backend storage targets."
 
       openldap_guac_connections:
         type: "list"

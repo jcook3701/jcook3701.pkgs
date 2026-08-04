@@ -45,7 +45,7 @@
   become: true
 
 - name: OpenLDAP key generation
-  ansible.builtin.include_tasks: "keys/keys.yml"
+  ansible.builtin.include_tasks: "keys/main.yml"
   when:
     - not openldap_existing_config.stat.exists
     - openldap_use_tls | bool
@@ -54,7 +54,7 @@
   ansible.builtin.include_tasks: configure.yml
 
 - name: OpenLDAP database and replication tree setup
-  ansible.builtin.include_tasks: database.yml
+  ansible.builtin.include_tasks: database/main.yml
 
 - name: Ensure OpenLDAP service is started and enabled
   ansible.builtin.service:

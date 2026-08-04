@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify Samba LDAP mapping capabilities and directory credentials
+  ansible.builtin.command: >-
+    net sam show "{{ samba_admin_user }}"
+  register: _samba_ldap_validate
+  changed_when: false
+  become: true
+  no_log: true
+  failed_when: >-
+    (_samba_ldap_validate.rc != 0) or
+    ('failed' in _samba_ldap_validate.stdout | lower) or
+    ('error' in _samba_ldap_validate.stderr | lower) or
+    ('denied' in _samba_ldap_validate.stdout | lower)
+
+- name: Provision Classic domain account engine structures
+  ansible.builtin.command: >-
+    net sam provision
+    --workgroup="{{ samba_workgroup | upper }}"
+    --domain="{{ samba_workgroup | upper }}"
+    --role="PDC"
+  register: _samba_nt4_provision
+  become: true
+  when: not _samba_nt4_secrets_stat.stat.exists
+  failed_when: >-
+    (_samba_nt4_provision.rc != 0 and 'already exists' not in _samba_nt4_provision.stderr | lower) or
+    ('critical' in _samba_nt4_provision.stderr | lower) or
+    ('panic' in _samba_nt4_provision.stdout | lower)
+
+- name: Force map administrator credentials to local database backend
+  ansible.builtin.command: >-
+    smbpasswd -an "{{ samba_admin_user }}"
+  register: _samba_admin_sync
+  become: true
+  changed_when: >-
+    ('added interface' not in _samba_admin_sync.stdout | lower)
+  failed_when: >-
+    (_samba_admin_sync.rc != 0) or
+    ('unable' in _samba_admin_sync.stderr | lower)

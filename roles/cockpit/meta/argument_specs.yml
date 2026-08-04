@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Cockpit web console installation."
+    description: "This role ensures the Cockpit web console package is installed or removed."
+    author: "Your Name"
+    options:
+      cockpit_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of the Cockpit service and package."

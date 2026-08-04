@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Enforce core parent configuration space integrity
+  ansible.builtin.file:
+    path: "{{ samba_directory.conf }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Ensure Samba group exists
+  ansible.builtin.include_tasks: groups.yml
+  when: samba_is_server | bool
+
+- name: Execute Samba user provisioning engine
+  ansible.builtin.include_tasks: admin-user.yml
+  when: samba_is_server | bool

@@ -1,3 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+chrony_pkg_names: []
+
+chrony_directory:
+  conf: "{{ chrony_os_directory.conf | default('/etc/chrony') }}"
+  log: "{{ chrony_os_directory.log | default('/var/log/chrony') }}"
+  var_state: "{{ chrony_os_directory.log | default('/var/lib/chrony') }}"
+
+chrony_service: "chronyd"

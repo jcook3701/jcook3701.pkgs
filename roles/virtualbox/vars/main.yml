@@ -21,6 +21,7 @@ virtualbox_selector:
 
 virtualbox_info: "{{ virtualbox_selector[virtualbox_selected] }}"
 
+virtualbox_user: vboxusers
 virtualbox_group: vboxusers
 
 # Determine the correct filename prefix based on the version

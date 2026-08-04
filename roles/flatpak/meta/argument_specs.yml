@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Flatpak installation and repositories."
+    description: "This role ensures Flatpak is configured and manages remote repositories."
+    author: "Your Name"
+    options:
+      flatpak_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of the Flatpak package and configuration."
+
+      flatpak_repos:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "A list of Flatpak remote repositories to configure."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The internal name for the Flatpak repository (e.g., flathub)."
+          url:
+            type: "str"
+            required: true
+            description: "The full URL pointing to the .flatpakrepo file."

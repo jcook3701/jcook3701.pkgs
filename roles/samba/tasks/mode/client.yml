@@ -10,13 +10,14 @@
     owner: root
     group: root
     mode: "0600"
+  no_log: true
   vars:
     mount_name: "{{ mount.name | default('default') }}"
-    creds_file: "/etc/samba-credentials-{{ mount_name }}"
+    creds_file: "{{ samba_directory.conf }}/.creds-{{ mount_name }}"
   loop: "{{ samba_client_mounts }}"
   loop_control:
     loop_var: mount
-    label: "Mount -> {{ mount.name }}"
+    label: "Mount -> {{ mount.name | default('default') }}"
 
 - name: Create local mounting endpoints
   ansible.builtin.file:
@@ -31,7 +32,7 @@
   loop: "{{ samba_client_mounts }}"
   loop_control:
     loop_var: mount
-    label: "Mount -> {{ mount.name }}"
+    label: "Mount -> {{ mount.name | default('default') }}"
 
 - name: Bind remote shares to filesystem table natively
   ansible.posix.mount:
@@ -42,7 +43,7 @@
     state: mounted
   vars:
     mount_name: "{{ mount.name | default('default') }}"
-    creds_file: "/etc/samba-credentials-{{ mount_name }}"
+    creds_file: "{{ samba_directory.conf }}/.creds-{{ mount_name }}"
     mount_uid: "{{ mount.owner_uid | default('root') }}"
     mount_gid: "{{ mount.owner_gid | default('root') }}"
     mount_options: >-
@@ -55,4 +56,4 @@
   loop: "{{ samba_client_mounts }}"
   loop_control:
     loop_var: mount
-    label: "Mount -> {{ mount.name }}"
+    label: "Mount -> {{ mount.name | default('default') }}"

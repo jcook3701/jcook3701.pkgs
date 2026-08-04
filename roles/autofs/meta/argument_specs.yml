@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Dynamic on-demand client filesystem automount core"
+    description: "Deploys on-demand kernel-level mount structures to eliminate network-dependent client boot stalls."
+    author: "Jared Cook"
+    options:
+      # Control switches
+      autofs_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "Target operational configuration lifecycle state."
+
+      autofs_use_sssd:
+        type: "bool"
+        required: false
+        default: false
+        description: "When true, disables local flat-file generation and configures system files to delegate all AutoFS map resolution to the SSSD daemon."
+
+      # Centralized On-Demand File System Mount Array
+      autofs_bootstrap_mounts:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "Centralized client-side explicit master map and drive definitions."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The unique identifier string for the shared drive profile."
+          mount_point:
+            type: "str"
+            required: true
+            description: "The absolute local destination target path where this mount anchors."
+          server_path:
+            type: "str"
+            required: true
+            description: "The absolute file path locating the directory export on the remote storage node."
+          timeout:
+            type: "int"
+            default: 60
+            description: "The inactivity window threshold in seconds before dropping the connection state."
+          fstype:
+            type: "str"
+            required: false
+            default: "cifs"
+            description: "The explicit file system protocol type flag utilized by the mount engine, supporting keys like cifs or nfs."

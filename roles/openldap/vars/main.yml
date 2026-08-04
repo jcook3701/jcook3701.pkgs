@@ -44,6 +44,7 @@ openldap_custom_schemas: >-
     ( ['ppolicy'] if (openldap_ppolicy | default(false)) else [] ) +
     ( ['samba'] if (openldap_samba | default(false)) else [] ) +
     ( ['sudo'] if (openldap_sudo | default(false)) else [] ) +
+    ( ['openssh-lpk'] if (openldap_openssh | default(false)) else [] ) +
     ( ['autofs'] if (openldap_autofs | default(false)) else [] ) +
     ( ['guacConfigGroup'] if (openldap_guac | default(false)) else [] )
   }}

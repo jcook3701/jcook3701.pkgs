@@ -1,5 +1,56 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Unmount and purge client remote storage attachments
+  ansible.posix.mount:
+    path: "{{ mount.path }}"
+    state: absent
+  loop: "{{ samba_client_mounts }}"
+  loop_control:
+    loop_var: mount
+    label: "Purging mount filesystem link -> {{ mount.path }}"
+
+- name: Purge Samba administrative user from the local system
+  ansible.builtin.user:
+    name: "{{ samba_admin_user }}"
+    state: absent
+    remove: yes
+  when: samba_is_server | bool
+
+- name: Purge OS-specific Samba user group from the local system
+  ansible.builtin.group:
+    name: "{{ samba_user_group }}"
+    state: absent
+  when: samba_is_server | bool
+
 - name: Stop Samba service — Uninstall and Purge
   ansible.builtin.include_tasks: uninstall.yml
+
+- name: Force deep purge of Samba packages and configuration from the OS
+  ansible.builtin.apt:
+    name: "{{ samba_pkg_names }}"
+    state: absent
+    purge: true
+    autoremove: true
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Purge local identity databases and operational state slates
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  loop:
+    - "{{ samba_directory.conf }}"
+    - "{{ samba_directory.spool }}"
+    - "{{ samba_directory.log }}"
+    - "{{ samba_directory.lib }}"
+    - "{{ samba_directory.cache }}"
+    - "{{ samba_directory.run }}"
+  loop_control:
+    loop_var: directory
+    label: "removed: {{ directory }}"
+
+- name: Flush transient runtime environment caches from system memory
+  ansible.builtin.command: "find {{ samba_directory.lib }}/private/ -type f -delete"
+  failed_when: false
+  changed_when: false

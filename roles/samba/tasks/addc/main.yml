@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Enforce native systemd-resolved DNS integration for Active Directory
+  ansible.builtin.include_role:
+    name: jcook3701.pkgs.systemd_resolved
+    tasks_from: integrations/samba_dns_integration.yml
+
+- name: Execute Active Directory headless provisioning engine
+  ansible.builtin.include_tasks: addc/provision.yml
+
+- name: Overwrite stock config with hardened template settings
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: "{{ samba_file.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Samba Services
+
+- name: Ensure Samba services are live before account insertion
+  meta: flush_handlers
+
+- name: Execute Active Directory group provisioning engine
+  ansible.builtin.include_tasks: addc/groups.yml
+  when: samba_addc_provision_groups | length > 0
+
+- name: Execute Active Directory user provisioning engine
+  ansible.builtin.include_tasks: addc/users.yml
+  when: samba_addc_provision_users | length > 0

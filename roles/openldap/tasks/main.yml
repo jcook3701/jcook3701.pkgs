@@ -42,6 +42,7 @@
   ansible.builtin.include_tasks: uninstall.yml
   when:
     - openldap_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
     - openldap_pkg_names[0] in ansible_facts.packages
 
 - name: Complete Purge and Tear-Down of OpenLDAP Environment

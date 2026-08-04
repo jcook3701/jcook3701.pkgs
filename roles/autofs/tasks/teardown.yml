@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Force stop system binaries and purge packages
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Isolate user-defined sub-map file targets dynamically for removal
+  ansible.builtin.set_fact:
+    _autofs_teardown_maps: >-
+      {{ autofs_bootstrap_mounts
+        | map(attribute='name')
+        | map('regex_replace', '^', 'auto.')
+        | unique | list }}
+
+- name: Purge dynamic storage partition map files from the filesystem
+  ansible.builtin.file:
+    path: "{{ autofs_directory.conf }}/{{ map_file }}"
+    state: absent
+  loop: "{{ _autofs_teardown_maps }}"
+  loop_control:
+    loop_var: map_file
+    label: "Removing Autofs Map -> {{ map_file }}"
+
+- name: Remove master automount routing configuration file
+  ansible.builtin.file:
+    path: "{{ autofs_file.master_file }}"
+    state: absent

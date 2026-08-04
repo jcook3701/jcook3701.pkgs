@@ -1,12 +1,18 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+systemd_resolved_service: "systemd-resolved"
+
+systemd_resolved_pkg_names: "{{ systemd_resolved_os_pkg_names | default([]) }}"
+
 systemd_resolved_directory:
-  conf: "{{ systemd_resolved_os_directory.conf }}"
-  runtime: "{{ systemd_resolved_os_directory.runtime }}"
+  conf: "{{ systemd_resolved_os_directory.conf | default('/etc/systemd/resolved.conf.d') }}"
+  runtime: "{{ systemd_resolved_os_directory.runtime | default('/run/systemd/resolve') }}"
+  state: "{{ systemd_resolved_os_directory.state | default('/var/lib/systemd/resolve') }}"
+  dbus: "{{ systemd_resolved_os_directory.dbus | default('/etc/dbus-1/system.d') }}"
 
 systemd_resolved_file:
-  main_config: "{{ systemd_resolved_os_file.main_config }}"
-  stub_resolv: "{{ systemd_resolved_os_file.stub_resolv }}"
-  static_resolv: "{{ systemd_resolved_os_file.static_resolv }}"
-  system_resolv: "{{ systemd_resolved_os_file.system_resolv }}"
+  main_config: "{{ systemd_resolved_directory.main_config | default('/etc/systemd/resolved.conf') }}"
+  stub_resolv: "{{ systemd_resolved_directory.runtime }}/stub-resolv.conf"
+  static_resolv: "{{ systemd_resolved_directory.runtime }}/resolv.conf"
+  system_resolv: "{{ systemd_resolved_os_file.system_resolv | default('/etc/resolv.conf') }}"

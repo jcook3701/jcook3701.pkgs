@@ -3,7 +3,7 @@
 ---
 - name: Install Cockpit package
   ansible.builtin.package:
-    name: "{{ cockpit_pkgs }}"
+    name: "{{ cockpit_pkg_names }}"
     state: "{{ cockpit_state }}"
   notify: Restart Cockpit
 

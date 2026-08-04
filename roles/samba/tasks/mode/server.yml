@@ -11,11 +11,10 @@
     loop_var: share
     label: "Share path exists for {{ share.name }}"
 
-- name: Deploy Samba server configuration
-  ansible.builtin.template:
-    src: smb.conf.j2
-    dest: "{{ samba_file.conf }}"
-    owner: root
-    group: root
-    mode: "0644"
-  notify: Restart Samba Services
+- name: Execute Classic NT4 Domain Engine branch
+  ansible.builtin.include_tasks: nt4/main.yml
+  when: samba_deployment_mode == "nt4"
+
+- name: Execute Modern Active Directory Domain Engine branch
+  ansible.builtin.include_tasks: addc/main.yml
+  when: samba_deployment_mode == "addc"
