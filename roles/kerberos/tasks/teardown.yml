@@ -34,6 +34,10 @@
     - "{{ kerberos_file.unlimited_ulog }}"
     - "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
     - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.dump_ok"
+    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.{{ ansible_hostname }}.{{ kerberos_domain_name }}.last_prop"
+    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.{{ ansible_fqdn }}.last_prop"
+    - "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.transit.keytab"
+    - "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
   loop_control:
     loop_var: db_file
     label: "Purging backend storage asset: {{ db_file }}"
@@ -72,6 +76,8 @@
   loop:
     - "{{ kerberos_file.keytab }}"
     - "{{ kerberos_file.admin_keytab }}"
+    - "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
+    - "{{ kerberos_directory.kdc_conf }}/{{ ansible_fqdn }}.keytab"
   loop_control:
     loop_var: keytab
     label: "Wiping identity keytab: {{ keytab }}"

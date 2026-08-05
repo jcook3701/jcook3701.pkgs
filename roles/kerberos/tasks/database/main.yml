@@ -5,30 +5,27 @@
 # PHASE 1: Create backend files, stash parameters, and administrative rules
 # ====================================================================
 - name: Execute Master KDC core principal database initialization pass
-  ansible.builtin.include_tasks: database/create.yml
+  ansible.builtin.include_tasks: create.yml
   when: kerberos_node_type == 'master'
 
 # ====================================================================
 # PHASE 2: Seed machine-level identities and process cross-node propagation
 # ====================================================================
 - name: Execute cluster infrastructure principal provisioning and synchronization
-  ansible.builtin.include_tasks: database/provision_infrastructure.yml
+  ansible.builtin.include_tasks: infrastructure/main.yml
 
 # ====================================================================
 # PHASE 3: Seed your core human user account principals natively via loop tools
 # ====================================================================
 - name: Execute source of truth identity principal seeding routines
-  ansible.builtin.include_tasks: database/provision_identities.yml
+  ansible.builtin.include_tasks: identities/main.yml
   when: kerberos_node_type == 'master'
 
-# ====================================================================
-# PHASE 4: Pull transit keys out of staging memory and write down to local disks
-# ====================================================================
 - name: Execute unconditional global system keytab delivery passes
-  ansible.builtin.include_tasks: database/deploy_keytabs.yml
+  ansible.builtin.include_tasks: infrastructure/keytabs/deploy.yml
 
 # ====================================================================
-# PHASE 5: SECURE TRANSACTION HOUSEKEEPING CLEANUP
+# PHASE 4: SECURE TRANSACTION HOUSEKEEPING CLEANUP
 # ====================================================================
 - name: Execute post-deployment temporary database transit file purge
-  ansible.builtin.include_tasks: database/cleanup.yml
+  ansible.builtin.include_tasks: cleanup.yml

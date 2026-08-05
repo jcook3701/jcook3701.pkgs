@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Dump the master Kerberos database for propagation
+  ansible.builtin.command:
+    cmd: "{{ command }}"
+  vars:
+    dump_file: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
+    command: "kdb5_util dump {{ dump_file }}"
+  when:
+    - kerberos_node_type == 'master'
+    - kerberos_replica_servers | length > 0
+
+- name: Propagate the database to the replica nodes
+  ansible.builtin.command:
+    cmd: "{{ command }}"
+  vars:
+    dump_file: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
+    command: "kprop -f {{ dump_file }} {{ replica_fqdn }}"
+    task_result: "{{ kprop_cmd.results[-1] if kprop_cmd.results is defined else none }}"
+  register: kprop_cmd
+  loop: "{{ kerberos_replica_servers }}"
+  loop_control:
+    loop_var: replica_fqdn
+    label: "Propagating database -> {{ replica_fqdn }}"
+  failed_when: >-
+    task_result is not none and (
+    task_result.rc != 0 or
+    'connection refused' in task_result.stderr | lower or
+    'cannot contact' in task_result.stderr | lower
+    )
+  when:
+    - kerberos_node_type == 'master'
+    - kerberos_replica_servers | length > 0

@@ -6,6 +6,7 @@
     name: "{{ service }}"
     state: stopped
     enabled: false
+  failed_when: false
   loop: "{{ kerberos_services | default([]) }}"
   loop_control:
     loop_var: service

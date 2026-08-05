@@ -10,10 +10,10 @@
   become: true
 
 - name: Configure Kerberos
-  ansible.builtin.include_tasks: configure.yml
+  ansible.builtin.include_tasks: configure/main.yml
 
 - name: Generate Kerberos Database and Keys
-  ansible.builtin.include_tasks: database.yml
+  ansible.builtin.include_tasks: database/main.yml
 
 - name: Ensure Kerberos infrastructure services are started and enabled
   ansible.builtin.systemd:

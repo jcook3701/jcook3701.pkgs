@@ -40,6 +40,55 @@ argument_specs:
         default: []
         description: "List of client endpoints slated for realm registration and machine keytab generation."
 
+      kerberos_propagation_servers:
+        type: "list"
+        elements: "str"
+        required: false
+        description: >-
+          A dynamically computed list containing both master and replica KDC hostnames.
+          Used by the configuration engine to map authorized database propagation
+          endpoints and replication access control lists.
+
+      kerberos_samba_file_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        required: false
+        description: >-
+          An explicit list of hostnames hosting corporate Samba file servers.
+          The Master KDC uses this array to iterate through and inject 'cifs/'
+          service principals into the staging keytabs during infrastructure execution passes.
+
+      kerberos_nfs_file_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        required: false
+        description: >-
+          An explicit list of hostnames hosting secure NFS filesystems.
+          The Master KDC uses this array to iterate through and inject 'nfs/'
+          service principals into the staging keytabs during infrastructure execution passes.
+
+      kerberos_http_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        required: false
+        description: >-
+          An explicit list of hostnames hosting web servers or administrative portals.
+          The Master KDC uses this array to iterate through and inject 'HTTP/'
+          service principals into the staging keytabs during infrastructure execution passes.
+
+      kerberos_ldap_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        required: false
+        description: >-
+          An explicit list of hostnames hosting secure OpenLDAP directory nodes.
+          The Master KDC uses this array to iterate through and inject 'ldap/'
+          service principals into the staging keytabs during infrastructure execution passes.
+
       kerberos_port:
         type: str
         default: "88"
@@ -53,11 +102,13 @@ argument_specs:
       kerberos_admin_bind_all:
         type: str
         default: "false"
+        choices: ["true", "false"]
         description: "Toggle string ('true' or 'false') to force kadmind to bind globally vs loopback."
 
       kerberos_iprop_enable:
         type: str
         default: "true"
+        choices: ["true", "false"]
         description: "Toggle string ('true' or 'false') to activate the incremental database replication engine."
 
       kerberos_iprop_port:
@@ -113,11 +164,13 @@ argument_specs:
       kerberos_dns_lookup_realm:
         type: str
         default: "false"
+        choices: ["true", "false"]
         description: "Toggle string allowing clients to use DNS SRV records to discover realm parameters."
 
       kerberos_dns_lookup_kdc:
         type: str
         default: "false"
+        choices: ["true", "false"]
         description: "Toggle string allowing clients to resolve KDC host nodes directly via standard DNS lookups."
 
       kerberos_ticket_lifetime:
@@ -133,6 +186,7 @@ argument_specs:
       kerberos_forwardable:
         type: str
         default: "true"
+        choices: ["true", "false"]
         description: "Toggle string dictating whether issued tokens can be cleanly forwarded across distinct system boundaries."
 
       kerberos_max_clock_skew:
@@ -140,29 +194,63 @@ argument_specs:
         default: "5m"
         description: "The maximum timing drift window allowed before processing synchronization token requests."
 
-      kerberos_encryption_types:
+      kerberos_dns_canonicalize_hostname:
         type: str
-        default: "aes256-cts-hmac-sha1-96"
+        default: "true"
+        required: false
+        choices: ["true", "false"]
+        description: >-
+          Controls whether the local Kerberos library performs canonicalization on hostnames
+          via DNS. Must be enabled (true) to support secure GSSAPI/Samba SMB ticket generation.
+
+      kerberos_rdns:
+        type: str
+        default: "true"
+        required: false
+        choices: ["true", "false"]
+        description: >-
+          Controls whether the local Kerberos library performs reverse DNS (PTR) verification
+          when establishing host mappings. Crucial for proper cross-platform Samba authorization.
+
+      kerberos_encryption_types:
+        type: list
+        default: ["aes256-cts-hmac-sha1-96"]
         description: "The principal key types generated during the master cryptographic database compilation."
 
       kerberos_permitted_enctypes:
-        type: str
-        default: "aes256-cts-hmac-sha1-96"
+        type: list
+        default: ["aes256-cts-hmac-sha1-96", "aes128-cts-hmac-sha1-96"]
+        choices:
+          - "aes256-cts-hmac-sha1-96"
+          - "aes128-cts-hmac-sha1-96"
+          - "aes256-cts"
+          - "aes128-cts"
         description: "The complete string listing of permitted cryptographic transaction formats allowed over the wire."
 
       kerberos_default_tgs_enctypes:
-        type: str
-        default: "aes256-cts-hmac-sha1-96"
+        type: list
+        default: ["aes256-cts-hmac-sha1-96", "aes128-cts-hmac-sha1-96"]
+        choices:
+          - "aes256-cts-hmac-sha1-96"
+          - "aes128-cts-hmac-sha1-96"
+          - "aes256-cts"
+          - "aes128-cts"
         description: "The fallback encryption algorithms used when structuring Ticket Granting Server challenges."
 
       kerberos_default_tkt_enctypes:
-        type: str
-        default: "aes256-cts-hmac-sha1-96"
+        type: list
+        default: ["aes256-cts-hmac-sha1-96", "aes128-cts-hmac-sha1-96"]
+        choices:
+          - "aes256-cts-hmac-sha1-96"
+          - "aes128-cts-hmac-sha1-96"
+          - "aes256-cts"
+          - "aes128-cts"
         description: "The baseline encryption algorithm assigned to standard endpoint user sessions."
 
       kerberos_client_auto_register_host:
         type: str
         default: "true"
+        choices: ["true", "false"]
         description: "Toggle string driving automated target host principal registration and local file keytab transfers."
 
       kerberos_bootstrap_users:

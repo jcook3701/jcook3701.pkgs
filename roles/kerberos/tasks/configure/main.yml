@@ -5,18 +5,18 @@
 # PHASE 1: DIRECTORY PROVISIONING AND CORE TEMPLATE DEPLOYMENT
 # ====================================================================
 - name: Create Kerberos configuration files
-  ansible.builtin.include_tasks: configure/file-generation.yml
+  ansible.builtin.include_tasks: file-generation.yml
 
 # ====================================================================
 # PHASE 2: CROSS-PLATFORM DAEMON NETWORK INTERFACE BINDING OVERRIDES
 # ====================================================================
 - name: Process administrative daemon network execution binding constraints
-  ansible.builtin.include_tasks: configure/admin-bind.yml
+  ansible.builtin.include_tasks: admin-bind.yml
   when: kerberos_node_type == 'master'
 
 # ====================================================================
 # PHASE 3: PLATFORM-SPECIFIC SECURITY SANDBOX OVERRIDES
 # ====================================================================
 - name: Apply explicit systemd storage sandbox configuration adjustments
-  ansible.builtin.include_tasks: configure/ubuntu.yml
+  ansible.builtin.include_tasks: ubuntu.yml
   when: ansible_distribution == "Ubuntu"

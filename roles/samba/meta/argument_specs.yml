@@ -27,7 +27,7 @@ argument_specs:
       samba_deployment_mode:
         type: "str"
         default: "addc"
-        choices: ["nt4", "addc"]
+        choices: ["nt4", "addc", "member_legacy", "member_sssd"]
         description: "Target identity backend model orchestration switch."
 
       # Domain Options
@@ -174,6 +174,7 @@ argument_specs:
       samba_idmap_backend:
         type: "str"
         default: "tdb"
+        choices: ["tdb", "ldap"]
         description: "Internal local identity numeric mapper translation module database."
 
       samba_idmap_range_low:

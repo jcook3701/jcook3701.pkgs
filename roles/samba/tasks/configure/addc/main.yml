@@ -7,9 +7,9 @@
     tasks_from: integrations/samba_dns_integration.yml
 
 - name: Execute Active Directory headless provisioning engine
-  ansible.builtin.include_tasks: addc/provision.yml
+  ansible.builtin.include_tasks: provision.yml
 
-- name: Overwrite stock config with hardened template settings
+- name: Deploy Samba server configuration
   ansible.builtin.template:
     src: smb.conf.j2
     dest: "{{ samba_file.conf }}"
@@ -22,9 +22,9 @@
   meta: flush_handlers
 
 - name: Execute Active Directory group provisioning engine
-  ansible.builtin.include_tasks: addc/groups.yml
+  ansible.builtin.include_tasks: groups.yml
   when: samba_addc_provision_groups | length > 0
 
 - name: Execute Active Directory user provisioning engine
-  ansible.builtin.include_tasks: addc/users.yml
+  ansible.builtin.include_tasks: users.yml
   when: samba_addc_provision_users | length > 0

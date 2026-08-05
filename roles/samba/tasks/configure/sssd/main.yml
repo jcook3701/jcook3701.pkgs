@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy Samba server configuration (SSSD Engine Profile)
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: "{{ samba_file.samba_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: _samba_sssd_config_state
+
+- name: Ensure Samba services are running and enabled
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: "{{ smb_state }}"
+    enabled: true
+  vars:
+    smb_state: "{{ (_samba_sssd_config_state.changed) | ternary('restarted', 'started') }}"
+  loop: "{{ samba_service }}"
+  loop_control:
+    loop_var: service
+    label: "Service status: {{ service }} -> state: {{ smb_state }}"

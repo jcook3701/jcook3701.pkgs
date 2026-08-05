@@ -10,6 +10,10 @@ $ sudo apt install samba samba-common-bin
 # Authors Notes:
 TODO: Test Samba Client code.  Using autofs for samba mounts so it's on the back burner.
 
+    Planning for the future now by locking down a clean, modern SSSD + Kerberos Member Server.
+
+    Since there are no Windows clients yet, setting this up as a flexible third option gives full architecture options later. If future Windows clients use tools like MIT Kerberos for Windows or we set up a Cross-Forest Trust down the road, they will get seamless Single Sign-On (SSO) directly through this pipeline
+
     # 1. Establish Server Role (Not a DC)
     server role = member server
     security = user

@@ -11,10 +11,18 @@
     loop_var: share
     label: "Share path exists for {{ share.name }}"
 
+- name: Execute Modern Active Directory Domain Engine branch
+  ansible.builtin.include_tasks: addc/main.yml
+  when: samba_deployment_mode == "addc"
+
+- name: Execute Modern SSSD System Engine branch
+  ansible.builtin.include_tasks: sssd/main.yml
+  when: samba_deployment_mode == "member_sssd"
+
 - name: Execute Classic NT4 Domain Engine branch
   ansible.builtin.include_tasks: nt4/main.yml
   when: samba_deployment_mode == "nt4"
 
-- name: Execute Modern Active Directory Domain Engine branch
-  ansible.builtin.include_tasks: addc/main.yml
-  when: samba_deployment_mode == "addc"
+- name: Document Standalone Legacy Profile activation
+  ansible.builtin.include_tasks: nt4/main.yml
+  when: samba_deployment_mode == "member_legacy"

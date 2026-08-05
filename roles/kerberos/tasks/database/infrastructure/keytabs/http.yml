@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely initialize missing HTTP service records in the KDC database
+  ansible.builtin.command: >-
+    kadmin.local -q "add_principal -randkey {{ service_principal }}"
+  vars:
+    base_fqdn: "{{ http_server }}.{{ kerberos_domain_name }}"
+    service_principal: "HTTP/{{ base_fqdn }}"
+  loop: "{{ kerberos_http_servers }}"
+  loop_control:
+    loop_var: http_server
+    label: "Seeding database entry for: HTTP/{{ http_server }}.{{ kerberos_domain_name }}"
+  register: _http_db_seeding
+  failed_when: >-
+    (_http_db_seeding.rc != 0) and
+    ('already exists' not in _http_db_seeding.stderr | lower)
+  when: inventory_hostname in kerberos_admin_servers
+  become: true
+
+- name: Securely append required HTTP service keys on the Master KDC
+  ansible.builtin.command: >-
+    kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
+  vars:
+    base_fqdn: "{{ http_server }}.{{ kerberos_domain_name }}"
+    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
+    service_principal: "HTTP/{{ base_fqdn }}"
+  loop: "{{ kerberos_http_servers }}"
+  loop_control:
+    loop_var: http_server
+    label: "Injecting HTTP keys for: {{ http_server }}"
+  when: inventory_hostname in kerberos_admin_servers
+  become: true

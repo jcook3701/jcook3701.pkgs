@@ -26,6 +26,20 @@
   become: true
   when: kerberos_node_type == 'master'
 
+- name: Clean up secondary replication propagation tracking footprints off the master
+  ansible.builtin.file:
+    path: "{{ target_path }}"
+    state: absent
+  vars:
+    log_name: "replica_datatrans.{{ replica_fqdn }}.last_prop"
+    target_path: "{{ kerberos_directory.kdc_conf }}/{{ log_name }}"
+  loop: "{{ kerberos_replica_servers | default([]) }}"
+  loop_control:
+    loop_var: replica_fqdn
+    label: "Wiping master propagation tracking log -> {{ log_name }}"
+  become: true
+  when: kerberos_node_type == 'master'
+
 # ====================================================================
 # REPLICA NODE CLEANUP TASKS
 # ====================================================================

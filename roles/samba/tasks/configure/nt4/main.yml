@@ -28,7 +28,7 @@
 
 - name: Execute directory synchronization and account provisioning engine
   ansible.builtin.include_tasks: directory.yml
-  when: samba_is_server | bool
+  when: samba_deployment_mode == 'nt4'
 
 - name: Ensure Samba services are running and enabled
   ansible.builtin.systemd:

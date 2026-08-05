@@ -6,8 +6,12 @@ samba_state: present
 samba_is_server: false
 samba_is_file_server: false
 
-# Options: "nt4" (Classic PDC with OpenLDAP) or "addc" (Active Directory DC)
-samba_deployment_mode: "addc"
+# The Four Mutually Exclusive Deployment Architecture Targets:
+# "addc"          - Active Directory Domain Controller (Internal LDAP/Kerberos)
+# "nt4"           - Classic Domain Controller (Samba hosts domain, reads LDAP directly)
+# "member_legacy" - Standalone "NT4-Member" file server (No domain, reads LDAP directly for passwords)
+# "member_sssd"   - Modern Standalone file server (No domain, hands ID & Kerberos auth to SSSD)
+samba_deployment_mode: "member_sssd"
 
 # Domain and Architecture Identification
 samba_top_level_domain: "com"

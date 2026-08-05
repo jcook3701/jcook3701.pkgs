@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Enterprise Host OS Principal Pipeline
+  ansible.builtin.include_tasks: hosts.yml
+  when:
+    - kerberos_client_nodes | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise CIFS File Sharing Principal Pipeline
+  ansible.builtin.include_tasks: cifs.yml
+  when:
+    - kerberos_samba_file_servers | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise NFS Secure UNIX Storage Principal Pipeline
+  ansible.builtin.include_tasks: nfs.yml
+  when:
+    - kerberos_nfs_file_servers | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise HTTP Single Sign-On Principal Pipeline
+  ansible.builtin.include_tasks: http.yml
+  when:
+    - kerberos_http_servers | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise LDAP Secure Directory Principal Pipeline
+  ansible.builtin.include_tasks: ldap.yml
+  when:
+    - kerberos_ldap_servers | length > 0
+    - kerberos_node_type == 'master'
+
+# - name: Execute unconditional global system keytab delivery passes
+#  ansible.builtin.include_tasks: deploy.yml

@@ -12,6 +12,10 @@ kerberos_replica_servers: []
 kerberos_client_nodes: []
 kerberos_propagation_servers: "{{ kerberos_admin_servers + kerberos_replica_servers }}"
 
+kerberos_samba_file_servers: []
+kerberos_nfs_file_servers: []
+kerberos_http_servers: []
+kerberos_ldap_servers: []
 # ====================================================================
 # NETWORK DAEMON PORT BINDING & INTERFACE SECURITY
 # ====================================================================
@@ -51,13 +55,15 @@ kerberos_ticket_lifetime: "24h"
 kerberos_renew_lifetime: "7d"
 kerberos_forwardable: "true"
 kerberos_max_clock_skew: "5m"
+kerberos_dns_canonicalize_hostname: "true"
+kerberos_rdns: "true"
 
 # ====================================================================
 # MODERN CRYPTOGRAPHIC COMPLIANCE LAYOUT PARAMETERS
 # ====================================================================
 kerberos_encryption_types:
   - "aes256-cts-hmac-sha1-96"
-  - aes128-cts-hmac-sha1-96
+  - "aes128-cts-hmac-sha1-96"
 
 kerberos_permitted_enctypes:
   - "aes256-cts-hmac-sha1-96"

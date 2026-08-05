@@ -3,10 +3,13 @@
 ---
 # Internal role constants calculated dynamically based on mode selection
 samba_server_role: >-
-  {{
-    'active directory domain controller' if samba_deployment_mode == 'addc'
-    else 'classic primary domain controller'
-  }}
+  {% if samba_deployment_mode == 'addc' %}
+  active directory domain controller
+  {% elif samba_deployment_mode in ['member_legacy', 'member_sssd'] %}
+  member server
+  {% else %}
+  classic primary domain controller
+  {% endif %}
 
 # Strict mapping of built-in Windows AD groups that cannot be re-created
 samba_addc_builtin_groups:

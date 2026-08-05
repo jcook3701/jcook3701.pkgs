@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# --- CENTRALIZED ENTERPRISE APPLICATION SERVICE PRINCIPAL ENGINE ---
+# ====================================================================
+- name: Securely initialize missing CIFS service records in the KDC database
+  ansible.builtin.command: >-
+    kadmin.local -q "add_principal -randkey {{ service_principal }}"
+  vars:
+    base_fqdn: "{{ cifs_server }}.{{ kerberos_domain_name }}"
+    service_principal: "cifs/{{ base_fqdn }}"
+  loop: "{{ kerberos_samba_file_servers }}"
+  loop_control:
+    loop_var: cifs_server
+    label: "Seeding database entry for: cifs/{{ cifs_server }}.{{ kerberos_domain_name }}"
+  register: _samba_db_seeding
+  # Bypasses the task if the principal already exists to ensure idempotency
+  failed_when: >-
+    (_samba_db_seeding.rc != 0) and
+    ('already exists' not in _samba_db_seeding.stderr | lower)
+  when:
+    - kerberos_samba_file_servers | length > 0
+    - inventory_hostname in kerberos_admin_servers
+  become: true
+
+- name: Securely append required application service keys on the Master KDC
+  ansible.builtin.command: >-
+    kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
+  vars:
+    base_fqdn: "{{ cifs_server }}.{{ kerberos_domain_name }}"
+    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
+    service_principal: "cifs/{{ base_fqdn }}"
+  loop: "{{ kerberos_samba_file_servers }}"
+  loop_control:
+    loop_var: "cifs_server"
+    label: "Injecting CIFS keys for: {{ cifs_server }}"
+  when:
+    - kerberos_samba_file_servers | length > 0
+    - inventory_hostname in kerberos_admin_servers
+  become: true

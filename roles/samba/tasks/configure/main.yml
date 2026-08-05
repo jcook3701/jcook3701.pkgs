@@ -9,10 +9,15 @@
     group: "root"
     mode: "0755"
 
-- name: Ensure Samba group exists
-  ansible.builtin.include_tasks: groups.yml
+- name: Bootstrap Samba group and admin user
+  ansible.builtin.include_tasks: bootstrap/main.yml
   when: samba_is_server | bool
 
-- name: Execute Samba user provisioning engine
-  ansible.builtin.include_tasks: admin-user.yml
+- name: Execute Samba Server configuration
+  ansible.builtin.include_tasks: server.yml
   when: samba_is_server | bool
+
+- name: Execute Samba Client configuration
+  ansible.builtin.include_tasks: client.yml
+  when:
+    - samba_client_mounts | length > 0

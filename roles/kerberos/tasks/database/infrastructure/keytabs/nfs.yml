@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely initialize missing NFS service records in the KDC database
+  ansible.builtin.command: >-
+    kadmin.local -q "add_principal -randkey {{ service_principal }}"
+  vars:
+    base_fqdn: "{{ nfs_server }}.{{ kerberos_domain_name }}"
+    service_principal: "nfs/{{ base_fqdn }}"
+  loop: "{{ kerberos_nfs_file_servers }}"
+  loop_control:
+    loop_var: nfs_server
+    label: "Seeding database entry for: nfs/{{ base_fqdn }}"
+  register: _nfs_db_seeding
+  failed_when: >-
+    (_nfs_db_seeding.rc != 0) and
+    ('already exists' not in _nfs_db_seeding.stderr | lower)
+  when:
+    - kerberos_nfs_file_servers | length > 0
+    - inventory_hostname in kerberos_admin_servers
+  become: true
+
+- name: Securely append required NFS service keys on the Master KDC
+  ansible.builtin.command: >-
+    kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
+  vars:
+    base_fqdn: "{{ nfs_server }}.{{ kerberos_domain_name }}"
+    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
+    service_principal: "nfs/{{ base_fqdn }}"
+  loop: "{{ kerberos_nfs_file_servers }}"
+  loop_control:
+    loop_var: nfs_server
+    label: "Injecting NFS keys for: {{ nfs_server }}"
+  when:
+    - kerberos_nfs_file_servers | length > 0
+    - inventory_hostname in kerberos_admin_servers
+  become: true

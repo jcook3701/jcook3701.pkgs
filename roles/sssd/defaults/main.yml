@@ -75,7 +75,6 @@ sssd_ldap_tls_cacert: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/m
 sssd_ldap_tls_cert: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/cert.pem"
 sssd_ldap_tls_key: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/priv.pem"
 
-
 # ====================================================================
 # ENGINE PERFORMANCE METRICS & CACHE TUNING TIMEOUTS
 # ====================================================================
