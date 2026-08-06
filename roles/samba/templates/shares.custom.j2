@@ -1,0 +1,57 @@
+{#
+# shares.custom.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+
+{%- macro create() -%}
+{#
+    Generates dynamic custom user shares from defined runtime array targets.
+    Iterates through complex list mappings to filter and apply explicit execution parameters.
+
+    Args:
+        None
+
+    Returns:
+        str: Sequenced blocks of custom target storage parameters.
+#}
+
+{% for share in samba_shares | default([]) %}
+[{{ share.name }}]
+{% set options = [
+    ('comment', share.comment),
+    ('path', share.path),
+    ('public', share.public),
+    ('valid users', share.valid_users),
+    ('force user', share.force_user),
+    ('force group', share.force_group),
+    ('read only', share.read_only),
+    ('writable', share.writable),
+    ('browseable', share.browsable),
+    ('guest ok', share.guest_ok),
+    ('create mask', share.create_mask),
+    ('force create mode', share.force_create_mode),
+    ('directory mask', share.directory_mask),
+    ('force directory mode', share.force_directory_mode)
+] %}
+{% for key, value in options if value is defined and value is not none %}
+    {{ key }} = {{ value }}
+{% endfor %}
+
+{% endfor %}
+{%- endmacro -%}

@@ -1,0 +1,77 @@
+{#
+# shares.base.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro create() %}
+{#
+    Generates default system shares based on operational targeting switches.
+    Provisions AD DC requirements (sysvol/netlogon) and base file system storage blocks (homes/printers).
+
+    Args:
+        None
+
+    Returns:
+        str: Formatted system and printer shares blocks.
+#}
+{% if samba_deployment_mode == 'addc' %}
+# Mandatory Active Directory Domain shares required on ALL domain controllers
+[sysvol]
+    path = {{ samba_directory.sysvol }}
+    read only = no
+
+[netlogon]
+    path = {{ samba_directory.sysvol }}/{{ samba_realm | lower }}/scripts
+    read only = no
+{% endif %}
+
+{% if samba_is_file_server | bool %}
+[homes]
+    comment = Home Directories
+    path = {{ samba_homes_base_dir }}/%S
+    valid users = %S, %D%w%S, @"{{ samba_workgroup }}\Domain Users"
+    browseable = no
+    read only = no
+    writable = yes
+    inherit acls = yes
+    follow symlinks = yes
+    wide links = yes
+    force user = %S
+    force group = "Domain Users"
+    create mask = 0660
+    force create mode = 0660
+    force directory mode = 0770
+
+[printers]
+    comment = All Printers
+    path = {{ samba_directory.spool }}
+    browseable = yes
+    writable = yes
+    printable = yes
+    create mask = 0600
+
+[print$]
+    comment = Printer Drivers
+    path = {{ samba_directory.lib }}/drivers
+    writable = yes
+    write list = @printadmin, root
+    force group = @printadmin
+    create mask = 0664
+    directory mask = 0775
+{% endif %}
+{%- endmacro -%}

@@ -3,7 +3,9 @@
 ---
 - name: Install Samba package and dependencies.
   ansible.builtin.package:
-    name: "{{ samba_pkg_names }}"
+    name: >-
+      {{ samba_pkg_names +
+        (samba_is_server | bool | ternary([], samba_client_dep_pkg_names)) }}
     state: present
 
 - name: Enforce external SSSD infrastructure pre-requisites

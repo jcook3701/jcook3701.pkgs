@@ -16,10 +16,13 @@
 
 - name: Disable conflicting display managers
   ansible.builtin.systemd:
-    name: "{{ item }}"
+    name: "{{ service }}"
     enabled: no
     state: stopped
   loop: [gdm, gdm3, sddm]
+  loop_control:
+    loop_var: service
+    loop_control: "Disabling: {{ service }}"
   ignore_errors: true
 
 - name: Deploy lightdm configuration from J2 template

@@ -31,5 +31,17 @@
     - kerberos_ldap_servers | length > 0
     - kerberos_node_type == 'master'
 
+- name: Fetch fully compiled multi-service client keytabs back to the Ansible controller
+  ansible.builtin.fetch:
+    src: "/tmp/ansible_client_{{ host_node_fqdn }}.keytab"
+    dest: "/tmp/ansible_client_{{ host_node_fqdn }}.keytab"
+    flat: true
+  loop: "{{ kerberos_client_nodes | default([]) }}"
+  loop_control:
+    loop_var: host_node_fqdn
+    label: "Caching completed passport to controller: /tmp/ansible_client_{{ host_node_fqdn }}.keytab"
+  when: kerberos_node_type == 'master'
+
+# Developer Note: deploy.yml should not be called here.
 # - name: Execute unconditional global system keytab delivery passes
 #  ansible.builtin.include_tasks: deploy.yml

@@ -47,6 +47,12 @@
   args:
     executable: /bin/bash
   register: read_kt_output
+  changed_when: read_kt_output.rc == 0
+  failed_when: >-
+    (read_kt_output.rc != 0) or
+    ('error' in read_kt_output.stderr | lower) or
+    ('failed' in read_kt_output.stderr | lower) or
+    ('permission denied' in read_kt_output.stderr | lower)
   when:
     - kerberos_node_type == 'replica'
     - "'host/' not in replica_kt_check.stdout"

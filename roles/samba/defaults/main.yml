@@ -3,7 +3,6 @@
 ---
 # Control switches
 samba_state: present
-samba_is_server: false
 samba_is_file_server: false
 
 # The Four Mutually Exclusive Deployment Architecture Targets:
@@ -11,15 +10,18 @@ samba_is_file_server: false
 # "nt4"           - Classic Domain Controller (Samba hosts domain, reads LDAP directly)
 # "member_legacy" - Standalone "NT4-Member" file server (No domain, reads LDAP directly for passwords)
 # "member_sssd"   - Modern Standalone file server (No domain, hands ID & Kerberos auth to SSSD)
+# "client"        - Samba Client Configuration
 samba_deployment_mode: "member_sssd"
+
+# Options: sssd, addc, or legacy
+samba_client_target_mode: "sssd"
 
 # Domain and Architecture Identification
 samba_top_level_domain: "com"
 samba_second_level_domain: "example"
 samba_domain_name: "{{ samba_second_level_domain }}.{{ samba_top_level_domain }}"
-
 samba_workgroup: "{{ samba_second_level_domain | upper }}"
-samba_addc_realm: "{{ samba_domain_name | upper }}"
+samba_realm: "{{ samba_domain_name | upper }}"
 
 # Server Naming & Identification
 samba_netbios_name: "{{ ansible_hostname | default(inventory_hostname_short) | upper }}"
@@ -62,11 +64,11 @@ samba_addc_dns_backend: "SAMBA_INTERNAL"
 samba_dns_forwarders:
   - "1.1.1.1"
   - "8.8.8.8"
-
 samba_primary_dc: "localhost"
 samba_additional_dcs: []
 
 # Protocol Security Engine
+samba_security_mode: "ads"
 samba_server_signing: "mandatory"
 samba_smb_encrypt: "mandatory"
 samba_server_min_protocol: "SMB2_10"
@@ -117,6 +119,10 @@ samba_shares: []
 #   valid_users: "shareuser"
 #   read_only: "no"
 #   guest_ok: "no"
+
+# Client Operational Feature Flags
+samba_client_enable_mounts: false
+# samba_client_mount_method: "autofs"
 
 # Client Configuration Defaults
 samba_client_mounts: []

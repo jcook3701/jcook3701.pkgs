@@ -8,14 +8,12 @@
   ansible.builtin.command: >-
     kadmin.local -q "add_principal -randkey {{ service_principal }}"
   vars:
-    base_fqdn: "{{ cifs_server }}.{{ kerberos_domain_name }}"
-    service_principal: "cifs/{{ base_fqdn }}"
+    service_principal: "cifs/{{ cifs_server_fqdn }}"
   loop: "{{ kerberos_samba_file_servers }}"
   loop_control:
-    loop_var: cifs_server
-    label: "Seeding database entry for: cifs/{{ cifs_server }}.{{ kerberos_domain_name }}"
+    loop_var: cifs_server_fqdn
+    label: "Seeding database entry for: cifs/{{ cifs_server_fqdn }}"
   register: _samba_db_seeding
-  # Bypasses the task if the principal already exists to ensure idempotency
   failed_when: >-
     (_samba_db_seeding.rc != 0) and
     ('already exists' not in _samba_db_seeding.stderr | lower)
@@ -28,13 +26,12 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    base_fqdn: "{{ cifs_server }}.{{ kerberos_domain_name }}"
-    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
-    service_principal: "cifs/{{ base_fqdn }}"
+    staging_keytab: "/tmp/ansible_client_{{ cifs_server_fqdn }}.keytab"
+    service_principal: "cifs/{{ cifs_server_fqdn }}"
   loop: "{{ kerberos_samba_file_servers }}"
   loop_control:
-    loop_var: "cifs_server"
-    label: "Injecting CIFS keys for: {{ cifs_server }}"
+    loop_var: "cifs_server_fqdn"
+    label: "Injecting CIFS keys for: {{ cifs_server_fqdn }}"
   when:
     - kerberos_samba_file_servers | length > 0
     - inventory_hostname in kerberos_admin_servers

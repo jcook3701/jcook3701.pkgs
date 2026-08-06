@@ -21,7 +21,7 @@
 - name: Slurp the public root certificate directly from the primary master LDAP server
   ansible.builtin.slurp:
     src: "{{ sssd_ldap_tls_cacert }}"
-  delegate_to: "{{ sssd_ldap_hosts | first | default(ansible_play_hosts | first) }}"
+  delegate_to: "{{ sssd_ldap_servers | first | default(ansible_play_hosts | first) }}"
   register: master_ca_raw_payload
   become: true
   run_once: true
@@ -29,7 +29,7 @@
 
 - name: Securely distribute public master authority certificate file to clients
   ansible.builtin.copy:
-    content: "{{ hostvars[sssd_ldap_hosts | first | default(ansible_play_hosts | first)]['master_ca_raw_payload']['content'] | b64decode }}"
+    content: "{{ hostvars[sssd_ldap_servers | first | default(ansible_play_hosts | first)]['master_ca_raw_payload']['content'] | b64decode }}"
     dest: "{{ sssd_ldap_tls_cacert }}"
     owner: root
     group: root

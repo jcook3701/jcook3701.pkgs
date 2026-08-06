@@ -17,13 +17,13 @@ sssd_id_provider: "ldap"
 sssd_auth_provider: "krb5"
 sssd_chpass_provider: "krb5"
 sssd_access_provider: "ldap"
-
 sssd_autofs_provider: "ldap"
 sssd_sudo_provider: "ldap"
 
 # Anti-spoofing Kerberos KDC server token validation gate
 sssd_krb5_validate: true
 sssd_cache_credentials: true
+sssd_krb5_store_password_if_offline: true
 
 # ====================================================================
 # NETWORK DOMAIN NAMING & REALM STRUCTURAL DESIGNATIONS
@@ -51,11 +51,17 @@ sssd_ldap_protocol: "ldaps"
 sssd_ldap_tls: false
 
 # LDAP and Kerberos Server Settings
-sssd_ldap_hosts:
+sssd_ldap_servers:
   - "ldap-server.{{ sssd_domain_name }}"
 
-sssd_krb5_hosts:
+sssd_krb5_servers:
   - "kerberos.{{ sssd_domain_name }}"
+
+# ==================================================================== #
+# SASL AND AUTHENTICATION PRINCIPAL SETTINGS
+# ==================================================================== #
+sssd_ldap_sasl_mech: "GSSAPI"
+sssd_ldap_user_principal: "nosubst"
 
 # ====================================================================
 # SUBSYSTEM RUNTIME VERBOSITY & DEEP DIAGNOSTIC MATRICES

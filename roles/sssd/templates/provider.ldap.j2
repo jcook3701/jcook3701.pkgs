@@ -1,0 +1,51 @@
+{#
+# provider.ldap.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{% import 'provider.ldap_common.j2' as ldap_common_provider with context %}
+
+{%- macro create() -%}
+{#
+    Generates the parameters for a pure direct OpenLDAP authentication and
+    identity structure. Maintains simple identity mapping and authentication
+    loops completely contained within the LDAP directory tree.
+
+    Args:
+        None
+
+    Returns:
+        str: A formatted block of direct OpenLDAP provider options.
+#}
+# --- DISCRETE BACKEND TRACK: PURE DIRECT LDAP AUTH ---
+id_provider = {{ sssd_id_provider | trim }}
+ldap_schema = {{ sssd_ldap_schema | trim }}
+ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert | trim }}
+ldap_uri = {{ sssd_ldap_uri | trim }}
+ldap_search_base = {{ sssd_ldap_search_base | trim }}
+ldap_user_search_base = {{ sssd_ldap_user_search_base | trim }}
+ldap_group_search_base = {{ sssd_ldap_group_search_base | trim }}
+ldap_access_filter = {{ sssd_ldap_access_filter | trim }}
+
+# Authentication Provider Settings
+auth_provider = {{ sssd_auth_provider | trim }}
+chpass_provider = {{ sssd_chpass_provider | trim }}
+cache_credentials = {{ sssd_cache_credentials | string | lower }}
+
+{{- ldap_common_provider.create() }}
+{%- endmacro -%}

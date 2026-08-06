@@ -5,12 +5,11 @@
   ansible.builtin.command: >-
     kadmin.local -q "add_principal -randkey {{ service_principal }}"
   vars:
-    base_fqdn: "{{ ldap_server }}.{{ kerberos_domain_name }}"
-    service_principal: "ldap/{{ base_fqdn }}"
+    service_principal: "ldap/{{ ldap_server_fqdn }}"
   loop: "{{ kerberos_ldap_servers }}"
   loop_control:
-    loop_var: ldap_server
-    label: "Seeding database entry for: ldap/{{ ldap_server }}.{{ kerberos_domain_name }}"
+    loop_var: ldap_server_fqdn
+    label: "Seeding database entry for: ldap/{{ ldap_server_fqdn }}}"
   register: _ldap_db_seeding
   failed_when: >-
     (_ldap_db_seeding.rc != 0) and
@@ -22,12 +21,11 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    base_fqdn: "{{ ldap_server }}.{{ kerberos_domain_name }}"
-    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
-    service_principal: "ldap/{{ base_fqdn }}"
+    staging_keytab: "/tmp/ansible_client_{{ ldap_server_fqdn }}.keytab"
+    service_principal: "ldap/{{ ldap_server_fqdn }}"
   loop: "{{ kerberos_ldap_servers }}"
   loop_control:
-    loop_var: ldap_server
-    label: "Injecting LDAP keys for: {{ ldap_server }}"
+    loop_var: ldap_server_fqdn
+    label: "Injecting LDAP keys for: {{ ldap_server_fqdn }}"
   when: inventory_hostname in kerberos_admin_servers
   become: true

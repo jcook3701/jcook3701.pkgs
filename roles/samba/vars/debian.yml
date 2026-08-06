@@ -6,6 +6,11 @@ samba_os_user_group: "sambashare"
 samba_os_service_nt4: ["smbd", nmbd]
 samba_os_service_addc: ["samba-ad-dc"]
 
+samba_client_dep_pkg_names:
+  - krb5-user
+  - sssd-krb5
+  - libpam-krb5
+
 samba_client_pkg_names:
   - smbclient
   - cifs-utils
@@ -39,3 +44,4 @@ samba_os_directory:
   cache: "/var/cache/samba"
   run: "/run/samba"
   assets: "/usr/share/samba"
+  sysvol: "/var/lib/samba/sysvol"

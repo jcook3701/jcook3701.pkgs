@@ -5,12 +5,11 @@
   ansible.builtin.command: >-
     kadmin.local -q "add_principal -randkey {{ service_principal }}"
   vars:
-    base_fqdn: "{{ http_server }}.{{ kerberos_domain_name }}"
-    service_principal: "HTTP/{{ base_fqdn }}"
+    service_principal: "HTTP/{{ http_server_fqdn }}"
   loop: "{{ kerberos_http_servers }}"
   loop_control:
-    loop_var: http_server
-    label: "Seeding database entry for: HTTP/{{ http_server }}.{{ kerberos_domain_name }}"
+    loop_var: http_server_fqdn
+    label: "Seeding database entry for: HTTP/{{ http_server_fqdn }}"
   register: _http_db_seeding
   failed_when: >-
     (_http_db_seeding.rc != 0) and
@@ -22,12 +21,11 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    base_fqdn: "{{ http_server }}.{{ kerberos_domain_name }}"
-    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
-    service_principal: "HTTP/{{ base_fqdn }}"
+    staging_keytab: "/tmp/ansible_client_{{ http_server_fqdn }}.keytab"
+    service_principal: "HTTP/{{ http_server_fqdn }}"
   loop: "{{ kerberos_http_servers }}"
   loop_control:
-    loop_var: http_server
-    label: "Injecting HTTP keys for: {{ http_server }}"
+    loop_var: http_server_fqdn
+    label: "Injecting HTTP keys for: {{ http_server_fqdn }}"
   when: inventory_hostname in kerberos_admin_servers
   become: true

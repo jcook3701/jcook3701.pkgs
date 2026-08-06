@@ -18,194 +18,47 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- set smb_header -%}
+{%- macro smb_header() -%}
+{#
+    Generates the base file header block.
+    Provides default file warnings and administrative execution notes for system operators.
+
+    Args:
+        None
+
+    Returns:
+        str: File warning and testparm command guidelines.
+#}
 # See smb.conf.example for a more detailed config file or
 # read the smb.conf manpage.
 # Run 'testparm' to verify the config is correct after
 # you modified it.
-{%- endset -%}
+{%- endmacro -%}
 
-{%- set smb_global_settings %}
-[global]
-    ## Browsing/Identification ##
-    workgroup = {{ samba_workgroup }}
-    netbios name = {{ samba_netbios_name }}
-    interfaces = {{ samba_interfaces }}
-    bind interfaces only = {{ samba_bind_interfaces_only }}
-    smb ports = {{ samba_port }}
-
-    ## Debugging/Accounting ##
-    log file = {{ samba_directory.log }}/log.%m
-    max log size = 1000
-    logging = file
-    panic action = {{ samba_directory.assets }}/panic-action %d
-
-    ## Core Server Role Definer ##
-    server role = {{ samba_server_role }}
-
-{% if samba_deployment_mode == 'addc' %}
-    {#- Active Directory Domain Controller Configuration Engine -#}
-    realm = {{ samba_addc_realm | upper }}
-    dns backend = {{ samba_addc_dns_backend }}
-    dns forwarder = {{ samba_dns_forwarders | join(' ') }}
-    idmap_ldb:use rfc2307 = yes
-
-{% else %}
-    {#- Standalone, NT4 Member, and PDC Shared Options -#}
-    security = user
-    obey pam restrictions = yes
-
-{% if samba_deployment_mode == 'nt4' %}
-    ## Domain Controller Services ##
-    domain logons = {{ samba_domain_logons }}
-    domain master = {{ samba_domain_master }}
-    local master = {{ samba_local_master }}
-    preferred master = {{ samba_preferred_master }}
-    os level = {{ samba_os_level }}
-    wins support = {{ samba_wins_support }}
-    unix password sync = yes
-    passwd program = /usr/bin/passwd %u
-    passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
-    pam password change = yes
-    map to guest = bad user
-    usershare allow guests = yes
-{% endif %}
-
-    ## Authentication Backends & Identity Mapping (IDMAP) ##
-{% if samba_deployment_mode == 'member_sssd' %}
-    passdb backend = tdbsam
-    idmap config * : backend = tdb
-    idmap config * : range = 3000-7999
-    idmap config {{ samba_workgroup }} : backend = sss
-    idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
-{% else %}
-    passdb backend = {{ samba_passdb_backend }}
-    idmap config * : backend = {{ samba_idmap_backend }}
-    idmap config * : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
-
-    ## Domains & LDAP Backend Maps ##
-    ldap suffix = {{ samba_ldap_suffix }}
-    ldap user suffix = {{ samba_ldap_user_suffix }}
-    ldap group suffix = {{ samba_ldap_group_suffix }}
-    ldap admin dn = {{ samba_ldap_admin_dn }}
-    ldap ssl = {{ 'off' if samba_ldap_proto == 'ldaps' else 'start_tls' }}
-
-    # Smart IDMAP Suffix Handler: Only prints out if the user selects the LDAP backend
-{% if samba_idmap_backend == 'ldap' %}
-    ldap idmap suffix = {{ samba_ldap_idmap_suffix }}
-{% endif %}
-{% endif %}
-
-{% if samba_deployment_mode == 'nt4' %}
-    ## LDAP Directory Management Scripts ##
-    ldap delete dn = no
-    ldap machine suffix = {{ samba_ldap_machine_suffix }}
-    add user script = /usr/sbin/smbldap-useradd -m '%u' -t 1
-    rename user script = /usr/sbin/smbldap-usermod -r '%unew' '%uold'
-    delete user script = /usr/sbin/smbldap-userdel '%u'
-    set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
-    add group script = /usr/sbin/smbldap-groupadd -p '%g'
-    delete group script = /usr/sbin/smbldap-groupdel '%g'
-    add user to group script = /usr/sbin/smbldap-groupmod -m '%u' '%g'
-    delete user from group script = /usr/sbin/smbldap-groupmod -x '%u' '%g'
-    add machine script = /usr/sbin/smbldap-useradd -w '%u' -t 1
-{% endif %}
-{% endif %}
-
-    ## Security & Protocols ##
-    server signing = {{ samba_server_signing }}
-    smb encrypt = {{ samba_smb_encrypt }}
-    server min protocol = {{ samba_server_min_protocol }}
-    server max protocol = {{ samba_server_max_protocol }}
-    client min protocol = {{ samba_client_min_protocol }}
-    client max protocol = {{ samba_client_max_protocol }}
-    unix extensions = no
-
-    ## Printing ##
-    load printers = yes
-    printing = cups
-    printcap name = cups
-    cups options = raw
-{%- endset -%}
-
-{%- set smb_default_shares %}
-{% if samba_deployment_mode == 'addc' %}
-# Mandatory Active Directory Domain shares required on ALL domain controllers
-[sysvol]
-    path = {{ samba_directory.sysvol | default('/var/lib/samba/sysvol') }}
-    read only = no
-
-[netlogon]
-    path = {{ samba_directory.sysvol | default('/var/lib/samba/sysvol') }}/{{ samba_addc_realm | lower }}/scripts
-    read only = no
-{% endif %}
-
-{% if samba_is_file_server | bool %}
-[homes]
-    comment = Home Directories
-    path = {{ samba_homes_base_dir }}/%S
-    valid users = %S, %D%w%S, @"{{ samba_workgroup }}\Domain Users"
-    browseable = no
-    read only = no
-    writable = yes
-    inherit acls = yes
-    follow symlinks = yes
-    wide links = yes
-    force user = %S
-    force group = "Domain Users"
-    create mask = 0660
-    force create mode = 0660
-    force directory mode = 0770
-
-[printers]
-    comment = All Printers
-    path = {{ samba_directory.spool }}
-    browseable = yes
-    writable = yes
-    printable = yes
-    create mask = 0600
-
-[print$]
-    comment = Printer Drivers
-    path = {{ samba_directory.lib }}/drivers
-    writable = yes
-    write list = @printadmin, root
-    force group = @printadmin
-    create mask = 0664
-    directory mask = 0775
-{% endif %}
-{%- endset %}
+{% import 'global.settings.j2' as smb_global_settings with context %}
+{% import 'shares.base.j2' as smb_shares_base with context %}
+{% import 'shares.custom.j2' as smb_shares_custom with context %}
 
 {%- macro smb_conf() -%}
-{{ smb_header }}
-{{ smb_global_settings }}
-{{ smb_default_shares }}
+{#
+    Master layout engine for building the smb.conf configuration skeleton.
+    Dynamically orchestrates top-level blocks by pulling predefined block variables in sequence.
 
-{% if samba_is_file_server | bool %}
-{% for share in samba_shares | default([]) %}
-[{{ share.name }}]
-{% set options = [
-    ('comment', share.comment),
-    ('path', share.server_path),
-    ('public', share.public),
-    ('valid users', share.valid_users),
-    ('force user', share.force_user),
-    ('force group', share.force_group),
-    ('read only', share.read_only),
-    ('writable', share.writable),
-    ('browseable', share.browsable),
-    ('guest ok', share.guest_ok),
-    ('create mask', share.create_mask),
-    ('force create mode', share.force_create_mode),
-    ('directory mask', share.directory_mask),
-    ('force directory mode', share.force_directory_mode)
-] %}
-{% for key, value in options if value is defined and value is not none %}
-    {{ key }} = {{ value }}
-{% endfor %}
+    Args:
+        None
 
-{% endfor %}
-{% endif %}
+    Returns:
+        str: A fully formatted, valid flat configuration file.
+#}
+    {{- smb_header() }}
+
+    {{- smb_global_settings.create() }}
+    {% if samba_is_server | bool %}
+        {{- smb_shares_base.create() }}
+        {% if samba_is_file_server | bool %}
+            {{- smb_shares_custom.create() }}
+        {% endif %}
+    {% endif %}
 {%- endmacro -%}
 
 {{- smb_conf() }}

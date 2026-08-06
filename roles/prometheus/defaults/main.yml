@@ -3,6 +3,6 @@
 ---
 prometheus_state: present
 
-promethus_exporter: prometheus-node-exporter
+prometheus_exporter: prometheus-node-exporter
 
-promethus_port: 9100
+prometheus_port: 9100

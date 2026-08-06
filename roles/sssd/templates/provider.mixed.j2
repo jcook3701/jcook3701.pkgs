@@ -1,0 +1,60 @@
+{#
+# provider.mixed.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{% import 'provider.ldap_common.j2' as ldap_common_provider with context %}
+
+{%- macro create() -%}
+{#
+    Generates the identity and authentication parameters for the mixed backend track.
+    Integrates an external OpenLDAP directory for user tracking alongside an Active
+    Directory Kerberos realm for secure validation.
+
+    Args:
+        None
+
+    Returns:
+        str: A formatted block of standard LDAP identity and Kerberos authentication
+        options.
+#}
+# --- DISCRETE BACKEND TRACK: LDAP IDENTITY WITH KERBEROS AUTH ---
+id_provider = {{ sssd_id_provider | trim }}
+ldap_schema = {{ sssd_ldap_schema | trim }}
+ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert | trim }}
+ldap_uri = {{ sssd_ldap_uri | trim }}
+ldap_search_base = {{ sssd_ldap_search_base | trim }}
+ldap_user_search_base = {{ sssd_ldap_user_search_base | trim }}
+ldap_group_search_base = {{ sssd_ldap_group_search_base | trim }}
+ldap_access_filter = {{ sssd_ldap_access_filter | trim }}
+
+# Identity Provider SASL Hooks
+ldap_sasl_mech = {{ sssd_ldap_sasl_mech | trim }}
+ldap_user_principal = {{ sssd_ldap_user_principal | trim }}
+
+# Authentication Provider Settings
+auth_provider = {{ sssd_auth_provider | trim }}
+chpass_provider = {{ sssd_chpass_provider | trim }}
+krb5_server = {{ sssd_krb5_server | trim }}
+krb5_realm = {{ sssd_krb5_realm | upper | trim }}
+krb5_validate = {{ sssd_krb5_validate | string | lower }}
+cache_credentials = {{ sssd_cache_credentials | string | lower }}
+krb5_store_password_if_offline = {{ sssd_krb5_store_password_if_offline | string | lower }}
+
+{{- ldap_common_provider.create() }}
+{%- endmacro -%}

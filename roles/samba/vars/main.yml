@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+samba_is_server: "{{ samba_deployment_mode != 'client' }}"
+
 # Internal role constants calculated dynamically based on mode selection
 samba_server_role: >-
   {% if samba_deployment_mode == 'addc' %}
@@ -46,6 +48,7 @@ samba_directory:
   cache: "{{ samba_os_directory.cache | default('/var/cache/samba') }}"
   run: "{{ samba_os_directory.run | default('/run/samba') }}"
   assets: "{{ samba_os_directory.assets | default('/usr/share/samba') }}"
+  sysvol: "{{ samba_os_directory.sysvol | default('/var/lib/samba/sysvol') }}"
 
 samba_file:
   samba_conf: "{{ samba_directory.conf }}/smb.conf"

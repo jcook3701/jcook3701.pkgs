@@ -55,6 +55,7 @@
   when:
     - kerberos_node_type == 'master'
     - kerberos_client_auto_register_host | bool
+    - false
 
 - name: Export unique client transit credentials on master disk space
   ansible.builtin.command:
@@ -68,6 +69,7 @@
   when:
     - kerberos_node_type == 'master'
     - kerberos_client_auto_register_host | bool
+    - false
 
 - name: Fetch unique client transit keytab files to controller staging cache
   ansible.builtin.fetch:
@@ -81,6 +83,7 @@
   when:
     - kerberos_node_type == 'master'
     - kerberos_client_auto_register_host | bool
+    - false
 
 - name: Purge temporary client staging files off master disk footprint
   ansible.builtin.file:
@@ -91,7 +94,9 @@
     loop_var: client_fqdn
     label: "Wiping master transit cache -> {{ client_fqdn }}.client.keytab"
   failed_when: false
-  when: kerberos_node_type == 'master'
+  when:
+    - kerberos_node_type == 'master'
+    - false
 
 - name: Ensure Master KDC service is running before propagation
   ansible.builtin.service:

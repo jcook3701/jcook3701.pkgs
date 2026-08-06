@@ -47,4 +47,5 @@
       slapadd -v -n 0 -F {{ openldap_directory.slapd }}
       -l {{ config_bootstrap_file }}
     ansible_remote_tmp: /tmp
+  become: true
   become_user: "{{ openldap_user }}"

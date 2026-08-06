@@ -1,0 +1,53 @@
+{#
+# global.addc.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro global_addc() -%}
+{#
+    Active Directory Domain Controller Configuration Engine.
+    Establishes standard Kerberos Realm verification and maps internal SAMBA RFC2307 schema backends.
+
+    Args:
+        None
+
+    Returns:
+        str: Global parameters strictly required for active controller states.
+#}
+    ## Core Server Role Definer ##
+    server role = {{ samba_server_role }}
+
+    ## Protocol Security Engine ##
+    server signing = {{ samba_server_signing }}
+    smb encrypt = {{ samba_smb_encrypt }}
+    server min protocol = {{ samba_server_min_protocol }}
+    server max protocol = {{ samba_server_max_protocol }}
+
+    ## Security & Protocols ##
+    client min protocol = {{ samba_client_min_protocol }}
+    client max protocol = {{ samba_client_max_protocol }}
+    unix extensions = no
+
+    ## Active Directory Domain Controller Configuration Engine ##
+    realm = {{ samba_realm | upper }}
+    dns backend = {{ samba_addc_dns_backend }}
+    dns forwarder = {{ samba_dns_forwarders | join(' ') }}
+    idmap_ldb:use rfc2307 = yes
+{%- endmacro -%}
+
+{{- global_addc() }}

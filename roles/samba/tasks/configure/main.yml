@@ -14,10 +14,10 @@
   when: samba_is_server | bool
 
 - name: Execute Samba Server configuration
-  ansible.builtin.include_tasks: server.yml
+  ansible.builtin.include_tasks: server/main.yml
   when: samba_is_server | bool
 
 - name: Execute Samba Client configuration
-  ansible.builtin.include_tasks: client.yml
+  ansible.builtin.include_tasks: client/main.yml
   when:
-    - samba_client_mounts | length > 0
+    - not samba_is_server | bool

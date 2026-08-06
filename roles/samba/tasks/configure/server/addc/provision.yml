@@ -17,7 +17,7 @@
   ansible.builtin.command: >
     samba-tool domain provision
     --use-rfc2307
-    --realm="{{ samba_addc_realm | upper }}"
+    --realm="{{ samba_realm | upper }}"
     --domain="{{ samba_workgroup | upper }}"
     --server-role=dc
     --dns-backend="{{ samba_addc_dns_backend }}"
@@ -36,7 +36,7 @@
 
 - name: Join Replica Nodes into existing Active Directory Domain Cluster
   ansible.builtin.command: >
-    samba-tool domain join "{{ samba_addc_realm | lower }}" DC
+    samba-tool domain join "{{ samba_realm | lower }}" DC
     -U"{{ samba_admin_user }}%{{ samba_admin_password }}"
     --dns-backend="{{ samba_addc_dns_backend }}"
   register: _samba_addc_join_output

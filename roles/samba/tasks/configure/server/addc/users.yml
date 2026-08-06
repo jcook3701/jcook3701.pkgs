@@ -7,7 +7,7 @@
     --given-name="{{ user.firstname | default(user.username) }}"
     --surname="{{ user.lastname | default(user.username) }}"
     --description="{{ user.description | default('Automated Provisioned Account') }}"
-    --mail-address="{{ user.mail | default(user.username ~ '@' ~ samba_addc_realm | lower) }}"
+    --mail-address="{{ user.mail | default(user.username ~ '@' ~ samba_realm | lower) }}"
     --uid-number={{ user.uid }}
     --gid-number={{ user.gid }}
     --login-shell="{{ user.login_shell | default('/bin/bash') }}"

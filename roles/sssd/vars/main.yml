@@ -22,7 +22,7 @@ sssd_ldap_port: "{{ (sssd_ldap_protocol == 'ldaps') | ternary(636, 389) }}"
 # Multi-Master Client Failover URI Constructor Loop Pass
 sssd_ldap_uri: >-
   {% set uris = [] %}
-  {% for host in sssd_ldap_hosts %}
+  {% for host in sssd_ldap_servers %}
     {% set _ = uris.append(sssd_ldap_protocol ~ '://' ~ host ~ ':' ~ sssd_ldap_port) %}
   {% endfor %}
   {{ uris | join(',') | trim }}
@@ -33,7 +33,7 @@ sssd_ldap_user_search_base: "ou={{ sssd_ldap_people_child_ou | trim }},ou={{ sss
 sssd_ldap_group_search_base: "ou={{ sssd_ldap_groups_ou | trim }},{{ sssd_ldap_search_base }}"
 
 # MIT Kerberos Interception Construction
-sssd_krb5_server: "{{ sssd_krb5_hosts | join(',') }}"
+sssd_krb5_server: "{{ sssd_krb5_servers | join(',') }}"
 sssd_krb5_realm: "{{ sssd_domain_name | upper }}"
 
 # Advanced Application Search Anchors

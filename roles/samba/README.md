@@ -8,6 +8,17 @@ $ sudo apt install samba samba-common-bin
 
 <!--
 # Authors Notes:
+Helpful command for testing samba smb configuration files.
+``` shell
+$ testparm /etc/samba/smb.conf
+```
+
+TODO:
+If you need multiple Active Directory servers for redundancy or scale, you use one of these two standard configurations:
+
+    * Additional/Secondary Domain Controller: You provision a second Samba machine using samba_deployment_mode: "addc", but instead of provisioning a fresh domain, you join it to your existing domain as an Additional DC. Both machines will replicate the database, and if one dies, the other keeps the network alive.  
+    * Domain Member File/Print Server: You provision a machine using samba_deployment_mode: "member_sssd". It joins the AD domain managed by your addc and acts as a dedicated file share worker, offloading resource traffic from your domain controllers.  
+
 TODO: Test Samba Client code.  Using autofs for samba mounts so it's on the back burner.
 
     Planning for the future now by locking down a clean, modern SSSD + Kerberos Member Server.

@@ -6,6 +6,11 @@ samba_os_user_group: "wheel"
 samba_os_service_nt4: ["smb, nmb"]
 samba_os_service_addc: ["samba"]
 
+samba_client_dep_pkg_names:
+  - krb5-workstation
+  - sssd-krb5
+  - sssd-client
+
 samba_client_pkg_names:
   - samba-client
   - cifs-utils
@@ -36,3 +41,4 @@ samba_os_directory:
   cache: "/var/cache/samba"
   run: "/run/samba"
   assets: "/usr/share/samba"
+  sysvol: "/var/lib/samba/sysvol"

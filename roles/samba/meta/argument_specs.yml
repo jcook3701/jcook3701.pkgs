@@ -14,11 +14,6 @@ argument_specs:
         choices: ["present", "absent", "teardown"]
         description: "Target operational configuration lifecycle state."
 
-      samba_is_server:
-        type: "bool"
-        default: false
-        description: "Determines whether the system provisions server engines or executes client storage mounts."
-
       samba_is_file_server:
         type: bool
         default: false
@@ -27,8 +22,20 @@ argument_specs:
       samba_deployment_mode:
         type: "str"
         default: "addc"
-        choices: ["nt4", "addc", "member_legacy", "member_sssd"]
+        choices: ["nt4", "addc", "member_legacy", "member_sssd", "client"]
         description: "Target identity backend model orchestration switch."
+
+      samba_client_target_mode:
+        type: str
+        default: "sssd"
+        required: false
+        choices: ["sssd", "addc", "legacy"]
+        description: >-
+          Dictates the identity mapping (IDMAP) layout strategy for workstation clients.
+          Only evaluated when 'samba_deployment_mode' is set to 'client'.
+          'sssd' triggers local TDB fallback limits and hooks the sss backend plugin.
+          'addc' completely suppresses IDMAP blocks to match domain controller native behaviors.
+          'legacy' evaluates traditional global fallback variable backends and ranges.
 
       # Domain Options
       samba_top_level_domain:
@@ -50,7 +57,7 @@ argument_specs:
         default: "WORKGROUP"
         description: "NetBIOS domain or workgroup token name."
 
-      samba_addc_realm:
+      samba_realm:
         type: "str"
         default: "EXAMPLE.COM"
         description: "Target Kerberos Realm structure realm mapping indicator string."
@@ -212,6 +219,12 @@ argument_specs:
         description: "Additional cluster domain nodes tracking matrix array."
 
       # Protocol Security Engine
+      samba_security_mode:
+        type: "str"
+        default: "user"
+        choices: ["user", "share", "domain", "ads"]
+        description: "Controls the underlying authentication method style for non-AD DC legacy server deployments."
+
       samba_server_signing:
         type: "str"
         default: "mandatory"
@@ -388,6 +401,11 @@ argument_specs:
           force_directory_mode:
             type: str
             description: "Forces octal bit flags onto directory generation actions."
+
+      samba_client_enable_mounts:
+        type: "bool"
+        default: false
+        description: "Safety switch allowing static fstab kernel client layouts to be enabled or skipped globally."
 
       samba_client_mounts:
         type: list

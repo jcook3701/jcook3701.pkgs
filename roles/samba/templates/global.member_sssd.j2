@@ -1,0 +1,60 @@
+{#
+# global.member_sssd.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro global_member_sssd() -%}
+{#
+    Modern Standalone File Server configuration using corporate Domain SSSD backend hooks for mapping execution permissions without localized LDAP structures.
+
+    Args:
+        None
+
+    Returns:
+        str: Identity configuration blocks mapping authorization tokens to local POSIX systems.
+#}
+    ## Core Server Role Definer ##
+    server role = {{ samba_server_role }}
+
+    ## Protocol Security Engine ##
+    server signing = {{ samba_server_signing }}
+    smb encrypt = {{ samba_smb_encrypt }}
+    server min protocol = {{ samba_server_min_protocol }}
+    server max protocol = {{ samba_server_max_protocol }}
+
+    ## Security & Protocols ##
+    client min protocol = {{ samba_client_min_protocol }}
+    client max protocol = {{ samba_client_max_protocol }}
+    unix extensions = no
+
+    ## Domain Membership Security Settings ##
+    security = {{ samba_security_mode }}
+{% if samba_security_mode == 'ads' %}
+    realm = {{ samba_realm | upper }}
+{% endif %}
+    obey pam restrictions = yes
+
+    ## Authentication Backends & Identity Mapping (IDMAP) ##
+    passdb backend = tdbsam
+    idmap config * : backend = tdb
+    idmap config * : range = 3000-7999
+    idmap config {{ samba_workgroup }} : backend = sss
+    idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
+{%- endmacro -%}
+
+{{- global_member_sssd() }}

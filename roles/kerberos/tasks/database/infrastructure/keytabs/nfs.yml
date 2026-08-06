@@ -5,12 +5,11 @@
   ansible.builtin.command: >-
     kadmin.local -q "add_principal -randkey {{ service_principal }}"
   vars:
-    base_fqdn: "{{ nfs_server }}.{{ kerberos_domain_name }}"
-    service_principal: "nfs/{{ base_fqdn }}"
+    service_principal: "nfs/{{ nfs_server_fqdn }}"
   loop: "{{ kerberos_nfs_file_servers }}"
   loop_control:
-    loop_var: nfs_server
-    label: "Seeding database entry for: nfs/{{ base_fqdn }}"
+    loop_var: nfs_server_fqdn
+    label: "Seeding database entry for: nfs/{{ nfs_server_fqdn }}"
   register: _nfs_db_seeding
   failed_when: >-
     (_nfs_db_seeding.rc != 0) and
@@ -24,12 +23,11 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    base_fqdn: "{{ nfs_server }}.{{ kerberos_domain_name }}"
-    staging_keytab: "/tmp/ansible_client_{{ base_fqdn }}.keytab"
-    service_principal: "nfs/{{ base_fqdn }}"
+    staging_keytab: "/tmp/ansible_client_{{ nfs_server_fqdn }}.keytab"
+    service_principal: "nfs/{{ nfs_server_fqdn }}"
   loop: "{{ kerberos_nfs_file_servers }}"
   loop_control:
-    loop_var: nfs_server
+    loop_var: nfs_server_fqdn
     label: "Injecting NFS keys for: {{ nfs_server }}"
   when:
     - kerberos_nfs_file_servers | length > 0

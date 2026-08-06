@@ -2,3 +2,30 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 samba_os_user_group: "sambashare"
+samba_os_service_nt4: ["smb", "nmb"]
+samba_os_service_addc: ["samba-ad-dc"]
+
+samba_client_dep_pkg_names:
+  - krb5
+  - sssd
+
+samba_client_pkg_names:
+  - smbclient
+  - cifs-utils
+
+samba_server_pkg_names_nt4:
+  - samba
+
+samba_server_pkg_names_addc:
+  - samba
+  - krb5
+
+samba_os_directory:
+  conf: "/etc/samba"
+  spool: "/var/spool/samba"
+  log: "/var/log/samba"
+  lib: "/var/lib/samba"
+  cache: "/var/cache/samba"
+  run: "/run/samba"
+  assets: "/usr/share/samba"
+  sysvol: "/var/lib/samba/sysvol"
