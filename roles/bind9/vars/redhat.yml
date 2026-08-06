@@ -1,12 +1,13 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-bind9_service: named
-bind9_user: named
+bind9_service: "named"
+bind9_user: "named"
+bind9_group: "named"
 
 bind9_pkg_names:
-  - bind
-  - bind-utils
+  - "bind"
+  - "bind-utils"
 
 bind9_rfc1918: "named.rfc1912.zones"
 

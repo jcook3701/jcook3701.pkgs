@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Bind9 DNSSEC keygen
+  ansible.builtin.include_tasks: dnssec.yml
+  loop: "{{ bind9_zones }}"
+  loop_control:
+    loop_var: zone
+    label: "Manage DNSSEC for zone -> {{ zone.name }}"
+  when:
+    - bind9_is_primary | bool
+    - not zone.inline_signing | bool
+
+- name: Bind9 TSIG keygen
+  ansible.builtin.include_tasks: tsig.yml
+  when: bind9_generate_tsig_keys | bool

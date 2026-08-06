@@ -20,42 +20,47 @@
 
 {%- macro db_reverse_zone() -%}
 $TTL 86400
-@   IN  SOA     ns1.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
+@   IN  SOA     {{ primary_hostname }}.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
         {{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@ IN NS ns1.{{ bind9_domain_name }}.
-@ IN NS ns2.{{ bind9_domain_name }}.
+@ IN NS {{ primary_hostname }}.{{ bind9_domain_name }}.
+{% if secondary_hostname %}
+@ IN NS {{ secondary_hostname }}.{{ bind9_domain_name }}.
+{% endif %}
 
-{{ bind9_dns_server_ip_address.split('.')[3] }} IN PTR ns1.{{ bind9_domain_name }}.
+{% if primary_ip and primary_hostname %}
+{{ primary_ip.split('.')[3] }} IN PTR {{ primary_hostname }}.{{ bind9_domain_name }}.
+{% endif %}
+{% if secondary_ip and secondary_hostname %}
+{{ secondary_ip.split('.')[3] }} IN PTR {{ secondary_hostname }}.{{ bind9_domain_name }}.
+{% endif %}
 
-{% for secondary_ip in bind9_secondary_servers | default([]) %}
-{{ secondary_ip.split('.')[3] }} IN PTR ns2.{{ bind9_domain_name }}.
-{% endfor %}
+{%- set ns1_octet = primary_ip.split('.')[3] | int if primary_ip else None %}
+{%- set ns2_octet = secondary_ip.split('.')[3] | int if secondary_ip else None %}
+{%- set processed_octets = [] %}
+{%- if ns1_octet is not none %}{%- set _ = processed_octets.append(ns1_octet) %}{%- endif %}
+{%- if ns2_octet is not none %}{%- set _ = processed_octets.append(ns2_octet) %}{%- endif %}
 
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
-{%- for host in bind9_zone_records | default([]) %}
-    {%- if host.ip is defined and host.hostname is defined %}
-        {%- set ip_parts = host.ip.split('.') %}
+{%- for zone_record in bind9_zone_records | default([]) %}
+    {%- if zone_record.ip is defined and zone_record.hostname is defined %}
+        {%- set ip_parts = zone_record.ip.split('.') %}
         {%- if ip_parts | length == 4 %}
-            {%- if host.hostname not in ['ns1', 'ns2'] %}
+            {%- set last_octet = ip_parts[3] | int %}
+            {#- Evaluate only if this specific zone_record octet has not been mapped yet -#}
+            {%- if last_octet not in processed_octets %}
                 {#- Add main hostname PTR -#}
                 {%- set _ = ptr_records.append({
-                    'octet': ip_parts[3] | int,
-                    'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ host.hostname ~ '.' ~ bind9_domain_name ~ '.'
+                    'octet': last_octet | int,
+                    'record': last_octet ~ '\tIN\tPTR\t' ~ zone_record.hostname ~ '.' ~ bind9_domain_name ~ '.'
                 }) %}
-
-                {#- Add PTRs for each alias -#}
-                {%- for alias in host.aliases | default([]) %}
-                    {%- set _ = ptr_records.append({
-                        'octet': ip_parts[3] | int,
-                        'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ alias ~ '.' ~ bind9_domain_name ~ '.'
-                    }) %}
-                {%- endfor %}
+                {#- Lock the octet to prevent duplicate alias iterations from rendering -#}
+                {%- set _ = processed_octets.append(last_octet) %}
             {%- endif %}
         {%- endif %}
     {%- endif %}
@@ -63,8 +68,8 @@ $TTL 86400
 
 ; --- Dynamic Reverse Zone Pointers ---
 {# Sort the list by the numeric octet #}
-{% for item in ptr_records | sort(attribute='octet') %}
-{{ item.record }}
+{% for ptr in ptr_records | sort(attribute='octet') %}
+{{ ptr.record }}
 {% endfor %}
 {%- endmacro -%}
 

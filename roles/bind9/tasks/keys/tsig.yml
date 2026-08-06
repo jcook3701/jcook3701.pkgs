@@ -1,52 +1,55 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# TODO: Fix groups['all'] -> Needs to be swapped with default variable that is a list.
 - name: Ensure key directory exist for each zone
   ansible.builtin.file:
-    path: "{{ bind9_key_directory.tsig }}/{{ hostvars[host].hostname | default(host) }}"
+    path: "{{ bind9_key_directory.tsig }}/{{ client_fqdn }}"
     state: directory
     owner: "{{ bind9_user }}"
-    group: "{{ bind9_user }}"
+    group: "{{ bind9_group }}"
     mode: "0775"
-  loop: "{{ groups['all'] }}"
+  loop: "{{ bind9_tsig_clients }}"
   loop_control:
-    loop_var: host
+    loop_var: client_fqdn
+    label: "Creating tsig key directory for {{ client_fqdn }}"
 
 - name: Generate TSIG key (only if it doesn't exist)
   ansible.builtin.command: >-
-    tsig-keygen -a {{ bind9_tsig_algorithm }} {{ current_host }}
+    tsig-keygen -a {{ bind9_tsig_algorithm }} {{ client_fqdn }}
   vars:
-    current_host: "{{ hostvars[host].hostname | default(host) }}"
-    key_dir: "{{ bind9_key_directory.tsig }}/{{ current_host }}"
+    key_dir: "{{ bind9_key_directory.tsig }}/{{ client_fqdn }}"
   args:
     chdir: "{{ key_dir }}"
-    creates: "{{ key_dir }}/{{ current_host }}-tsig.key"
+    creates: "{{ key_dir }}/{{ client_fqdn }}-tsig.key"
   register: tsig_keygen_output
-  loop: "{{ groups['all'] }}"
+  loop: "{{ bind9_tsig_clients }}"
   loop_control:
-    loop_var: host
+    loop_var: client_fqdn
+    label: "Creates tsig key at {{ key_dir }}"
 
 - name: Save each TSIG key to file
   ansible.builtin.copy:
     content: "{{ key.stdout }}"
-    dest: >-
-      {{ bind9_key_directory.tsig }}/{{ hostvars[key.host].hostname | default(key.host) }}/{{
-      hostvars[key.host].hostname | default(key.host) }}-tsig.key
+    dest: "{{ key_dir }}/{{ key.client_fqdn }}-tsig.key"
     owner: "{{ bind9_user }}"
-    group: "{{ bind9_user }}"
+    group: "{{ bind9_group }}"
     mode: "0640"
+  vars:
+    key_dir: "{{ bind9_key_directory.tsig }}/{{ key.client_fqdn }}"
   loop: "{{ tsig_keygen_output.results }}"
   loop_control:
     loop_var: key
-  when: key.stdout is defined
+    label: "Writing key file for {{ key.client_fqdn | default('skipped') }}"
+  when:
+    - key.stdout is defined
+    - key.stdout | length > 0
 
 - name: Generate named.conf.keys from saved TSIG keys
   ansible.builtin.template:
     src: "{{ ansible_facts['os_family'] | lower }}/named.conf.keys.j2"
     dest: "{{ bind9_file.named_conf_keys }}"
     owner: "{{ bind9_user }}"
-    group: "{{ bind9_user }}"
+    group: "{{ bind9_group }}"
     mode: "0640"
   when:
     - ansible_facts['os_family'] == 'Debian'

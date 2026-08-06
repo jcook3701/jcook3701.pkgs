@@ -6,25 +6,11 @@
     name: "{{ bind9_pkg_names }}"
     state: present
 
-- name: Create Bind9 configuration directories
-  ansible.builtin.include_tasks: directory-creation.yml
+- name: Bind9 configuration
+  ansible.builtin.include_tasks: configure/main.yml
 
-- name: Bind9 DNSSEC keygen
-  ansible.builtin.include_tasks: dnssec-keygen-and-sign.yml
-  loop: "{{ bind9_zones }}"
-  loop_control:
-    loop_var: zone
-    label: "{{ zone.name }}"
-  when:
-    - bind9_is_primary | bool
-    - not zone.inline_signing | bool
-
-- name: Bind9 TSIG keygen
-  ansible.builtin.include_tasks: tsig-keygen.yml
-  when: bind9_generate_tsig_keys | bool
-
-- name: Create Bind9 configuration files
-  ansible.builtin.include_tasks: file-generation.yml
+- name: Bind9 Key generation
+  ansible.builtin.include_tasks: keys/main.yml
 
 - name: Ensure Bind9 service is started and enable
   ansible.builtin.systemd:

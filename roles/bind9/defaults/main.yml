@@ -25,6 +25,7 @@ bind9_dydns_update_servers: []
 
 # Transaction Signatures (TSIG) Settings
 bind9_enable_tsig: false
+bind9_tsig_clients: []
 
 # Network & Listening Ports
 bind9_dns_port: 53
@@ -39,9 +40,6 @@ bind9_tsig_algorithm: "hmac-sha256"
 # ip_address_space - Standard Options 10.0.0 and 192.168.0
 bind9_ip_address_space: "192.168.0"
 bind9_reverse_ip_address_space: "0.168.192"
-
-# Static IP of new (DNS) server
-bind9_dns_server_ip_address: "{{ bind9_ip_address_space }}.2"
 
 # prefix_length - Standard Options: 8, 12, 16, 24
 bind9_prefix_length: "24"

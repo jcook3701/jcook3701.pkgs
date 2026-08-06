@@ -1,16 +1,28 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: DEBUG - Inspect bind9_service value and type
+  ansible.builtin.debug:
+    msg:
+      - "The literal value is: {{ bind9_service }}"
+      - "The variable data type is: {{ bind9_service | type_debug }}"
+      - "Is the variable defined? {{ bind9_service is defined }}"
+
+- name: Populate system service facts
+  ansible.builtin.service_facts:
+
 - name: Ensure Bind9 service is stopped and disabled
-  ansible.builtin.systemd:
-    name: "{{ bind9_service }}"
+  ansible.builtin.service:
+    name: "{{ bind9_service | default('bind9') }}"
     state: stopped
     enabled: false
+  become: true
+  when:
+    - (bind9_service ~ '.service') in services
+    - services[bind9_service ~ '.service']['state'] in ['running', 'enabled']
 
 - name: Uninstall Bind9 package and dependencies
   ansible.builtin.package:
     name: "{{ bind9_pkg_names }}"
     state: absent
-
-- name: Clean Bind9 configuration files
-  ansible.builtin.include_tasks: file-removal.yml
+  become: true

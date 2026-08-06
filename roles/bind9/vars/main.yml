@@ -8,6 +8,19 @@ bind9_tsig_clients: "{{ (bind9_secondary_servers + bind9_dydns_update_servers) |
 bind9_ip_loopback_space: "127.0.0"
 bind9_ip_loopback_address: "{{ bind9_ip_loopback_space }}.1"
 
+primary_ip: "{{ bind9_primary_servers | first | default('') }}"
+secondary_ip: "{{ bind9_secondary_servers | first | default('') }}"
+primary_hostname: >-
+  {{ (bind9_zone_records
+      | selectattr('ip', 'defined')
+      | selectattr('ip', 'equalto', primary_ip)
+      | first).hostname | default('') }}
+secondary_hostname: >-
+  {{ (bind9_zone_records
+      | selectattr('ip', 'defined')
+      | selectattr('ip', 'equalto', secondary_ip)
+      | first).hostname | default('') }}
+
 bind9_directory:
   conf: "{{ bind9_os_directory.conf }}"
   zone: >-
