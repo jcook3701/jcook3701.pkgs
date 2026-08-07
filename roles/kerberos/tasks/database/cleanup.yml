@@ -6,23 +6,27 @@
 # ====================================================================
 - name: Clean up temporary transit files from all system nodes
   ansible.builtin.file:
-    path: "/tmp/ansible_client_{{ client_fqdn }}.keytab"
+    path: "{{ target_client_staging }}"
     state: absent
+  vars:
+    target_client_staging: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, client_fqdn.split('.') | first) }}"
   loop: "{{ kerberos_client_nodes | default([]) }}"
   loop_control:
     loop_var: client_fqdn
-    label: "Wiping master transit cache -> ansible_client_{{ client_fqdn }}.keytab"
+    label: "Wiping master transit cache -> {{ client_fqdn }}"
   become: true
   when: kerberos_node_type == 'master'
 
 - name: Clean up the master staging directory
   ansible.builtin.file:
-    path: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.transit.keytab"
+    path: "{{ target_transit_file }}"
     state: absent
+  vars:
+    target_transit_file: "{{ kerberos_keytabs.master_transit_file | replace(ansible_hostname, replica_fqdn.split('.') | first) }}"
   loop: "{{ kerberos_replica_servers | default([]) }}"
   loop_control:
     loop_var: replica_fqdn
-    label: "Wiping master replica cache -> {{ replica_fqdn }}.transit.keytab"
+    label: "Wiping master replica cache -> {{ replica_fqdn }}"
   become: true
   when: kerberos_node_type == 'master'
 
@@ -45,11 +49,8 @@
 # ====================================================================
 - name: Clean up the replica staging directory
   ansible.builtin.file:
-    path: "{{ tmp_file }}"
+    path: "{{ kerberos_keytabs.replica_delivered_transit }}"
     state: absent
-  vars:
-    replica_fqdn: "{{ ansible_hostname }}.{{ kerberos_domain_name }}"
-    tmp_file: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab"
   become: true
   when: kerberos_node_type == 'replica'
 
@@ -58,24 +59,28 @@
 # ====================================================================
 - name: Clean up local controller staging replica keytab cache
   ansible.builtin.file:
-    path: "/tmp/ansible_transit_{{ replica_fqdn }}.keytab"
+    path: "{{ target_controller_transit }}"
     state: absent
+  vars:
+    target_controller_transit: "{{ kerberos_keytabs.controller_transit_staging | replace(ansible_hostname, replica_fqdn.split('.') | first) }}"
   loop: "{{ kerberos_replica_servers | default([]) }}"
   loop_control:
     loop_var: replica_fqdn
-    label: "Purging controller replica cache -> ansible_transit_{{ replica_fqdn }}.keytab"
+    label: "Purging controller replica cache -> {{ replica_fqdn }}"
   delegate_to: localhost
   run_once: true
   become: false
 
 - name: Clean up local controller staging client keytab cache
   ansible.builtin.file:
-    path: "/tmp/ansible_client_{{ client_fqdn }}.keytab"
+    path: "{{ target_controller_client }}"
     state: absent
+  vars:
+    target_controller_client: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, client_fqdn.split('.') | first) }}"
   loop: "{{ kerberos_client_nodes | default([]) }}"
   loop_control:
     loop_var: client_fqdn
-    label: "Purging controller client cache -> ansible_client_{{ client_fqdn }}.keytab"
+    label: "Purging controller client cache -> {{ client_fqdn }}"
   delegate_to: localhost
   run_once: true
   become: false

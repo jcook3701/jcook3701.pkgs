@@ -33,13 +33,15 @@
 
 - name: Fetch fully compiled multi-service client keytabs back to the Ansible controller
   ansible.builtin.fetch:
-    src: "/tmp/ansible_client_{{ host_node_fqdn }}.keytab"
-    dest: "/tmp/ansible_client_{{ host_node_fqdn }}.keytab"
+    src: "{{ target_client_staging }}"
+    dest: "{{ target_client_staging }}"
     flat: true
+  vars:
+    target_client_staging: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, host_node_fqdn.split('.') | first) }}"
   loop: "{{ kerberos_client_nodes | default([]) }}"
   loop_control:
     loop_var: host_node_fqdn
-    label: "Caching completed passport to controller: /tmp/ansible_client_{{ host_node_fqdn }}.keytab"
+    label: "Caching completed passport to controller for: : {{ host_node_fqdn }}"
   when: kerberos_node_type == 'master'
 
 # Developer Note: deploy.yml should not be called here.

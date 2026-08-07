@@ -5,16 +5,17 @@
   ansible.builtin.command:
     cmd: "{{ command }}"
   vars:
-    transit_file: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.transit.keytab"
+    target_transit_file: "{{ kerberos_keytabs.master_transit_file | replace(ansible_hostname, replica_fqdn.split('.')[0]) }}"
     replica_host_principal: "host/{{ replica_fqdn }}"
     replica_sync_principal: "kiprop/{{ replica_fqdn }}"
     ktadd_query: "{{ replica_host_principal }} {{ replica_sync_principal }}"
-    command: kadmin.local -q 'ktadd -k {{ transit_file }} {{ ktadd_query }}'
+    command: kadmin.local -q 'ktadd -k {{ target_transit_file }} {{ ktadd_query }}'
   loop: "{{ kerberos_replica_servers }}"
   loop_control:
     loop_var: replica_fqdn
-    label: "cmd -> {{ command }}"
+    label: "Exporting replica transit keytab for {{ replica_fqdn }}"
   register: export_cmd
+  changed_when: "'added' in export_cmd.stdout | lower"
   failed_when: >-
     export_cmd.rc != 0 or
     'error' in export_cmd.stderr | lower or
@@ -26,77 +27,19 @@
 
 - name: Fetch the temporary replica keytab back to the Ansible controller
   ansible.builtin.fetch:
-    src: "{{ transit_file }}"
-    dest: "{{ tmp_file }}"
+    src: "{{ target_transit_file }}"
+    dest: "{{ target_tmp_file }}"
     flat: true
   vars:
-    transit_file: "{{ kerberos_directory.kdc_conf }}/{{ transit_fqdn }}.transit.keytab"
-    tmp_file: "/tmp/ansible_transit_{{ transit_fqdn }}.keytab"
+    target_transit_file: "{{ kerberos_keytabs.master_transit_file | replace(ansible_hostname, transit_fqdn.split('.')[0]) }}"
+    target_tmp_file: "{{ kerberos_keytabs.controller_transit_staging | replace(ansible_hostname, transit_fqdn.split('.')[0]) }}"
   loop: "{{ kerberos_replica_servers }}"
   loop_control:
     loop_var: transit_fqdn
-    label: "{{ transit_file }} -> {{ tmp_file }}"
+    label: "Fetching transit: {{ transit_fqdn }}"
   when:
     - kerberos_node_type == 'master'
     - kerberos_replica_servers | length > 0
-
-- name: Ensure targeted system client host principals exist in master database
-  ansible.builtin.command:
-    cmd: "kadmin.local -q 'addprinc -randkey host/{{ client_fqdn }}'"
-  loop: "{{ kerberos_client_nodes | default([]) }}"
-  loop_control:
-    loop_var: client_fqdn
-    label: "Creating Client Principal -> host/{{ client_fqdn }}"
-  register: client_princ_create
-  changed_when: "'already exists' not in client_princ_create.stderr | lower"
-  failed_when: >
-    client_princ_create.rc != 0 and
-    'already exists' not in client_princ_create.stderr | lower
-  when:
-    - kerberos_node_type == 'master'
-    - kerberos_client_auto_register_host | bool
-    - false
-
-- name: Export unique client transit credentials on master disk space
-  ansible.builtin.command:
-    cmd: "kadmin.local -q 'ktadd -k {{ kerberos_directory.kdc_conf }}/{{ client_fqdn }}.client.keytab host/{{ client_fqdn }}'"
-  loop: "{{ kerberos_client_nodes | default([]) }}"
-  loop_control:
-    loop_var: client_fqdn
-    label: "Exporting Client Keytab -> {{ client_fqdn }}.client.keytab"
-  args:
-    creates: "{{ kerberos_directory.kdc_conf }}/{{ client_fqdn }}.client.keytab"
-  when:
-    - kerberos_node_type == 'master'
-    - kerberos_client_auto_register_host | bool
-    - false
-
-- name: Fetch unique client transit keytab files to controller staging cache
-  ansible.builtin.fetch:
-    src: "{{ kerberos_directory.kdc_conf }}/{{ client_fqdn }}.client.keytab"
-    dest: "/tmp/ansible_client_{{ client_fqdn }}.keytab"
-    flat: true
-  loop: "{{ kerberos_client_nodes | default([]) }}"
-  loop_control:
-    loop_var: client_fqdn
-    label: "Staging client keytab -> /tmp/ansible_client_{{ client_fqdn }}.keytab"
-  when:
-    - kerberos_node_type == 'master'
-    - kerberos_client_auto_register_host | bool
-    - false
-
-- name: Purge temporary client staging files off master disk footprint
-  ansible.builtin.file:
-    path: "{{ kerberos_directory.kdc_conf }}/{{ client_fqdn }}.client.keytab"
-    state: absent
-  loop: "{{ kerberos_client_nodes | default([]) }}"
-  loop_control:
-    loop_var: client_fqdn
-    label: "Wiping master transit cache -> {{ client_fqdn }}.client.keytab"
-  failed_when: false
-  when:
-    - kerberos_node_type == 'master'
-    - false
 
 - name: Ensure Master KDC service is running before propagation
   ansible.builtin.service:

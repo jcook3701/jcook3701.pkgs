@@ -49,8 +49,6 @@ kerberos_file:
   admin_acl: "{{ kerberos_directory.kdc_conf }}/kadm5.acl"
   kprop_acl: "{{ kerberos_directory.kdc_conf }}/kpropd.acl"
   stash: "{{ kerberos_directory.kdc_conf }}/{{ kerberos_os_stash_name | default('stash') }}"
-  keytab: "{{ kerberos_directory.conf }}/krb5.keytab"
-  admin_keytab: "{{ kerberos_directory.kdc_conf }}/kadm5.keytab"
   principal: "{{ kerberos_directory.state }}/principal"
   default_log: "{{ kerberos_directory.log }}/krb5libs.log"
   kdc_log: "{{ kerberos_directory.log }}/krb5kdc.log"
@@ -60,3 +58,17 @@ kerberos_file:
   unlimited_ulog: "{{ kerberos_directory.state }}/unlimited.ulog"
   dictionary: "{{ kerberos_directory.dict }}/words"
   admin_defaults: "{{ kerberos_directory.defaults }}/{{ kerberos_os_admin_defaults_name | default('krb5-admin-server') }}"
+
+# Centralized Keytab Filename and Path Management Switchboard
+kerberos_keytabs:
+  # The core system keytabs
+  system_default: "{{ kerberos_directory.conf }}/krb5.keytab"
+  kdc_admin: "{{ kerberos_directory.kdc_conf }}/kadm5.keytab"
+  # Locally generated files on the KDC master before transit
+  master_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.transit.keytab"
+  master_client_cache: "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.client.keytab"
+  # Controller staging cache names (/tmp on your Ansible deployment machine)
+  controller_transit_staging: "/tmp/ansible_transit_{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
+  controller_client_staging: "/tmp/ansible_client_{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
+  # Target destination placement names when files land on client/replica filesystem
+  replica_delivered_transit: "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"

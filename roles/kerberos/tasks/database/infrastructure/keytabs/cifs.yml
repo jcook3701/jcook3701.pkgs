@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# --- CENTRALIZED ENTERPRISE APPLICATION SERVICE PRINCIPAL ENGINE ---
-# ====================================================================
 - name: Securely initialize missing CIFS service records in the KDC database
   ansible.builtin.command: >-
     kadmin.local -q "add_principal -randkey {{ service_principal }}"
@@ -14,6 +11,9 @@
     loop_var: cifs_server_fqdn
     label: "Seeding database entry for: cifs/{{ cifs_server_fqdn }}"
   register: _samba_db_seeding
+  changed_when: >-
+    'principal' in _samba_db_seeding.stdout | lower and
+    'created' in _samba_db_seeding.stdout | lower
   failed_when: >-
     (_samba_db_seeding.rc != 0) and
     ('already exists' not in _samba_db_seeding.stderr | lower)
@@ -26,12 +26,18 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    staging_keytab: "/tmp/ansible_client_{{ cifs_server_fqdn }}.keytab"
+    staging_keytab: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, cifs_server_fqdn.split('.') | first) }}"
     service_principal: "cifs/{{ cifs_server_fqdn }}"
   loop: "{{ kerberos_samba_file_servers }}"
   loop_control:
     loop_var: "cifs_server_fqdn"
     label: "Injecting CIFS keys for: {{ cifs_server_fqdn }}"
+  register: _samba_key_injection
+  changed_when: "'added' in _samba_key_injection.stdout | lower"
+  failed_when: >-
+    (_samba_key_injection.rc != 0) or
+    ('error' in _samba_key_injection.stdout | lower) or
+    ('failed' in _samba_key_injection.stdout | lower)
   when:
     - kerberos_samba_file_servers | length > 0
     - inventory_hostname in kerberos_admin_servers

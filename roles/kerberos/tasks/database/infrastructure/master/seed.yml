@@ -5,7 +5,7 @@
 # MASTER INFRASTRUCTURE PROVISIONING BLOCKS
 # ====================================================================
 - name: Check if host/kiprop keys already exist in master system keytab
-  ansible.builtin.command: "klist -k {{ kerberos_file.keytab }}"
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.system_default }}"
   register: system_kt_check
   changed_when: false
   failed_when: false
@@ -18,6 +18,9 @@
     master_sync_principal: "kiprop/{{ ansible_hostname }}.{{ kerberos_domain_name }}"
     command: "kadmin.local -q 'addprinc -randkey {{ master_sync_principal }}'"
   register: master_princ_cmd
+  changed_when: >-
+    'principal' in master_princ_cmd.stdout | lower and
+    'created' in master_princ_cmd.stdout | lower
   failed_when: >-
     master_princ_cmd.rc != 0 or
     ('add_principal:' in master_princ_cmd.stderr | lower and
@@ -33,7 +36,7 @@
     master_host_principal: "host/{{ ansible_hostname }}.{{ kerberos_domain_name }}"
     command: "kadmin.local -q 'addprinc -randkey {{ master_host_principal }}'"
   register: master_host_create_cmd
-  changed_when: "'principal already exists' not in master_host_create_cmd.stderr | lower"
+  changed_when: "'principal' not in master_host_create_cmd.stderr | lower"
   failed_when: >-
     master_host_create_cmd.rc != 0 or
     ('add_principal:' in master_host_create_cmd.stderr | lower and
@@ -47,8 +50,9 @@
     cmd: "{{ command }}"
   vars:
     master_sync_principal: "kiprop/{{ ansible_hostname }}.{{ kerberos_domain_name }}"
-    command: "kadmin.local -q 'ktadd -k {{ kerberos_file.keytab }} {{ master_sync_principal }}'"
+    command: "kadmin.local -q 'ktadd -k {{ kerberos_keytabs.system_default }} {{ master_sync_principal }}'"
   register: master_key_cmd
+  changed_when: "'added' in master_key_cmd.stdout | lower"
   failed_when: >-
     master_key_cmd.rc != 0 or
     ('ktadd:' in master_key_cmd.stderr | lower and
@@ -62,8 +66,9 @@
     cmd: "{{ command }}"
   vars:
     master_host_principal: "host/{{ ansible_hostname }}.{{ kerberos_domain_name }}"
-    command: "kadmin.local -q 'ktadd -k {{ kerberos_file.keytab }} {{ master_host_principal }}'"
+    command: "kadmin.local -q 'ktadd -k {{ kerberos_keytabs.system_default }} {{ master_host_principal }}'"
   register: master_host_cmd
+  changed_when: "'added' in master_host_cmd.stdout | lower"
   failed_when: >-
     master_host_cmd.rc != 0 or
     "does not exist" in master_host_cmd.stderr | lower or
@@ -79,11 +84,12 @@
   loop: "{{ kerberos_replica_servers | unique | product(['host', 'kiprop']) | list }}"
   loop_control:
     loop_var: princ_pair
-    label: "{{ command }}"
+    label: "Creating replica principal: {{ command }}"
   register: replica_princ_cmd
   vars:
     task_result: "{{ replica_princ_cmd.results[-1] if replica_princ_cmd.results is defined else none }}"
     command: kadmin.local -q 'addprinc -randkey {{ princ_pair.1 }}/{{ princ_pair.0 }}'
+  changed_when: true
   failed_when: >-
     task_result is not none and (
     task_result.rc != 0 or

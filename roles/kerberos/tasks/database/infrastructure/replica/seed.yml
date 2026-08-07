@@ -17,19 +17,15 @@
 
 - name: Securely deliver transit keytab to the targeted replica node
   ansible.builtin.copy:
-    src: "{{ tmp_file }}"
-    dest: "{{ replica_keytab }}"
+    src: "{{ kerberos_keytabs.controller_transit_staging }}"
+    dest: "{{ kerberos_keytabs.replica_delivered_transit }}"
     owner: root
     group: root
     mode: "0600"
-  vars:
-    replica_fqdn: "{{ ansible_hostname }}.{{ kerberos_domain_name }}"
-    tmp_file: "/tmp/ansible_transit_{{ replica_fqdn }}.keytab"
-    replica_keytab: "{{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab"
   when: kerberos_node_type == 'replica'
 
 - name: Check if transit keys are already merged on Replica
-  ansible.builtin.command: "klist -k {{ kerberos_file.keytab }}"
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.system_default }}"
   register: replica_kt_check
   changed_when: false
   failed_when: false
@@ -39,23 +35,37 @@
   ansible.builtin.shell:
     cmd: |
       ktutil <<EOF
-      read_kt {{ kerberos_file.keytab }}
-      read_kt {{ kerberos_directory.kdc_conf }}/{{ ansible_fqdn }}.keytab
-      write_kt {{ kerberos_file.keytab }}
+      read_kt {{ kerberos_keytabs.system_default }}
+      read_kt {{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab
+      write_kt {{ kerberos_keytabs.system_default }}
       quit
       EOF
+  vars:
+    replica_fqdn: "{{ ansible_hostname }}.{{ kerberos_domain_name }}"
   args:
     executable: /bin/bash
   register: read_kt_output
-  changed_when: read_kt_output.rc == 0
+  changed_when: >-
+    (read_kt_output.rc == 0) and
+    ('error' not in read_kt_output.stdout | lower) and
+    ('failed' not in read_kt_output.stdout | lower)
   failed_when: >-
     (read_kt_output.rc != 0) or
+    ('error' in read_kt_output.stdout | lower) or
+    ('failed' in read_kt_output.stdout | lower) or
     ('error' in read_kt_output.stderr | lower) or
     ('failed' in read_kt_output.stderr | lower) or
     ('permission denied' in read_kt_output.stderr | lower)
   when:
     - kerberos_node_type == 'replica'
     - "'host/' not in replica_kt_check.stdout"
+
+- name: Initialize empty baseline database files so KDC service can safely bind
+  ansible.builtin.command:
+    cmd: "kdb5_util -r {{ kerberos_realm | upper }} create -s -P ''"
+    creates: "{{ kerberos_file.principal }}"
+  become: true
+  when: kerberos_node_type == 'replica'
 
 - name: Ensure Replica update server daemon is active
   ansible.builtin.service:

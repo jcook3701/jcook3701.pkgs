@@ -26,7 +26,7 @@
 {%- macro kdc_realm_properties() -%}
 # Core Database Engine Paths
 database_name = {{ kerberos_file.principal }}
-admin_keytab = {{ kerberos_file.admin_keytab }}
+admin_keytab = {{ kerberos_keytabs.kdc_admin }}
 acl_file = {{ kerberos_file.admin_acl }}
 dict_file = {{ kerberos_file.dictionary }}
 {% if kerberos_use_stash_file | bool %}
