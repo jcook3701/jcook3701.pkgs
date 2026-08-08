@@ -28,4 +28,4 @@
 # PHASE 4: SECURE TRANSACTION HOUSEKEEPING CLEANUP
 # ====================================================================
 - name: Execute post-deployment temporary database transit file purge
-  ansible.builtin.include_tasks: cleanup.yml
+  ansible.builtin.include_tasks: cleanup/main.yml
