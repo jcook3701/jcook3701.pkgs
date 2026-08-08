@@ -38,6 +38,7 @@ id_provider = {{ sssd_id_provider | trim }}
 ldap_schema = {{ sssd_ldap_schema | trim }}
 ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert | trim }}
 ldap_uri = {{ sssd_ldap_uri | trim }}
+ldap_sasl_minssf = 0
 ldap_search_base = {{ sssd_ldap_search_base | trim }}
 ldap_user_search_base = {{ sssd_ldap_user_search_base | trim }}
 ldap_group_search_base = {{ sssd_ldap_group_search_base | trim }}
@@ -55,6 +56,8 @@ krb5_realm = {{ sssd_krb5_realm | upper | trim }}
 krb5_validate = {{ sssd_krb5_validate | string | lower }}
 cache_credentials = {{ sssd_cache_credentials | string | lower }}
 krb5_store_password_if_offline = {{ sssd_krb5_store_password_if_offline | string | lower }}
+ldap_sasl_authid = host/{{ ansible_fqdn }}@{{ sssd_krb5_realm | upper | trim }}
+ldap_krb5_keytab = {{ sssd_file.keytab | trim }}
 
 {{- ldap_common_provider.create() }}
 {%- endmacro -%}

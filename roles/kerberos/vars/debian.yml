@@ -3,6 +3,8 @@
 ---
 kerberos_user: "krb5kdc"
 kerberos_group: "krb5kdc"
+kerberos_ldap_group: "openldap"
+kerberos_ldap_service: "slapd"
 
 kerberos_server_pkgs:
   - krb5-kdc

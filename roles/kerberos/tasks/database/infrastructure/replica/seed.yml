@@ -36,12 +36,10 @@
     cmd: |
       ktutil <<EOF
       read_kt {{ kerberos_keytabs.system_default }}
-      read_kt {{ kerberos_directory.kdc_conf }}/{{ replica_fqdn }}.keytab
+      read_kt {{ kerberos_keytabs.replica_delivered_transit }}
       write_kt {{ kerberos_keytabs.system_default }}
       quit
       EOF
-  vars:
-    replica_fqdn: "{{ ansible_hostname }}.{{ kerberos_domain_name }}"
   args:
     executable: /bin/bash
   register: read_kt_output
@@ -59,13 +57,7 @@
   when:
     - kerberos_node_type == 'replica'
     - "'host/' not in replica_kt_check.stdout"
-
-- name: Initialize empty baseline database files so KDC service can safely bind
-  ansible.builtin.command:
-    cmd: "kdb5_util -r {{ kerberos_realm | upper }} create -s -P ''"
-    creates: "{{ kerberos_file.principal }}"
   become: true
-  when: kerberos_node_type == 'replica'
 
 - name: Ensure Replica update server daemon is active
   ansible.builtin.service:

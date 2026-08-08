@@ -15,7 +15,7 @@
     'principal' in _nfs_db_seeding.stdout | lower and
     'created' in _nfs_db_seeding.stdout | lower
   failed_when: >-
-    (_nfs_db_seeding.rc != 0) and
+    (_nfs_db_seeding.rc is defined and _nfs_db_seeding.rc != 0) and
     ('already exists' not in _nfs_db_seeding.stderr | lower)
   when:
     - kerberos_nfs_file_servers | length > 0
@@ -26,7 +26,8 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    staging_keytab: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, nfs_server_fqdn.split('.') | first) }}"
+    target_node: "{{ nfs_server_fqdn.split('.') | first }}"
+    staging_keytab: "{{ kerberos_keytabs.master_transit_file }}"
     service_principal: "nfs/{{ nfs_server_fqdn }}"
   loop: "{{ kerberos_nfs_file_servers }}"
   loop_control:
@@ -35,7 +36,7 @@
   register: _nfs_key_injection
   changed_when: "'added' in _nfs_key_injection.stdout | lower"
   failed_when: >-
-    (_nfs_key_injection.rc != 0) or
+    (_nfs_key_injection.rc is defined and _nfs_key_injection.rc != 0) or
     ('error' in _nfs_key_injection.stdout | lower) or
     ('failed' in _nfs_key_injection.stdout | lower)
   when:

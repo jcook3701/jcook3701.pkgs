@@ -85,16 +85,17 @@
   loop_control:
     loop_var: princ_pair
     label: "Creating replica principal: {{ command }}"
-  register: replica_princ_cmd
   vars:
     task_result: "{{ replica_princ_cmd.results[-1] if replica_princ_cmd.results is defined else none }}"
     command: kadmin.local -q 'addprinc -randkey {{ princ_pair.1 }}/{{ princ_pair.0 }}'
-  changed_when: true
+  register: replica_princ_cmd
+  changed_when: >-
+    'principal' in replica_princ_cmd.stdout | lower
+    and 'created' in replica_princ_cmd.stdout | lower
   failed_when: >-
-    task_result is not none and (
-    task_result.rc != 0 or
-    ('add_principal:' in task_result.stderr | lower and
-    'already exists' not in task_result.stderr | lower))
+    replica_princ_cmd.rc != 0 or
+    ('add_principal:' in replica_princ_cmd.stderr | lower and
+    'already exists' not in replica_princ_cmd.stderr | lower)
   when:
     - kerberos_node_type == 'master'
     - kerberos_replica_servers | length > 0

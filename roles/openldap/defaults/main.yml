@@ -63,6 +63,7 @@ openldap_ppolicy: false
 openldap_samba: false
 openldap_sudo: false
 openldap_openssh: false
+openldap_kerberos: false
 
 ## Password Policy (ppolicy) Operational Constraints ##
 openldap_ppolicy_min_length: 8

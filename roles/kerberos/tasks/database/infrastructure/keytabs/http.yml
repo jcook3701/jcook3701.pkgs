@@ -15,7 +15,7 @@
     'principal' in _http_db_seeding.stdout | lower and
     'created' in _http_db_seeding.stdout | lower
   failed_when: >-
-    (_http_db_seeding.rc != 0) and
+    (_http_db_seeding.rc is defined and _http_db_seeding.rc != 0) and
     ('already exists' not in _http_db_seeding.stderr | lower)
   when: inventory_hostname in kerberos_admin_servers
   become: true
@@ -24,7 +24,8 @@
   ansible.builtin.command: >-
     kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
   vars:
-    staging_keytab: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, http_server_fqdn.split('.') | first) }}"
+    target_node: "{{ http_server_fqdn.split('.') | first }}"
+    staging_keytab: "{{ kerberos_keytabs.master_transit_file }}"
     service_principal: "HTTP/{{ http_server_fqdn }}"
   loop: "{{ kerberos_http_servers }}"
   loop_control:
@@ -33,7 +34,7 @@
   register: _http_key_injection
   changed_when: "'added' in _http_key_injection.stdout | lower"
   failed_when: >-
-    (_http_key_injection.rc != 0) or
+    (_http_key_injection.rc is defined and _http_key_injection.rc != 0) or
     ('error' in _http_key_injection.stdout | lower) or
     ('failed' in _http_key_injection.stdout | lower)
   when: inventory_hostname in kerberos_admin_servers

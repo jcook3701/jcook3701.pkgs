@@ -9,3 +9,8 @@ jellyfin_pkg_names:
 # Repository Specifics
 jellyfin_repo_id: "jellyfin"
 jellyfin_repo_name: "Jellyfin Media Server"
+
+jellyfin_directory:
+  conf: "{{ jellyfin_os_directory.conf | default('/etc/jellyfin') }}"
+  data: "{{ jellyfin_os_directory.data | default('/var/lib/jellyfin') }}"
+  plugin: "{{ jellyfin_os_directory.plugin | default('/var/lib/jellyfin/plugins') }}"

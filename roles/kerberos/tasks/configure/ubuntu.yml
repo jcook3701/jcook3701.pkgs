@@ -21,7 +21,7 @@
         dest: "/etc/systemd/system/{{ service }}.service.d/override.conf"
         content: |
           [Service]
-          ReadWritePaths=/var/log/krb5/
+          ReadWritePaths={{ kerberos_directory.log }}/ {{ kerberos_directory.state }}/
         mode: "0644"
         owner: root
         group: root
@@ -29,4 +29,9 @@
       loop_control:
         loop_var: service
         label: "Systemd Storage Sandbox Configuration -> /etc/systemd/system/{{ service }}.service.d/override.conf"
-      notify: Reload systemd daemon
+      register: _sandbox_overrides_copied
+
+    - name: Force immediate systemd configuration refresh
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: _sandbox_overrides_copied.changed

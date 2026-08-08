@@ -12,9 +12,11 @@ sssd_directory:
   db: "{{ sssd_os_directory.db | default('/var/lib/sss/db') }}"
   mc: "{{ sssd_os_directory.mc | default('/var/lib/sss/mc') }}"
   pipes: "{{ sssd_os_directory.pipes | default('/var/lib/sss/pipes') }}"
+  keytab: "{{ sssd_os_directory.keytab | default('/etc') }}"
 
 sssd_file:
   sssd_conf: "{{ sssd_directory.conf }}/sssd.conf"
+  keytab: "{{ sssd_directory.keytab }}/krb5.keytab"
 
 # Dynamic transmission ports calculations
 sssd_ldap_port: "{{ (sssd_ldap_protocol == 'ldaps') | ternary(636, 389) }}"

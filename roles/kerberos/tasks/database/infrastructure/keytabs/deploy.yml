@@ -7,6 +7,13 @@
   changed_when: false
   failed_when: false
 
+- name: Check if a staged client keytab file exists on the Ansible Controller
+  ansible.builtin.stat:
+    path: "{{ kerberos_keytabs.controller_client_staging }}"
+  register: controller_staging_stat
+  delegate_to: localhost
+  become: false
+
 - name: Securely deliver unique host keytab file to the system target node
   ansible.builtin.copy:
     src: "{{ kerberos_keytabs.controller_client_staging }}"
@@ -14,4 +21,35 @@
     owner: root
     group: root
     mode: "0600"
-  when: "'host/' not in client_kt_check.stdout | lower"
+  when:
+    - controller_staging_stat.stat.exists
+    - ('host/' not in client_kt_check.stdout | lower or
+        inventory_hostname in kerberos_ldap_servers or
+        inventory_hostname in kerberos_admin_servers)
+
+- name: Provide local LDAP directory service daemons read-access to host keys
+  ansible.builtin.file:
+    path: "{{ kerberos_keytabs.system_default }}"
+    owner: root
+    group: "{{ kerberos_ldap_group }}"
+    mode: "0640"
+  become: true
+  when:
+    - kerberos_ldap_servers | length > 0
+    - inventory_hostname in kerberos_ldap_servers
+
+- name: Populate system service availability facts
+  ansible.builtin.service_facts:
+  when:
+    - kerberos_ldap_servers | length > 0
+    - inventory_hostname in kerberos_ldap_servers
+
+- name: Force explicit LDAP server daemon reload to accept incoming network GSSAPI tokens
+  ansible.builtin.service:
+    name: "{{ kerberos_ldap_service }}"
+    state: restarted
+  become: true
+  when:
+    - kerberos_ldap_servers | length > 0
+    - inventory_hostname in kerberos_ldap_servers
+    - kerberos_ldap_service + '.service' in services or kerberos_ldap_service in services

@@ -9,11 +9,28 @@
     path: "{{ target_client_staging }}"
     state: absent
   vars:
-    target_client_staging: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, client_fqdn.split('.') | first) }}"
+    target_node: "{{ client_fqdn.split('.') | first }}"
+    target_client_staging: "{{ kerberos_keytabs.controller_client_staging }}"
   loop: "{{ kerberos_client_nodes | default([]) }}"
   loop_control:
     loop_var: client_fqdn
     label: "Wiping master transit cache -> {{ client_fqdn }}"
+  become: true
+  when: kerberos_node_type == 'master'
+
+- name: Clean up compiled client staging keytabs off the Master KDC disk
+  ansible.builtin.file:
+    path: "{{ target_client_staging }}"
+    state: absent
+  vars:
+    target_node: "{{ node_fqdn.split('.') | first }}"
+    target_client_staging: "{{ kerberos_keytabs.controller_client_staging }}"
+  loop: >-
+    {{ (kerberos_replica_servers | default([])) +
+        [ansible_hostname + '.' + kerberos_domain_name] }}
+  loop_control:
+    loop_var: node_fqdn
+    label: "Purging master infrastructure staging cache -> {{ node_fqdn }}"
   become: true
   when: kerberos_node_type == 'master'
 
@@ -22,7 +39,8 @@
     path: "{{ target_transit_file }}"
     state: absent
   vars:
-    target_transit_file: "{{ kerberos_keytabs.master_transit_file | replace(ansible_hostname, replica_fqdn.split('.') | first) }}"
+    target_node: "{{ replica_fqdn.split('.') | first }}"
+    target_transit_file: "{{ kerberos_keytabs.master_transit_file }}"
   loop: "{{ kerberos_replica_servers | default([]) }}"
   loop_control:
     loop_var: replica_fqdn
@@ -62,8 +80,13 @@
     path: "{{ target_controller_transit }}"
     state: absent
   vars:
-    target_controller_transit: "{{ kerberos_keytabs.controller_transit_staging | replace(ansible_hostname, replica_fqdn.split('.') | first) }}"
-  loop: "{{ kerberos_replica_servers | default([]) }}"
+    target_node: "{{ replica_fqdn.split('.') | first }}"
+    target_controller_transit: "{{ kerberos_keytabs.controller_transit_staging }}"
+  loop: >-
+    {{ kerberos_client_nodes | default([]) +
+      (kerberos_replica_servers | default([])) +
+      [ansible_hostname + '.' + kerberos_domain_name]
+    }}
   loop_control:
     loop_var: replica_fqdn
     label: "Purging controller replica cache -> {{ replica_fqdn }}"
@@ -76,8 +99,12 @@
     path: "{{ target_controller_client }}"
     state: absent
   vars:
-    target_controller_client: "{{ kerberos_keytabs.controller_client_staging | replace(ansible_hostname, client_fqdn.split('.') | first) }}"
-  loop: "{{ kerberos_client_nodes | default([]) }}"
+    target_controller_client: "{{ kerberos_keytabs.controller_client_staging }}"
+  loop: >-
+    {{ kerberos_client_nodes | default([]) +
+      (kerberos_replica_servers | default([])) +
+      [ansible_hostname + '.' + kerberos_domain_name]
+    }}
   loop_control:
     loop_var: client_fqdn
     label: "Purging controller client cache -> {{ client_fqdn }}"

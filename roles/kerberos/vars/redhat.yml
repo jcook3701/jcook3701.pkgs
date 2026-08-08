@@ -3,6 +3,8 @@
 ---
 kerberos_user: "root"
 kerberos_group: "root"
+kerberos_ldap_group: "ldap"
+kerberos_ldap_service: "dirsrv"
 
 kerberos_server_packages:
   - krb5-server

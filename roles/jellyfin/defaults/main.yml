@@ -2,3 +2,39 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 jellyfin_state: present
+
+jellyfin_port: 8096
+jellyfin_server_name: "localhost"
+jellyfin_ui_language: "en-US"
+jellyfin_country_code: "US"
+jellyfin_url: "http://{{ jellyfin_server_name }}:{{ jellyfin_port }}"
+
+# Bootstrap administrator credentials
+jellyfin_admin_username: "sysadmin"
+jellyfin_admin_password: "YourSecurePassword123"
+
+# Plugins Switches
+jellyfin_ldap: true
+jellyfin_ldap_servers: []
+
+# Direct LDAP binding standards
+jellyfin_ldap_server: "ldap.internal.network"
+jellyfin_ldap_port_insecure: 389
+jellyfin_ldap_port_secure: 636
+jellyfin_ldap_use_ssl: true
+jellyfin_ldap_skip_ssl_verify: false
+jellyfin_ldap_base_dn: "dc=internal,dc=network"
+jellyfin_ldap_search_filter: "(objectClass=person)"
+jellyfin_ldap_username_attribute: "uid"
+jellyfin_ldap_admin_filter: "(memberOf=cn=sysadmins,ou=groups,dc=internal,dc=network)"
+
+# Virtual media storage loops
+jellyfin_libraries:
+  - name: "Movies"
+    type: "movies"
+    paths:
+      - "/var/lib/jellyfin/media/movies"
+  - name: "TV Shows"
+    type: "tvshows"
+    paths:
+      - "/var/lib/jellyfin/media/tv"

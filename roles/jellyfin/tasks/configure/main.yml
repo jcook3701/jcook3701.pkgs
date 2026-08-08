@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Run baseline server initialization database seeds
+  ansible.builtin.include_tasks: seed.yml
+
+- name: Process secondary plugin configurations
+  ansible.builtin.include_tasks: plugins/main.yml

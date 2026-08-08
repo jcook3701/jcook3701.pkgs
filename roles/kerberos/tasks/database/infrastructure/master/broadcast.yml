@@ -1,16 +1,26 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Dump the master Kerberos database for propagation
+- name: Dump the master Kerberos database for incremental propagation distribution
   ansible.builtin.command:
     cmd: "{{ command }}"
   vars:
     dump_file: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
-    command: "kdb5_util dump {{ dump_file }}"
+    command: "kdb5_util dump -b7 {{ dump_file }}"
+  register: _master_db_dump
+  changed_when: _master_db_dump.rc == 0
+  failed_when: >-
+    _master_db_dump.rc != 0 or
+    'error' in _master_db_dump.stderr | lower or
+    'failed' in _master_db_dump.stderr | lower
   when:
     - kerberos_node_type == 'master'
     - kerberos_replica_servers | length > 0
 
+# TODO: Remove after testing:
+# It's redundant: Once your keytabs match and kpropd starts successfully,
+# the built-in Kerberos engine handles the synchronization natively without
+# needing Ansible to shell out to kprop.
 - name: Propagate the database to the replica nodes
   ansible.builtin.command:
     cmd: "{{ command }}"
@@ -32,3 +42,4 @@
   when:
     - kerberos_node_type == 'master'
     - kerberos_replica_servers | length > 0
+    - false

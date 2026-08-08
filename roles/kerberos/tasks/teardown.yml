@@ -77,7 +77,6 @@
     - "{{ kerberos_keytabs.system_default }}"
     - "{{ kerberos_keytabs.kdc_admin }}"
     - "{{ kerberos_keytabs.replica_delivered_transit }}"
-    - "{{ kerberos_keytabs.replica_delivered_transit | replace(ansible_hostname, ansible_hostname) }}"
   loop_control:
     loop_var: keytab
     label: "Wiping identity keytab: {{ keytab }}"

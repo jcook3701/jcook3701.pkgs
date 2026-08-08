@@ -16,3 +16,4 @@ sssd_os_directory:
   db: "/var/lib/sss/db"
   mc: "/var/lib/sss/mc"
   pipes: "/var/lib/sss/pipes"
+  keytab: "/etc"

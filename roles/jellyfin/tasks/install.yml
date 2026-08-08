@@ -26,6 +26,9 @@
     state: present
   notify: Restart jellyfin
 
+- name: Execute Jellyfin core configuration and provisioning
+  ansible.builtin.include_tasks: configure/main.yml
+
 - name: Ensure Jellyfin service is enabled and started
   ansible.builtin.systemd:
     name: "{{ jellyfin_service }}"

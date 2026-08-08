@@ -39,6 +39,7 @@
     - /tmp/02_data_structure.ldif
     - /tmp/02_data_seed.ldif
     - /tmp/03_feature_replication.ldif
+    - /tmp/03_feature_replication.config.ldif
     - /tmp/load_syncprov.ldif
   loop_control:
     loop_var: host_tmp_file

@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Wait for Jellyfin API port to become active
+  ansible.builtin.wait_for:
+    port: "{{ jellyfin_url | urlsplit('port') | default(8096) }}"
+    host: "{{ jellyfin_url | urlsplit('hostname') }}"
+    delay: 2
+    timeout: 30
+
+- name: API - Submit initial wizard setup configuration
+  ansible.builtin.uri:
+    url: "{{ jellyfin_url }}/Startup/Configuration"
+    method: POST
+    body_format: json
+    body: "{{ lookup('template', 'startup_payloads.json.j2') }}"
+  vars:
+    payload_type: "config"
+
+- name: API - Programmatically create initial local Administrator account
+  ansible.builtin.uri:
+    url: "{{ jellyfin_url }}/Startup/User"
+    method: POST
+    body_format: json
+    body: "{{ lookup('template', 'startup_payloads.json.j2') }}"
+    status_code:
+  vars:
+    payload_type: "user"
+  register: user_creation_result
+
+- name: API - Formally signal backend that wizard is completed
+  ansible.builtin.uri:
+    url: "{{ jellyfin_url }}/Startup/Complete"
+    method: POST
+    body_format: json
+
+- name: API - Authenticate to grab active session token
+  ansible.builtin.uri:
+    url: "{{ jellyfin_url }}/Users/AuthenticateByName"
+    method: POST
+    body_format: json
+    body: "{{ lookup('template', 'startup_payloads.json.j2') }}"
+  vars:
+    payload_type: "login"
+  register: auth_response
+
+- name: Set administrative API Token fact
+  ansible.builtin.set_fact:
+    jellyfin_api_token: "{{ auth_response.json.AccessToken }}"
+
+- name: API - Provision virtual media folders
+  ansible.builtin.uri:
+    url: "{{ jellyfin_url }}/Library/VirtualFolders?name={{ media.name | urlencode }}&collectionType={{ media.type }}"
+    method: POST
+    body_format: json
+    headers:
+      X-MediaBrowser-Token: "{{ jellyfin_api_token }}"
+    body: "{{ item.paths | to_json }}"
+    status_code:
+  loop: "{{ jellyfin_libraries }}"
+  loop_control:
+    loop_var: media
+    label: "Provisioning: {{ media.name }}"
+  when: jellyfin_libraries is defined
+
+- name: API - Force initial global library scan
+  ansible.builtin.uri:
+    url: "{{ jellyfin_url }}/Library/Refresh"
+    method: POST
+    headers:
+      X-MediaBrowser-Token: "{{ jellyfin_api_token }}"
+    status_code:
+        status_code:
+        - 200
+        - 204

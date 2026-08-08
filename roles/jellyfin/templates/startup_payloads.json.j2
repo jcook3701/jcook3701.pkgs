@@ -1,0 +1,48 @@
+{#
+# startup_payloads.json.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{% macro build_startup_json(type) %}
+{#
+    Pure Workstation Client-Side Kerberos Layer Configuration. Establishes default
+    global protocol standards for outbound mounting requests without hosting services.
+    Args:
+        type (str): The configuration step payload type to generate ('config', 'user', or 'login').
+    Returns:
+        str: Baseline security parameters for outbound clients.
+#}
+
+{% set switch = {
+  'config': {
+    "UILanguage": jellyfin_ui_language,
+    "MetadataCountryCode": jellyfin_country_code
+  },
+  'user': {
+    "Name": jellyfin_admin_username,
+    "Password": jellyfin_admin_password
+  },
+  'login': {
+    "Username": jellyfin_admin_username,
+    "Pw": jellyfin_admin_password
+  }
+} %}
+{{ switch[type] | to_json }}
+{% endmacro %}
+
+{{ build_startup_json(payload_type) }}

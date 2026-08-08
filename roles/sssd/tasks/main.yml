@@ -18,6 +18,7 @@
   ansible.builtin.include_tasks: uninstall.yml
   when:
     - sssd_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
     - sssd_pkg_names[0] in ansible_facts.packages
 
 - name: Teardown SSSD

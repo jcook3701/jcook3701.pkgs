@@ -30,6 +30,11 @@ olcTLSCertificateFile: {{ openldap_tls_cert }}
 olcTLSCertificateKeyFile: {{ openldap_tls_key }}
 olcSecurity: ssf=64
 {% endif %}
+{% if openldap_kerberos | default(false) | bool %}
+# Dynamic Regular Expression Map: Translates incoming Kerberos principals into active user database DN strings
+olcAuthzRegexp: uid=([^,]+),cn={{ openldap_domain_name }},cn=gssapi,cn=auth
+  uid=$1,ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_domain_name | replace('.', ',dc=') }}
+{% endif %}
 olcLogLevel: stats
 
 # 2. Module Container (Allows online module loading later)

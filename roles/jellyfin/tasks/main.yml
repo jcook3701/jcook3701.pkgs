@@ -10,12 +10,18 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Jellyfin Install
+- name: Install Jellyfin packages
   ansible.builtin.include_tasks: install.yml
   when: jellyfin_state | default('present') == 'present'
 
-- name: Jellyfin Uninstall
+- name: Uninstall Jellyfin packages
   ansible.builtin.include_tasks: uninstall.yml
   when:
     - jellyfin_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
     - jellyfin_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown Jellyfin
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - jellyfin_state | default('present') == 'teardown'

@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Jellyfin plugin storage directories exist
+  ansible.builtin.file:
+    path: "{{ jellyfin_directory.plugins }}/LDAP-Auth"
+    state: directory
+    owner: "{{ jellyfin_user }}"
+    group: "{{ jellyfin_group }}"
+    mode: "0750"
+
+- name: Fetch and deploy pre-compiled LDAP plugin binary
+  ansible.builtin.get_url:
+    url: "{{ jellyfin_ldap_plugin_binary_url }}"
+    dest: "{{ jellyfin_directory.plugins }}/LDAP-Auth/LDAP-Auth.dll"
+    owner: "{{ jellyfin_user }}"
+    group: "{{ jellyfin_group }}"
+    mode: "0644"
+  notify: Restart Jellyfin
+
+- name: Deploy LDAP-Auth plugin XML settings configuration file
+  ansible.builtin.template:
+    src: templates/LDAP-Auth.xml.j2
+    dest: "{{ jellyfin_directory.plugins }}/configurations/LDAP-Auth.xml"
+    owner: "{{ jellyfin_user }}"
+    group: "{{ jellyfin_group }}"
+    mode: "0644"
+  notify: Restart Jellyfin

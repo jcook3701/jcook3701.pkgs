@@ -65,10 +65,10 @@ kerberos_keytabs:
   system_default: "{{ kerberos_directory.conf }}/krb5.keytab"
   kdc_admin: "{{ kerberos_directory.kdc_conf }}/kadm5.keytab"
   # Locally generated files on the KDC master before transit
-  master_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.transit.keytab"
-  master_client_cache: "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.client.keytab"
+  master_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.transit.keytab"
+  # master_client_cache: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.client.keytab"
   # Controller staging cache names (/tmp on your Ansible deployment machine)
-  controller_transit_staging: "/tmp/ansible_transit_{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
-  controller_client_staging: "/tmp/ansible_client_{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
+  controller_transit_staging: "/tmp/ansible_transit_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_client_staging: "/tmp/ansible_client_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
   # Target destination placement names when files land on client/replica filesystem
-  replica_delivered_transit: "{{ kerberos_directory.kdc_conf }}/{{ ansible_hostname }}.{{ kerberos_domain_name }}.keytab"
+  replica_delivered_transit: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"

@@ -44,4 +44,4 @@
     src: "{{ kerberos_file.stash }}"
     dest: /tmp/kerberos_stash_file
     flat: true
-  when: kerberos_use_stash_file | bool
+  become: true
