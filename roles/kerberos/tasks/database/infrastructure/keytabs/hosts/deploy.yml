@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify if baseline host identity keys are already present on target endpoints
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.system_default }}"
+  register: endpoint_hosts_file_check
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in (kerberos_all_nodes | default([]))
+
+- name: Check if a staged host keytab file exists on the Ansible Controller
+  ansible.builtin.stat:
+    path: "{{ kerberos_keytabs.controller_hosts_staging }}"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_hosts_staging }}"
+  register: controller_hosts_staging_stat
+  delegate_to: localhost
+  become: false
+  when: inventory_hostname in (kerberos_all_nodes | default([]))
+
+- name: Securely deliver unique host keytab file to the system target node transit landing pad
+  ansible.builtin.copy:
+    src: "{{ target_controller_staging }}"
+    dest: "{{ kerberos_keytabs.client_hosts_delivered_transit }}"
+    owner: root
+    group: root
+    mode: "0600"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_hosts_staging }}"
+  when:
+    - inventory_hostname in (kerberos_all_nodes | default([]))
+    - controller_hosts_staging_stat.stat.exists | default(false)
+    - ('host/' not in endpoint_hosts_file_check.stdout | lower)
+
+- name: Merge host transit keys natively into the client default system keytab
+  ansible.builtin.shell:
+    cmd: |
+      ktutil <<EOF
+      read_kt {{ staging_keytab }}
+      write_kt {{ kerberos_keytabs.system_default }}
+      quit
+      EOF
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    staging_keytab: "{{ kerberos_keytabs.client_hosts_delivered_transit }}"
+  args:
+    executable: /bin/bash
+  register: hosts_merge_output
+  become: true
+  changed_when: >-
+    (hosts_merge_output.rc == 0) and
+    ('error' not in hosts_merge_output.stdout | lower) and
+    ('failed' not in hosts_merge_output.stdout | lower)
+  failed_when: >-
+    (hosts_merge_output.rc != 0) or
+    ('error' in hosts_merge_output.stdout | lower) or
+    ('failed' in hosts_merge_output.stdout | lower) or
+    ('error' in hosts_merge_output.stderr | lower) or
+    ('failed' in hosts_merge_output.stderr | lower) or
+    ('permission denied' in hosts_merge_output.stderr | lower)
+  when:
+    - inventory_hostname in (kerberos_all_nodes | default([]))
+    - ('host/' not in endpoint_hosts_file_check.stdout | lower)

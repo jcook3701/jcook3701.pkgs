@@ -1,9 +1,0 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
----
-- name: Clean up the replica staging directory
-  ansible.builtin.file:
-    path: "{{ kerberos_keytabs.replica_delivered_transit }}"
-    state: absent
-  become: true
-  when: kerberos_node_type == 'replica'

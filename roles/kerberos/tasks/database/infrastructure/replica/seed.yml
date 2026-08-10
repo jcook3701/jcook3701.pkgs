@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# REPLICA INTERACTION AND MASTER DATABASE PROPAGATION BLOCKS
-# ====================================================================
 - name: Push master stash file to Replicas
   ansible.builtin.copy:
     src: /tmp/kerberos_stash_file
@@ -14,54 +11,3 @@
   when:
     - kerberos_node_type == 'replica'
     - kerberos_use_stash_file | bool
-
-- name: Securely deliver transit keytab to the targeted replica node
-  ansible.builtin.copy:
-    src: "{{ kerberos_keytabs.controller_transit_staging }}"
-    dest: "{{ kerberos_keytabs.replica_delivered_transit }}"
-    owner: root
-    group: root
-    mode: "0600"
-  when: kerberos_node_type == 'replica'
-
-- name: Check if transit keys are already merged on Replica
-  ansible.builtin.command: "klist -k {{ kerberos_keytabs.system_default }}"
-  register: replica_kt_check
-  changed_when: false
-  failed_when: false
-  when: kerberos_node_type == 'replica'
-
-- name: Merge transit keys natively into the replica default system keytab
-  ansible.builtin.shell:
-    cmd: |
-      ktutil <<EOF
-      read_kt {{ kerberos_keytabs.system_default }}
-      read_kt {{ kerberos_keytabs.replica_delivered_transit }}
-      write_kt {{ kerberos_keytabs.system_default }}
-      quit
-      EOF
-  args:
-    executable: /bin/bash
-  register: read_kt_output
-  changed_when: >-
-    (read_kt_output.rc == 0) and
-    ('error' not in read_kt_output.stdout | lower) and
-    ('failed' not in read_kt_output.stdout | lower)
-  failed_when: >-
-    (read_kt_output.rc != 0) or
-    ('error' in read_kt_output.stdout | lower) or
-    ('failed' in read_kt_output.stdout | lower) or
-    ('error' in read_kt_output.stderr | lower) or
-    ('failed' in read_kt_output.stderr | lower) or
-    ('permission denied' in read_kt_output.stderr | lower)
-  when:
-    - kerberos_node_type == 'replica'
-    - "'host/' not in replica_kt_check.stdout"
-  become: true
-
-- name: Ensure Replica update server daemon is active
-  ansible.builtin.service:
-    name: "{{ kerberos_kprop_service }}"
-    state: started
-    enabled: true
-  when: kerberos_node_type == 'replica'

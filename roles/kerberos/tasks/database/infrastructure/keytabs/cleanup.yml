@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Enterprise Kiprop OS Cleanup Pipeline
+  ansible.builtin.include_tasks: kiprop/cleanup.yml
+  when:
+    - kerberos_client_nodes | default([]) | length > 0
+
+- name: Execute Enterprise Host OS Cleanup Pipeline
+  ansible.builtin.include_tasks: hosts/cleanup.yml
+  when:
+    - kerberos_client_nodes | default([]) | length > 0
+
+- name: Execute Enterprise CIFS File Sharing Cleanup Pipeline
+  ansible.builtin.include_tasks: cifs/cleanup.yml
+  when:
+    - kerberos_samba_file_servers | default([]) | length > 0
+
+- name: Execute Enterprise NFS Secure UNIX Storage Cleanup Pipeline
+  ansible.builtin.include_tasks: nfs/cleanup.yml
+  when:
+    - kerberos_nfs_file_servers | default([]) | length > 0
+
+- name: Execute Enterprise HTTP Single Sign-On Cleanup Pipeline
+  ansible.builtin.include_tasks: http/cleanup.yml
+  when:
+    - kerberos_http_servers | default([]) | length > 0
+
+- name: Execute Enterprise LDAP Secure Directory Cleanup Pipeline
+  ansible.builtin.include_tasks: ldap/cleanup.yml
+  when:
+    - kerberos_ldap_servers | default([]) | length > 0

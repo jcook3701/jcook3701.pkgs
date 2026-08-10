@@ -1,6 +1,21 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+kerberos_propagation_servers: >-
+  {{ (kerberos_admin_servers
+      + kerberos_replica_servers)
+      | unique | list }}
+
+kerberos_all_nodes: >-
+  {{ (kerberos_admin_servers
+      + kerberos_replica_servers
+      + kerberos_client_nodes
+      + kerberos_samba_file_servers
+      + kerberos_nfs_file_servers
+      + kerberos_http_servers
+      + kerberos_ldap_servers)
+      | unique | list }}
+
 kerberos_user: "root"
 kerberos_group: "root"
 
@@ -49,6 +64,7 @@ kerberos_file:
   admin_acl: "{{ kerberos_directory.kdc_conf }}/kadm5.acl"
   kprop_acl: "{{ kerberos_directory.kdc_conf }}/kpropd.acl"
   stash: "{{ kerberos_directory.kdc_conf }}/{{ kerberos_os_stash_name | default('stash') }}"
+  replica_datatrans: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
   principal: "{{ kerberos_directory.state }}/principal"
   default_log: "{{ kerberos_directory.log }}/krb5libs.log"
   kdc_log: "{{ kerberos_directory.log }}/krb5kdc.log"
@@ -61,14 +77,34 @@ kerberos_file:
 
 # Centralized Keytab Filename and Path Management Switchboard
 kerberos_keytabs:
-  # The core system keytabs
-  system_default: "{{ kerberos_directory.conf }}/krb5.keytab"
+  # ---- The core system keytabs ----
   kdc_admin: "{{ kerberos_directory.kdc_conf }}/kadm5.keytab"
-  # Locally generated files on the KDC master before transit
-  master_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.transit.keytab"
-  # master_client_cache: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.client.keytab"
-  # Controller staging cache names (/tmp on your Ansible deployment machine)
-  controller_transit_staging: "/tmp/ansible_transit_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
-  controller_client_staging: "/tmp/ansible_client_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
-  # Target destination placement names when files land on client/replica filesystem
-  replica_delivered_transit: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  system_default: "{{ kerberos_directory.conf }}/krb5.keytab"
+  cifs_default: "{{ kerberos_directory.conf }}/samba.keytab"
+  ldap_default: "{{ kerberos_directory.conf }}/ldap.keytab"
+  http_default: "{{ kerberos_directory.conf }}/http.keytab"
+  nfs_default: "{{ kerberos_directory.conf }}/nfs.keytab"
+
+  # ---- Locally generated files on the KDC master before transit ----
+  master_hosts_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.hosts.transit.keytab"
+  master_kiprop_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.kiprop.transit.keytab"
+  master_cifs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.cifs.transit.keytab"
+  master_ldap_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.ldap.transit.keytab"
+  master_http_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.http.transit.keytab"
+  master_nfs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.nfs.transit.keytab"
+
+  # ---- Controller staging cache names (/tmp on Ansible deployment machine) ----
+  controller_hosts_staging: "/tmp/ansible_hosts_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_kiprop_staging: "/tmp/ansible_kiprop_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_cifs_staging: "/tmp/ansible_cifs_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_ldap_staging: "/tmp/ansible_ldap_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_http_staging: "/tmp/ansible_http_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_nfs_staging: "/tmp/ansible_nfs_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+
+  # ---- Target destination placement names when files land on client/replica filesystem ----
+  client_hosts_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.hosts.delivered.keytab"
+  replica_kiprop_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.kiprop.delivered.keytab"
+  client_cifs_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.cifs.delivered.keytab"
+  client_ldap_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.ldap.delivered.keytab"
+  client_http_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.http.delivered.keytab"
+  client_nfs_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.nfs.delivered.keytab"

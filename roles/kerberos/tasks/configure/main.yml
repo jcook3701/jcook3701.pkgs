@@ -2,21 +2,29 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 # ====================================================================
-# PHASE 1: DIRECTORY PROVISIONING AND CORE TEMPLATE DEPLOYMENT
+# PHASE 1:  DIRECTORY PROVISIONING AND SYSTEM LOG STORAGE LAYERS
 # ====================================================================
-- name: Create Kerberos configuration files
-  ansible.builtin.include_tasks: file-generation.yml
+- name: Ensure Kerberos log directories and system tracking files exist
+  ansible.builtin.include_tasks: logging.yml
 
 # ====================================================================
-# PHASE 2: CROSS-PLATFORM DAEMON NETWORK INTERFACE BINDING OVERRIDES
+# PHASE 2: CENTRALIZED JINJA CORE TEMPLATE DEPLOYMENT
+# ====================================================================
+- name: Deploy dynamic configuration matrices and access control sheets
+  ansible.builtin.include_tasks: templates.yml
+
+# ====================================================================
+# PHASE 3: CROSS-PLATFORM DAEMON NETWORK INTERFACE BINDING OVERRIDES
 # ====================================================================
 - name: Process administrative daemon network execution binding constraints
   ansible.builtin.include_tasks: admin-bind.yml
   when: kerberos_node_type == 'master'
 
 # ====================================================================
-# PHASE 3: PLATFORM-SPECIFIC SECURITY SANDBOX OVERRIDES
+# PHASE 4: CROSS-PLATFORM SYSTEMD STORAGE SANDBOX OVERRIDES
 # ====================================================================
 - name: Apply explicit systemd storage sandbox configuration adjustments
-  ansible.builtin.include_tasks: ubuntu.yml
-  when: ansible_distribution == "Ubuntu"
+  ansible.builtin.include_tasks: systemd-sandbox.yml
+  when:
+    - kerberos_node_type in ['master', 'replica']
+    - ansible_distribution in ['Ubuntu', 'Archlinux']

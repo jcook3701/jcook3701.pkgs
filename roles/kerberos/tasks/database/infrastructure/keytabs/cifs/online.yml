@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely query local operating system group databases to check for Samba environment presence
+  ansible.builtin.getent:
+    database: group
+    key: "{{ kerberos_samba_group | default('sambashare') }}"
+    fail_key: false
+  when: inventory_hostname in (kerberos_samba_file_servers | default([]))
+
+- name: Determine if Samba environment requirements are met
+  ansible.builtin.set_fact:
+    _samba_environment_ready: >-
+      {{ ansible_facts.getent_group is defined and
+          (kerberos_samba_group | default('sambashare')) in ansible_facts.getent_group and
+          ansible_facts.getent_group[kerberos_samba_group | default('sambashare')] is not none }}
+  when: inventory_hostname in (kerberos_samba_file_servers | default([]))
+
+- name: Execute Samba Runtime Configuration and Service Reloads
+  when:
+    - inventory_hostname in (kerberos_samba_file_servers | default([]))
+    - _samba_environment_ready | default(false) | bool
+  block:
+
+    - name: Verify if Samba service keys are already present on target endpoint for engine activation
+      ansible.builtin.command: "klist -k {{ kerberos_keytabs.cifs_default }}"
+      register: endpoint_cifs_engine_check
+      changed_when: false
+      failed_when: false
+
+    - name: Provide local Samba file sharing daemons read-access to CIFS keys
+      ansible.builtin.file:
+        path: "{{ kerberos_keytabs.cifs_default }}"
+        owner: root
+        group: "{{ kerberos_samba_group | default('sambashare') }}"
+        mode: "0640"
+      become: true
+      when:
+        - endpoint_cifs_engine_check.stdout is defined
+        - ('cifs/' in endpoint_cifs_engine_check.stdout | lower)
+
+    - name: Populate system service availability facts for Samba orchestration
+      ansible.builtin.service_facts:
+
+    - name: Force explicit Samba daemon reload to ingest independent keytab path
+      ansible.builtin.service:
+        name: "{{ samba_service }}"
+        state: restarted
+      loop: "{{ kerberos_samba_services | default(['smbd', 'nmbd']) }}"
+      loop_control:
+        loop_var: samba_service
+        label: "Restarting Samba: {{ samba_service }}"
+      become: true
+      when:
+        - samba_service + '.service' in services or samba_service in services
+        - endpoint_cifs_engine_check.stdout is defined
+        - ('cifs/' in endpoint_cifs_engine_check.stdout | lower)

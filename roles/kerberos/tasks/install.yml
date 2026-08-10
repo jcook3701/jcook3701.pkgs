@@ -3,7 +3,7 @@
 ---
 - name: Install Kerberos packages
   ansible.builtin.package:
-    name: "{{ kerberos_pkg_names + kerberos_shared_libs  | default([])  }}"
+    name: "{{ kerberos_pkg_names + kerberos_shared_libs | default([]) }}"
     state: present
   environment:
     DEBIAN_FRONTEND: "{{ 'noninteractive' if ansible_facts['os_family'] == 'Debian' else omit }}"

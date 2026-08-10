@@ -12,20 +12,29 @@
 # PHASE 2: Seed machine-level identities and process cross-node propagation
 # ====================================================================
 - name: Execute cluster infrastructure principal provisioning and synchronization
-  ansible.builtin.include_tasks: infrastructure/main.yml
+  ansible.builtin.include_tasks: infrastructure/bringup.yml
 
 # ====================================================================
-# PHASE 3: Seed your core human user account principals natively via loop tools
+# PHASE 3: Seed core human user account principals natively
 # ====================================================================
 - name: Execute source of truth identity principal seeding routines
   ansible.builtin.include_tasks: identities/main.yml
   when: kerberos_node_type == 'master'
 
-- name: Execute unconditional global system keytab delivery passes
-  ansible.builtin.include_tasks: infrastructure/keytabs/deploy.yml
+# ====================================================================
+# PHASE 4: SYSTEM DELIVERY PASS (Propagate Compiled Keytab Payloads)
+# ====================================================================
+# - name: Execute unconditional global system keytab delivery passes
+#  ansible.builtin.include_tasks: infrastructure/keytabs/deploy.yml
 
 # ====================================================================
-# PHASE 4: SECURE TRANSACTION HOUSEKEEPING CLEANUP
+# PHASE 5: SECURE TRANSACTION HOUSEKEEPING CLEANUP
 # ====================================================================
 - name: Execute post-deployment temporary database transit file purge
-  ansible.builtin.include_tasks: cleanup/main.yml
+  ansible.builtin.include_tasks: infrastructure/cleanup.yml
+
+# ====================================================================
+# PHASE 6: SECURE APPLICATION SERVICE DAEMON ACTIVATION
+# ====================================================================
+- name: Execute global standalone application service engine reloads
+  ansible.builtin.include_tasks: infrastructure/keytabs/online.yml

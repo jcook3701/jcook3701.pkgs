@@ -40,15 +40,6 @@ argument_specs:
         default: []
         description: "List of client endpoints slated for realm registration and machine keytab generation."
 
-      kerberos_propagation_servers:
-        type: "list"
-        elements: "str"
-        required: false
-        description: >-
-          A dynamically computed list containing both master and replica KDC hostnames.
-          Used by the configuration engine to map authorized database propagation
-          endpoints and replication access control lists.
-
       kerberos_samba_file_servers:
         type: "list"
         elements: "str"
@@ -88,6 +79,25 @@ argument_specs:
           An explicit list of hostnames hosting secure OpenLDAP directory nodes.
           The Master KDC uses this array to iterate through and inject 'ldap/'
           service principals into the staging keytabs during infrastructure execution passes.
+
+      kerberos_propagation_servers:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: >-
+          A dynamically computed list containing both master and replica KDC hostnames.
+          Used by the configuration engine to map authorized database propagation
+          endpoints and replication access control lists.
+
+      kerberos_all_nodes:
+        type: "list"
+        required: false
+        default: []
+        description: >-
+          A dynamically computed list containing a completely unified and deduplicated array
+          of all physical machine FQDNs across the entire network cluster. Built by combining
+          infrastructure, client, and individual application service hosts.
 
       kerberos_port:
         type: str

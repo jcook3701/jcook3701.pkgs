@@ -10,7 +10,6 @@ kerberos_node_type: client
 kerberos_admin_servers: []
 kerberos_replica_servers: []
 kerberos_client_nodes: []
-kerberos_propagation_servers: "{{ kerberos_admin_servers + kerberos_replica_servers }}"
 
 kerberos_samba_file_servers: []
 kerberos_nfs_file_servers: []

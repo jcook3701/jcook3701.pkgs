@@ -32,16 +32,15 @@
     - "{{ kerberos_file.principal_ulog }}"
     - "{{ kerberos_file.replica_ulog }}"
     - "{{ kerberos_file.unlimited_ulog }}"
-    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
-    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.dump_ok"
-    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.{{ ansible_hostname }}.{{ kerberos_domain_name }}.last_prop"
-    - "{{ kerberos_directory.kdc_conf }}/replica_datatrans.{{ ansible_fqdn }}.last_prop"
-    - "{{ kerberos_keytabs.master_transit_file }}"
-    - "{{ kerberos_keytabs.replica_delivered_transit }}"
+    - "{{ kerberos_file.replica_datatrans }}"
+    - "{{ kerberos_file.replica_datatrans }}.dump_ok"
+    - "{{ kerberos_file.replica_datatrans }}.{{ ansible_hostname }}.{{ kerberos_domain_name }}.last_prop"
+    - "{{ kerberos_file.replica_datatrans }}.{{ ansible_fqdn }}.last_prop"
   loop_control:
     loop_var: db_file
     label: "Purging backend storage asset: {{ db_file }}"
   become: true
+  when: kerberos_node_type in ['master', 'replica']
 
 - name: Verify if the Kerberos state directory exists on the filesystem
   ansible.builtin.stat:
@@ -59,7 +58,7 @@
   become: true
   when: teardown_state_dir_stat.stat.exists
 
-- name: Delete everything inside the directory
+- name: Delete everything inside kerberos state directory
   ansible.builtin.file:
     path: "{{ file.path }}"
     state: absent
@@ -69,19 +68,88 @@
     label: "Deleted: {{ file.path }}"
   become: true
 
-- name: Delete system identity keytab files
+- name: Delete system identity and production application keytab files
   ansible.builtin.file:
     path: "{{ keytab }}"
     state: absent
   loop:
     - "{{ kerberos_keytabs.system_default }}"
     - "{{ kerberos_keytabs.kdc_admin }}"
-    - "{{ kerberos_keytabs.replica_delivered_transit }}"
+    - "{{ kerberos_keytabs.cifs_default }}"
+    - "{{ kerberos_keytabs.ldap_default }}"
+    - "{{ kerberos_keytabs.http_default }}"
+    - "{{ kerberos_keytabs.nfs_default }}"
   loop_control:
     loop_var: keytab
-    label: "Wiping identity keytab: {{ keytab }}"
+    label: "Wiping production keytab file: {{ keytab }}"
   become: true
 
+# ====================================================================
+# PHASE 2.5: PROTOCOL TRANSIT & CONTROLLER STAGING PURGES
+# ====================================================================
+- name: Force factory sweep of all protocol transit files off the Master KDC disk
+  ansible.builtin.file:
+    path: "{{ kerberos_keytabs[master_sweep_matrix.1] }}"
+    state: absent
+  vars:
+    target_node: "{{ master_sweep_matrix.0.split('.') | first }}"
+  loop: >-
+    {{ kerberos_all_nodes | default([]) | product([
+        'master_hosts_transit_file',
+        'master_kiprop_transit_file',
+        'master_cifs_transit_file',
+        'master_ldap_transit_file',
+        'master_http_transit_file',
+        'master_nfs_transit_file'
+      ]) | list }}
+  loop_control:
+    loop_var: master_sweep_matrix
+    label: "Purging Master KDC scratch asset for node: {{ master_sweep_matrix.0 }}"
+  when: kerberos_node_type == 'master'
+  become: true
+
+- name: Force factory sweep of local controller staging keytab caches
+  ansible.builtin.file:
+    path: "{{ kerberos_keytabs[controller_sweep_matrix.1] }}"
+    state: absent
+  vars:
+    target_node: "{{ controller_sweep_matrix.0.split('.') | first }}"
+  loop: >-
+    {{ kerberos_all_nodes | default([]) | product([
+        'controller_hosts_staging',
+        'controller_kiprop_staging',
+        'controller_cifs_staging',
+        'controller_ldap_staging',
+        'controller_http_staging',
+        'controller_nfs_staging'
+      ]) | list }}
+  loop_control:
+    loop_var: controller_sweep_matrix
+    label: "Purging Controller deployment machine staging asset for node: {{ controller_sweep_matrix.0 }}"
+  delegate_to: localhost
+  become: false
+
+- name: Force factory sweep of transient landed file layers from endpoint targets
+  ansible.builtin.file:
+    path: "{{ targeted_landed_file }}"
+    state: absent
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+  loop:
+    - "{{ kerberos_keytabs.client_hosts_delivered_transit }}"
+    - "{{ kerberos_keytabs.replica_kiprop_delivered_transit }}"
+    - "{{ kerberos_keytabs.client_cifs_delivered_transit }}"
+    - "{{ kerberos_keytabs.client_ldap_delivered_transit }}"
+    - "{{ kerberos_keytabs.client_http_delivered_transit }}"
+    - "{{ kerberos_keytabs.client_nfs_delivered_transit }}"
+  loop_control:
+    loop_var: targeted_landed_file
+    label: "Purging landed scratch file from filesystem: {{ targeted_landed_file }}"
+  become: true
+
+# ====================================================================
+# PHASE 3: CONFIGURATION SHEET AND SERVICE PROFILE ERASURES
+# ====================================================================
 - name: Clean out all role-generated configuration matrices
   ansible.builtin.file:
     path: "{{ conf_file }}"
@@ -97,17 +165,17 @@
     label: "Wiping text layout file: {{ conf_file }}"
   become: true
 
-- name: Drop custom Systemd storage sandboxing directories (Ubuntu Only)
+- name: Drop custom Systemd storage sandboxing directories
   ansible.builtin.file:
-    path: "{{ kerberos_directory.systemd }}/{{ file_name }}.service.d"
+    path: "{{ kerberos_directory.systemd }}/{{ service_name }}.service.d"
     state: absent
-  loop:
-    - krb5-kdc
-    - krb5-admin-server
-    - krb5-kpropd
+  loop: >-
+    {{ [kerberos_kdc_service]
+        + [kerberos_admin_service]
+        + [kerberos_kprop_service] }}
   loop_control:
-    loop_var: file_name
-    label: "Removing systemd sandbox path for: {{ file_name }}"
+    loop_var: service_name
+    label: "Removing systemd sandbox path for: {{ service_name }}"
   become: true
-  when: ansible_distribution == "Ubuntu"
+  when: ansible_distribution in ['Ubuntu', 'Archlinux']
   notify: Reload systemd daemon

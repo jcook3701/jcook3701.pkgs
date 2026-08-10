@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Kerberos log directory exists
+  ansible.builtin.file:
+    path: "{{ kerberos_directory.log }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Ensure log files for Kerberos exist
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ file }}"
+    force: false
+    owner: "{{ kerberos_user }}"
+    group: "{{ kerberos_group }}"
+    mode: "0640"
+  loop:
+    - "{{ kerberos_file.default_log }}"
+    - "{{ kerberos_file.kdc_log }}"
+    - "{{ kerberos_file.admin_log }}"
+  loop_control:
+    loop_var: file
+    label: "Creating log file: {{ file }}"

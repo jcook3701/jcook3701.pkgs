@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify if NFS service principal records exist inside the live KDC database
+  ansible.builtin.command: "kadmin.local -q 'get_principal {{ service_principal }}'"
+  vars:
+    service_principal: "nfs/{{ nfs_server_fqdn }}"
+  register: master_nfs_db_check
+  changed_when: false
+  failed_when: false
+  loop: "{{ kerberos_nfs_file_servers | default([]) }}"
+  loop_control:
+    loop_var: nfs_server_fqdn
+    label: "Querying database status for: nfs/{{ nfs_server_fqdn }}"
+  when:
+    - kerberos_nfs_file_servers | default([]) | length > 0
+    - kerberos_node_type == 'master'
+    - inventory_hostname in (kerberos_admin_servers | default([]))
+
+- name: Securely initialize missing NFS service records in the KDC database
+  ansible.builtin.command: >-
+    kadmin.local -q "add_principal -randkey {{ service_principal }}"
+  vars:
+    service_principal: "nfs/{{ nfs_server_fqdn }}"
+  loop: "{{ kerberos_nfs_file_servers }}"
+  loop_control:
+    loop_var: nfs_server_fqdn
+    index_var: loop_idx
+    label: "Seeding database entry for: nfs/{{ nfs_server_fqdn }}"
+  register: _nfs_db_seeding
+  changed_when: >-
+    'principal' in _nfs_db_seeding.stdout | lower and
+    'created' in _nfs_db_seeding.stdout | lower
+  failed_when: >-
+    (_nfs_db_seeding.rc is defined and _nfs_db_seeding.rc != 0) and
+    ('already exists' not in _nfs_db_seeding.stderr | lower)
+  when:
+    - kerberos_nfs_file_servers | default([]) | length > 0
+    - inventory_hostname in (kerberos_admin_servers | default([]))
+    - ('principal does not exist' in
+        master_nfs_db_check.results[loop_idx].stderr | lower)
+  become: true

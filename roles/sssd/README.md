@@ -9,5 +9,8 @@ Helpful for testing sssd.conf
 ``` shell
 $ sudo sssctl config-check
 ```
+``` shell
+$ sudo sssctl domain-status your-domain.com
+```
 
 -->

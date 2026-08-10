@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify if NFS service keys are already present on target endpoint for engine activation
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.nfs_default }}"
+  register: endpoint_nfs_engine_check
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([]))
+
+- name: Provide local NFS storage kernel daemons read-access to NFS keys
+  ansible.builtin.file:
+    path: "{{ kerberos_keytabs.nfs_default }}"
+    owner: root
+    group: "{{ kerberos_nfs_group | default('root') }}"
+    mode: "0600"
+  become: true
+  when:
+    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+    - endpoint_nfs_engine_check.stdout is defined
+    - ('nfs/' in endpoint_nfs_engine_check.stdout | lower)
+
+- name: Populate system service availability facts for NFS orchestration
+  ansible.builtin.service_facts:
+  when:
+    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+
+- name: Force explicit kernel RPC secure identification daemon reload to accept keys
+  ansible.builtin.service:
+    name: "{{ kerberos_nfs_service | default('rpc-gssd') }}"
+    state: restarted
+  become: true
+  when:
+    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+    - kerberos_nfs_service | default('rpc-gssd') + '.service' in services
+        or kerberos_nfs_service | default('rpc-gssd') in services
+    - endpoint_nfs_engine_check.stdout is defined
+    - ('nfs/' in endpoint_nfs_engine_check.stdout | lower)

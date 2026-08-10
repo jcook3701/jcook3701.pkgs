@@ -1,35 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Ensure directories needed for configuration
-  ansible.builtin.file:
-    path: "{{ dir }}"
-    state: directory
-    group: "root"
-    owner: "root"
-    mode: "0755"
-  loop:
-    - "{{ kerberos_directory.log }}"
-  loop_control:
-    loop_var: dir
-    label: "Creating directory: {{ dir }}"
-
-- name: Ensure files needed for Kerberos configuration
-  ansible.builtin.copy:
-    content: ""
-    dest: "{{ file }}"
-    force: false
-    group: "{{ kerberos_user }}"
-    owner: "{{ kerberos_group }}"
-    mode: "0660"
-  loop:
-    - "{{ kerberos_file.default_log }}"
-    - "{{ kerberos_file.kdc_log }}"
-    - "{{ kerberos_file.admin_log }}"
-  loop_control:
-    loop_var: file
-    label: "Creating file: {{ file }}"
-
 - name: Deploy global Kerberos configuration file
   ansible.builtin.template:
     src: krb5.conf.j2

@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Master node cleanup tasks
+  ansible.builtin.include_tasks: master/cleanup.yml
+  when: kerberos_node_type == 'master'
+
+- name: Local controller (localhost) cleanup tasks
+  ansible.builtin.include_tasks: controller/cleanup.yml
+
+- name: Execute Centralized Keytab Protocol Component Purge Pipelines
+  ansible.builtin.include_tasks: keytabs/cleanup.yml

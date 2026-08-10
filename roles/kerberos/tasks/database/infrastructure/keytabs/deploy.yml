@@ -1,55 +1,32 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Check if host principal keys are already present in system keytab
-  ansible.builtin.command: "klist -k {{ kerberos_keytabs.system_default }}"
-  register: client_kt_check
-  changed_when: false
-  failed_when: false
-
-- name: Check if a staged client keytab file exists on the Ansible Controller
-  ansible.builtin.stat:
-    path: "{{ kerberos_keytabs.controller_client_staging }}"
-  register: controller_staging_stat
-  delegate_to: localhost
-  become: false
-
-- name: Securely deliver unique host keytab file to the system target node
-  ansible.builtin.copy:
-    src: "{{ kerberos_keytabs.controller_client_staging }}"
-    dest: "{{ kerberos_keytabs.system_default }}"
-    owner: root
-    group: root
-    mode: "0600"
+- name: Execute Enterprise Kiprop OS Delivery Pipeline
+  ansible.builtin.include_tasks: kiprop/deploy.yml
   when:
-    - controller_staging_stat.stat.exists
-    - ('host/' not in client_kt_check.stdout | lower or
-        inventory_hostname in kerberos_ldap_servers or
-        inventory_hostname in kerberos_admin_servers)
+    - kerberos_client_nodes | default([]) | length > 0
 
-- name: Provide local LDAP directory service daemons read-access to host keys
-  ansible.builtin.file:
-    path: "{{ kerberos_keytabs.system_default }}"
-    owner: root
-    group: "{{ kerberos_ldap_group }}"
-    mode: "0640"
-  become: true
+- name: Execute Enterprise Host OS Delivery Pipeline
+  ansible.builtin.include_tasks: hosts/deploy.yml
   when:
-    - kerberos_ldap_servers | length > 0
-    - inventory_hostname in kerberos_ldap_servers
+    - kerberos_client_nodes | default([]) | length > 0
 
-- name: Populate system service availability facts
-  ansible.builtin.service_facts:
+- name: Execute Enterprise CIFS File Sharing Delivery Pipeline
+  ansible.builtin.include_tasks: cifs/deploy.yml
   when:
-    - kerberos_ldap_servers | length > 0
-    - inventory_hostname in kerberos_ldap_servers
+    - kerberos_samba_file_servers | default([]) | length > 0
 
-- name: Force explicit LDAP server daemon reload to accept incoming network GSSAPI tokens
-  ansible.builtin.service:
-    name: "{{ kerberos_ldap_service }}"
-    state: restarted
-  become: true
+- name: Execute Enterprise NFS Secure UNIX Storage Delivery Pipeline
+  ansible.builtin.include_tasks: nfs/deploy.yml
   when:
-    - kerberos_ldap_servers | length > 0
-    - inventory_hostname in kerberos_ldap_servers
-    - kerberos_ldap_service + '.service' in services or kerberos_ldap_service in services
+    - kerberos_nfs_file_servers | default([]) | length > 0
+
+- name: Execute Enterprise HTTP Single Sign-On Delivery Pipeline
+  ansible.builtin.include_tasks: http/deploy.yml
+  when:
+    - kerberos_http_servers | default([]) | length > 0
+
+- name: Execute Enterprise LDAP Secure Directory Delivery Pipeline
+  ansible.builtin.include_tasks: ldap/deploy.yml
+  when:
+    - kerberos_ldap_servers | default([]) | length > 0
