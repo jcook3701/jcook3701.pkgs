@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Configure OpenLDAP environment to read breakout Kerberos keytab path (Debian/Ubuntu)
+  ansible.builtin.lineinfile:
+    path: "{{ openldap_file.defaults }}"
+    regexp: '^#?\s*export\s+KRB5_KTNAME='
+    line: "export KRB5_KTNAME={{ openldap_file.keytab }}"
+    create: no
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Configure OpenLDAP environment to read breakout Kerberos keytab path (RedHat/Rocky/Alma)
+  ansible.builtin.lineinfile:
+    path: "{{ openldap_file.defaults }}"
+    regexp: '^#?\s*KRB5_KTNAME='
+    line: "KRB5_KTNAME={{ openldap_file.keytab }}"
+    create: no
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Configure OpenLDAP environment to read breakout Kerberos keytab path via Systemd (Archlinux)
+  block:
+    - name: Ensure custom Systemd storage drop-in directory exists for OpenLDAP
+      ansible.builtin.file:
+        path: "{{ openldap_directory.override }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write custom Systemd storage sandboxing override for breakout keytab path
+      ansible.builtin.copy:
+        dest: "{{ openldap_file.override }}"
+        content: |
+          [Service]
+          Environment="KRB5_KTNAME={{ openldap_file.keytab }}"
+        owner: root
+        group: root
+        mode: "0644"
+  become: true
+  when: ansible_facts['os_family'] == 'Archlinux'

@@ -12,7 +12,7 @@
 - name: Deploy client configuration (ldap.conf)
   ansible.builtin.template:
     src: ldap.conf.j2
-    dest: "{{ openldap_directory.conf }}/ldap.conf"
+    dest: "{{ openldap_file.global_config }}"
     owner: root
     group: root
     mode: "0644"
@@ -20,7 +20,7 @@
 
 - name: Ensure OpenLDAP daemon system settings are fully populated
   ansible.builtin.lineinfile:
-    path: "{{ openldap_directory.defaults }}"
+    path: "{{ openldap_file.defaults }}"
     regexp: "^{{ setting.variable }}="
     line: '{{ setting.variable }}="{{ setting.value }}"'
     create: true
@@ -32,5 +32,6 @@
     - { variable: "SLAPD_OPTIONS", value: "" }
   loop_control:
     loop_var: setting
+    label: "Updating Daemon Setting: {{ setting.variable }}"
   notify: Restart openldap service
   become: true

@@ -37,3 +37,9 @@
 # ====================================================================
 - name: OpenLDAP replication engine configuration
   ansible.builtin.include_tasks: replication.yml
+
+# ====================================================================
+# PHASE 7: STAGE FILE CLEANUP
+# ====================================================================
+- name: OpenLDAP configuration staging cleanup
+  ansible.builtin.include_tasks: cleanup.yml

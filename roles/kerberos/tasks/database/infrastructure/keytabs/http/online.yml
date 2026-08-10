@@ -1,38 +1,54 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Verify if HTTP service keys are already present on target endpoint for engine activation
-  ansible.builtin.command: "klist -k {{ kerberos_keytabs.http_default }}"
-  register: endpoint_http_engine_check
-  changed_when: false
-  failed_when: false
+- name: Securely query local operating system group databases to check for HTTP environment presence
+  ansible.builtin.getent:
+    database: group
+    key: "{{ kerberos_http_group | default('www-data') }}"
+    fail_key: false
   when: inventory_hostname in (kerberos_http_servers | default([]))
 
-- name: Provide local HTTP web service daemons read-access to HTTP keys
-  ansible.builtin.file:
-    path: "{{ kerberos_keytabs.http_default }}"
-    owner: root
-    group: "{{ kerberos_http_group | default('www-data') }}"
-    mode: "0640"
-  become: true
-  when:
-    - inventory_hostname in (kerberos_http_servers | default([]))
-    - endpoint_http_engine_check.stdout is defined
-    - ('http/' in endpoint_http_engine_check.stdout | lower)
+- name: Determine if HTTP environment requirements are met
+  ansible.builtin.set_fact:
+    _http_environment_ready: >-
+      {{ ansible_facts.getent_group is defined and
+         (kerberos_http_group | default('www-data')) in ansible_facts.getent_group and
+         ansible_facts.getent_group[kerberos_http_group | default('www-data')] is not none }}
+  when: inventory_hostname in (kerberos_http_servers | default([]))
 
-- name: Populate system service availability facts for HTTP orchestration
-  ansible.builtin.service_facts:
+- name: Execute HTTP Runtime Configuration and Service Reloads
   when:
     - inventory_hostname in (kerberos_http_servers | default([]))
+    - _http_environment_ready | default(false) | bool
+  block:
 
-- name: Force explicit Web Server daemon reload to ingest independent keytab path
-  ansible.builtin.service:
-    name: "{{ kerberos_http_service | default('apache2') }}"
-    state: restarted
-  become: true
-  when:
-    - inventory_hostname in (kerberos_http_servers | default([]))
-    - (kerberos_http_service | default('apache2') + '.service' in services
-        or kerberos_http_service | default('apache2') in services)
-    - endpoint_http_engine_check.stdout is defined
-    - ('http/' in endpoint_http_engine_check.stdout | lower)
+    - name: Verify if HTTP service keys are already present on target endpoint for engine activation
+      ansible.builtin.command: "klist -k {{ kerberos_keytabs.http_default }}"
+      register: endpoint_http_engine_check
+      changed_when: false
+      failed_when: false
+
+    - name: Provide local HTTP web service daemons read-access to HTTP keys
+      ansible.builtin.file:
+        path: "{{ kerberos_keytabs.http_default }}"
+        owner: root
+        group: "{{ kerberos_http_group | default('www-data') }}"
+        mode: "0640"
+      become: true
+      when:
+        - endpoint_http_engine_check.stdout is defined
+        - ('http/' in endpoint_http_engine_check.stdout | lower)
+
+    - name: Populate system service availability facts for HTTP orchestration
+      ansible.builtin.service_facts:
+
+    - name: Force explicit Web Server daemon reload to ingest independent keytab path
+      ansible.builtin.service:
+        name: "{{ kerberos_http_service | default('apache2') }}"
+        state: restarted
+      become: true
+      when:
+        - (kerberos_http_service | default('apache2') + '.service' in services
+            or kerberos_http_service | default('apache2') in services)
+        - endpoint_http_engine_check.stdout is defined
+        - ('http/' in endpoint_http_engine_check.stdout | lower)

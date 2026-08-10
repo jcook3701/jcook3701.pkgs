@@ -30,7 +30,7 @@
     - { question: "slapd/root_password_again", value: "{{ openldap_admin_password }}", vtype: "password" }
   loop_control:
     loop_var: config
-  no_log: true
+    label: "Updating Installer Configuration: {{ config.question }}"
   become: true
   when:
     - ansible_facts['os_family'] == 'Debian'
@@ -38,11 +38,16 @@
 
 - name: Install OpenLDAP package and dependencies.
   ansible.builtin.package:
-    name: "{{ openldap_pkg_names + openldap_shared_libs }}"
+    name: >-
+      {{ openldap_pkg_names | default([])
+          + openldap_shared_libs | default([]) }}
     state: latest
   environment:
     DEBIAN_FRONTEND: "{{ 'noninteractive' if ansible_facts['os_family'] == 'Debian' else omit }}"
   become: true
+
+- name: OpenLDAP Kerberos keytab environment and permission synchronization
+  ansible.builtin.include_tasks: keytabs/main.yml
 
 - name: OpenLDAP key generation
   ansible.builtin.include_tasks: "keys/main.yml"

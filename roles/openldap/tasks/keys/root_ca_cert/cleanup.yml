@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# STEP 5: FINAL IDEMPOTENT WORKSPACE CLEANUP (ALL FLEET NODES)
+# ====================================================================
+- name: Clean up temporary Root CA certificate signing request file from master
+  ansible.builtin.file:
+    path: "{{ openldap_tls_ca_csr }}"
+    state: absent
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Clean up operational local server host certificate signing request files
+  ansible.builtin.file:
+    path: "{{ openldap_tls_csr }}"
+    state: absent
+  become: true
+
+- name: Clean up transient Root CA certificate storage off the Ansible Controller
+  ansible.builtin.file:
+    path: "{{ openldap_controller_staging.root_ca_cert }}"
+    state: absent
+  delegate_to: localhost
+  become: false

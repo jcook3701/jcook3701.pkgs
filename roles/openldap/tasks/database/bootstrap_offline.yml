@@ -34,18 +34,17 @@
 - name: Deploy bootstrap configuration from J2 template
   ansible.builtin.template:
     src: "01_config_bootstrap.ldif.j2"
-    dest: "/tmp/01_config_bootstrap.ldif"
+    dest: "{{ openldap_host_staging.bootstrap_config }}"
     owner: "{{ openldap_user }}"
     group: "{{ openldap_group }}"
     mode: "0600"
 
 - name: Initialize OpenLDAP configuration offline
-  ansible.builtin.command: "{{ command }}"
-  vars:
-    config_bootstrap_file: "/tmp/01_config_bootstrap.ldif"
-    command: >-
+  ansible.builtin.command: >-
       slapadd -v -n 0 -F {{ openldap_directory.slapd }}
       -l {{ config_bootstrap_file }}
+  vars:
+    config_bootstrap_file: "{{ openldap_host_staging.bootstrap_config }}"
     ansible_remote_tmp: /tmp
   become: true
   become_user: "{{ openldap_user }}"

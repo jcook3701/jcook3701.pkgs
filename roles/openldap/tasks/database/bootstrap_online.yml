@@ -24,14 +24,12 @@
 
 - name: Load base core schemas online (In Order)
   ansible.builtin.shell:
-    cmd: "{{ command }}"
-  args:
-    executable: /bin/bash
-  vars:
-    command: >-
+    cmd: >-
       set -o pipefail && iconv -f UTF-8 -t UTF-8
       -c {{ openldap_directory.schema }}/{{ schema }}.ldif 2>&1 |
       ldapadd -Y EXTERNAL -H ldapi:///
+  args:
+    executable: /bin/bash
   loop: "{{ openldap_schemas_base }}"
   loop_control:
     loop_var: schema
@@ -63,18 +61,17 @@
 - name: Deploy Database Online Configuration LDIF
   ansible.builtin.template:
     src: 01_config_database.ldif.j2
-    dest: "/tmp/01_config_database.ldif"
+    dest: "{{ openldap_host_staging.database_config }}"
     owner: root
     group: root
     mode: "0600"
 
 - name: Apply Online Configuration to OpenLDAP
-  ansible.builtin.command: "{{ command }}"
-  vars:
-    config_database_file: "/tmp/01_config_database.ldif"
-    command: >-
+  ansible.builtin.command: >-
       ldapmodify -Y EXTERNAL -H ldapi:///
       -f {{ config_database_file }}
+  vars:
+    config_database_file: "{{ openldap_host_staging.database_config }}"
   register: ldap_modify_result
   failed_when:
     - ldap_modify_result.rc != 0
@@ -85,7 +82,7 @@
 - name: Deploy base domain structure LDIF
   ansible.builtin.template:
     src: 02_data_structure.ldif.j2
-    dest: "/tmp/02_data_structure.ldif"
+    dest: "{{ openldap_host_staging.data_structure }}"
     owner: root
     group: root
     mode: "0600"
@@ -94,7 +91,7 @@
 - name: Create base domain structure
   ansible.builtin.command: "{{ command }}"
   vars:
-    data_structure_file: /tmp/02_data_structure.ldif
+    data_structure_file: "{{ openldap_host_staging.data_structure }}"
     base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
     bind_dn: "cn={{ openldap_admin_user }},{{ base_dn }}"
     command: >-

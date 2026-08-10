@@ -24,4 +24,5 @@ openldap_os_directory:
   modules: "/usr/lib64/openldap"
   schema: "/etc/openldap/schema"
   run: "/run/openldap"
-  defaults: "/etc/sysconfig/slapd"
+  override: "/etc/systemd/system/slapd.service.d"
+  defaults: "/etc/sysconfig"

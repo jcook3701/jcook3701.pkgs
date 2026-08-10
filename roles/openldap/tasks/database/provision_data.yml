@@ -27,7 +27,7 @@
 - name: Deploy dynamic bootstrap users and groups data LDIF
   ansible.builtin.template:
     src: 02_data_seed.ldif.j2
-    dest: "/tmp/02_data_seed.ldif"
+    dest: "{{ openldap_host_staging.data_seed }}"
     owner: root
     group: root
     mode: "0600"
@@ -38,7 +38,7 @@
     ldapadd -x -H ldapi:///
     -D "cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
     -w "{{ openldap_admin_password }}"
-    -f /tmp/02_data_seed.ldif
+    -f "{{ openldap_host_staging.data_seed }}"
   register: user_seed_result
   failed_when:
     - user_seed_result.rc != 0

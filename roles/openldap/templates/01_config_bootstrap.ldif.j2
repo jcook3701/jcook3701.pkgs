@@ -23,8 +23,8 @@
 dn: cn=config
 objectClass: olcGlobal
 cn: config
-olcPidFile: {{ openldap_directory.run }}/slapd.pid
-olcArgsFile: {{ openldap_directory.run }}/slapd.args
+olcPidFile: {{ openldap_file.pid }}
+olcArgsFile: {{ openldap_file.args }}
 {% if openldap_use_tls | bool %}
 olcTLSCertificateFile: {{ openldap_tls_cert }}
 olcTLSCertificateKeyFile: {{ openldap_tls_key }}

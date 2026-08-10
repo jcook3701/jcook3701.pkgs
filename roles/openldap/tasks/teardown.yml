@@ -23,7 +23,7 @@
     - "{{ openldap_directory.database }}"
     - "{{ openldap_directory.certs }}"
     - "{{ openldap_directory.run }}"
-    - "{{ openldap_directory.defaults }}"
+    - "{{ openldap_file.defaults }}"
   loop_control:
     loop_var: directory
     label: "removed: {{ directory }}"
@@ -34,17 +34,29 @@
     path: "{{ host_tmp_file }}"
     state: absent
   loop:
-    - /tmp/01_config_bootstrap.ldif
-    - /tmp/01_config_database.ldif
-    - /tmp/02_data_structure.ldif
-    - /tmp/02_data_seed.ldif
-    - /tmp/03_feature_replication.ldif
-    - /tmp/03_feature_replication.config.ldif
-    - /tmp/load_syncprov.ldif
+    - "{{ openldap_host_staging.bootstrap_config }}"
+    - "{{ openldap_host_staging.database_config }}"
+    - "{{ openldap_host_staging.data_structure }}"
+    - "{{ openldap_host_staging.data_seed }}"
+    - "{{ openldap_host_staging.feature_replication }}"
+    - "{{ openldap_host_staging.load_syncprov }}"
+    - "{{ openldap_host_staging.backup }}"
   loop_control:
     loop_var: host_tmp_file
     label: "Removed host tmp artifact: {{ host_tmp_file }}"
   become: true
+
+- name: Scrub staging artifacts on the Ansible Controller
+  ansible.builtin.file:
+    path: "{{ controller_tmp_file }}"
+    state: absent
+  loop:
+    - "{{ openldap_controller_staging.root_ca_cert }}"
+    - "{{ openldap_controller_staging.backup }}"
+  loop_control:
+    loop_var: controller_tmp_file
+    label: "Removed controller tmp artifact: {{ controller_tmp_file }}"
+  become: false
 
 - name: Clear controller controller staging backup files
   ansible.builtin.file:

@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# TODO: Maybe -> {{ ansible_date_time.iso8601_basic_short }}
+openldap_timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}"
+
 openldap_user: "openldap"
 openldap_group: "openldap"
 
@@ -21,8 +24,36 @@ openldap_directory:
   modules: "{{ openldap_os_directory.modules | default('/usr/lib/ldap') }}"
   schema: "{{ openldap_os_directory.schema | default('/etc/ldap/schema') }}"
   run: "{{ openldap_os_directory.run | default('/run/slapd') }}"
-  defaults: "{{ openldap_os_directory.defaults | default('/etc/default/slapd') }}"
+  defaults: "{{ openldap_os_directory.defaults | default('/etc/default') }}"
+  override: "{{ openldap_os_directory.override | default('/etc/systemd/system/slapd.service.d') }}"
   backup: "{{ openldap_backup_dir }}"
+
+openldap_file:
+  global_config: "{{ openldap_directory.conf }}/ldap.conf"
+  slapd_config: "{{ openldap_directory.conf }}/slapd.conf"
+  defaults: "{{ openldap_directory.defaults }}/slapd"
+  pid: "{{ openldap_directory.run }}/slapd.pid"
+  args: "{{ openldap_directory.run }}/slapd.args"
+  override: "{{ openldap_directory.override }}/override.conf"
+  keytab: "/etc/ldap.keytab"
+  backup: "{{ openldap_directory.backup }}/openldap_database_backup_{{ openldap_timestamp }}.ldif"
+
+# "{{ openldap_directory.backup }}/openldap_database_backup.ldif"
+openldap_staging_directory: "/tmp"
+openldap_controller_tmp_dir: "/tmp"
+
+openldap_host_staging:
+  bootstrap_config: "{{ openldap_staging_directory }}/01_config_bootstrap.ldif"
+  database_config: "{{ openldap_staging_directory }}/01_config_database.ldif"
+  data_structure: "{{ openldap_staging_directory }}/02_data_structure.ldif"
+  data_seed: "{{ openldap_staging_directory }}/02_data_seed.ldif"
+  feature_replication: "{{ openldap_staging_directory }}/03_feature_replication.ldif"
+  load_syncprov: "{{ openldap_staging_directory }}/load_syncprov.ldif"
+  backup: "{{ openldap_controller_tmp_dir }}openldap_database_backup.ldif"
+
+openldap_controller_staging:
+  root_ca_cert: "{{ openldap_controller_tmp_dir }}/openldap_master_root_ca.pem"
+  backup: "{{ openldap_controller_tmp_dir }}/ldap_backup_controller_staging.ldif"
 
 openldap_schemas_base:
   - core
