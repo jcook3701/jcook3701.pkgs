@@ -40,6 +40,7 @@
   ansible.builtin.package:
     name: >-
       {{ openldap_pkg_names | default([])
+          + openldap_dep_pkg_names | default([])
           + openldap_shared_libs | default([]) }}
     state: latest
   environment:

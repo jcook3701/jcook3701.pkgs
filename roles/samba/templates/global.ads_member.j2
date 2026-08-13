@@ -1,5 +1,5 @@
 {#
-# global.member_legacy.j2 for jcook3701.pkgs
+# global.ads_member.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,16 +18,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro global_member_legacy() -%}
+{# TODO: Fix this. #}
+{%- macro global_ads_member_settings() -%}
 {#
-    Parameters for an Independent Standalone File Server utilizing OpenLDAP.
-    Configures legacy passdb maps for non-domain storage environments.
+    Modern Standalone File Server configuration using corporate Domain SSSD backend hooks for mapping execution permissions without localized LDAP structures.
 
     Args:
         None
 
     Returns:
-        str: Independent global blocks for mapping passwords across legacy directory servers.
+        str: Identity configuration blocks mapping authorization tokens to local POSIX systems.
 #}
     ## Core Server Role Definer ##
     server role = {{ samba_server_role }}
@@ -43,25 +43,28 @@
     client max protocol = {{ samba_client_max_protocol }}
     unix extensions = no
 
-    ## Standalone Server Security Settings ##
+    ## Domain Membership Security Settings ##
     security = {{ samba_security_mode }}
+    ntlm auth = disabled
+    realm = {{ samba_realm | upper }}
+    dedicated keytab file = {{ samba_file.keytab }}
+    kerberos method = dedicated keytab
+
     obey pam restrictions = yes
+    # samba kdc subauth = no
+    gensec:require_pac = no
+    reject_missing_pac = false
+    # kerberos encryption types = all
+    # Use OpenLDAP for password management and backup hashes (maybe)
+    # Only for Mac and Windows
 
     ## Authentication Backends & Identity Mapping (IDMAP) ##
     passdb backend = {{ samba_passdb_backend }}
-    idmap config * : backend = {{ samba_idmap_backend }}
-    idmap config * : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
+    idmap config * : backend = tdb
+    idmap config * : range = 3000-7999
 
-    ## Domains & LDAP Backend Maps ##
-    ldap suffix = {{ samba_ldap_suffix }}
-    ldap user suffix = {{ samba_ldap_user_suffix }}
-    ldap group suffix = {{ samba_ldap_group_suffix }}
-    ldap admin dn = {{ samba_ldap_admin_dn }}
-    ldap ssl = {{ 'off' if samba_ldap_proto == 'ldaps' else 'start_tls' }}
-{% if samba_idmap_backend == 'ldap' %}
-{# Smart IDMAP Suffix Handler: Only prints out if the user selects the LDAP backend #}
-    ldap idmap suffix = {{ samba_ldap_idmap_suffix }}
-{% endif %}
+    # idmap config {{ samba_workgroup }} : backend = nss
+    # idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
 {%- endmacro -%}
 
-{{- global_member_legacy() }}
+{{- global_ads_member_settings() }}

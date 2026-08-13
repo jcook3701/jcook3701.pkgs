@@ -36,6 +36,17 @@
 # --- DISCRETE BACKEND TRACK: LDAP IDENTITY WITH KERBEROS AUTH ---
 id_provider = {{ sssd_id_provider | trim }}
 ldap_schema = {{ sssd_ldap_schema | trim }}
+ldap_rfc2307_fallback_to_local_users = {{ sssd_ldap_rfc2307_fallback_to_local_users | trim }}
+
+# Explicitly bind the structural identity mapping attributes
+ldap_group_object_class = {{ sssd_ldap_group_object_class | trim }}
+ldap_group_name = {{ sssd_ldap_group_name | trim }}
+ldap_group_gid_number = {{ sssd_ldap_group_gid_number | trim }}
+ldap_group_member = {{ sssd_ldap_group_member | trim }}
+ldap_group_uuid = {{ sssd_ldap_group_uuid | trim }}
+ldap_user_uuid = {{ sssd_ldap_user_uuid | trim }}
+
+ldap_id_mapping = {{ sssd_ldap_id_mapping | lower | trim }}
 ldap_tls_reqcert = {{ sssd_ldap_tls_reqcert | trim }}
 ldap_uri = {{ sssd_ldap_uri | trim }}
 ldap_sasl_minssf = 0
@@ -58,6 +69,7 @@ cache_credentials = {{ sssd_cache_credentials | string | lower }}
 krb5_store_password_if_offline = {{ sssd_krb5_store_password_if_offline | string | lower }}
 ldap_sasl_authid = host/{{ ansible_fqdn }}@{{ sssd_krb5_realm | upper | trim }}
 ldap_krb5_keytab = {{ sssd_file.keytab | trim }}
+krb5_ccname_template = FILE:%d/krb5cc_%U
 
 {{- ldap_common_provider.create() }}
 {%- endmacro -%}

@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Re-create skeletal SSSD directory architecture with strict permissions
+  ansible.builtin.file:
+    path: "{{ directory.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ directory.mode }}"
+  loop:
+    - { path: "{{ sssd_directory.conf }}", mode: '0600' }
+    - { path: "{{ sssd_directory.db }}", mode: '0700' }
+    - { path: "{{ sssd_directory.mc }}", mode: '0700' }
+    - { path: "{{ sssd_directory.pipes }}", mode: '0755' }
+    - { path: "{{ sssd_directory.private_pipes }}", mode: '0700' }
+    - { path: "{{ sssd_directory.log }}", mode: '0750' }
+  loop_control:
+    loop_var: directory
+    label: "Creating directory: {{ directory.path }}"
+  become: true
+
+- name: Configure Linux kernel SPNEGO request key upcall
+  copy:
+    dest: /etc/request-key.d/cifs.spnego.conf
+    content: |
+      create  cifs.spnego    *       *       /usr/sbin/cifs.upcall %k
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy System Security Services Daemon text configuration file
+  ansible.builtin.template:
+    src: sssd.conf.j2
+    dest: "{{ sssd_file.sssd_conf }}"
+    group: root
+    owner: root
+    mode: "0600"
+  notify:
+    - Restart SSSD Service
+    - Restart Systemd Logind Service

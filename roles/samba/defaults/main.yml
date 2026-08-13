@@ -5,16 +5,18 @@
 samba_state: present
 samba_is_file_server: false
 
-# The Four Mutually Exclusive Deployment Architecture Targets:
-# "addc"          - Active Directory Domain Controller (Internal LDAP/Kerberos)
-# "nt4"           - Classic Domain Controller (Samba hosts domain, reads LDAP directly)
-# "member_legacy" - Standalone "NT4-Member" file server (No domain, reads LDAP directly for passwords)
-# "member_sssd"   - Modern Standalone file server (No domain, hands ID & Kerberos auth to SSSD)
-# "client"        - Samba Client Configuration
-samba_deployment_mode: "member_sssd"
+# The Six Mutually Exclusive Deployment Architecture Targets:
+# "addc"        - Active Directory Domain Controller (Internal LDAP/Kerberos engine)
+# "ads_member"  - Modern Active Directory Member file server (No domain, hands ID & Kerberos auth to SSSD)
+# "nt4_pdc"     - Classic Primary Domain Controller (Samba hosts domain, reads OpenLDAP directly via ldapsam)
+# "nt4_member"  - Classic Domain Member storage node (No domain, loops back to PDC/OpenLDAP for passwords)
+# "standalone"  - Basic Standalone workgroup storage node (No domain, completely isolated local tdbsam file database)
+# "client"      - Dedicated Client workspace node (Samba utilities and remote mount tools configuration)
+samba_deployment_mode: "nt4_pdc"
 
+# Only need when samba_deployment_mode is set to 'client'
 # Options: sssd, addc, or legacy
-samba_client_target_mode: "sssd"
+samba_client_target_mode: "legacy"
 
 # Domain and Architecture Identification
 samba_top_level_domain: "com"
@@ -33,7 +35,6 @@ samba_port: "445"
 
 # NT4 Classic Legacy Services Configuration
 samba_wins_support: "yes"
-samba_domain_logons: "yes"
 samba_domain_master: "yes"
 samba_local_master: "yes"
 samba_preferred_master: "yes"
@@ -43,21 +44,21 @@ samba_os_level: "65"
 samba_ldap_proto: "ldaps"
 samba_ldap_host: "ldap.internal.net"
 samba_ldap_port: "636"
-samba_passdb_backend: "ldapsam:{{ samba_ldap_proto }}://{{ samba_ldap_host }}:{{ samba_ldap_port }}"
+samba_ldap_passdb_backend: "ldapsam:{{ samba_ldap_proto }}://{{ samba_ldap_host }}:{{ samba_ldap_port }}"
 
 # NT4 Classic Legacy OpenLDAP Schema Offsets
 samba_ldap_suffix: "dc={{ samba_second_level_domain }},dc={{ samba_top_level_domain }}"
 samba_ldap_user_suffix: "ou=People"
-samba_ldap_group_suffix: "ou=Group"
+samba_ldap_group_suffix: "ou=Groups"
 samba_ldap_machine_suffix: "ou=Computers"
 samba_ldap_idmap_suffix: "ou=Idmap"
 samba_ldap_admin_dn: "cn=admin,{{ samba_ldap_suffix }}"
 samba_ldap_secret: ""
 
 # NT4 Classic Legacy Identity Mapping (IDMAP) Real Estate Engine
-samba_idmap_backend: "tdb"
-samba_idmap_range_low: "10000"
-samba_idmap_range_high: "99999"
+samba_idmap_backend: "autorid"
+samba_idmap_range_low: "2000"
+samba_idmap_range_high: "300000"
 
 # Active Directory Domain Controller Specific Engine
 samba_addc_dns_backend: "SAMBA_INTERNAL"
@@ -68,7 +69,6 @@ samba_primary_dc: "localhost"
 samba_additional_dcs: []
 
 # Protocol Security Engine
-samba_security_mode: "ads"
 samba_server_signing: "mandatory"
 samba_smb_encrypt: "mandatory"
 samba_server_min_protocol: "SMB2_10"
@@ -77,7 +77,7 @@ samba_client_min_protocol: "SMB2_10"
 samba_client_max_protocol: "SMB3"
 
 # Administrative Credentials
-samba_admin_user: "samba-admin"
+samba_admin_user: "admin"
 samba_admin_password: "SecretPassword123"
 
 # Storage Allocation Schemas
@@ -116,7 +116,8 @@ samba_shares: []
 # Example structure for samba_shares:
 # - name: "media"
 #   path: "/srv/samba/media"
-#   valid_users: "shareuser"
+#   valid_users:
+#     - { name: "shareuser", type: "user" }
 #   read_only: "no"
 #   guest_ok: "no"
 

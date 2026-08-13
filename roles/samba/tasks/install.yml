@@ -4,21 +4,23 @@
 - name: Install Samba package and dependencies.
   ansible.builtin.package:
     name: >-
-      {{ samba_pkg_names +
-        (samba_is_server | bool | ternary([], samba_client_dep_pkg_names)) }}
+      {{ samba_pkg_names | default([])
+        + (samba_is_server | bool | ternary([], samba_client_dep_pkg_names))
+      }}
     state: present
 
-- name: Enforce external SSSD infrastructure pre-requisites
-  ansible.builtin.fail:
-    msg: >-
-      Deployment failed: 'samba_deployment_mode' is set to 'member_sssd', but the 'sssd'
-      package was not detected on this host. Please ensure your central SSSD role runs
-      and configures the system identities before executing the Samba deployment.
-  when:
-    - samba_is_server | bool
-    - samba_deployment_mode == 'member_sssd'
-    - ansible_facts.packages is defined
-    - ansible_facts.packages['sssd'] is not defined
+- name: Enforce core parent configuration space integrity
+  ansible.builtin.file:
+    path: "{{ samba_directory.conf }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
 
-- name: Initial Samba configuration
-  ansible.builtin.include_tasks: configure/main.yml
+- name: Execute Samba Server configuration
+  ansible.builtin.include_tasks: configure/server/main.yml
+  when: samba_is_server | bool
+
+- name: Execute Samba Client configuration
+  ansible.builtin.include_tasks: configure/client/main.yml
+  when: not samba_is_server | bool

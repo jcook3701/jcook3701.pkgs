@@ -40,13 +40,14 @@
     smb ports = {{ samba_port }}
 {% endif %}
 
+{% include 'global.' ~ samba_deployment_mode ~ '.j2' %}
+
     ## Debugging/Accounting ##
     log file = {{ samba_directory.log }}/log.%m
     max log size = 1000
     logging = file
+    log level = 3 auth:5 idmap:5 gensec:5
     panic action = {{ samba_directory.assets }}/panic-action %d
-
-{% include 'global.' ~ samba_deployment_mode ~ '.j2' %}
 
 {% if samba_is_server | bool %}
     ## Printing ##

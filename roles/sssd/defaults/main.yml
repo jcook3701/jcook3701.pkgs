@@ -37,7 +37,7 @@ sssd_domain_name: "{{ sssd_second_level_domain }}.{{ sssd_top_level_domain }}"
 # ====================================================================
 sssd_ldap_users_parent_ou: "Users"
 sssd_ldap_people_child_ou: "People"
-sssd_ldap_groups_ou: "Group"
+sssd_ldap_groups_ou: "Groups"
 sssd_ldap_sudoers_ou: "SUDOers"
 sssd_ldap_automount_ou: "AutoMount"
 
@@ -85,6 +85,17 @@ sssd_ldap_tls_key: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/priv
 # ENGINE PERFORMANCE METRICS & CACHE TUNING TIMEOUTS
 # ====================================================================
 sssd_ldap_schema: "rfc2307"
+sssd_ldap_rfc2307_fallback_to_local_users: true
+
+# Explicitly bind identity mapping attributes
+sssd_ldap_group_object_class: posixGroup
+sssd_ldap_group_name: cn
+sssd_ldap_group_gid_number: gidNumber
+sssd_ldap_group_member: memberUid
+sssd_ldap_group_uuid: nsUniqueId
+sssd_ldap_user_uuid: nsUniqueId
+
+sssd_ldap_id_mapping: false
 sssd_nss_homedir_substring: "/home"
 sssd_ldap_search_timeout: 90
 sssd_ldap_network_timeout: 90

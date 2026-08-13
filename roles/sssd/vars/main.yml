@@ -12,6 +12,8 @@ sssd_directory:
   db: "{{ sssd_os_directory.db | default('/var/lib/sss/db') }}"
   mc: "{{ sssd_os_directory.mc | default('/var/lib/sss/mc') }}"
   pipes: "{{ sssd_os_directory.pipes | default('/var/lib/sss/pipes') }}"
+  private_pipes: "{{ sssd_os_directory.private_pipes | default('/var/lib/sss/pipes/private') }}"
+  log: "{{ sssd_os_directory.log | default('/var/log/sssd') }}"
   keytab: "{{ sssd_os_directory.keytab | default('/etc') }}"
 
 sssd_file:

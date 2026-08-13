@@ -9,24 +9,26 @@
   when: ansible_facts.services is not defined or sssd_nscd_service in ansible_facts.services
   failed_when: false
 
+# TODO: Add purge feature to personal jcook3701.utils
+- name: Ensure Conflicting Packages are purged
+  ansible.builtin.apt:
+    name: "{{ sssd_conflict_pkg_names }}"
+    purge: yes
+    state: absent
+  when: ansible_facts['os_family'] == 'Debian'
+
 - name: Install SSSD package and dependencies.
   ansible.builtin.package:
-    name: "{{ sssd_pkg_names }}"
+    name: >-
+      {{ sssd_pkg_names | default([])
+          + sssd_dep_pkg_names | default([]) }}
     state: present
 
 - name: Load client security certificate assets
   ansible.builtin.include_tasks: keys.yml
 
-- name: Deploy System Security Services Daemon text configuration file
-  ansible.builtin.template:
-    src: sssd.conf.j2
-    dest: "{{ sssd_file.sssd_conf }}"
-    group: root
-    owner: root
-    mode: "0600"
-  notify:
-    - Restart SSSD Service
-    - Restart Systemd Logind Service
+- name: Configure SSSD service
+  ansible.builtin.include_tasks: configure.yml
 
 - name: Ensure SSSD service is started and enabled
   ansible.builtin.systemd:
@@ -35,7 +37,8 @@
     enabled: true
 
 - name: Forcefully enable SSSD profiles within the system PAM authentication stacks
-  ansible.builtin.command: "pam-auth-update --package --enable sss"
+  ansible.builtin.command: >-
+    pam-auth-update --package --enable sss --enable mkhomedir
   environment:
     DEBIAN_FRONTEND: noninteractive
   register: pam_enable_cmd
@@ -44,8 +47,17 @@
   when: ansible_facts['os_family'] == 'Debian'
 
 - name: Forcefully select SSSD profile within Red Hat system authselect stacks
-  ansible.builtin.command: "authselect select sssd with-mkhomedir --force"
+  ansible.builtin.command: >-
+    authselect select sssd with-mkhomedir --force
   register: authselect_cmd
   changed_when: authselect_cmd.rc == 0
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Ensure oddjobd background service is running on Red Hat systems
+  ansible.builtin.service:
+    name: oddjobd
+    state: started
+    enabled: true
   become: true
   when: ansible_facts['os_family'] == 'RedHat'

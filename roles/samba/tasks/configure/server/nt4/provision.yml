@@ -27,14 +27,3 @@
     (_samba_nt4_provision.rc != 0 and 'already exists' not in _samba_nt4_provision.stderr | lower) or
     ('critical' in _samba_nt4_provision.stderr | lower) or
     ('panic' in _samba_nt4_provision.stdout | lower)
-
-- name: Force map administrator credentials to local database backend
-  ansible.builtin.command: >-
-    smbpasswd -an "{{ samba_admin_user }}"
-  register: _samba_admin_sync
-  become: true
-  changed_when: >-
-    ('added interface' not in _samba_admin_sync.stdout | lower)
-  failed_when: >-
-    (_samba_admin_sync.rc != 0) or
-    ('unable' in _samba_admin_sync.stderr | lower)

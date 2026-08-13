@@ -1,0 +1,114 @@
+ # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+ openldap_samba_groups:
+  # =========================================================================
+  # NATIVE WINDOWS GLOBAL DOMAIN GROUPS (RID Range 512-520) -> type: 2
+  # ======================================================================
+  - name: "Domain Admins"
+    gid: 512
+    rid: 512
+    type: 2
+    description: "Privileged directory administrators with global system access"
+
+  - name: "Domain Users"
+    gid: 513
+    rid: 513
+    type: 2
+    description: "Standard directory network user account container"
+
+  - name: "Domain Guests"
+    gid: 514
+    rid: 514
+    type: 2
+    description: "Netbios Domain Guests Users"
+
+  - name: "Domain Computers"
+    gid: 515
+    rid: 515
+    type: 2
+    description: "Netbios Domain Computers accounts"
+
+  - name: "Schema Admins"
+    gid: 518
+    rid: 518
+    type: 2
+    description: "High-privilege administrators authorized to alter the directory structure"
+
+  - name: "Enterprise Admins"
+    gid: 519
+    rid: 519
+    type: 2
+    description: "Highest tier administrators with forest-wide management capabilities"
+
+  # =========================================================================
+  # NATIVE WINDOWS BUILT-IN LOCAL ALIASES (RID Range 540-560) -> type: 4
+  # =========================================================================
+  - name: "Administrators"
+    gid: 544
+    rid: 544
+    type: 4
+    description: "Netbios Domain Members can fully administer the computers"
+
+  - name: "Users"
+    gid: 545
+    rid: 545
+    type: 4
+    description: "Standard local system users pool"
+
+  - name: "Guests"
+    gid: 546
+    rid: 546
+    type: 4
+    description: "Default local guest system group container"
+
+  - name: "Account Operators"
+    gid: 548
+    rid: 548
+    type: 4
+    description: "Netbios Domain Users to manipulate users accounts"
+
+  - name: "Server Operators"
+    gid: 549
+    rid: 549
+    type: 4
+    description: "Members can administer domain servers"
+
+  - name: "Print Operators"
+    gid: 550
+    rid: 550
+    type: 4
+    description: "Netbios Domain Print Operators"
+
+  - name: "Backup Operators"
+    gid: 551
+    rid: 551
+    type: 4
+    description: "Netbios Domain Members can bypass file security to back up files"
+
+  - name: "Replicators"
+    gid: 552
+    rid: 552
+    type: 4
+    description: "Netbios Domain Supports file replication in a domainuser"
+
+  - name: "Remote Desktop Users"
+    gid: 555
+    rid: 555
+    type: 4
+    description: "Users authorized to log in to network endpoints via RDP"
+
+  - name: "Network Configuration Operators"
+    gid: 562
+    rid: 562
+    type: 4
+    description: "Members can have some administrative privileges to manage configuration of networking features"
+
+  # =========================================================================
+  # SAMBA-SPECIFIC OPERATIONAL SERVICE CONTROLS -> type: 2
+  # =========================================================================
+  - name: "Samba Operators"
+    gid: 547
+    rid: 547
+    type: 2
+    description: "Service accounts and managers handling filesystem shares"

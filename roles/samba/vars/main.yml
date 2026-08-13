@@ -3,16 +3,6 @@
 ---
 samba_is_server: "{{ samba_deployment_mode != 'client' }}"
 
-# Internal role constants calculated dynamically based on mode selection
-samba_server_role: >-
-  {% if samba_deployment_mode == 'addc' %}
-  active directory domain controller
-  {% elif samba_deployment_mode in ['member_legacy', 'member_sssd'] %}
-  member server
-  {% else %}
-  classic primary domain controller
-  {% endif %}
-
 # Strict mapping of built-in Windows AD groups that cannot be re-created
 samba_addc_builtin_groups:
   - "Domain Admins"
@@ -23,7 +13,9 @@ samba_addc_builtin_groups:
   - "Remote Desktop Users"
   - "Samba Operators"
 
-samba_user_group: "{{ samba_os_user_group | default('sambashare') }}"
+# samba_user_group
+samba_user: "{{ samba_os_user | default('sambashare') }}"
+samba_group: "{{ samba_os_group | default('sambashare') }}"
 
 samba_service: >-
   {{ (samba_deployment_mode == 'addc')
@@ -53,3 +45,4 @@ samba_directory:
 samba_file:
   samba_conf: "{{ samba_directory.conf }}/smb.conf"
   krb5_conf: "/etc/krb5.conf"
+  keytab: "/etc/samba.keytab"

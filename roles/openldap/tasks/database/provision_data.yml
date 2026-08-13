@@ -1,19 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Discover the operational local system domain SID from the target machine
-  ansible.builtin.command: "net getdomainsid"
-  register: openldap_system_sid_raw
-  changed_when: false
-  failed_when: false
-  become: true
-  when:
-    - openldap_node_type == 'master'
-    - openldap_samba | bool
-
-- name: Register the system domain SID into active execution memory facts
+- name: Mathematically calculate a stable network Domain SID based on domain string hash
   ansible.builtin.set_fact:
-    openldap_system_domain_sid: "{{ openldap_system_sid_raw.stdout | regex_search('S-1-5-21-[0-9\\-]+') | default('S-1-5-21-0000000000-0000000000-0000000000') | trim }}"
+    openldap_system_domain_sid: >-
+      S-1-5-21-{{ domain_hash[0:9] | int % 2147483647 }}-{{ domain_hash[9:18] | int % 2147483647 }}-{{ domain_hash[18:27] | int % 2147483647 }}
+  vars:
+    domain_hash: "{{ (second_level_domain | default('example') | string | hash('md5') | int(base=16)) | string }}"
   when: openldap_node_type == 'master'
 
 - name: Ingest optional feature schema extensions online

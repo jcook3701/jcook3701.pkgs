@@ -6,9 +6,11 @@ openldap_group: "openldap"
 
 openldap_sysconfig_variable: SLAPD_SERVICES
 
+openldap_dep_pkg_names:
+  - ldap-utils
+
 openldap_pkg_names:
   - slapd
-  - ldap-utils
   - slapd-contrib
 
 openldap_shared_libs:

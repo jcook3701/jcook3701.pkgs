@@ -254,10 +254,29 @@ argument_specs:
             type: "int"
             required: true
             description: "The explicit numeric group identifier assigned to the tracking element."
+          rid:
+            type: "int"
+            required: false
+            description: "The explicit Relative Identifier (RID) assigned to the group. If omitted, the template defaults to falling back on the native Linux gid value."
+          type:
+            type: "int"
+            required: false
+            default: 2
+            choices: [2, 4, 5]
+            description: "The Windows group scope descriptor type flag (e.g., 2 for Global Groups, 4 for Local Aliases/Built-ins, 5 for Universal Groups)."
+          display_name:
+            type: "str"
+            required: false
+            description: "The localized user-friendly string value printed on Windows client layout screens."
           description:
             type: "str"
             required: false
             description: "An open text line detailing the group's operational application boundaries."
+          is_samba_group:
+            type: "bool"
+            required: false
+            default: false
+            description: "A boolean execution flag specifying whether this element requires a Windows NT4 structural group mapping."
 
       openldap_bootstrap_users:
         type: "list"
@@ -308,6 +327,9 @@ argument_specs:
           is_sudoer:
             type: "bool"
             description: "Controls privilege escalation assignments across client layers."
+          is_samba_user:
+            type: "bool"
+            description: "Enables structural generation of Windows-compatible NT password hashes and security descriptors required for central SMB/CIFS file share mounting."
           is_pxe_worker:
             type: "bool"
             description: "Custom network lifecycle flag tagging infrastructure automation profiles."

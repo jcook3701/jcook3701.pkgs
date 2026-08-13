@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-samba_os_user_group: "sambashare"
+samba_os_user: "sambashare"
+samba_os_group: "sambashare"
+
 samba_os_service_nt4: ["smb", "nmb"]
 samba_os_service_addc: ["samba-ad-dc"]
 

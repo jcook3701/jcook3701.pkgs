@@ -1,13 +1,28 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+sssd_conflict_pkg_names:
+  - libnss-winbind
+  - libnss-ldap
+  - libnss-ldapd
+  - nslcd
+  - libpam-ldap
+  - libpam-ldapd
+  - libpam-krb5
+
+sssd_dep_pkg_names:
+  - libpam-sss
+  - libpam-runtime
+  - libnss-sss
+
 sssd_pkg_names:
   - sssd
   - sssd-tools
   - sssd-ldap
   - sssd-krb5
-  - libpam-sss
-  - libnss-sss
+  - sssd-dbus
+  - libsss-sudo
+  # - libnss-winbind
 
 sssd_os_directory:
   conf: "/etc/sssd"
@@ -16,4 +31,6 @@ sssd_os_directory:
   db: "/var/lib/sss/db"
   mc: "/var/lib/sss/mc"
   pipes: "/var/lib/sss/pipes"
+  private_pipes: "/var/lib/sss/pipes/private"
+  log: "/var/log/sssd"
   keytab: "/etc"

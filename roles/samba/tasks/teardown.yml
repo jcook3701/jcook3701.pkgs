@@ -15,11 +15,13 @@
     name: "{{ samba_admin_user }}"
     state: absent
     remove: yes
-  when: samba_is_server | bool
+  when:
+    - samba_is_server | bool
+    - false
 
 - name: Purge OS-specific Samba user group from the local system
   ansible.builtin.group:
-    name: "{{ samba_user_group }}"
+    name: "{{ samba_group }}"
     state: absent
   when: samba_is_server | bool
 

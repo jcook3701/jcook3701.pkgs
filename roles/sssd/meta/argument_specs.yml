@@ -212,6 +212,46 @@ argument_specs:
         choices: ["rfc2307", "rfc2307bis", "IPA", "AD"]
         description: "The schema protocol architecture ruleset used for directory data parsing."
 
+      sssd_ldap_rfc2307_fallback_to_local_users:
+        type: "bool"
+        default: true
+        description: "Instructs the local SSSD engine to merge network-fetched account memberships cleanly into matching local files like /etc/group."
+
+      sssd_ldap_group_object_class:
+        type: "str"
+        default: "posixGroup"
+        description: "Defines the explicit LDAP database structural object type used to filter group container searches."
+
+      sssd_ldap_group_name:
+        type: "str"
+        default: "cn"
+        description: "Sets the naming attribute key used to extract the human-readable identifier for network groups."
+
+      sssd_ldap_group_gid_number:
+        type: "str"
+        default: "gidNumber"
+        description: "Maps the target structural field tracking numeric Linux Group IDs inside directory records."
+
+      sssd_ldap_group_member:
+        type: "str"
+        default: "memberUid"
+        description: "Dictates the explicit member attribute token string used to process individual username accounts."
+
+      sssd_ldap_group_uuid:
+        type: "str"
+        default: "nsUniqueId"
+        description: "Tracks the internal unique structural object identifier used by the provider backend for group indexing operations."
+
+      sssd_ldap_user_uuid:
+        type: "str"
+        default: "nsUniqueId"
+        description: "Tracks the internal unique structural object identifier used by the provider backend for user indexing operations."
+
+      sssd_ldap_id_mapping:
+        type: "bool"
+        default: false
+        description: "Controls dynamic SID-to-UID calculation. Set to false to force SSSD to rely strictly on your explicitly declared directory uidNumber and gidNumber attributes."
+
       sssd_nss_homedir_substring:
         type: str
         default: "/home"

@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro global_addc() -%}
+{%- macro global_addc_settings() -%}
 {#
     Active Directory Domain Controller Configuration Engine.
     Establishes standard Kerberos Realm verification and maps internal SAMBA RFC2307 schema backends.
@@ -50,4 +50,4 @@
     idmap_ldb:use rfc2307 = yes
 {%- endmacro -%}
 
-{{- global_addc() }}
+{{- global_addc_settings() }}

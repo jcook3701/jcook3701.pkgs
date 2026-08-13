@@ -5,6 +5,7 @@ autofs_os_service: "autofs"
 
 autofs_os_package_names:
   - "autofs"
+  - "autofs-ldap"
   - "cifs-utils"
 
 autofs_os_directory:

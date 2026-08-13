@@ -138,3 +138,6 @@ openldap_guac_connections:
       - "sftp-root-directory=/"
     members:
       - "example"
+
+# Ansible Developer Debugging
+openldap_template_debug: false

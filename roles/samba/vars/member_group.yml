@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+samba_server_role: >-
+  {{ _samba_server_role_override | default(
+    'active directory domain controller' if samba_deployment_mode == 'addc'
+    else 'member server' if samba_deployment_mode in ['ads_member', 'nt4_member']
+    else 'classic primary domain controller' if samba_deployment_mode == 'nt4_pdc'
+    else 'standalone server'
+  ) | trim }}
+
+samba_security_mode: >-
+  {{ _samba_security_mode_override | default(
+    'user' if samba_deployment_mode == 'nt4_pdc'
+    else 'domain' if samba_deployment_mode == 'nt4_member'
+    else 'ads' if samba_deployment_mode == 'ads_member'
+    else 'user'
+  ) | trim }}
+
+samba_passdb_backend: >-
+  {{ _samba_passdb_backend_override | default(
+    samba_ldap_passdb_backend if samba_deployment_mode in ['nt4_pdc', 'nt4_member']
+    else 'samba4' if samba_deployment_mode == 'addc'
+    else 'tdbsam'
+  ) | trim }}
+
+# TODO: utilities below variables within role where necessary.
+# Automatically handles kerberos method directives for SSSD setups
+samba_kerberos_method: >-
+  {{ 'dedicated keytab' if samba_deployment_mode == 'ads_member'
+     else 'secrets and keytab' if samba_deployment_mode == 'addc'
+     else 'none' }}
+
+# Tracks whether legacy NT4 domain features should be globally loaded into templates
+samba_enable_domain_logons: >-
+  {{ true if samba_deployment_mode == 'nt4_pdc' else false }}

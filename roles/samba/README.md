@@ -8,10 +8,31 @@ $ sudo apt install samba samba-common-bin
 
 <!--
 # Authors Notes:
-Helpful command for testing samba smb configuration files.
+
+sudo tail -n 50 /var/log/samba/log.localhost
+sudo journalctl -u smbd --no-pager -n 50
+
+**Helpful commands** for testing **samba** configuration files.
+
 ``` shell
 $ testparm /etc/samba/smb.conf
 ```
+
+``` shell
+$ smbclient -L <hostname> -k
+```
+```
+wbinfo --name-to-sid "JCOOK3701\Domain Users"
+```
+
+``` shell
+wbinfo --sid-to-gid $(wbinfo --name-to-sid "JCOOK3701\Domain Users"
+```
+
+``` shell
+sudo net sam show "jcook3701\pxeuser"
+```
+
 
 TODO:
 If you need multiple Active Directory servers for redundancy or scale, you use one of these two standard configurations:
@@ -61,4 +82,11 @@ TODO: Test Samba Client code.  Using autofs for samba mounts so it's on the back
     {% if share.directory_mask is defined %}directory mask = {{ share.directory_mask }}{% endif %}
     {% if share.force_directory_mode is defined %}force directory mode = {{ share.force_directory_mode }}{% endif %}
 
+    old smb cfg settings for nt4_pdc:
+
+    winbind max domain connections = 10
+    winbind enum users = yes
+    winbind enum groups = yes
+    winbind use default domain = yes
+    winbind nested groups = yes
 -->

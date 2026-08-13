@@ -8,7 +8,7 @@
     create_home: false
     system: true
     state: present
-    groups: "{{ samba_user_group }}"
+    groups: "{{ samba_group }}"
     append: yes
 
 - name: Check if Samba administrative user exists in SAM database

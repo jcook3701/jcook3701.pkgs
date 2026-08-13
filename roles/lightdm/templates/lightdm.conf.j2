@@ -22,6 +22,8 @@
 [Seat:*]
 user-session=xfce
 greeter-session={{ lightdm_greeter }}
+greeter-show-manual-login={{ lightdm_greeter_show_manual_login | lower | trim }}
+greeter-hide-users={{ lightdm_greeter_hide_users | lower | trim }}
 {%- endmacro -%}
 
 {{- lightdm_conf() }}

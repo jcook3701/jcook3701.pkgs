@@ -11,6 +11,8 @@ lightdm_desktop_envs:
 lightdm_window_manager: xfce4
 lightdm_session_manager: xfce4-session
 lightdm_greeter: lightdm-gtk-greeter
+lightdm_greeter_show_manual_login: true
+lightdm_greeter_hide_users: false
 
 lightdm_directory:
   config: "/etc/lightdm/"

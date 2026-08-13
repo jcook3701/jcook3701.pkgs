@@ -30,8 +30,10 @@
         str: Baseline security parameters for outbound clients.
 #}
     ## Core Client Domain Security Definer ##
-    security = {{ samba_security_mode }}
+    security = {{ 'ads' if samba_client_target_mode == 'addc' else 'user' }}
+{% if samba_client_target_mode == 'addc' and samba_realm is defined %}
     realm = {{ samba_realm | upper }}
+{% endif %}
 
     ## Authentication Backends & Identity Mapping (IDMAP) ##
 {% if samba_client_target_mode == 'sssd' %}
@@ -40,7 +42,6 @@
     idmap config {{ samba_workgroup }} : backend = sss
     idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
 {% elif samba_client_target_mode == 'addc' %}
-    client use spnego = yes
     winbind cache time = 300
     winbind nested groups = yes
     winbind refresh tickets = yes
@@ -49,8 +50,8 @@
     idmap config {{ samba_workgroup }} : backend = rid
     idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
 {% else %}
-    idmap config * : backend = {{ samba_idmap_backend }}
-    idmap config * : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
+    idmap config * : backend = tdb
+    idmap config * : range = 3000-7999
 {% endif %}
 
     ## Protocol Security Engine ##

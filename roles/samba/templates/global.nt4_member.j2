@@ -1,5 +1,5 @@
 {#
-# global.nt4.j2 for jcook3701.pkgs
+# global.nt4_member.j2 for jcook3701.pkgs
 #
 # SPDX-FileCopyrightText: Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -18,16 +18,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro global_nt4() -%}
+{%- macro global_nt4_member_settings() -%}
 {#
-    Generates security frameworks for a Classic Primary Domain Controller backend.
-    Configures old-school Windows domains powered by standalone OpenLDAP directories.
+    Parameters for an Independent Standalone File Server utilizing OpenLDAP.
+    Configures legacy passdb maps for non-domain storage environments.
 
     Args:
         None
 
     Returns:
-        str: Comprehensive domain service and script declaration blocks.
+        str: Independent global blocks for mapping passwords across legacy directory servers.
 #}
     ## Core Server Role Definer ##
     server role = {{ samba_server_role }}
@@ -43,23 +43,9 @@
     client max protocol = {{ samba_client_max_protocol }}
     unix extensions = no
 
-    ## Classic Domain Controller Security Settings ##
+    ## Standalone Server Security Settings ##
     security = {{ samba_security_mode }}
     obey pam restrictions = yes
-
-    ## Domain Controller Services ##
-    domain logons = {{ samba_domain_logons }}
-    domain master = {{ samba_domain_master }}
-    local master = {{ samba_local_master }}
-    preferred master = {{ samba_preferred_master }}
-    os level = {{ samba_os_level }}
-    wins support = {{ samba_wins_support }}
-    unix password sync = yes
-    passwd program = /usr/bin/passwd %u
-    passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
-    pam password change = yes
-    map to guest = bad user
-    usershare allow guests = yes
 
     ## Authentication Backends & Identity Mapping (IDMAP) ##
     passdb backend = {{ samba_passdb_backend }}
@@ -76,19 +62,6 @@
 {# Smart IDMAP Suffix Handler: Only prints out if the user selects the LDAP backend #}
     ldap idmap suffix = {{ samba_ldap_idmap_suffix }}
 {% endif %}
-
-    ## LDAP Directory Management Scripts ##
-    ldap delete dn = no
-    ldap machine suffix = {{ samba_ldap_machine_suffix }}
-    add user script = /usr/sbin/smbldap-useradd -m '%u' -t 1
-    rename user script = /usr/sbin/smbldap-usermod -r '%unew' '%uold'
-    delete user script = /usr/sbin/smbldap-userdel '%u'
-    set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
-    add group script = /usr/sbin/smbldap-groupadd -p '%g'
-    delete group script = /usr/sbin/smbldap-groupdel '%g'
-    add user to group script = /usr/sbin/smbldap-groupmod -m '%u' '%g'
-    delete user from group script = /usr/sbin/smbldap-groupmod -x '%u' '%g'
-    add machine script = /usr/sbin/smbldap-useradd -w '%u' -t 1
 {%- endmacro -%}
 
-{{- global_nt4() }}
+{{- global_nt4_member_settings() }}

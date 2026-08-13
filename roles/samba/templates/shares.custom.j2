@@ -37,7 +37,6 @@
     ('comment', share.comment),
     ('path', share.path),
     ('public', share.public),
-    ('valid users', share.valid_users),
     ('force user', share.force_user),
     ('force group', share.force_group),
     ('read only', share.read_only),
@@ -52,6 +51,18 @@
 {% for key, value in options if value is defined and value is not none %}
     {{ key }} = {{ value }}
 {% endfor %}
+{% if share.valid_users is defined and share.valid_users is not none %}
+{% set domain_prefix = second_level_domain | default('JCOOK3701') | upper %}
+{% set compiled_principals = [] %}
+{% for principal in share.valid_users %}
+  {%- if principal.type == 'group' %}
+    {%- set _ = compiled_principals.append('@"' ~ domain_prefix ~ '\\' ~ principal.name ~ '"') %}
+  {%- else %}
+    {%- set _ = compiled_principals.append(principal.name) %}
+  {%- endif %}
+{% endfor %}
+    valid users = {{ compiled_principals | join(', ') }}
+{% endif %}
 
 {% endfor %}
 {%- endmacro -%}

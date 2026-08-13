@@ -26,6 +26,7 @@ objectClass: organizationalUnit
 description: LDAP Centralized Sudo Roles Repository
 ou: {{ openldap_sudoers_ou | trim }}
 
+# Support for Red Hat / Rocky Linux Clients
 dn: cn=%wheel,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
 changetype: add
 objectClass: top
@@ -37,6 +38,19 @@ sudoCommand: ALL
 sudoOption: !authenticate
 sudoRunAsUser: ALL
 sudoOrder: 3
+
+# Support for Debian / Ubuntu Clients
+dn: cn=%sudo,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: sudoRole
+cn: %sudo
+sudoUser: %sudo
+sudoHost: ALL
+sudoCommand: ALL
+sudoOption: !authenticate
+sudoRunAsUser: ALL
+sudoOrder: 4
 
 dn: cn=root,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
 changetype: add
@@ -73,13 +87,25 @@ changetype: add
 objectClass: top
 objectClass: posixGroup
 cn: sudo
-gidNumber: 9999
+gidNumber: 27
 {% for user in openldap_bootstrap_users | default([]) %}
 {% if user.is_sudoer | default(false) | bool %}
 memberUid: {{ user.username | trim }}
 {% endif %}
-
 {% endfor %}
+
+dn: cn=wheel,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+cn: wheel
+gidNumber: 10
+{% for user in openldap_bootstrap_users | default([]) %}
+{% if user.is_sudoer | default(false) | bool %}
+memberUid: {{ user.username | trim }}
+{% endif %}
+{% endfor %}
+
 {%- endmacro -%}
 
 {{- sudo_ldif() }}

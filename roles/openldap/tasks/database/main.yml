@@ -43,3 +43,4 @@
 # ====================================================================
 - name: OpenLDAP configuration staging cleanup
   ansible.builtin.include_tasks: cleanup.yml
+  when: not openldap_template_debug | bool

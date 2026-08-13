@@ -10,6 +10,9 @@
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: Load Samba Member Group variables
+  ansible.builtin.include_vars: "member_group.yml"
+
 - name: Install Samba
   ansible.builtin.include_tasks: install.yml
   when: samba_state | default('present') == 'present'
