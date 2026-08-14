@@ -1,10 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# 1. OPTIONAL FEATURE SCHEMA INGESTION
-# ====================================================================
-- name: Upload specific custom LDIF schema extension to the guest host
+- name: "Upload specific custom {{ current_feature_name }} LDIF schema extension to the guest host"
   ansible.builtin.copy:
     src: "schema/{{ current_feature_name }}.ldif"
     dest: "{{ openldap_directory.schema }}/{{ current_feature_name }}.ldif"
@@ -13,7 +10,7 @@
     mode: "0644"
   become: true
 
-- name: Load optional feature schema extension online
+- name: "Load optional {{ current_feature_name }} feature schema extension online"
   ansible.builtin.shell:
     cmd: "{{ command }}"
   args:

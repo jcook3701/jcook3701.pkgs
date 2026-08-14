@@ -36,7 +36,7 @@
     - ansible_facts['os_family'] == 'Debian'
     - not openldap_existing_config.stat.exists
 
-- name: Install OpenLDAP package and dependencies.
+- name: Install OpenLDAP package and dependencies
   ansible.builtin.package:
     name: >-
       {{ openldap_pkg_names | default([])
@@ -47,17 +47,8 @@
     DEBIAN_FRONTEND: "{{ 'noninteractive' if ansible_facts['os_family'] == 'Debian' else omit }}"
   become: true
 
-- name: OpenLDAP Kerberos keytab environment and permission synchronization
-  ansible.builtin.include_tasks: keytabs/main.yml
-
-- name: OpenLDAP key generation
-  ansible.builtin.include_tasks: "keys/main.yml"
-  when:
-    - not openldap_existing_config.stat.exists
-    - openldap_use_tls | bool
-
 - name: OpenLDAP configuration
-  ansible.builtin.include_tasks: configure.yml
+  ansible.builtin.include_tasks: configure/main.yml
 
 - name: OpenLDAP database and replication tree setup
   ansible.builtin.include_tasks: database/main.yml

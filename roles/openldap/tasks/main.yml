@@ -32,35 +32,33 @@
   become: true
 
 - name: OpenLDAP database backup
-  ansible.builtin.include_tasks: backupDB.yml
+  ansible.builtin.include_tasks: utilities/backupDB.yml
   when:
     - openldap_state | default('present') in ['present', 'teardown', 'backup']
     - openldap_existing_config.stat.exists
     - openldap_node_type == 'master'
-    - slapd_in_packages
-  vars:
-    # Safely abstract the boolean expression outside of the YAML list syntax to force clean evaluation
-    slapd_in_packages: "{{ 'slapd' in ansible_facts.packages }}"
+    - ansible_facts.packages is defined
+    - openldap_pkg_names[0] in ansible_facts.packages
 
 - name: Install Openldap
-  ansible.builtin.include_tasks: install.yml
+  ansible.builtin.include_tasks: state/install.yml
   when:
     - openldap_state | default('present') == 'present'
 
 - name: OpenLDAP database restoration and import
-  ansible.builtin.include_tasks: importDB.yml
+  ansible.builtin.include_tasks: utilities/importDB.yml
   when:
     - openldap_state | default('present') == 'present'
     - not openldap_existing_config.stat.exists
 
 - name: Uninstall Openldap
-  ansible.builtin.include_tasks: uninstall.yml
+  ansible.builtin.include_tasks: state/uninstall.yml
   when:
     - openldap_state | default('present') == 'absent'
     - ansible_facts.packages is defined
     - openldap_pkg_names[0] in ansible_facts.packages
 
 - name: Complete Purge and Tear-Down of OpenLDAP Environment
-  ansible.builtin.include_tasks: teardown.yml
+  ansible.builtin.include_tasks: state/teardown.yml
   when:
     - openldap_state | default('present') == 'teardown'

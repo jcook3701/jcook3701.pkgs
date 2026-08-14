@@ -3,12 +3,12 @@
 ---
 - name: Unmount and purge client remote storage attachments
   ansible.posix.mount:
-    path: "{{ mount.path }}"
+    path: "{{ smb_mount.path }}"
     state: absent
-  loop: "{{ samba_client_mounts }}"
+  loop: "{{ samba_client_mounts | default([]) }}"
   loop_control:
-    loop_var: mount
-    label: "Purging mount filesystem link -> {{ mount.path }}"
+    loop_var: smb_mount
+    label: "Purging mount filesystem link -> {{ smb_mount.path }}"
 
 - name: Purge Samba administrative user from the local system
   ansible.builtin.user:

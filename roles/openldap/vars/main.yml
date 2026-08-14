@@ -12,6 +12,7 @@ openldap_service: "slapd"
 # Place holders for OS-specific variables
 openldap_sysconfig_variable: "SLAPD_SERVICES"
 
+openldap_dep_pkg_names: []
 openldap_pkg_names: []
 openldap_shared_libs: []
 

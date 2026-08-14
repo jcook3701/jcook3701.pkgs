@@ -421,6 +421,10 @@ argument_specs:
         default: []
         description: "Remote shares mapped into the local file directory tree via clients."
         options:
+          name:
+            type: str
+            required: true
+            description: "The unique descriptive identifier naming the target file share asset block."
           src:
             type: str
             required: true

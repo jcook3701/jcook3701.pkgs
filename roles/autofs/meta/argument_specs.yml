@@ -3,8 +3,8 @@
 ---
 argument_specs:
   main:
-    short_description: "Dynamic on-demand client filesystem automount core"
-    description: "Deploys on-demand kernel-level mount structures to eliminate network-dependent client boot stalls."
+    short_description: "Enterprise multi-OS hybrid AutoFS client integration core"
+    description: "Validates local filesystem mount parameters, daemon behavior properties, and database schema lookups."
     author: "Jared Cook"
     options:
       # Control switches
@@ -14,11 +14,125 @@ argument_specs:
         choices: ["present", "absent", "teardown"]
         description: "Target operational configuration lifecycle state."
 
-      autofs_use_sssd:
-        type: "bool"
+      autofs_lookup_provider:
+        type: "str"
         required: false
-        default: false
-        description: "When true, disables local flat-file generation and configures system files to delegate all AutoFS map resolution to the SSSD daemon."
+        default: "sss"
+        choices:
+          - "sss"
+          - "ldap"
+          - "files"
+        description: "The primary centralized lookup dispatch source provider backend handling system name switches."
+
+      autofs_master_map_name:
+        type: "str"
+        required: false
+        default: "auto.master"
+        description: "The root-level central switchboard directory map name the engine scans for."
+
+      autofs_client_timeout:
+        type: "int"
+        required: false
+        default: 60
+        description: "System-level threshold defaults for dynamically unmounting inactive drives (in seconds)."
+
+      autofs_browse_mode:
+        type: "str"
+        required: false
+        default: "yes"
+        choices:
+          - "yes"
+          - "no"
+        description: "Controls the baseline visibility of underlying unmounted share directories on the filesystem."
+
+      autofs_logging:
+        type: "str"
+        required: false
+        default: "verbose"
+        choices:
+          - "none"
+          - "verbose"
+          - "debug"
+        description: "Configures the tracking output logging verbosity level of the system daemon process."
+
+      autofs_sasl_usetls:
+        type: "str"
+        required: false
+        default: "no"
+        choices:
+          - "yes"
+          - "no"
+        description: "Enables or disables TLS transport encryption layers for native SASL directory communication."
+
+      autofs_sasl_tlsrequired:
+        type: "str"
+        required: false
+        default: "no"
+        choices:
+          - "yes"
+          - "no"
+        description: "Enforces strict channel termination if an encrypted TLS frame cannot be safely negotiated."
+
+      autofs_sasl_authrequired:
+        type: "str"
+        required: false
+        default: "yes"
+        choices:
+          - "yes"
+          - "no"
+        description: "Instructs the lookup module whether explicit identity tokens are required to query the directory."
+
+      autofs_sasl_authmechanism:
+        type: "str"
+        required: false
+        default: "GSSAPI"
+        choices:
+          - "GSSAPI"
+          - "PLAIN"
+          - "LOGIN"
+        description: "The targeted SASL cryptographic authentication engine mechanism utilized over the connection channel."
+
+      autofs_ldap_timeout:
+        type: "int"
+        required: false
+        default: 30
+        description: "The execution timeout boundary threshold for individual network data queries (in seconds)."
+
+      autofs_ldap_network_timeout:
+        type: "int"
+        required: false
+        default: 30
+        description: "The transport network layer drop timeout metric limit for directory lookups (in seconds)."
+
+      autofs_map_object_class:
+        type: "str"
+        required: false
+        default: "automountMap"
+        description: "The targeted structural schema objectClass token representing container map dictionaries."
+
+      autofs_entry_object_class:
+        type: "str"
+        required: false
+        default: "automount"
+        description: "The targeted structural schema objectClass token representing individual file mount content entries."
+
+      autofs_map_attribute:
+        type: "str"
+        required: false
+        default: "automountMapName"
+        description: "The specific directory database attribute key identifying distinct map groupings."
+
+      autofs_entry_attribute:
+        type: "str"
+        required: false
+        default: "automountKey"
+        description: "The specific directory database attribute key tracking exact mounting trigger path tokens."
+
+      autofs_value_attribute:
+        type: "str"
+        required: false
+        default: "automountInformation"
+        description: "The directory database attribute key mapping UNC network share targets and connection flags."
 
       # Centralized On-Demand File System Mount Array
       autofs_bootstrap_mounts:

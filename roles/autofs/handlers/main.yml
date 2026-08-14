@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Verify configuration syntax using automount engine
-  ansible.builtin.command: "automount --test {{ autofs_file.master_file }}"
+  ansible.builtin.command: "automount --dumpmaps"
   register: _autofs_handler_syntax_check
   changed_when: false
   failed_when: >
     (_autofs_handler_syntax_check.rc != 0) or
-    ('error' in _autofs_handler_syntax_check.stderr | lower) or
-    ('critical' in _autofs_handler_syntax_check.stderr | lower) or
-    ('failed to load' in _autofs_handler_syntax_check.stdout | lower)
+    ('failed to load' in _autofs_handler_syntax_check.stdout | lower) or
+    ('syntax error' in _autofs_handler_syntax_check.stderr | lower) or
+    ('parse error' in _autofs_handler_syntax_check.stderr | lower)
   listen: "Restart Autofs Services"
 
 - name: Reload autofs systemd daemon following valid verification pass

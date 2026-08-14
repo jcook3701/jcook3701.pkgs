@@ -24,6 +24,5 @@
     group: root
     mode: "0644"
 
-- name: Execute Modern Active Directory Domain Engine branch
+- name: Prepare to mount samba file shares on client machines
   ansible.builtin.include_tasks: mounts.yml
-  when: samba_client_enable_mounts | bool

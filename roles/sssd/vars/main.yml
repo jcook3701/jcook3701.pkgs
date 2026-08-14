@@ -41,5 +41,5 @@ sssd_krb5_server: "{{ sssd_krb5_servers | join(',') }}"
 sssd_krb5_realm: "{{ sssd_domain_name | upper }}"
 
 # Advanced Application Search Anchors
-sssd_ldap_autofs_search_base: "cn={{ sssd_ldap_automount_ou | trim }},{{ sssd_ldap_search_base }}"
+sssd_ldap_autofs_search_base: "ou={{ sssd_ldap_automount_ou | trim }},{{ sssd_ldap_search_base }}"
 sssd_ldap_sudo_search_base: "ou={{ sssd_ldap_sudoers_ou | trim }},{{ sssd_ldap_search_base }}"

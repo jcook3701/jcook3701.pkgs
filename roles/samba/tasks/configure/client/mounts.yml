@@ -1,6 +1,18 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Ensure local mounting endpoints exist
+  ansible.builtin.file:
+    path: "{{ mount.path | default('/media/network_share') }}"
+    state: directory
+    owner: "{{ mount.owner_uid | default('root') }}"
+    group: "{{ mount.owner_gid | default('root') }}"
+    mode: "0755"
+  loop: "{{ samba_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: "Mount -> {{ mount.name | default('default') }}"
+
 - name: Securely generate credentials files for mounts
   ansible.builtin.copy:
     dest: "{{ creds_file }}"
@@ -14,25 +26,11 @@
   vars:
     mount_name: "{{ mount.name | default('default') }}"
     creds_file: "{{ samba_directory.conf }}/.creds-{{ mount_name }}"
-  loop: "{{ samba_client_mounts }}"
+  loop: "{{ samba_client_mounts | default([]) }}"
   loop_control:
     loop_var: mount
     label: "Mount -> {{ mount.name | default('default') }}"
-
-- name: Create local mounting endpoints
-  ansible.builtin.file:
-    path: "{{ mount.path }}"
-    state: directory
-    owner: "{{ mount_uid }}"
-    group: "{{ mount_gid }}"
-    mode: "0755"
-  vars:
-    mount_uid: "{{ mount.owner_uid | default('root') }}"
-    mount_gid: "{{ mount.owner_gid | default('root') }}"
-  loop: "{{ samba_client_mounts }}"
-  loop_control:
-    loop_var: mount
-    label: "Mount -> {{ mount.name | default('default') }}"
+  when: samba_client_enable_mounts | bool
 
 - name: Bind remote shares to filesystem table natively
   ansible.posix.mount:
@@ -44,16 +42,15 @@
   vars:
     mount_name: "{{ mount.name | default('default') }}"
     creds_file: "{{ samba_directory.conf }}/.creds-{{ mount_name }}"
-    mount_uid: "{{ mount.owner_uid | default('root') }}"
-    mount_gid: "{{ mount.owner_gid | default('root') }}"
     mount_options: >-
       credentials={{ creds_file }},
       iocharset=utf8,
-      uid={{ mount_uid }},
-      gid={{ mount_gid }},
+      uid={{ mount.owner_uid | default('root') }},
+      gid={{ mount.owner_gid | default('root') }},
       file_mode=0755,
       dir_mode=0755
-  loop: "{{ samba_client_mounts }}"
+  loop: "{{ samba_client_mounts | default([]) }}"
   loop_control:
     loop_var: mount
     label: "Mount -> {{ mount.name | default('default') }}"
+  when: samba_client_enable_mounts | bool

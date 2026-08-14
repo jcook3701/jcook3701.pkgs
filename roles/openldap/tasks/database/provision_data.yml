@@ -10,7 +10,7 @@
   when: openldap_node_type == 'master'
 
 - name: Ingest optional feature schema extensions online
-  ansible.builtin.include_tasks: features/load_schema.yml
+  ansible.builtin.include_tasks: features/01_load_schema.yml
   loop: "{{ openldap_custom_schemas }}"
   loop_control:
     loop_var: current_feature_name
@@ -41,7 +41,7 @@
   when: openldap_node_type == 'master'
 
 - name: Apply active feature configuration data objects online
-  ansible.builtin.include_tasks: features/apply_data.yml
+  ansible.builtin.include_tasks: features/02_apply_data.yml
   loop: "{{ openldap_custom_schemas }}"
   loop_control:
     loop_var: current_feature_name

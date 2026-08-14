@@ -3,17 +3,18 @@
 ---
 - name: Install required system binaries for the selected platform
   ansible.builtin.package:
-    name: "{{ autofs_package_names }}"
+    name: >-
+      {{ autofs_package_names | default([])
+          + autofs_dep_package_names | default([]) }}
     state: present
+  become: true
 
 - name: Execute Autofs dynamic file system configuration
-  ansible.builtin.include_tasks: configure.yml
-  when:
-    - not autofs_use_sssd | bool
-    - autofs_bootstrap_mounts | length > 0
+  ansible.builtin.include_tasks: configure/main.yml
 
 - name: Enforce Autofs service is started and enabled
   ansible.builtin.systemd:
     name: "{{ autofs_service }}"
     state: started
     enabled: true
+  become: true

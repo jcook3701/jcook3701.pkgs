@@ -26,29 +26,54 @@ ou: {{ openldap_automount_ou | default('AutoMount') | trim }}
 objectClass: organizationalUnit
 objectClass: top
 
-# 2. DYNAMIC AUTOMOUNT MAPS DISCOVERY PASS-THROUGH LOOP
-{% for mount in openldap_autofs_mounts | default([]) if 'automountMapName' in mount %}
-dn: automountMapName={{ mount.automountMapName | trim }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+# 2. THE MASTER MAP SWITCHBOARD CONTROL SWITCH
+dn: automountMapName=auto.master,ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
 changetype: add
-automountMapName: {{ mount.automountMapName | trim }}
-ou: {{ mount.ou | default(mount.automountMapName) | trim }}
-{% for o_class in mount.objectClass %}
-objectClass: {{ o_class | trim }}
+automountMapName: auto.master
+ou: auto.master
+objectClass: top
+objectClass: automountMap
+
+# 3. DYNAMICALLY LOOP TO INITIALIZE UNIQUE SUB-MAPS AND LINK TO AUTO.MASTER
+{% set unique_maps = [] %}
+{% for share in openldap_autofs_mounts | default([]) %}
+  {%- set sub_map_name = 'auto.' ~ (share.client_mount_parent | basename) %}
+  {%- if sub_map_name not in unique_maps %}
+    {%- set _ = unique_maps.append(sub_map_name) %}
+dn: automountMapName={{ sub_map_name }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+automountMapName: {{ sub_map_name }}
+ou: {{ sub_map_name }}
+objectClass: top
+objectClass: automountMap
+
+dn: automountKey={{ share.client_mount_parent }},automountMapName=auto.master,ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: automount
+automountKey: {{ share.client_mount_parent }}
+automountInformation: automountMapName={{ sub_map_name }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+cn: {{ share.client_mount_parent | basename }}
+
+  {%- endif %}
 {% endfor %}
 
-{% endfor %}
-# 3. DYNAMIC AUTOMOUNT CONNECTION RULES LOOP
-{% for mount in openldap_autofs_mounts | default([]) if 'automountKey' in mount %}
-dn: automountKey={{ mount.automountKey | trim }},automountMapName={{ mount.parent_map | trim }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+
+# 4. DYNAMIC AUTOMOUNT CONNECTION RULES LOOP (Resolving Server Context Natively)
+{% for share in openldap_autofs_mounts | default([]) %}
+  {%- set sub_map_name = 'auto.' ~ (share.client_mount_parent | basename) %}
+  {#- The OpenLDAP role natively calculates the exact host FQDN running the services #}
+  {%- set server_host = openldap_samba_domain_fqdn | default(ansible_fqdn) %}
+  {%- set mnt_info = '-fstype=' ~ share.fstype ~ ',sec=' ~ share.auth_mode ~ ',vers=3.11' %}
+  {%- set mnt_path = '//' ~ server_host ~ '/' ~ share.name %}
+dn: automountKey={{ share.name }},automountMapName={{ sub_map_name }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
 changetype: add
-{% for o_class in mount.objectClass %}
-objectClass: {{ o_class | trim }}
-{% endfor %}
-automountInformation: {{ mount.automountInformation | trim }}
-automountKey: {{ mount.automountKey | trim }}
-cn: {{ mount.cn | trim }}
+objectClass: top
+objectClass: automount
+automountKey: {{ share.name }}
+automountInformation: {{ mnt_info }} {{ mnt_path }}
+cn: {{ share.name }}
 
 {% endfor %}
 {%- endmacro -%}
-
 {{- autofs_ldif() }}

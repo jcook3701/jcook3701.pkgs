@@ -354,37 +354,31 @@ argument_specs:
       openldap_autofs_mounts:
         type: "list"
         elements: "dict"
-        description: "Array defining standard dynamic automount maps mapped out to client nodes."
+        required: false
+        description: "The raw share-drive configuration data collection passed dynamically to the OpenLDAP generation role."
         options:
-          ou:
+          name:
             type: "str"
-            required: false
-            description: "Organizational Unit attribute string used exclusively when initializing structural top-level automountMap records."
-          cn:
-            type: "str"
-            required: false
-            description: "Common Name structural key identifier applied to individual sub-map automount leaf records."
-          parent_map:
-            type: "str"
-            required: false
-            description: "Tracks the structural top-level mount junction folder location under which this specific record resides."
-          objectClass:
-            type: "list"
-            elements: "str"
             required: true
-            description: "Strict schema definition tags (e.g., ['top', 'automountMap'] or ['top', 'automount']) dictating record traits inside the LDAP pool."
-          automountMapName:
+            description: "The common name identifier of the network share drive."
+          fstype:
             type: "str"
             required: false
-            description: "Explicit mapping name parameter defining the parent directory attachment point."
-          automountKey:
+            default: "cifs"
+            description: "The filesystem driver protocol execution type flag."
+          auth_mode:
             type: "str"
             required: false
-            description: "The unique look-up folder name fragment searched for by the SSSD daemon kernel interface."
-          automountInformation:
+            default: "krb5"
+            choices:
+              - "krb5"
+              - "ntlmsspi"
+            description: "Specifies the primary transport security protocol architecture mode."
+          client_mount_parent:
             type: "str"
             required: false
-            description: "The absolute protocol connection flag string containing the fstype, timeouts, credentials paths, and backend storage targets."
+            default: "/media/network_share"
+            description: "The base operational absolute directory route serving as the mount parent on client hosts."
 
       openldap_guac_connections:
         type: "list"

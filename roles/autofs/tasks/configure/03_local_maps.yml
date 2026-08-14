@@ -1,18 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Create unified configuration parent directory
-  ansible.builtin.file:
-    path: "{{ autofs_directory.conf }}"
-    state: directory
-    owner: "root"
-    group: "root"
-    mode: "0755"
-
 - name: Generate master automount routing configurations
   ansible.builtin.template:
     src: "auto.master.j2"
-    dest: "{{ autofs_file.master_file }}"
+    dest: "{{ autofs_file.auto_master }}"
     owner: "root"
     group: "root"
     mode: "0644"

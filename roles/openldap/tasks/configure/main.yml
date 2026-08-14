@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: OpenLDAP Kerberos keytab environment and permission synchronization
+  ansible.builtin.include_tasks: keytabs/main.yml
+
+- name: OpenLDAP key generation
+  ansible.builtin.include_tasks: keys/main.yml
+  when:
+    - not openldap_existing_config.stat.exists
+    - openldap_use_tls | bool
+
+- name: Execute system environment profile configuration setup
+  ansible.builtin.include_tasks: system.yml

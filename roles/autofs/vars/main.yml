@@ -3,10 +3,16 @@
 ---
 autofs_service: "{{ autofs_os_service | default('autofs') }}"
 
+autofs_dep_package_names: "{{ autofs_os_dep_package_names | default([]) }}"
+
 autofs_package_names: "{{ autofs_os_package_names | default([]) }}"
 
 autofs_directory:
   conf: "{{ autofs_os_directory.conf | default('/etc') }}"
+  db: "{{ autofs_os_directory.db | default('/var/lib/sss/db') }}"
 
 autofs_file:
-  master_file: "{{ autofs_directory.conf }}/auto.master"
+  conf: "{{ autofs_directory.conf }}/autofs.conf"
+  ldap_auth_conf: "{{ autofs_directory.conf }}/autofs_ldap_auth.conf"
+  sasl_credential_cache: "{{ autofs_directory.db }}/ccache"
+  auto_master: "{{ autofs_directory.conf }}/{{ autofs_master_map_name | default('auto.master') }}"

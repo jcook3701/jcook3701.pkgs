@@ -1,10 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# 2. RUNTIME DATA OBJECT INJECTION
-# ====================================================================
-- name: Render optional feature extension profile LDIF
+- name: "Render optional feature {{ current_feature_name }} extension profile LDIF"
   ansible.builtin.template:
     src: "features/{{ current_feature_name }}.ldif.j2"
     dest: "/tmp/feature_chunk_{{ current_feature_name }}.ldif"
@@ -12,7 +9,7 @@
     group: root
     mode: "0600"
 
-- name: Apply optional feature extension online to OpenLDAP data database
+- name: "Apply optional feature extension {{ current_feature_name }} online to OpenLDAP data database"
   ansible.builtin.command: >-
       ldapmodify -c -x -H ldapi:///
       -D "{{ bind_dn }}"
@@ -31,9 +28,6 @@
         or 'modifying entry' in chunk_add_result.stdout | lower)
   become: true
 
-# ====================================================================
-# 3. HOUSEKEEPING CLEANUP
-# ====================================================================
 - name: Clean up feature configuration chunk files
   ansible.builtin.file:
     path: "/tmp/feature_chunk_{{ current_feature_name }}.ldif"
