@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# STEP 1: ROOT CA KEYPAIR & CA SPECIFICATION GENERATION (MASTER ONLY)
-# ====================================================================
 - name: Generate private key for the internal Root Certificate Authority
   community.crypto.openssl_privatekey:
     path: "{{ openldap_tls_ca_key }}"

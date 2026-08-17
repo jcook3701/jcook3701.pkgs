@@ -1,7 +1,7 @@
  # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
- openldap_samba_groups:
+openldap_samba_groups:
   # =========================================================================
   # NATIVE WINDOWS GLOBAL DOMAIN GROUPS (RID Range 512-520) -> type: 2
   # ======================================================================

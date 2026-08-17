@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# STEP 4: SEPARATED LOCAL-HOST SIGNING ENGINE
-# ====================================================================
 - name: Generate signed directory server certificate for the master node locally
   community.crypto.x509_certificate:
     path: "{{ openldap_tls_cert }}"

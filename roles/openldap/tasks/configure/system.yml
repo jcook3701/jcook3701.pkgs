@@ -1,14 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Create LDAP configuration directory
-  ansible.builtin.file:
-    path: "{{ openldap_directory.conf }}"
-    state: directory
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0750"
-
 - name: Deploy client configuration (ldap.conf)
   ansible.builtin.template:
     src: ldap.conf.j2
@@ -16,6 +8,7 @@
     owner: root
     group: root
     mode: "0644"
+  become: true
   notify: Restart openldap service
 
 - name: Ensure OpenLDAP daemon system settings are fully populated
@@ -35,3 +28,4 @@
     label: "Updating Daemon Setting: {{ setting.variable }}"
   notify: Restart openldap service
   become: true
+  when: openldap_node_type in ['master', 'slave']

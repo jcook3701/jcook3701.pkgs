@@ -4,17 +4,27 @@
 # TODO: Maybe -> {{ ansible_date_time.iso8601_basic_short }}
 openldap_timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}"
 
-openldap_user: "openldap"
-openldap_group: "openldap"
+openldap_user: "{{ openldap_os_user | default('openldap') }}"
+openldap_group: "{{ openldap_os_group | default('openldap') }}"
 
 openldap_service: "slapd"
 
-# Place holders for OS-specific variables
-openldap_sysconfig_variable: "SLAPD_SERVICES"
+openldap_sysconfig_variable: "{{ openldap_os_sysconfig_variable | default('SLAPD_SERVICES') }}"
 
-openldap_dep_pkg_names: []
-openldap_pkg_names: []
-openldap_shared_libs: []
+openldap_shared_lib_pkg_names: >-
+  {{
+    _openldap_shared_lib_pkg_names_override
+      | default(openldap_os_shared_lib_pkg_names, true)
+  }}
+
+openldap_pkg_names: >-
+  {{
+    _openldap_pkg_names_override
+      | default((openldap_os_server_pkg_names + openldap_os_client_pkg_names)
+      if openldap_node_type in ['master', 'slave']
+      else openldap_os_client_pkg_names if openldap_node_type == 'client' else []
+    )
+  }}
 
 openldap_directory:
   conf: "{{ openldap_os_directory.conf | default('/etc/ldap') }}"

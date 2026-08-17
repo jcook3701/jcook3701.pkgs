@@ -1,14 +1,22 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Create LDAP configuration directory
+  ansible.builtin.file:
+    path: "{{ openldap_directory.conf }}"
+    state: directory
+    owner: "{{ openldap_user if openldap_node_type in ['master', 'slave'] else 'root' }}"
+    group: "{{ openldap_group if openldap_node_type in ['master', 'slave'] else 'root' }}"
+    mode: "0755"
+  become: true
+
 - name: OpenLDAP Kerberos keytab environment and permission synchronization
   ansible.builtin.include_tasks: keytabs/main.yml
+  when: openldap_node_type in ['master', 'slave']
 
 - name: OpenLDAP key generation
   ansible.builtin.include_tasks: keys/main.yml
-  when:
-    - not openldap_existing_config.stat.exists
-    - openldap_use_tls | bool
+  when: openldap_use_tls | bool
 
 - name: Execute system environment profile configuration setup
   ansible.builtin.include_tasks: system.yml

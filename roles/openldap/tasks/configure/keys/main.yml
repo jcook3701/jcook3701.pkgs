@@ -5,9 +5,10 @@
   ansible.builtin.file:
     path: "{{ openldap_directory.certs }}"
     state: directory
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0700"
+    owner: "{{ openldap_user if openldap_node_type in ['master', 'slave'] else 'root' }}"
+    group: "{{ openldap_group if openldap_node_type in ['master', 'slave'] else 'root' }}"
+    mode: "0755"
+  become: true
 
 - name: Execute formal multi-tier Certificate Authority pipeline
   ansible.builtin.include_tasks: root_ca_cert.yml

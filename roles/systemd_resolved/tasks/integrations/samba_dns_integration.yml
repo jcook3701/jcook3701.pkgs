@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Create systemd-resolved configuration drop-in folder
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/resolved.conf.d
     state: directory
     mode: "0755"
 
 - name: Configure systemd-resolved to disable its local stub listener
-  copy:
+  ansible.builtin.copy:
     dest: /etc/systemd/resolved.conf.d/00-samba-dff.conf
     content: |
       [Resolve]
@@ -17,10 +17,10 @@
   notify: Restart systemd-resolved
 
 - name: Flush handlers to free port 53 immediately
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Configure static host DNS path directly to the local machine
-  copy:
+  ansible.builtin.copy:
     dest: /etc/resolv.conf
     content: |
       nameserver {{ ansible_default_ipv4.address }}

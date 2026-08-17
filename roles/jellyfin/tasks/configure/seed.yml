@@ -70,6 +70,6 @@
     headers:
       X-MediaBrowser-Token: "{{ jellyfin_api_token }}"
     status_code:
-        status_code:
-        - 200
-        - 204
+      status_code:
+      - 200
+      - 204

@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# ====================================================================
-# STEP 3: LOCAL HOST WORKER GENERATION (ALL NODES)
-# ====================================================================
 - name: Generate private key for OpenLDAP server workers
   community.crypto.openssl_privatekey:
     path: "{{ openldap_tls_key }}"

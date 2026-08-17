@@ -6,6 +6,27 @@ OpenLDAP Software is an open source implementation of the Lightweight Directory 
 
 * Online Configuration (OLC)
 
+## Authors Notes
+
+### Roadmap
+
+Look into updating project to utilize **slapd-smbk5pwd** as an option for system password management.
+Currently kerberos is completely separate from ldap server and utilizes its own principal (database)
+to store user keys.
+
+``` shell
+[ User ] ---> ( Changes Password via LDAP )
+                     |
+                     v
+             [ OpenLDAP Server ]
+                     |
+         ( smbk5pwd Overlay Intercepts )
+          /          |          \
+         v           v           v
+  [ Linux Hash ]  [ Samba Hash ]  [ Kerberos Keys ]
+  (SSHA/Argon2)   (NTLM Hash)    (AES/DES Keys)
+```
+
 <!--
 
 Authors Notes:

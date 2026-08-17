@@ -1,40 +1,23 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Generate private key for standalone OpenLDAP workers
-  community.crypto.openssl_privatekey:
-    path: "{{ openldap_tls_key }}"
-    select_crypto_backend: cryptography
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0600"
+- name: Check if a valid public master CA certificate is already present on the disk
+  ansible.builtin.stat:
+    path: "{{ openldap_tls_ca_cert }}"
+  register: _openldap_active_ca_state
+  become: true
 
-- name: Generate Certificate Signing Request (CSR) for local hosts
-  community.crypto.openssl_csr:
-    path: "{{ openldap_tls_csr }}"
-    privatekey_path: "{{ openldap_tls_key }}"
-    select_crypto_backend: cryptography
-    common_name: "{{ ansible_hostname }}.{{ openldap_domain_name }}"
-    subject_alt_name:
-      - "DNS:{{ ansible_fqdn }}"
-      - "DNS:{{ ansible_hostname }}"
-      - "IP:{{ ansible_default_ipv4.address }}"
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0644"
+- name: Execute Standalone Flat Master Key and Certificate Generation Phase
+  ansible.builtin.include_tasks: flat_cert/seed.yml
+  when:
+    - openldap_node_type == 'master'
+    - not _openldap_active_ca_state.stat.exists
 
-- name: Generate standalone flat self-signed directory certificate
-  community.crypto.x509_certificate:
-    path: "{{ openldap_tls_cert }}"
-    csr_path: "{{ openldap_tls_csr }}"
-    privatekey_path: "{{ openldap_tls_key }}"
-    provider: selfsigned
-    select_crypto_backend: cryptography
-    selfsigned_not_after: "+365d"
-    owner: "{{ openldap_user }}"
-    group: "{{ openldap_group }}"
-    mode: "0644"
+- name: Execute Fleet-wide Flat Self-Signed Certificate Distribution Phase
+  ansible.builtin.include_tasks: flat_cert/distribute.yml
 
-- name: Force local CA string verification paths to match native server certificates
-  ansible.builtin.set_fact:
-    openldap_tls_ca_cert: "{{ openldap_tls_cert }}"
+- name: Execute Standalone Flat Certificate Execution Cleanup Phase
+  ansible.builtin.include_tasks: flat_cert/cleanup.yml
+  when:
+    - openldap_node_type in ['master', 'slave']
+    - not _openldap_active_ca_state.stat.exists

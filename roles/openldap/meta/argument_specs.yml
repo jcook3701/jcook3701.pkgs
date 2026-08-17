@@ -14,13 +14,13 @@ argument_specs:
       openldap_state:
         type: "str"
         default: "present"
-        choices: ["present", "absent", "teardown"]
+        choices: ["present", "absent", "teardown", "backup"]
         description: "The targeted operational state of the OpenLDAP server components."
 
       openldap_node_type:
         type: "str"
         default: "master"
-        choices: ["master", "slave"]
+        choices: ["master", "slave", "client"]
         description: "Designates if this instance acts as a write-capable provider (master) or a read-only consumer (slave)."
 
       openldap_admin_servers:

@@ -9,6 +9,7 @@
   become: true
 
 - name: Manage system-wide groups and permissions
+  when: pulseaudio_system_wide
   block:
     - name: Ensure system-wide pulse service user exists
       ansible.builtin.user:
@@ -32,7 +33,6 @@
         mode: "0644"
       become: true
       notify: Reload systemd daemon
-  when: pulseaudio_system_wide
 
 - name: Create PulseAudio configuration directory
   ansible.builtin.file:

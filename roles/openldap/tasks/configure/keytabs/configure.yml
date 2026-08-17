@@ -20,6 +20,8 @@
   when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Configure OpenLDAP environment to read breakout Kerberos keytab path via Systemd (Archlinux)
+  become: true
+  when: ansible_facts['os_family'] == 'Archlinux'
   block:
     - name: Ensure custom Systemd storage drop-in directory exists for OpenLDAP
       ansible.builtin.file:
@@ -38,5 +40,3 @@
         owner: root
         group: root
         mode: "0644"
-  become: true
-  when: ansible_facts['os_family'] == 'Archlinux'

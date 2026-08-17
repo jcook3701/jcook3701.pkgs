@@ -9,12 +9,12 @@
     group: root
     mode: "{{ directory.mode }}"
   loop:
-    - { path: "{{ sssd_directory.conf }}", mode: '0600' }
-    - { path: "{{ sssd_directory.db }}", mode: '0700' }
-    - { path: "{{ sssd_directory.mc }}", mode: '0700' }
-    - { path: "{{ sssd_directory.pipes }}", mode: '0755' }
-    - { path: "{{ sssd_directory.private_pipes }}", mode: '0700' }
-    - { path: "{{ sssd_directory.log }}", mode: '0750' }
+    - { path: "{{ sssd_directory.conf }}", mode: "0600" }
+    - { path: "{{ sssd_directory.db }}", mode: "0700" }
+    - { path: "{{ sssd_directory.mc }}", mode: "0700" }
+    - { path: "{{ sssd_directory.pipes }}", mode: "0755" }
+    - { path: "{{ sssd_directory.private_pipes }}", mode: "0700" }
+    - { path: "{{ sssd_directory.log }}", mode: "0750" }
   loop_control:
     loop_var: directory
     label: "Creating directory: {{ directory.path }}"

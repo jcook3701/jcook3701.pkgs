@@ -5,3 +5,4 @@
   ansible.builtin.service:
     name: "{{ openldap_service }}"
     state: restarted
+  when: openldap_node_type in ['master', 'slave']

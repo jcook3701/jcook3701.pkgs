@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 openldap_state: present
-# Node Role Configuration (Options: master, slave)
+# Node Role Configuration (Options: master, slave, client)
 openldap_node_type: master
 openldap_admin_servers: []
 openldap_slave_servers: []
@@ -107,37 +107,23 @@ openldap_bootstrap_users:
     ssh_public_keys: []
 
 openldap_autofs_mounts:
-  # ============================================================================
-  # 1. Example Top-Level Master Junction Map (Equivalent to auto.master)
-  # ============================================================================
-  - ou: "/media/network_share"
-    objectClass:
-      - "top"
-      - "automountMap"
-    automountMapName: "/media/network_share"
-# ============================================================================
-  # 2. Example Child Storage Target Map Entry (Equivalent to an indirect map line)
-  # ============================================================================
-  - cn: "example_storage"
-    parent_map: "/media/network_share"
-    objectClass:
-      - "top"
-      - "automount"
-    automountKey: "example_storage"
-    automountInformation: "-fstype=nfs,rw,timeout=60,nfsvers=4,proto=tcp,soft example_hostname.{{ openldap_domain_name }}:/media/example_path"
+  - name: "drivers"
+    fstype: "cifs"
+    auth_mode: "krb5"
+    client_mount_parent: "/media/network_share"
 
 openldap_guac_connections:
   - name: "ssh-example-computer"
     protocol: "ssh"
     parent_ou: "ssh"
     parameters:
-      - "hostname=://example.com"
+      - "hostname=example-computer.example.com"
       - "port=22"
       - "color-scheme=white-black"
       - "enable-sftp=true"
       - "sftp-root-directory=/"
     members:
-      - "example"
+      - "example-user"
 
 # Ansible Developer Debugging
 openldap_template_debug: false

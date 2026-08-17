@@ -1,18 +1,18 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-openldap_user: "openldap"
-openldap_group: ldap
+openldap_os_user: "openldap"
+openldap_os_group: ldap
 
-openldap_sysconfig_variable: "SLAPD_URLS"
+openldap_os_sysconfig_variable: "SLAPD_URLS"
 
-openldap_pkg_names:
-  - openldap
-
-openldap_shared_libs:
+openldap_os_shared_lib_pkg_names:
   - perl-net-ldap
   - python-passlib
   - python-ldap
+
+openldap_pkg_names:
+  - openldap
 
 openldap_os_directory:
   conf: "/etc/openldap"
