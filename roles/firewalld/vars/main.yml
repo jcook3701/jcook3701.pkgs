@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-firewalld_service: firewalld
+firewalld_service: "{{ firewalld_os_service | default('firewalld') }}"
 
-firewalld_dep_pkg_names: []
-firewalld_pkg_names: []
+firewalld_dep_pkg_names: "{{ firewalld_os_dep_pkg_names  | default([]) }}"
+firewalld_pkg_names: "{{ firewalld_os_pkg_names | default(['firewalld']) }}"
 
 firewalld_directory:
   conf: "{{ firewalld_os_directory.conf | default('/etc/firewalld') }}"

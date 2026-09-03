@@ -1,4 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-cockpit_service: cockpit.socket
+cockpit_service: "cockpit.service"
+cockpit_socket: "cockpit.socket"
+
+cockpit_pkg_names: >-
+  {{
+    _cockpit_pkg_names_override |
+      default(
+        cockpit_os_server_pkg_names if cockpit_node_type == 'master'
+        else cockpit_os_client_pkg_names if cockpit_node_type == 'client'
+        else []
+      )
+  }}

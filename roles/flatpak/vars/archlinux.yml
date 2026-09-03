@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-flatpak_pkgs:
+flatpak_os_dep_pkg_names: []
+
+flatpak_os_pkg_names:
   - flatpak
   # Note: Arch typically includes Flatpak support in the base gnome-software package
   # or as an optional dependency.

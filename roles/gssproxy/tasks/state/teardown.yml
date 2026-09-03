@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure GSS-Proxy service is stopped and configurations purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Clean up GSS-Proxy main configuration file
+  ansible.builtin.file:
+    path: "{{ gssproxy_file.conf }}"
+    state: "absent"
+  become: true
+
+- name: Remove GSS-Proxy service configuration files
+  ansible.builtin.file:
+    path: "{{ gssproxy_directory.conf }}/{{ service.name }}.conf"
+    state: absent
+  become: true
+  loop: "{{ gssproxy_services | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "Removing file: {{ service.name }}"
+  when:
+    - gssproxy_services is defined
+    - gssproxy_services | length > 0

@@ -2,6 +2,10 @@
 
 [UxPlay](https://github.com/fdh2/uxplay) is a free, open-source AirPlay server that lets you mirror your iPhone, iPad, or Mac screen (with audio) directly to your PC. It turns your computer into an Apple TV-like receiver, making it ideal for presentations, streaming, or watching videos on a larger screen.
 
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+
 <!--
 Authors Notes:
 TODO: Firewall needs to be figured out in future for this and other apps.

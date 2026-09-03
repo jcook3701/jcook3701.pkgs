@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load PAM Utilities OS-specific variables
+  ansible.builtin.include_vars: "{{ pam_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: pam_vars
+    label: "Loading variables file: {{ pam_vars }}"
+
+- name: Ensure PAM is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: pam_state | default('present') == 'present'
+
+- name: Ensure PAM teardown of profiles and configurations
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: pam_state | default('present') in ['uninstall', 'teardown']
+
+- name: Flush handlers to force absolute PAM profile engine synchronization
+  ansible.builtin.meta: flush_handlers

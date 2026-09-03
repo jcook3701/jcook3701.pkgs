@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if Tailscale CLI is installed
+  ansible.builtin.command: which tailscale
+  register: tailscale_cli_check
+  failed_when: false
+  changed_when: false
+
+- name: Force logout from Tailnet (Removes node from Admin Console)
+  ansible.builtin.command: tailscale logout
+  register: tailscale_logout_result
+  when: tailscale_cli_check.rc == 0
+  failed_when:
+    - tailscale_logout_result.rc != 0
+    - ('not logged in' not in tailscale_logout_result.stderr | lower)
+  changed_when: tailscale_logout_result.rc == 0
+  become: true
+
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure Tailscale VPN service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ tailscale_service | default('tailscaled') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (tailscale_service ~ '.service' in ansible_facts.services)
+
+- name: Force deep purge of Tailscale VPN packages
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ tailscale_pkg_names | default(['tailscale']) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete

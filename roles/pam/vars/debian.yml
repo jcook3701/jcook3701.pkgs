@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+pam_os_dep_pkg_names:
+  - libpam-cap
+  - libpam-gnome-keyring
+  - libpam-modules-bin
+  - libpam-pwquality
+  - libpam0g
+
+pam_os_pkg_names:
+  - libpam-runtime
+  - libpam-modules
+  - libpam-systemd
+  - libpam-sss
+  - libpam-fprintd
+  - libpam-duo
+  - libpam-u2f
+  - libpam-yubico
+
+pam_os_directory:
+  path: "/etc/pam.d"
+  shared: "/usr/share"
+  shared_pam: "/usr/share/pam"
+  shared_pam_configs: "/usr/share/pam-configs"

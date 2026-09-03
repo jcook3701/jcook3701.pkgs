@@ -6,22 +6,24 @@
     manager: auto
 
 - name: Load Fail2ban OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ fail2ban_vars }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: fail2ban_vars
+    label: "Loading variables file: {{ fail2ban_vars }}"
 
 - name: Install Fail2ban packages
-  ansible.builtin.include_tasks: install.yml
+  ansible.builtin.include_tasks: state/install.yml
   when: fail2ban_state | default('present') == 'present'
 
 - name: Uninstall Fail2ban packages
-  ansible.builtin.include_tasks: uninstall.yml
+  ansible.builtin.include_tasks: state/uninstall.yml
   when:
     - fail2ban_state | default('present') == 'absent'
     - ansible_facts.packages is defined
     - fail2ban_pkg_names[0] in ansible_facts.packages
 
 - name: Teardown Fail2ban
-  ansible.builtin.include_tasks: teardown.yml
-  when:
-    - fail2ban_state | default('present') == 'teardown'
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: fail2ban_state | default('present') == 'teardown'

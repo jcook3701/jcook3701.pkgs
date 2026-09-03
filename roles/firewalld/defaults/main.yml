@@ -1,8 +1,16 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# Lifecycle execution state for package installation or removal
 firewalld_state: present
 
+# Default operational zone assignment for new system network interfaces
+firewalld_default_zone: public
+
+# Define whether rules should be persistently written to disk (permanent)
+firewalld_permanent: true
+
+# A matrix array defining zones, open services, ports, interfaces, and trusted networks
 firewalld_zones:
   public:
     services:
@@ -11,11 +19,27 @@ firewalld_zones:
       - https
     ports:
       - "8443/tcp"
-    masquerade: "no"
+    masquerade: false
+    sources: []
+    interfaces: []
 
   internal:
     services:
       - dhcp
       - dns
+    ports: []
+    masquerade: false
     sources:
       - "192.168.1.0/24"
+    interfaces: []
+
+# Add user-defined custom service structures to /etc/firewalld/services/
+# Example layout structure:
+# firewalld_custom_services:
+#   - name: "custom-app"
+#     short: "Custom Application"
+#     description: "Inbound port definitions for internal production services"
+#     ports:
+#       - "9000/tcp"
+#       - "9001/udp"
+firewalld_custom_services: []

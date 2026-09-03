@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-flatpak_pkgs:
+flatpak_os_user: "_flatpak"
+flatpak_os_group: "_flatpak"
+
+flatpak_os_dep_pkg_names: []
+
+flatpak_os_pkg_names:
   - flatpak
   - gnome-software-plugin-flatpak

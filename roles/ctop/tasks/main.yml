@@ -1,12 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Install ctop if not present
-  ansible.builtin.include_tasks: install.yml
+- name: Ensure ctop is installed
+  ansible.builtin.include_tasks: state/install.yml
   when: ctop_state | default('present') == 'present'
 
-- name: Uninstall ctop if not present
-  ansible.builtin.file:
-    path: "{{ ctop_file.bin }}"
-    state: absent
-  when: ctop_state | default('present') == 'absent'
+- name: Ensure ctop is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: ctop_state | default('present') in ['absent', 'teardown']

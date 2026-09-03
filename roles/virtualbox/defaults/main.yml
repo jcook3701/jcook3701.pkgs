@@ -1,11 +1,59 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+# Structural installation state ('present' or 'absent' or 'teardown')
 virtualbox_state: present
 
+# Accounts granted rootless or direct access to the virtualbox daemon
+virtualbox_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'virtualbox' system group
+virtualbox_manage_group: true
+
+# -------------------------------------------------------------------------
+# CLI Plugins & Companion Packages
+# -------------------------------------------------------------------------
+virtualbox_install_extension_pack: true
+# -------------------------------------------------------------------------
+# Virtualbox Package Configuration ()
+# -------------------------------------------------------------------------
 virtualbox_selected: "virtualbox_7_1"
 virtualbox_download_url: "https://download.virtualbox.org"
+# -------------------------------------------------------------------------
+# Kernel Module & Compilation Tuning
+# -------------------------------------------------------------------------
+# Automatically compile kernel modules via dkms upon host kernel updates
+virtualbox_enable_dkms: true
 
-# virtualbox_conf:
-#  name: "debian-trixie"
-#  ip: "10.1.0.125"
+# Re-run '/sbin/vboxconfig' if core host kernel modules are missing
+virtualbox_recompile_drivers: true
+
+# -------------------------------------------------------------------------
+# Host Networking & Security Constraints
+# -------------------------------------------------------------------------
+# Restrict Host-Only network allocation boundaries to protect host spaces
+# Refuse initialization if network CIDRs overlap existing physical paths
+virtualbox_manage_net_policy: true
+virtualbox_hostonly_allowed_subnets:
+  - "192.168.56.0/21"
+
+# -------------------------------------------------------------------------
+# System Environment & Default Path Configurations
+# -------------------------------------------------------------------------
+# Change global machine folder to isolate heavy guest VM disk allocation
+virtualbox_default_machine_folder: ""
+# Example: virtualbox_default_machine_folder: "/mnt/fast-storage/virtualbox-vms"
+
+# Headless service settings (If running VirtualBox on an un-headed server node)
+virtualbox_headless_enabled: false
+virtualbox_headless_vrde_port: 3389
+
+# -------------------------------------------------------------------------
+# Extensible Custom Options
+# -------------------------------------------------------------------------
+# Dictionary mapping extra global configuration options via VBoxManage setproperty
+virtualbox_global_properties_custom: {}

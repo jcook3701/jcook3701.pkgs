@@ -3,12 +3,26 @@
 ---
 sssd_state: present
 
+# Additional options that are passed to the Daemon.
+sssd_daemon_opts: "-D -f"
+
+# Where to direct debug output, valid options are 'files', 'journald', 'stderr'.
+sssd_debug_logger: "journald"
+
+# Responder orchestration architecture strategy
+sssd_responder_activation_method: "socket"
+
 # ====================================================================
 # DYNAMIC ENGINE SERVICE LIFECYCLE TOGGLES
 # ====================================================================
+sssd_enable_nss: true
+sssd_enable_pam: true
 sssd_enable_autofs: true
 sssd_enable_ssh: true
 sssd_enable_sudo: true
+sssd_enable_kdc: true
+sssd_enable_pac: false
+sssd_enable_ifp: true
 
 # ====================================================================
 # CORE BACKEND PROVIDER DEFINITIONS
@@ -50,6 +64,9 @@ sssd_ldap_protocol: "ldaps"
 # SSL/TLS Toggle (Switched to false because role uses direct ldaps:// over port 636 natively)
 sssd_ldap_tls: false
 
+# Controls whether the role should actively collect, deploy and manage LDAP TLS certificates
+sssd_manage_ldap_keys: false
+
 # LDAP and Kerberos Server Settings
 sssd_ldap_servers:
   - "ldap-server.{{ sssd_domain_name }}"
@@ -72,6 +89,9 @@ sssd_autofs_debug_level: 10
 sssd_ldap_debug_level: 6
 sssd_sudo_debug_level: 5
 sssd_ssh_debug_level: 5
+sssd_kdc_debug_level: 7
+sssd_pac_debug_level: 7
+sssd_ifp_debug_level: 7
 
 # ====================================================================
 # INDUSTRIAL CRYPTOGRAPHIC ENGINE PATH TRANSPORT PARAMETERS
@@ -100,7 +120,7 @@ sssd_nss_homedir_substring: "/home"
 sssd_ldap_search_timeout: 90
 sssd_ldap_network_timeout: 90
 sssd_timeout: 30
-
+sssd_ifp_users: ['root', 'cockpit']
 # ====================================================================
 # DYNAMIC EXTERNAL APPLICATION OBJECT ATTRIBUTE MAPS
 # ====================================================================

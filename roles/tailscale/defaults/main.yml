@@ -1,8 +1,38 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# Lifecycle execution state for package installation or removal
 tailscale_state: present
+
+# Remote URL targeting the official automated shell installation script
 tailscale_repo_url: https://tailscale.com/install.sh
+
+# The specific UDP port used by Tailscale for peer-to-peer tunnels (default: 41641)
+tailscale_port: 41641
+
+# Extra flags to pass directly to the background service daemon via /etc/default/tailscaled
+tailscale_daemon_extra_flags: ""
+
+# Accept DNS configuration from the tailnet admin console (Set false to prevent Kerberos breaks)
+tailscale_accept_dns: false
+
+# Overrides the automatically discovered system hostname in the admin console dashboard
+tailscale_hostname: ""
+
+# Controls whether this host offers to behave as a full VPN gateway route endpoint
+tailscale_advertise_exit_node: false
+
+# A list of internal private network CIDRs to turn this device into a subnet router
+tailscale_advertise_routes: []
+
+# Pre-authenticated authorization key used to automatically join the node to your Tailnet
 tailscale_auth_key: null
 
-tailscale_is_server: false
+# Custom arbitrary flags passed specifically to the runtime 'tailscale up' execution
+tailscale_up_extra_flags: ""
+
+# Appends security flags to drop local logging telemetry data collections entirely
+tailscale_no_logs: false
+
+# Enables secure, policy-controlled SSH connectivity directly through the encrypted wire mesh layer
+tailscale_enable_ssh: false

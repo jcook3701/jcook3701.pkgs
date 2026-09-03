@@ -6,12 +6,31 @@
     cmd: "kdb5_util dump -b7 {{ dump_file }}"
   vars:
     dump_file: "{{ kerberos_file.replica_datatrans }}"
+  become: true
   register: _master_db_dump
   changed_when: _master_db_dump.rc == 0
   failed_when: >-
     _master_db_dump.rc != 0 or
     'error' in _master_db_dump.stderr | lower or
     'failed' in _master_db_dump.stderr | lower
+  when:
+    - kerberos_node_type == 'master'
+    - kerberos_replica_servers | length > 0
+
+- name: Propagate database dump from master directly to all replica hosts
+  ansible.builtin.command:
+    cmd: "kprop -f {{ kerberos_file.replica_datatrans }} {{ replica_fqdn }}"
+  loop: "{{ kerberos_replica_servers | default([]) }}"
+  loop_control:
+    loop_var: replica_fqdn
+    label: "{{ replica_fqdn }}"
+  become: true
+  register: _master_db_prop
+  changed_when: _master_db_prop.rc == 0
+  failed_when: >-
+    _master_db_prop.rc != 0 or
+    'error' in _master_db_prop.stderr | lower or
+    'failed' in _master_db_prop.stderr | lower
   when:
     - kerberos_node_type == 'master'
     - kerberos_replica_servers | length > 0

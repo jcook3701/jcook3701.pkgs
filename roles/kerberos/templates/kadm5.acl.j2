@@ -18,11 +18,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro kadm5() -%}
+{%- macro kadm5_acl() -%}
 {{ kerberos_admin_user | lower }}@{{ kerberos_realm | upper }} *
 {% for server in kerberos_replica_servers %}
 kiprop/{{ server | lower }}@{{ kerberos_realm | upper }} p
 {% endfor %}
 {%- endmacro -%}
 
-{{- kadm5() -}}
+{{- kadm5_acl() -}}

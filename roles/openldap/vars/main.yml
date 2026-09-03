@@ -19,11 +19,13 @@ openldap_shared_lib_pkg_names: >-
 
 openldap_pkg_names: >-
   {{
-    _openldap_pkg_names_override
-      | default((openldap_os_server_pkg_names + openldap_os_client_pkg_names)
-      if openldap_node_type in ['master', 'slave']
-      else openldap_os_client_pkg_names if openldap_node_type == 'client' else []
-    )
+    _openldap_pkg_names_override |
+      default(
+        (openldap_os_server_pkg_names + openldap_os_client_pkg_names)
+          if openldap_node_type in ['master', 'slave']
+          else openldap_os_client_pkg_names
+          if openldap_node_type == 'client' else []
+        )
   }}
 
 openldap_directory:

@@ -16,13 +16,13 @@ kerberos_all_nodes: >-
       + kerberos_ldap_servers)
       | unique | list }}
 
-kerberos_user: "root"
-kerberos_group: "root"
+kerberos_user: "{{ kerberos_os_user | default('root') }}"
+kerberos_group: "{{ kerberos_os_group | default('root') }}"
 
-kerberos_server_pkgs: []
-kerberos_replica_pkgs: []
-kerberos_client_pkgs: []
-kerberos_shared_libs: []
+kerberos_server_pkgs: "{{ kerberos_os_server_pkgs | default([]) }}"
+kerberos_replica_pkgs: "{{ kerberos_os_replica_pkgs | default([]) }}"
+kerberos_client_pkgs: "{{ kerberos_os_client_pkgs | default([]) }}"
+kerberos_shared_libs: "{{ kerberos_os_shared_libs | default([]) }}"
 
 kerberos_raw_packages: >-
   {% if kerberos_node_type == 'master' %}
@@ -51,6 +51,7 @@ kerberos_services: "{{ kerberos_raw_services | from_yaml }}"
 # Dynamic references mapping directly to loaded OS variables
 kerberos_directory:
   conf: "{{ kerberos_os_directory.conf | default('/etc') }}"
+  conf_d: "{{ kerberos_os_directory.conf_d | default('/etc/krb5.conf.d') }}"
   kdc_conf: "{{ kerberos_os_directory.kdc_conf | default('/etc/krb5kdc') }}"
   log: "{{ kerberos_os_directory.log | default('/var/log/krb5') }}"
   state: "{{ kerberos_os_directory.state | default('/var/lib/krb5kdc') }}"

@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Action state for package installation or removal
+rsyslog_state: "present"
+
+# Architecture deployment target type ('local', 'client', or 'master')
+rsyslog_node_type: "local"
+
+# High-level tracking flags for target configurations (Evaluated only when type is client)
+rsyslog_remote_server_host: "host.example.com"
+rsyslog_remote_server_port: 514
+rsyslog_remote_protocol: "udp"
+
+# System environment permission rules properties
+rsyslog_file_create_mode: "0640"
+rsyslog_dir_create_mode: "0755"
+rsyslog_umask: "0022"
+
+# Pluggable facilities configuration array blueprint
+rsyslog_facility_rules:
+  - { rule: "auth,authpriv.*", target: "{{ rsyslog_directory.log_root ~ '/auth.log' }}" }
+  - { rule: "*.*;auth,authpriv.none", target: "-{{ rsyslog_directory.log_root ~ '/syslog' }}" }
+  - { rule: "cron.*", target: "{{ rsyslog_directory.log_root ~ '/cron.log' }}" }
+  - { rule: "daemon.*", target: "-{{ rsyslog_directory.log_root ~ '/daemon.log' }}" }
+  - { rule: "kern.*", target: "-{{ rsyslog_directory.log_root ~ '/kern.log' }}" }
+  - { rule: "user.*", target: "-{{ rsyslog_directory.log_root ~ '/user.log' }}" }

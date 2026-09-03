@@ -26,11 +26,11 @@ server {{ server }} iburst{% if chrony_enable_nts %} nts{% endif %}
 {% endfor %}
 
 # Drift file location
-driftfile {{ chrony_directory.var_state }}/drift
+driftfile {{ chrony_directory.state }}/drift
 
 {% if chrony_enable_nts -%}
 # Save NTS keys, certificates, and cookies to disk
-ntsdumpdir {{ chrony_directory.var_state }}
+ntsdumpdir {{ chrony_directory._state }}
 {%- endif %}
 
 # Log files location.

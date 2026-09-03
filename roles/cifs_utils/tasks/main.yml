@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load CIFS Utilities OS-specific variables
+  ansible.builtin.include_vars: "{{ cifs_utils_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: cifs_utils_vars
+    label: "Loading variables file: {{ cifs_utils_vars }}"
+
+- name: Ensure CIFS Utilities are installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when:
+    - cifs_utils_state | default('present') == 'present'
+
+- name: Ensure CIFS Utilities are uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - cifs_utils_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - cifs_utils_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown CIFS Utilities, services, packages, and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when:
+    - cifs_utils_state | default('present') == 'teardown'

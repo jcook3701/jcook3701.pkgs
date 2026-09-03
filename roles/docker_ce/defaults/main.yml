@@ -1,7 +1,73 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+# Structural installation state ('present' or 'absent' or 'teardown')
 docker_ce_state: present
 
+# Accounts granted rootless or direct access to the docker daemon socket
 docker_ce_users:
-  - name: "{{ ansible_user }}"
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'docker' system group
+docker_ce_manage_group: true
+
+# -------------------------------------------------------------------------
+# Docker Package Configuration
+# -------------------------------------------------------------------------
+docker_ce_download_url: "https://download.docker.com"
+
+# -------------------------------------------------------------------------
+# CLI Plugins & Companion Packages
+# -------------------------------------------------------------------------
+docker_ce_install_compose: true
+docker_ce_install_buildx: true
+
+# -------------------------------------------------------------------------
+# Docker Daemon Configuration (/etc/docker/daemon.json)
+# -------------------------------------------------------------------------
+# Overarching toggle to manage daemon.json
+docker_ce_manage_config: true
+
+# Target runtime directory where containers, volumes, and images persist
+docker_ce_data_root: "/var/lib/docker"
+
+# Storage driver (e.g., overlay2)
+docker_ce_storage_driver: "overlay2"
+docker_ce_storage_opts: []
+
+# Logging driver and log rotation defaults (defensive log caps)
+docker_ce_log_driver: "json-file"
+docker_ce_log_opts:
+  max-size: "50m"
+  max-file: "3"
+
+# Live restore ensures containers stay alive during daemon restarts/upgrades
+docker_ce_live_restore: true
+
+# Container networking and Bridge Defaults
+docker_ce_iptables: true
+docker_ce_ip_forward: true
+docker_ce_userland_proxy: false
+docker_ce_default_address_pools: []
+# Example default address pool:
+# docker_ce_default_address_pools:
+#   - base: "172.20.0.0/16"
+#     size: 24
+
+# DNS and Network Resolvers
+docker_ce_dns_servers: []
+docker_ce_dns_search: []
+
+# Registry controls and Mirror configurations
+docker_ce_registry_mirrors: []
+docker_ce_insecure_registries: []
+
+# Metrics, OpenTelemetry, and Health Exporters
+docker_ce_metrics_addr: ""
+docker_ce_experimental: false
+
+# Dictionary passthrough for extra/unstructured daemon.json parameters
+docker_ce_config_custom: {}

@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro krb5() -%}
+{%- macro krb5_conf() -%}
 [libdefaults]
     default_realm = {{ kerberos_realm | upper }}
     dns_lookup_realm = {{ kerberos_dns_lookup_realm | lower }}
@@ -57,6 +57,8 @@
     default = FILE:{{ kerberos_file.default_log }}
     kdc = FILE:{{ kerberos_file.kdc_log }}
     admin_server = FILE:{{ kerberos_file.admin_log }}
+
+{# includedir {{ kerberos_directory.conf_d }} #}
 {%- endmacro -%}
 
-{{- krb5() -}}
+{{- krb5_conf() -}}

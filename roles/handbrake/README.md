@@ -2,6 +2,10 @@
 
 [Handbrake](https://handbrake.fr/) HandBrake is a open-source tool, built by volunteers, for converting video from nearly any format to a selection of modern, widely supported codecs.
 
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+
 <!--
 
 # Authors Notes:

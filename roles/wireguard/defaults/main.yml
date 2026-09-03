@@ -2,3 +2,40 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 wireguard_state: present
+
+# The name of the WireGuard interface configuration file (maps to /etc/wireguard/{{ wireguard_interface }}.conf)
+wireguard_interface: wg0
+
+# The local IP address and subnet mask assigned to this host's tunnel interface
+# e.g., "10.0.0.1/24" for a server or "10.0.0.2/24" for a client node
+wireguard_address: ""
+
+# The UDP port WireGuard will listen on for incoming VPN connections (Default standard is 51820)
+wireguard_port: 51820
+
+# The local private key for this node. If null or empty, your tasks can automatically
+# generate a persistent key inside /etc/wireguard/ keys directory.
+wireguard_private_key: null
+
+# System Routing & Firewalls
+# ---------------------------
+# Controls whether to configure IP forwarding on the host system to route traffic between peers
+wireguard_ip_forward: false
+
+# PostUp commands executed when bringing the interface up (often used for iptables NAT routing)
+wireguard_post_up: []
+
+# PostDown commands executed when bringing the interface down
+wireguard_post_down: []
+
+# Peer Configuration Matrix
+# -------------------------
+# A list of dictionary objects representing the remote peers connected to this host
+wireguard_peers: []
+#  - name: "bastion-client"
+#    public_key: "abc123xyz...="
+#    preshared_key: null        # Optional: extra layer of symmetric encryption
+#    allowed_ips:               # Subnets routed through this peer connection
+#      - "10.0.0.2/32"
+#    endpoint: "1.2.3.4:51820"  # Optional: Public IP and port if this peer has a static address
+#    persistent_keepalive: 25   # Optional: Keeps tunnels open through restrictive NAT firewalls

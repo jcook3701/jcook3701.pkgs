@@ -14,6 +14,10 @@ Uninstall **Mutt** email client.
 $ ansible-playbook jcook3701.pkgs.mutt.yml -K -e "mutt_state=absent"
 ```
 
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+
 <!--
 # TODO:
     * Fix up muttrc file to ensure won't fail if missing values.

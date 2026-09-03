@@ -3,6 +3,13 @@
 ---
 jellyfin_state: present
 
+# Accounts granted rootless or direct access to the docker daemon socket
+jellyfin_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'docker' system group
+jellyfin_manage_group: true
+
 jellyfin_port: 8096
 jellyfin_server_name: "localhost"
 jellyfin_ui_language: "en-US"

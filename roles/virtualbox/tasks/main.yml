@@ -1,28 +1,29 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Collect running user facts
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: sudo_user_facts.yml
-  when: sudo_user is not defined
-
-- name: Load Virtualbox OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_os_family | lower }}.yml"
-    - "default.yml"
-
 - name: Gather target host package facts
   ansible.builtin.package_facts:
     manager: auto
 
-- name: VirtualBox Install
-  ansible.builtin.include_tasks: install.yml
+- name: Load Oracle VM Virtualbox OS-specific variables
+  ansible.builtin.include_vars: "{{ virtualbox_vars }}"
+  with_first_found:
+    - "os/{{ ansible_os_family | lower }}.yml"
+  loop_control:
+    loop_var: virtualbox_vars
+    label: "Loading variables file: {{ virtualbox_vars }}"
+
+- name: Install Oracle VM VirtualBox
+  ansible.builtin.include_tasks:  state/install.yml
   when: virtualbox_state | default('present') == 'present'
 
-- name: VirtualBox Uninstall
-  ansible.builtin.include_tasks: uninstall.yml
+- name: Uninstall Oracle VM VirtualBox
+  ansible.builtin.include_tasks: state/uninstall.yml
   when:
     - virtualbox_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
     - virtualbox_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown Oracle VM VirtualBox services, packages, and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: virtualbox_state | default('present') == 'teardown'

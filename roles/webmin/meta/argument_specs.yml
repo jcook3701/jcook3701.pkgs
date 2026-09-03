@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Webmin control panel installation and repository setups."
+    description: "This role downloads the official setup script, configures upstream package repositories, and manages the Webmin package state."
+    author: "Jared Cook"
+    options:
+      webmin_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices:
+          - "present"
+          - "absent"
+        description: "The operational state for Webmin. Set to 'present' to setup repositories and install packages, or 'absent' to cleanly remove them."
+      webmin_repo_url:
+        type: "str"
+        required: false
+        default: "https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repos.sh"
+        description: "The remote URL targeting the official Webmin repository setup script."

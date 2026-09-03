@@ -7,3 +7,7 @@ Setup **Mixxx** repository and install
 ``` shell
 $ ansible-playbook jcook3701.pkgs.mixxx.yml -K
 ```
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

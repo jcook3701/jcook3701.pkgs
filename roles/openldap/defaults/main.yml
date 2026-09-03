@@ -5,7 +5,7 @@ openldap_state: present
 # Node Role Configuration (Options: master, slave, client)
 openldap_node_type: master
 openldap_admin_servers: []
-openldap_slave_servers: []
+openldap_slave_servers: [] # TODO: Use or remove
 
 ## Domain Options ##
 openldap_top_level_domain: "com"

@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Identify Any Installed VirtualBox Extension Packs
+  ansible.builtin.command: "VBoxManage list extpacks"
+  register: vbox_installed_extpacks
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Uninstall Oracle VM VirtualBox Extension Pack
+  ansible.builtin.command: "VBoxManage extpack uninstall 'Oracle VM VirtualBox Extension Pack'"
+  become: true
+  when:
+    - vbox_installed_extpacks.rc == 0
+    - "'Oracle VM VirtualBox Extension Pack' in vbox_installed_extpacks.stdout"
+
+- name: Stop and Disable VirtualBox System Services
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: stopped
+    enabled: false
+  loop:
+    - "vboxdrv"
+    - "vboxballoonctrl-service"
+    - "vboxautostart-service"
+    - "vboxweb-service"
+  loop_control:
+    loop_var: service
+    label: "Stopping service: {{ service }}"
+  become: true
+  failed_when: false
+
+- name: Ensure Virtualbox installation and configurations are purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Unload Residual VirtualBox Host Kernel Modules
+  community.general.modprobe:
+    name: "{{ kernel_module }}"
+    state: absent
+  loop:
+    - "vboxnetadp"
+    - "vboxnetflt"
+    - "vboxdrv"
+  loop_control:
+    loop_var: kernel_module
+    label: "Unloading kernel module: {{ kernel_module }}"
+  become: true
+  failed_when: false
+
+- name: Scrub VirtualBox System Configuration Files and Security Directories
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - "{{ virtualbox_directory.conf }}"
+    - "{{ virtualbox_file.modules_conf }}"
+    - "{{ virtualbox_file.modprobe_conf }}"
+  loop_control:
+    loop_var: file
+    label: "Scrubbing directory/file: {{ file }}"
+  become: true
+
+- name: Decommission Oracle VM VirtualBox Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ virtualbox_repo_id }}"
+    repo_add_name: "{{ virtualbox_repo_name }}"
+    repo_add_state: "absent"
+  when:
+    - virtualbox_repo_id is defined
+    - virtualbox_repo_id | length > 0
+    - ansible_os_family in ['Debian', 'RedHat']

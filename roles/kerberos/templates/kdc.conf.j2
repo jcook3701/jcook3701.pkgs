@@ -18,12 +18,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
+{%- macro kdc_realm_properties() -%}
 {#
   Macro: kdc_realm_properties
   Purpose: Compiles the backend database parameters, security rules, and real-time
            incremental database replication settings for the local directory partition.
 #}
-{%- macro kdc_realm_properties() -%}
 # Core Database Engine Paths
 database_name = {{ kerberos_file.principal }}
 admin_keytab = {{ kerberos_keytabs.kdc_admin }}
@@ -57,12 +57,12 @@ iprop_master_ulog_spec = file:{{ kerberos_file.principal_ulog }}
 {%- endmacro -%}
 
 
+{%- macro kdc_config() -%}
 {#
-  Macro: kdc_global_config
+  Macro: kdc_config
   Purpose: Builds the root structural layout blocks for the MIT KDC engine, including
            global port configurations and nested realm database blocks.
 #}
-{%- macro kdc_global_config() -%}
 [kdcdefaults]
     kdc_ports = {{ kerberos_port }}
     kdc_tcp_ports = {{ kerberos_port }}
@@ -77,4 +77,4 @@ iprop_master_ulog_spec = file:{{ kerberos_file.principal_ulog }}
     admin_server = FILE:{{ kerberos_file.admin_log }}
 {%- endmacro -%}
 
-{{- kdc_global_config() -}}
+{{- kdc_config() -}}

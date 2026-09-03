@@ -12,8 +12,8 @@
   loop_control:
     loop_var: nfs_server_fqdn
     label: "Purging master NFS transit scratch file -> nfs/{{ nfs_server_fqdn }}"
-  when: kerberos_node_type == 'master'
   become: true
+  when: kerberos_node_type == 'master'
 
 - name: Clean up local controller staging NFS keytab cache
   ansible.builtin.file:

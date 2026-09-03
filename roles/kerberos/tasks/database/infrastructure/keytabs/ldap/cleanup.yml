@@ -12,8 +12,8 @@
   loop_control:
     loop_var: ldap_server_fqdn
     label: "Purging master LDAP transit scratch file -> ldap/{{ ldap_server_fqdn }}"
-  when: kerberos_node_type == 'master'
   become: true
+  when: kerberos_node_type == 'master'
 
 - name: Clean up local controller staging LDAP keytab cache
   ansible.builtin.file:

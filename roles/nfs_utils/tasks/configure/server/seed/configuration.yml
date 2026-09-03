@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure server snippet export directories exist
+  ansible.builtin.file:
+    path: "{{ nfs_utils_directory.exports_d }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Deploy NFS master exports configuration template
+  ansible.builtin.template:
+    src: "exports.j2"
+    dest: "{{ nfs_utils_file.exports }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Restart nfs server service
+
+- name: Deploy client-side NFS upcall request-key configuration
+  ansible.builtin.template:
+    src: "nfs.idmap.conf.j2"
+    dest: "{{ nfs_utils_file.nfs_idmap_conf }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  # Only deploy if running in native mode; gssproxy overrides this logic later
+  when: not nfs_utils_use_gssproxy | bool

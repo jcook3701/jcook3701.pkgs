@@ -1,0 +1,85 @@
+{#
+# daemon.json.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro daemon_json() -%}
+{%- set daemon_config = {} -%}
+
+{# 1. MAP CORE STORAGE AND INFRASTRUCTURE PATHS #}
+{%- set _ = daemon_config.update({
+  'data-root': docker_ce_data_root | string,
+  'storage-driver': docker_ce_storage_driver | string
+}) -%}
+
+{# 2. CONSTRUCT DEFENSIVE ROTATIONAL LOGGING PROFILE #}
+{%- if docker_ce_log_driver is defined and docker_ce_log_driver | length > 0 -%}
+  {%- set _ = daemon_config.update({
+    'log-driver': docker_ce_log_driver | string,
+    'log-opts': docker_ce_log_opts | default({})
+  }) -%}
+{%- endif -%}
+
+{# 3. MAP KERNEL NETWORK AND TRANSLATION AGENTS #}
+{%- set _ = daemon_config.update({
+  'iptables': docker_ce_iptables | bool,
+  'ip-forward': docker_ce_ip_forward | bool,
+  'userland-proxy': docker_ce_userland_proxy | bool,
+  'live-restore': docker_ce_live_restore | bool
+}) -%}
+
+{# 4. MAP SYSTEM RECONCILIATION NETWORK MATRICES IF DEFINED #}
+{%- if docker_ce_default_address_pools is defined and docker_ce_default_address_pools | length > 0 -%}
+  {%- set _ = daemon_config.update({'default-address-pools': docker_ce_default_address_pools}) -%}-
+{%- endif -%}
+
+{%- if docker_ce_dns_servers is defined and docker_ce_dns_servers | length > 0 -%}
+  {%- set _ = daemon_config.update({'dns': docker_ce_dns_servers}) -%}
+{%- endif -%}
+
+{%- if docker_ce_dns_search is defined and docker_ce_dns_search | length > 0 -%}
+  {%- set _ = daemon_config.update({'dns-search': docker_ce_dns_search}) -%}
+{%- endif -%}
+
+{# 5. INTEGRATE DISTRIBUTED REGISTRY ACCESS OVERRIDES #}
+{%- if docker_ce_registry_mirrors is defined and docker_ce_registry_mirrors | length > 0 -%}
+  {%- set _ = daemon_config.update({'registry-mirrors': docker_ce_registry_mirrors}) -%}
+{%- endif -%}
+
+{%- if docker_ce_insecure_registries is defined and docker_ce_insecure_registries | length > 0 -%}
+  {%- set _ = daemon_config.update({'insecure-registries': docker_ce_insecure_registries}) -%}
+{%- endif -%}
+
+{# 6. ATTACH PERFORMANCE MONITORING EXPORTERS #}
+{%- if docker_ce_metrics_addr is defined and docker_ce_metrics_addr | length > 0 -%}
+  {%- set _ = daemon_config.update({
+    'metrics-addr': docker_ce_metrics_addr | string,
+    'experimental': docker_ce_experimental | bool
+  }) -%}
+{%- endif -%}
+
+{# 7. MERGE ARBITRARY RUNTIME DICTIONARY HOOKS PASSED BY CONSUMER #}
+{%- if docker_ce_config_custom is defined and docker_ce_config_custom is mapping -%}
+  {%- set daemon_config = daemon_config | combine(docker_ce_config_custom, recursive=True) -%}
+{%- endif -%}
+
+{# 8. OUTPUT CLEAN ENTRIES #}
+{{ daemon_config | to_nice_json(indent=2) }}
+{%- endmacro -%}
+
+{{- daemon_json() }}

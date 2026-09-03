@@ -1,13 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-firewalld_service: firewalld
+firewalld_os_service: "firewalld"
 
-firewalld_dep_pkg_names:
-  - python3-firewalld
+firewalld_os_dep_pkg_names:
+  - "python3-firewalld"
 
-firewalld_pkg_names:
-  - firewalld
+firewalld_os_pkg_names:
+  - "firewalld"
+  - "firewalld-tests"
 
 firewalld_os_directory:
   conf: "/etc/firewalld"

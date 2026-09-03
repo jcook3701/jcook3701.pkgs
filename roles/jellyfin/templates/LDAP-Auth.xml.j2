@@ -18,6 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
+{%- macro jellyfin_ldap_auth() -%}
 <?xml version="1.0" encoding="utf-8"?>
 <LdapAuthenticationConfiguration xmlns:xsi="http://w3.org" xmlns:xsd="http://w3.org">
   <Server>{{ jellyfin_ldap_server }}</Server>
@@ -35,3 +36,6 @@
   <AdminFilter>{{ jellyfin_ldap_admin_filter | default('') }}</AdminFilter>
   <IsEnabled>true</IsEnabled>
 </LdapAuthenticationConfiguration>
+{%- endmacro -%}
+
+{{- jellyfin_ldap_auth() }}

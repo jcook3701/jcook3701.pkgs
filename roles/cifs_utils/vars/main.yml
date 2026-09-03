@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+cifs_utils_dep_pkg_names: "{{ cifs_utils_os_dep_pkg_names | default([]) }}"
+cifs_utils_pkg_names: "{{ cifs_utils_os_pkg_names | default([]) }}"
+
+cifs_utils_directory:
+  bin: "{{ cifs_utils_os_directory.bin | default('/usr/sbin') }}"
+  request_key: "{{ cifs_utils_os_directory.request_key | default('/etc') }}"
+  request_key_d: "{{ cifs_utils_os_directory.request_key_d | default('/etc/request-key.d') }}"
+  gssproxy_socket: "{{ cifs_utils_os_directory.gssproxy_socket | default('/var/lib/gssproxy') }}"
+
+cifs_utils_file:
+  request_key_conf: "{{ cifs_utils_directory.request_key }}/request-key.conf"
+  spnego_upcall_conf: "{{ cifs_utils_directory.request_key_d }}/cifs.spnego.conf"
+
+cifs_utils_command:
+  upcall: "{{ cifs_utils_directory.bin }}/cifs.upcall"
+
+cifs_utils_socket:
+  gssproxy_socket: "{{ cifs_utils_gssproxy_socket | default(cifs_utils_directory.gssproxy_socket ~ '/cifs.sock') }}"
+
+# Dynamic flag resolution driven entirely by user selection of the gssproxy toggle
+cifs_utils_request_key_command_flags: >-
+  {{ '-t' if cifs_utils_use_gssproxy | bool else '' }}

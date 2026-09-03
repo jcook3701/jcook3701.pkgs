@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Write custom service definition template cleanly to disk
+  ansible.builtin.template:
+    src: "custom_service.xml.j2"
+    dest: "{{ firewalld_directory.services }}/{{ custom_service.name }}.xml"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    service_name: "{{ custom_service.name }}"
+    service_short: "{{ custom_service.short | default(custom_service.name) }}"
+    service_desc: "{{ custom_service.description | default('Custom service deployed by Ansible configuration pipelines') }}"
+    service_ports: "{{ custom_service.ports | default([]) }}"
+  when: custom_service.name not in firewalld_native_services
+  register: service_template_result
+  become: true
+
+- name: Instantly enable the newly generated service definition
+  ansible.posix.firewalld:
+    service: "{{ custom_service.name }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true

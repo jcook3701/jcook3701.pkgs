@@ -14,6 +14,10 @@ Uninstall **Rollo Driver** package from vender website.
 $ ansible-playbook jcook3701.pkgs.rollo.yml -K -e "rollo_state=absent"
 ```
 
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+
 <!--
 # TODO:
 - name: Discover the dynamic physical USB device node for Rollo hardware

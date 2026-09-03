@@ -1,10 +1,21 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-cockpit_pkg_names:
+cockpit_os_user:
+cockpit_os_group:
+
+cockpit_os_server_pkg_names:
   - cockpit
-  - cockpit-storaged
+  - cockpit-bridge
+  - cockpit-machines
   - cockpit-networkmanager
   - cockpit-packagekit
+  - cockpit-pcp
   - cockpit-podman
-  - cockpit-machines
+  - cockpit-storaged
+  - cockpit-sosreport
+
+cockpit_os_client_pkg_names:
+  - cockpit-ws
+  - cockpit-system
+  - cockpit-bridge

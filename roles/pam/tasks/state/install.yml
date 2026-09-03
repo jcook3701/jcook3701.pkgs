@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure PAM package and dependencies are installed
+  ansible.builtin.package:
+    name: >-
+      {{ pam_pkg_names | default([])
+          + pam_dep_pkg_names | default([]) }}
+    state: present
+  become: true
+
+- name: Ensure PAM is configured
+  ansible.builtin.include_tasks: configure/main.yml

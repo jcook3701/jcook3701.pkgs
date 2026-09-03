@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure Firewalld service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ firewalld_service | default('firewalld') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (firewalld_service ~ '.service' in ansible_facts.services)
+
+- name: Force deep purge of Firewalld package and dependencies
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ firewalld_pkg_names | default(['firewalld']) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete

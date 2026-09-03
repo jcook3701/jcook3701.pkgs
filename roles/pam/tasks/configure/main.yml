@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute PAM session configuration seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Execute native OS authentication profile activation tasks
+  ansible.builtin.include_tasks: "02_profile.yml"

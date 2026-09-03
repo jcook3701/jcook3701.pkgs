@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-kerberos_user: "krb5kdc"
-kerberos_group: "krb5kdc"
+kerberos_os_user: "krb5kdc"
+kerberos_os_group: "krb5kdc"
 
 kerberos_sssd_group: "sssd"
 kerberos_sssd_service: "sssd"
@@ -21,17 +21,18 @@ kerberos_http_group: "www-data"
 kerberos_http_service: "nginx"
 
 # Native APT Package Implementations (Unified MIT Kerberos Ecosystem)
-kerberos_server_pkgs:
+kerberos_os_server_pkgs:
   - krb5-kdc
   - krb5-admin-server
-kerberos_replica_pkgs:
+kerberos_os_replica_pkgs:
   - krb5-kdc
   - krb5-kpropd
-kerberos_client_pkgs:
+kerberos_os_client_pkgs:
   - krb5-user
 
 # Python Context Extensions (Debian Linux Native naming schema)
-kerberos_shared_libs:
+kerberos_os_shared_libs:
+  - libkrb5-3
   - python3-kerberos
   - python3-gssapi
   - python3-passlib
@@ -46,6 +47,7 @@ kerberos_kprop_service: "krb5-kpropd"
 # Filesystem Directory Layout Structural Specifications
 kerberos_os_directory:
   conf: "/etc"
+  conf_d: "/etc/krb5.conf.d"
   kdc_conf: "/etc/krb5kdc"
   log: "/var/log/krb5"
   state: "/var/lib/krb5kdc"

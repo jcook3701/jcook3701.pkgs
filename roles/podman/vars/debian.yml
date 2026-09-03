@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+podman_os_dep_pkg_names: []
+  # - podman-toolbox
+  # - podman-docker
+
+podman_os_pkg_names:
+  - podman
+
+podman_os_system_directory:
+  conf: "/etc/containers"
+  conf_dropdowns: "/etc/containers/containers.conf.d"
+  storage: "/var/lib/containers/storage"
+  cache: "/var/cache/containers"
+  registries_d: "/etc/containers/registries.d"
+  systemd_units: "/etc/systemd/system"
+
+podman_os_user_directory:
+  conf: "~/.config/containers"
+  conf_dropdowns: "~/.config/containers/containers.conf.d"
+  storage: "~/.local/share/containers/storage"
+  cache: "~/.cache/containers"
+  runtime_tmp: "/run/user/{{ ansible_user_uid }}/containers"
+  systemd_units: "~/.config/systemd/user"

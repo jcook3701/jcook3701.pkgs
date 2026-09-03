@@ -37,3 +37,4 @@ dependencies: []
 
 collections:
   - community.general
+  - jcook3701.utils

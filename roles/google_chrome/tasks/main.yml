@@ -2,9 +2,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Load Google Chrome OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ google_chrome_vars }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: google_chrome_vars
+    label: "Including variables from: {{ google_chrome_vars }}"
 
 - name: Google Chrome Install
   ansible.builtin.include_tasks: install.yml
@@ -12,6 +15,4 @@
 
 - name: Uninstall Google Chrome
   ansible.builtin.include_tasks: uninstall.yml
-  when:
-    - google_chrome_state | default('present') == 'absent'
-    - google_chrome_pkg_names[0] in ansible_facts.packages
+  when: google_chrome_state | default('present') in ['absent', 'teardown']

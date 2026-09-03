@@ -23,10 +23,11 @@
 <autofs_ldap_sasl_conf
     usetls="{{ autofs_sasl_usetls | default('no') | trim }}"
     tlsrequired="{{ autofs_sasl_tlsrequired | default('no') | trim }}"
-    authrequired="{{ autofs_sasl_authrequired | default('yes') | trim }}"
+    authrequired="{{ autofs_sasl_authrequired | default('no') | trim }}"
     authmechanism="{{ autofs_sasl_authmechanism | default('GSSAPI') | trim }}"
-    credentialcache="{{ autofs_file.sasl_credential_cache | trim }}"
 />
 {%- endmacro -%}
 
 {{- autofs_ldap_auth_conf() }}
+
+{# credentialcache="{{ autofs_file.sasl_credential_cache | trim }}" #}

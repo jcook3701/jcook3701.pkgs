@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# Lifecycle execution state for package installation or removal
 ctop_state: present
 
-ctop_url: https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-amd64
+# The target deployment version for the ctop binary
+ctop_version: "0.7.7"
+
+# Base repository endpoint for release asset lookups
+ctop_base_bin_url: "https://github.com/bcicen/ctop/releases/download/v{{ ctop_version }}"

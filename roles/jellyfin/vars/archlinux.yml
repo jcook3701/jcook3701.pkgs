@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-jellyfin_pkg_names:
+jellyfin_os_pkg_names:
   - jellyfin-server
   - jellyfin-web
 

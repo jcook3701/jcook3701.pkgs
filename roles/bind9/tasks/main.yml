@@ -23,5 +23,4 @@
 
 - name: Teardown Bind9
   ansible.builtin.include_tasks: teardown.yml
-  when:
-    - bind9_state | default('present') == 'teardown'
+  when: bind9_state | default('present') == 'teardown'

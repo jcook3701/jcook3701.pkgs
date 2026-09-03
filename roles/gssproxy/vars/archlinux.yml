@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+gssproxy_os_service: "gssproxy"
+
+gssproxy_os_dep_pkg_names:
+  - keyutils
+  - cifs-utils
+
+gssproxy_os_pkg_names:
+  - gssproxy
+
+gssproxy_os_directory:
+  bin: "/usr/sbin"
+  conf: "/etc/gssproxy"
+  request_key: "/etc"
+  request_key_d: "/etc/request-key.d"

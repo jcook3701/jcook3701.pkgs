@@ -124,9 +124,11 @@ kerberos_ldap_schema_source: >-
     'files/schemas/mit-kerberos.ldif' if kerberos_implementation == 'mit' else
     'files/schemas/heimdal-kerberos.ldif'
   }}
-
-
 ```
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
 
 <!--
 # Authors Notes Semi-Hidden:

@@ -15,3 +15,7 @@ Testing **zone** files with the following:
 ``` shell
 $ sudo named-checkzone example.com /etc/bind/zones/db.example.zone
 ```
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

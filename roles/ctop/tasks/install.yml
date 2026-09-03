@@ -1,8 +1,0 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
----
-- name: Install Ctop in /usr/local/bin
-  ansible.builtin.get_url:
-    url: "{{ ctop_url }}"
-    dest: "{{ ctop_file.bin }}"
-    mode: "0755"

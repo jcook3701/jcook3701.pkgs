@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure WireGuard interface service unit is enabled and running
+  ansible.builtin.systemd:
+    name: "{{ wireguard_service | default('wg-quick@' ~ wireguard_interface) }}"
+    state: "{{ wireguard_config_template.changed | ternary('restarted', 'started') }}"
+    enabled: true
+  become: true
+  when: (wireguard_service ~ '.service' in ansible_facts.services)

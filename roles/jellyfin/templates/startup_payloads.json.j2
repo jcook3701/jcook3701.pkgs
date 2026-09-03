@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{% macro build_startup_json(type) %}
+{%- macro build_startup_json(type) -%}
 {#
     Pure Workstation Client-Side Kerberos Layer Configuration. Establishes default
     global protocol standards for outbound mounting requests without hosting services.
@@ -43,6 +43,6 @@
   }
 } %}
 {{ switch[type] | to_json }}
-{% endmacro %}
+{%- endmacro -%}
 
-{{ build_startup_json(payload_type) }}
+{{- build_startup_json(payload_type) }}

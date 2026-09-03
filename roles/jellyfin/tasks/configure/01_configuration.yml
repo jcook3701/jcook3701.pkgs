@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Optional TODO: Setup override file.
+
+- name: Deploy default Jellyfin configuration settings file
+  ansible.builtin.template:
+    src: jellyfin.j2
+    dest: "{{ jellyfin_file.default | default('/var/default/jellyfin') }}"
+    owner: "{{ jellyfin_user | default('jellyfin') }}"
+    group: "{{ jellyfin_group | default('jellyfin') }}"
+    mode: "0644"
+  notify: Restart Jellyfin

@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Wireguard package and dependencies.
+  ansible.builtin.package:
+    name: "{{ wireguard_dep_pkg_names | default([])
+              + wireguard_pkg_names | default(['wireguard']) }}"
+    state: present
+  become: true
+
+- name: Ensure Wireguard VPN is configured
+  ansible.builtin.include_tasks: configure/main.yml

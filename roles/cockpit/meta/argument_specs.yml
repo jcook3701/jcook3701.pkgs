@@ -13,3 +13,9 @@ argument_specs:
         default: "present"
         choices: ["present", "absent", "teardown"]
         description: "The desired state of the Cockpit service and package."
+      cockpit_node_type:
+        type: "str"
+        required: false
+        default: "client"
+        choices: ["master", "client"]
+        description: "Controls the operational profile of the Cockpit deployment layout. Set to 'master' to deploy dashboard routing layers or 'client' for isolated endpoints."

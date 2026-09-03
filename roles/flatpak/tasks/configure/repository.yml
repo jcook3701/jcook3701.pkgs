@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Add flathub remote repositories that do not exist
+  ansible.builtin.command:
+    cmd: flatpak remote-add --if-not-exists {{ repo.name }} {{ repo.url }}
+  loop: "{{ flatpak_repos | default([]) }}"
+  loop_control:
+    loop_var: repo
+    label: "Adding repository: {{ repo.name }}"
+  when:
+    - repo.name is defined
+    - repo.name | length > 0

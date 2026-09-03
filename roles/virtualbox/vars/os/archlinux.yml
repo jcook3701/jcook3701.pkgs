@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Package Core Mappings (Arch relies on native dkms companion modules)
+virtualbox_os_user: "vboxusers"
+virtualbox_os_group: "vboxusers"
+virtualbox_os_dep_pkg_names:
+  - "linux-headers"
+virtualbox_os_pkg_names:
+  - "virtualbox"
+  - "virtualbox-host-dkms"
+
+# Internal Filesystem Layout
+virtualbox_os_directory:
+  bin: "/bin"
+
+# Repository Configuration for jcook3701.utils.repo_add
+# (Left empty so repo_add skips rendering external sheets on Arch)
+virtualbox_repo_id: "virtualbox"
+virtualbox_repo_name: "Arch Linux Core Repositories"

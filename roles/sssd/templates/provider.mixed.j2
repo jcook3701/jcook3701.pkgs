@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{% import 'provider.ldap_common.j2' as ldap_common_provider with context %}
+{%- import 'provider.ldap_common.j2' as ldap_common_provider with context -%}
 
 {%- macro create() -%}
 {#
@@ -69,7 +69,7 @@ cache_credentials = {{ sssd_cache_credentials | string | lower }}
 krb5_store_password_if_offline = {{ sssd_krb5_store_password_if_offline | string | lower }}
 ldap_sasl_authid = host/{{ ansible_fqdn }}@{{ sssd_krb5_realm | upper | trim }}
 ldap_krb5_keytab = {{ sssd_file.keytab | trim }}
-krb5_ccname_template = FILE:%d/krb5cc_%U
+krb5_ccname_template = KCM:%U:0
 
 {{- ldap_common_provider.create() }}
 {%- endmacro -%}

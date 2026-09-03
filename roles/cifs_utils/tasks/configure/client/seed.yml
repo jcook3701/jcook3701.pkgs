@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Comment out conflicting cifs.spnego rule in request-key.conf
+  ansible.builtin.lineinfile:
+    path: "{{ cifs_utils_file.request_key_conf }}"
+    regexp: '^(create\s+cifs\.spnego\s+.*\/usr\/sbin\/cifs\.upcall\s+-c\s+%k)'
+    line: '# \1'
+    backrefs: yes
+    state: present
+  become: true
+
+- name: Configure Linux kernel SPNEGO request key upcall template
+  ansible.builtin.template:
+    src: "cifs.spnego.conf.j2"
+    dest: "{{ cifs_utils_file.spnego_upcall_conf }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true

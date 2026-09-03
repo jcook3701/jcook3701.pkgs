@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify VirtualBox kernel module is actively loaded
+  community.general.modprobe:
+    name: "vboxdrv"
+    state: "present"
+  become: true
+  failed_when: false
+  register: vbox_modprobe_result
+
+- name: Recompile and load VirtualBox kernel modules via vboxconfig fallback
+  ansible.builtin.command: "{{ virtualbox_command.vboxconfig }}"
+  become: true
+  when:
+    - virtualbox_recompile_drivers | default(true) | bool
+    - vbox_modprobe_result.rc is defined
+    - vbox_modprobe_result.rc != 0

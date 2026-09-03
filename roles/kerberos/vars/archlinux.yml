@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-kerberos_user: "root"
-kerberos_group: "root"
+kerberos_os_user: "root"
+kerberos_os_group: "root"
+
 kerberos_sssd_group: "sssd"
 kerberos_sssd_service: "sssd"
 kerberos_nscd_service: "nscd"
@@ -19,15 +20,15 @@ kerberos_http_group: "http"
 kerberos_http_service: "nginx"
 
 # Native Pacman Package Implementations (Unified MIT Kerberos Ecosystem)
-kerberos_server_pkgs:
+kerberos_os_server_pkgs:
   - krb5
-kerberos_replica_pkgs:
+kerberos_os_replica_pkgs:
   - krb5
-kerberos_client_pkgs:
+kerberos_os_client_pkgs:
   - krb5
 
 # Python Context Extensions (Arch Linux Native naming schema)
-kerberos_shared_libs:
+kerberos_os_shared_libs:
   - python-kerberos
   - python-gssapi
   - python-passlib

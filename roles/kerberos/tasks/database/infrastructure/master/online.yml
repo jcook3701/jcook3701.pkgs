@@ -5,10 +5,12 @@
   ansible.builtin.service:
     name: "{{ kerberos_kdc_service }}"
     state: started
+  become: true
   when: kerberos_node_type == 'master'
 
 - name: Ensure Master Administration server is running before propagation
   ansible.builtin.service:
     name: "{{ kerberos_admin_service }}"
     state: started
+  become: true
   when: kerberos_node_type == 'master'

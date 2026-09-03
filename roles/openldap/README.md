@@ -27,6 +27,16 @@ to store user keys.
   (SSHA/Argon2)   (NTLM Hash)    (AES/DES Keys)
 ```
 
+ldif schemas:
+
+1. PKINIT (Public Key Cryptography for Initial Authentication in Kerberos)
+
+2. l
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+
 <!--
 
 Authors Notes:

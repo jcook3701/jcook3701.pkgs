@@ -52,7 +52,7 @@ changetype: add
 objectClass: top
 objectClass: automount
 automountKey: {{ share.client_mount_parent }}
-automountInformation: automountMapName={{ sub_map_name }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+automountInformation: {{ sub_map_name | trim }}
 cn: {{ share.client_mount_parent | basename }}
 
   {%- endif %}
@@ -62,10 +62,12 @@ cn: {{ share.client_mount_parent | basename }}
 # 4. DYNAMIC AUTOMOUNT CONNECTION RULES LOOP (Resolving Server Context Natively)
 {% for share in openldap_autofs_mounts | default([]) %}
   {%- set sub_map_name = 'auto.' ~ (share.client_mount_parent | basename) %}
-  {#- The OpenLDAP role natively calculates the exact host FQDN running the services #}
-  {%- set server_host = openldap_samba_domain_fqdn | default(ansible_fqdn) %}
-  {%- set mnt_info = '-fstype=' ~ share.fstype ~ ',sec=' ~ share.auth_mode ~ ',vers=3.11' %}
-  {%- set mnt_path = '//' ~ server_host ~ '/' ~ share.name %}
+  {%- set mnt_path = '//' ~ share.src ~ '/' ~ share.name %}
+  {%- if share.fstype | default('cifs') == 'nfs' %}
+    {%- set mnt_info = '-fstype=nfs,sync,sec=' ~ (share.auth_mode | default('krb5p')) ~ ',noatime' %}
+  {%- else %}
+    {%- set mnt_info = '-fstype=cifs,sec=' ~ (share.auth_mode | default('krb5')) ~ ',multiuser,vers=3.11' %}
+  {%- endif %}
 dn: automountKey={{ share.name }},automountMapName={{ sub_map_name }},ou={{ openldap_automount_ou | default('AutoMount') | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
 changetype: add
 objectClass: top

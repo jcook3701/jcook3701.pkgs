@@ -12,6 +12,10 @@
   loop_control:
     loop_var: mount
     label: "Mount -> {{ mount.name | default('default') }}"
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool
 
 - name: Securely generate credentials files for mounts
   ansible.builtin.copy:
@@ -30,7 +34,10 @@
   loop_control:
     loop_var: mount
     label: "Mount -> {{ mount.name | default('default') }}"
-  when: samba_client_enable_mounts | bool
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool
 
 - name: Bind remote shares to filesystem table natively
   ansible.posix.mount:
@@ -53,4 +60,7 @@
   loop_control:
     loop_var: mount
     label: "Mount -> {{ mount.name | default('default') }}"
-  when: samba_client_enable_mounts | bool
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool

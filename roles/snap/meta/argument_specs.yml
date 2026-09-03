@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Snap package ecosystem installation, configurations, and services."
+    description: "This role sets up the snapd daemon, manages platform-specific classic snap symlinks, and configures core paths across Ubuntu, Red Hat, and Arch systems."
+    author: "Jared Cook"
+    options:
+      snap_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices:
+          - "present"
+          - "absent"
+        description: "The lifecycle execution state for the Snap package engine and core utilities. Use 'present' to install and configure Snap, or 'absent' to cleanly remove it."

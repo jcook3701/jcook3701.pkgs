@@ -1,16 +1,28 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-jellyfin_service: jellyfin
+# Service Settings
+jellyfin_user: "{{ jellyfin_os_user | default('jellyfin') }}"
+jellyfin_group: "{{ jellyfin_os_group | default('jellyfin') }}"
+jellyfin_service: "{{ jellyfin_os_service | default('jellyfin') }}"
 
-jellyfin_pkg_names:
-  - jellyfin
-
-# Repository Specifics
-jellyfin_repo_id: "jellyfin"
-jellyfin_repo_name: "Jellyfin Media Server"
+jellyfin_dep_pkg_names: "{{ jellyfin_os_dep_pkg_names | default([]) }}"
+jellyfin_pkg_names: "{{ jellyfin_os_pkg_names | default(['jellyfin']) }}"
 
 jellyfin_directory:
   conf: "{{ jellyfin_os_directory.conf | default('/etc/jellyfin') }}"
+  cache: "{{ jellyfin_os_directory.cache | default('/var/cache/jellyfin') }}"
   data: "{{ jellyfin_os_directory.data | default('/var/lib/jellyfin') }}"
-  plugin: "{{ jellyfin_os_directory.plugin | default('/var/lib/jellyfin/plugins') }}"
+  default: "{{ jellyfin_os_directory.default | default('/var/default') }}"
+  log: "{{ jellyfin_os_directory.log | default('/var/log/jellyfin') }}"
+  override: "{{ jellyfin_directory.override  | default('/etc/systemd/system/jellyfin.service.d') }}"
+  plugins: "{{ jellyfin_os_directory.plugin | default('/var/lib/jellyfin/plugins') }}"
+
+jellyfin_file:
+  default: "{{ jellyfin_directory.default ~ '/jellyfin' | default('/var/default/jellyfin') }}"
+  override: "{{ jellyfin_directory.override ~ '/jellyfin.service.conf'
+                  | default('/etc/systemd/system/jellyfin.service.d/jellyfin.service.conf') }}"
+
+# Repository Specifics
+jellyfin_repo_id: "{{ jellyfin_os_repo_id | default('jellyfin') }}"
+jellyfin_repo_name: "{{ jellyfin_os_repo_name | default('Jellyfin Media Server') }}"

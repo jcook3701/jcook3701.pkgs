@@ -6,4 +6,5 @@
     name: "{{ kerberos_kdc_service }}"
     state: started
     enabled: true
+  become: true
   when: kerberos_node_type == 'replica'

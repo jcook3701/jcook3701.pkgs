@@ -1,0 +1,153 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Installs, configures, and maintains the Docker Community Edition ecosystem."
+    description: >-
+      This role provisions Docker CE, handles local user group assignments to the
+      docker socket interface, installs container tools (Compose and Buildx), and
+      deploys an enterprise-grade, defensive daemon.json configuration file.
+    author: "Jared Cook"
+    options:
+      # -------------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------------
+      docker_ce_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The targeted structural execution state. Setting this to 'absent' purges packages and storage assets."
+
+      docker_ce_users:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "A declarative array of local system accounts that will be appended to the managed 'docker' socket group."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The exact local username string to add to the container daemon group execution path."
+
+      docker_ce_manage_group:
+        type: "bool"
+        default: true
+        description: "Toggles whether the role ensures the foundational 'docker' system group is actively declared and maintained."
+
+      docker_ce_download_url:
+        type: "str"
+        default: "https://download.docker.com"
+        description: "The primary upstream URL base path used to fetch docker repository files."
+
+      # -------------------------------------------------------------------------
+      # CLI Plugins & Companion Packages
+      # -------------------------------------------------------------------------
+      docker_ce_install_compose:
+        type: "bool"
+        default: true
+        description: "Controls whether the modern Docker Compose v2 CLI plugin package is included in the installation sweep."
+
+      docker_ce_install_buildx:
+        type: "bool"
+        default: true
+        description: "Controls whether the next-generation Docker Buildx CLI extension plugin package is deployed."
+
+      # -------------------------------------------------------------------------
+      # Docker Daemon Configuration (/etc/docker/daemon.json)
+      # -------------------------------------------------------------------------
+      docker_ce_manage_config:
+        type: "bool"
+        default: true
+        description: "Master switch to determine if the role overrides and manages the main daemon.json engine file."
+
+      docker_ce_data_root:
+        type: "str"
+        default: "/var/lib/docker"
+        description: "The absolute directory path on the host node where image layers, network fabrics, and local volumes persist."
+
+      docker_ce_storage_driver:
+        type: "str"
+        default: "overlay2"
+        description: "The storage execution driver engine utilized by the Linux kernel to stitch together root filesystems."
+
+      docker_ce_storage_opts:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "Comma-separated or element-tracked parameter flags passed directly downward to isolate backing file storage layers."
+
+      docker_ce_log_driver:
+        type: "str"
+        default: "json-file"
+        description: "The target stdout/stderr processing agent used to intercept, tag, and persist raw container outputs."
+
+      docker_ce_log_opts:
+        type: "dict"
+        default: {"max-size": "50m", "max-file": "3"}
+        description: "Key-value pair map enforcing defensive container log cap thresholds to block storage starvation events."
+
+      docker_ce_live_restore:
+        type: "bool"
+        default: true
+        description: "Ensures running container processes stay completely online and responsive during engine service upgrades or daemon restarts."
+
+      docker_ce_iptables:
+        type: "bool"
+        default: true
+        description: "Allows the engine daemon to automatically inject netfilter routing parameters straight into the active host kernel tables."
+
+      docker_ce_ip_forward:
+        type: "bool"
+        default: true
+        description: "Enforces standard Linux sysctl forwarding rules to enable bridging traffic seamlessly across network boundaries."
+
+      docker_ce_userland_proxy:
+        type: "bool"
+        default: false
+        description: "Toggles the legacy user-space network proxy companion routing binary. Disabling this optimizes system network performance."
+
+      docker_ce_default_address_pools:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "An array defining pre-allocated network blocks carved out automatically during internal user bridge creation passes."
+
+      docker_ce_dns_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "Explicit list of static IPv4/IPv6 target upstream name resolvers passed to all newly created container engines."
+
+      docker_ce_dns_search:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "Domain search scope suffix array appended to internal name evaluation requests failing baseline queries."
+
+      docker_ce_registry_mirrors:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "Explicit mirror URL strings checked during pulling operations before reaching to the public standard registry indices."
+
+      docker_ce_insecure_registries:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "Disables TLS verification and endpoint matching validation for designated development repository endpoints."
+
+      docker_ce_metrics_addr:
+        type: "str"
+        default: ""
+        description: "The specific network socket IP and port layout target assigned to serve live internal promotional telemetry indices."
+
+      docker_ce_experimental:
+        type: "bool"
+        default: false
+        description: "Toggles whether advanced alpha/beta runtime software feature sets are exposed inside the active binary core context."
+
+      docker_ce_config_custom:
+        type: "dict"
+        default: {}
+        description: "A free-form nested map merged recursively into the rendered daemon config sheet to accommodate custom unstructured keys."

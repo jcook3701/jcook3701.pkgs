@@ -1,8 +1,20 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# Lifecycle execution state for package installation or removal
 flatpak_state: present
 
+# Accounts granted rootless or direct access to flatpak runtime group
+flatpak_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'flatpak' system group
+flatpak_manage_group: true
+
+# A list of Flatpak remote repositories to configure.
 flatpak_repos:
   - name: flathub
     url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+# Overarching toggle to manage 'flatpak' repositories
+flatpak_manage_repos: true

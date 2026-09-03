@@ -14,6 +14,6 @@
     name: jcook3701.utils.pkg_manager
   vars:
     pkg_manager_pkgs:
-      - "{{ google_chrome_file.package }}"
+      - "{{ google_chrome_file.package | default([]) }}"
     pkg_manager_state: "present"
     pkg_manager_update_cache: true

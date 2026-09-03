@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Webmin repository is setup
+  ansible.builtin.include_tasks: configure/main.yml
+
+- name: Installing Webmin package
+  ansible.builtin.package:
+    name: "{{ webmin_pkg_names | default([]) }}"
+    state: "present"
+  become: true
+
+- name: Ensure Webmin service is started and enabled
+  ansible.builtin.service:
+    name: "{{ webmin_service | default('webmin') }}"
+    state: started
+    enabled: yes
+  become: true

@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure rsyslog service is stopped and configurations purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Clean up remaining persistent and transient rsyslog runtime state directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: "absent"
+  become: true
+  loop:
+    - "{{ rsyslog_directory.conf_d | default('/etc/rsyslog.d') }}"
+    - "{{ rsyslog_directory.state | default('/var/spool/rsyslog') }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing runtime configuration folder: {{ directory }}"
+
+- name: Clean up remaining persistent and transient rsyslog runtime state files
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: "absent"
+  become: true
+  loop:
+    - "{{ rsyslog_file.conf | default('/etc/rsyslog.conf') }}"
+    - "{{ rsyslog_file.default_rules | default('/etc/rsyslog.d/50-default.conf') }}"
+  loop_control:
+    loop_var: file
+    label: "Removing configuration file tracking handle: {{ file }}"

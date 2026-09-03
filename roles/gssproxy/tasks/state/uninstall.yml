@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure GSS-Proxy service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ gssproxy_service | default('gssproxy') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (gssproxy_service ~ '.service' in ansible_facts.services)
+
+- name: Force kill any orphaned gssproxy background processes lingering in memory
+  ansible.builtin.command: "pkill -9 {{ gssproxy_service | default('gssproxy') }}"
+  failed_when: false
+  become: true
+
+- name: Force deep purge of GSS-Proxy packages and configuration files from the OS
+  ansible.builtin.package:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ gssproxy_pkg_names | default(['gssproxy']) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete

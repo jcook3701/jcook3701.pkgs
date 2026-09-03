@@ -7,3 +7,7 @@ PXE Server
 ```shell
 $ ansible-playbook jcook3701.pkgs.nginx.yml -K
 ```
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

@@ -1,22 +1,18 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Gather target host package facts
-  ansible.builtin.package_facts:
-    manager: auto
-
 - name: Load cockpit OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ cockpit_vars }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: cockpit_vars
+    label: "Loading variables file: {{ cockpit_vars }}"
 
-- name: Cockpit Install
-  ansible.builtin.include_tasks: install.yml
+- name: Ensure Cockpit is installed
+  ansible.builtin.include_tasks: state/install.yml
   when: cockpit_state | default('present') == 'present'
 
-- name: Cockpit Uninstall
-  ansible.builtin.include_tasks: uninstall.yml
-  when:
-    - cockpit_state | default('present') == 'absent'
-    - ansible_facts.packages is defined
-    - cockpit_pkg_names[0] in ansible_facts.packages
+- name: Ensure Cockpit is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: cockpit_state | default('present') in ['absent', 'teardown']

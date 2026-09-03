@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Chrony services are stopped and packages are purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Cleaning Up Core Chrony Configuration Directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  become: true
+  loop:
+    - "{{ chrony_directory.log }}"
+    - "{{ chrony_directory.state }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing directory footprint: {{ directory }}"
+
+- name: Cleaning Up Core Chrony Configuration File
+  ansible.builtin.file:
+    path: "{{ chrony_file.conf }}"
+    state: absent
+  become: true

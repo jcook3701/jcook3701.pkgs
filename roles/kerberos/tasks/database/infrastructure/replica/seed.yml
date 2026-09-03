@@ -8,6 +8,7 @@
     owner: root
     group: root
     mode: "0600"
+  become: true
   when:
     - kerberos_node_type == 'replica'
     - kerberos_use_stash_file | bool

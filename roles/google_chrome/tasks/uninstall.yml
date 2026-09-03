@@ -3,5 +3,6 @@
 ---
 - name: Uninstall Google Chrome package and dependencies.
   ansible.builtin.package:
-    name: "{{ google_chrome_pkg_names }}"
+    name: "{{ google_chrome_pkg_names | default([]) }}"
     state: absent
+  become: true

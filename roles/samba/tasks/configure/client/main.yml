@@ -26,3 +26,7 @@
 
 - name: Prepare to mount samba file shares on client machines
   ansible.builtin.include_tasks: mounts.yml
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool

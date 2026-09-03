@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart wireguard
+- name: Restart wireguard service
   ansible.builtin.service:
-    name: "{{ wireguard_service }}"
+    name: "{{ wireguard_service | default('wg-quick@' ~ wireguard_interface) }}"
     state: restarted
+  become: true

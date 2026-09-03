@@ -1,7 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-snap_pkg_names:
-  - snapd
+snap_socket: "{{ snap_os_socket | default('snapd.socket') }}"
+snap_service: "{{ snap_os_service | default('snapd.service') }}"
 
-snap_service: snapd
+snap_pkg_names: "{{ snap_os_pkg_names | default(['snapd']) }}"
+
+snap_directory:
+  state: "{{ snap_os_directory.state | default('/var/lib/snapd') }}"
+  mount: "{{ snap_os_directory.mount | default('/snap') }}"
+
+snap_file:
+  snap: "{{ snap_directory.state }}/snap"

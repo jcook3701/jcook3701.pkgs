@@ -1,12 +1,18 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Snap Install
-  ansible.builtin.include_tasks: install.yml
+- name: Load Snap OS-specific variables
+  ansible.builtin.include_vars: "{{ snap_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: snap_vars
+    label: "Loading variables file: {{ snap_vars }}"
+
+- name: Ensure Snap is install
+  ansible.builtin.include_tasks: state/install.yml
   when: snap_state | default('present') == 'present'
 
-- name: Snap Uninstall
-  ansible.builtin.include_tasks: uninstall.yml
-  when:
-    - snap_state | default('present') == 'absent'
-    - snap_pkg_names[0] in ansible_facts.packages
+- name: Ensure Snap is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: snap_state | default('present') in ['absent', 'teardown']

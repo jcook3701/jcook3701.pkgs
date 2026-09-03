@@ -1,58 +1,43 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-docker_ce_deb_architecture:
-  armv6l: "armhf"
-  armv7l: "armhf"
-  aarch64: "arm64"
-  x86_64: "amd64"
-  i386: "i386"
+docker_ce_os_group: "docker"
+docker_ce_os_user: "docker"
 
-docker_ce_arch: "{{ docker_ce_deb_architecture[ansible_architecture] | default(ansible_architecture) }}"
-docker_ce_codename: "{{ ansible_distribution_release }}"
-docker_ce_idname: "{{ ansible_distribution | lower }}"
+docker_ce_os_service: "docker"
 
-docker_ce_pkgs:
-  - docker-ce
-  - docker-ce-cli
-  - containerd.io
-  - docker-buildx-plugin
+docker_ce_os_unofficial_pkg_names:
+  - "docker.io"
+  - "docker-compose"
+  - "docker-compose-v2"
+  - "docker-doc"
+  - "docker-buildx"
+  - "podman-docker"
 
-docker_ce_compose_pkgs:
+docker_ce_os_pkg_names:
+  - "containerd.io"
+  - "docker-ce"
+  - "docker-ce-cli"
+
+docker_ce_os_compose_pkg_names:
   - "docker-compose-plugin"
 
-docker_ce_directory:
-  keyrings: "/etc/apt/keyrings"
-  sources: "/etc/apt/sources.list.d/"
+docker_ce_os_buildx_pkg_names:
+  - "docker-buildx-plugin"
 
-docker_ce_file:
-  gpg: "{{ docker_ce_directory.keyrings }}/docker.asc"
-  list: "{{ docker_ce_directory.sources }}/docker.list"
+docker_ce_os_directory:
+  conf: "/etc/docker"
+  default: "/etc/default"
+  data_root: "/var/lib/docker"
+  systemd_override: "/etc/systemd/system/docker.service.d"
+  systemd_socket_override: "/etc/systemd/system/docker.socket.d"
+  cli_plugins: "/usr/local/lib/docker/cli-plugins"
 
-docker_ce_repo_base_url: "https://download.docker.com"
-docker_ce_repo_distro: "{{ ansible_distribution | lower }}"
+# Repository Configuration for jcook3701.utils.repo_add
+docker_ce_os_repo_id: "docker-ce"
+docker_ce_os_repo_name: "Docker Community Edition"
 
-docker_ce_repo_url: >-
-  {{ docker_ce_repo_base_url }}/linux/{{ docker_ce_repo_distro }}
-
-docker_ce_gpg_url: >-
-  {{ docker_ce_repo_url }}/gpg
-
-docker_ce_repo_line: >-
-  deb [arch={{ docker_ce_arch }}
-  signed-by={{ docker_ce_file.gpg }}]
-  {{ docker_ce_repo_url }} {{ docker_ce_codename }} stable
-
-# TODO: Remove this after testing.
-# "https://download.docker.com/linux/{{ idname }}/gpg"
-
-#      deb [arch={{ arch }}
-#      signed-by=/etc/apt/keyrings/docker.asc]
-#      https://download.docker.com/linux/{{ idname }}
-#      {{ codename }} stable
-
-# - name: Set facts for architecture, codename, & idname
-#  ansible.builtin.set_fact:
-#    arch: "{{ deb_architecture[ansible_architecture] }}"
-#    codename: "{{ ansible_distribution_release }}"
-#    idname: "{{ ansible_distribution | lower }}"
+docker_ce_debian_uris: "{{ docker_ce_download_url }}/linux/{{ ansible_distribution | lower }}"
+docker_ce_debian_suites: "{{ ansible_distribution_release }}"
+docker_ce_debian_component: "stable"
+docker_ce_debian_signed_by: "{{ docker_ce_debian_uris }}/gpg"

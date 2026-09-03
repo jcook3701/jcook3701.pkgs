@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Flatpak group settings are configured
+  ansible.builtin.include_tasks: group.yml
+  when:
+    - ansible_os_family in ['Debian', 'Redhat']
+    - flatpak_manage_group | default(true) | bool
+
+- name: Ensure Flatpak repositories are configured
+  ansible.builtin.include_tasks: repository.yml
+  when: flatpak_manage_repos | default(true) | bool

@@ -2,25 +2,21 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Load Firewalld OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ firewalld_vars }}"
   with_first_found:
     - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: firewalld_vars
+    label: "Loading variables file: {{ firewalld_vars }}"
 
-- name: Gather target host package facts
-  ansible.builtin.package_facts:
-    manager: auto
-
-- name: Install Firewalld
-  ansible.builtin.include_tasks: install.yml
+- name: Ensure Firewalld is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
   when: firewalld_state | default('present') == 'present'
 
-- name: Uninstall Firewalld
-  ansible.builtin.include_tasks: uninstall.yml
-  when:
-    - firewalld_state | default('present') == 'absent'
-    - firewalld_pkg_names[0] in ansible_facts.packages
+- name: Ensure Firewalld is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: firewalld_state | default('present') == 'absent'
 
-- name: Teardown Firewalld
-  ansible.builtin.include_tasks: teardown.yml
-  when:
-    - firewalld_state | default('present') == 'teardown'
+- name: Ensure Firewalld purge of packages and configurations
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: firewalld_state | default('present') == 'teardown'

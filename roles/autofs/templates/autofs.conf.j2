@@ -30,14 +30,15 @@ browse_mode = {{ autofs_browse_mode | default('yes') | trim }}
 logging = {{ autofs_logging | default('verbose') | trim }}
 
 ## LDAP CONNECTOR SCHEMA ATTRIBUTES ##
-ldap_timeout = {{ autofs_ldap_timeout | default(30) | int }}
-ldap_network_timeout = {{ autofs_ldap_network_timeout | default(30) | int }}
+# ldap_timeout = {{ autofs_ldap_timeout | default(30) | int }}
+# ldap_network_timeout = {{ autofs_ldap_network_timeout | default(30) | int }}
 
-map_object_class = {{ autofs_map_object_class | default('automountMap') | trim }}
-entry_object_class = {{ autofs_entry_object_class | default('automount') | trim }}
-map_attribute = {{ autofs_map_attribute | default('automountMapName') | trim }}
-entry_attribute = {{ autofs_entry_attribute | default('automountKey') | trim }}
-value_attribute = {{ autofs_value_attribute | default('automountInformation') | trim }}
+# [ lookup_ldap ]
+# map_object_class = {{ autofs_map_object_class | default('automountMap') | trim }}
+# entry_object_class = {{ autofs_entry_object_class | default('automount') | trim }}
+# map_attribute = {{ autofs_map_attribute | default('automountMapName') | trim }}
+# entry_attribute = {{ autofs_entry_attribute | default('automountKey') | trim }}
+# value_attribute = {{ autofs_value_attribute | default('automountInformation') | trim }}
 {%- endmacro -%}
 
 {{- autofs_conf() }}

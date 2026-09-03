@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Firewalld service is stopped and uninstalled
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Completely purge Firewalld custom service and zone configurations
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ firewalld_directory.services | default('/etc/firewalld/services') }}"
+    - "{{ firewalld_directory.conf | default('/etc/firewalld') }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing: {{ directory }}"
+  become: true

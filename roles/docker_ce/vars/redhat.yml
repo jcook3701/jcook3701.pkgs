@@ -1,16 +1,37 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-docker_ce_pkgs:
+docker_ce_os_group: "docker"
+docker_ce_os_user: "docker"
+
+docker_ce_os_service: "docker"
+
+docker_ce_os_unofficial_pkg_names:
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-engine
+  - runc
+
+docker_ce_os_pkg_names:
+  - containerd.io
   - docker-ce
   - docker-ce-cli
-  - containerd.io
 
-docker_ce_compose_pkgs:
-  - "docker-compose-plugin"
+docker_ce_os_compose_pkg_names:
+  - docker-compose-plugin
 
-docker_ce_repo_base_url: "https://download.docker.com"
-docker_ce_repo_distro: "{{ (ansible_distribution == 'Fedora') | ternary('fedora', 'centos') }}"
+docker_ce_os_buildx_pkg_names:
+  - docker-buildx-plugin
 
-# Final assembled URL
-docker_ce_repo_url: "{{ docker_ce_repo_base_url }}/{{ docker_ce_repo_distro }}/docker-ce.repo"
+docker_ce_os_directory:
+  conf: "/etc/docker"
+
+# Repository Configuration for jcook3701.utils.repo_add
+docker_ce_os_repo_id: "docker-ce"
+docker_ce_os_repo_name: "Docker Community Edition Official DNF Repository"
+
+docker_ce_redhat_baseurl: "{{ docker_ce_download_url }}/linux/{{ ansible_distribution | lower }}/$basearch"

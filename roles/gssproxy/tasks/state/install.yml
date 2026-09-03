@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure GSS-Proxy package and dependencies are installed
+  ansible.builtin.package:
+    name: >-
+      {{ gssproxy_dep_pkg_names | default([])
+          + gssproxy_pkg_names | default([]) }}
+    state: present
+  become: true
+
+- name: Ensure GSS-Proxy is configured
+  ansible.builtin.include_tasks: configure/main.yml
+
+- name: Ensure GSS-Proxy service is started and enabled
+  ansible.builtin.service:
+    name: "{{ gssproxy_service | default('gssproxy') }}"
+    state: started
+    enabled: true
+  become: true

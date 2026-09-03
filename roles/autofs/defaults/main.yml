@@ -17,7 +17,7 @@ autofs_logging: "verbose"
 # AutoFS LDAP SASL Authentication Configuration Defaults
 autofs_sasl_usetls: "no"
 autofs_sasl_tlsrequired: "no"
-autofs_sasl_authrequired: "yes"
+autofs_sasl_authrequired: "no"
 autofs_sasl_authmechanism: "GSSAPI"
 
 # LDAP Connector Performance Thresholds

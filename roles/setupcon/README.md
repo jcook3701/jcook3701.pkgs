@@ -8,6 +8,10 @@
 
 The [console-setup](https://manpages.debian.org/testing/console-setup/console-setup.5.en.html) console-setup package is a utility suite that configures the font, screen encoding, and layout of the virtual text consoles (TTYs). It ensures the system displays characters correctly and provides a comfortable typing experience when working directly with the Linux system rather than a graphical desktop.
 
-### Authors Notes
+## Authors Notes
 
 1. This will only work on debian based operating systems.
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

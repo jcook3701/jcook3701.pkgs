@@ -18,11 +18,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{%- macro kpropd() -%}
+{%- macro kpropd_acl() -%}
 {% for server in kerberos_propagation_servers %}
 host/{{ server | lower }}@{{ kerberos_realm | upper }}
 kiprop/{{ server | lower }}@{{ kerberos_realm | upper }}
 {% endfor %}
 {%- endmacro -%}
 
-{{- kpropd() -}}
+{{- kpropd_acl() -}}

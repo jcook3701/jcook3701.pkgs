@@ -13,6 +13,49 @@ argument_specs:
         choices: ["present", "absent", "teardown"]
         description: "The intended configuration state of the SSSD client infrastructure."
 
+      sssd_daemon_opts:
+        type: "str"
+        required: false
+        default: "-D -f"
+        description: >
+          Additional runtime flags and arguments passed directly to the main sssd daemon startup process.
+          Use "-D" to run as a daemon and "-f" to force interactive/interactive behavior configurations.
+
+      sssd_debug_logger:
+        type: "str"
+        required: false
+        default: "journald"
+        choices:
+          - "files"
+          - "journald"
+          - "stderr"
+        description: >
+          Determines where the internal SSSD engine sends its operational logs and deep diagnostic matrices.
+          Selecting 'files' routes output to /var/log/sssd/, while 'journald' integrates directly with the systemd event logging rings.
+
+      sssd_responder_activation_method:
+        type: "str"
+        required: false
+        default: "socket"
+        choices:
+          - "socket"
+          - "service"
+        description: >
+          Controls the architecture style used to trigger SSSD sub-responders (autofs, ssh, sudo, kcm, pac).
+          Set to 'socket' for modern on-demand systemd socket activation. Set to 'service' for high-frequency or legacy resident background daemons.
+
+      sssd_enable_nss:
+        type: "bool"
+        required: false
+        default: true
+        description: "Toggles the Name Service Switch (NSS) responder loop for system identity maps (passwd, group, netgroup)."
+
+      sssd_enable_pam:
+        type: "bool"
+        required: false
+        default: false
+        description: "Toggles advanced SSSD responder loop configuration for system-wide Pluggable Authentication Modules (PAM)."
+
       sssd_enable_autofs:
         type: bool
         default: true
@@ -27,6 +70,24 @@ argument_specs:
         type: bool
         default: true
         description: "Toggles centralized directory-driven root authorization rule caching models."
+
+      sssd_enable_kdc:
+        type: "bool"
+        required: false
+        default: true
+        description: "Enables or disables SSSD locator plugin integration to help clients dynamically find Kerberos Key Distribution Centers (KDCs)."
+
+      sssd_enable_pac:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls whether SSSD processes and validates Active Directory Privilege Attribute Certificate (PAC) data for Kerberos tickets."
+
+      sssd_enable_ifp:
+        type: "bool"
+        required: false
+        default: true
+        description: "Enables the InfoPipe D-Bus interface responder to expose identities to external applications."
 
       sssd_id_provider:
         type: str
@@ -131,6 +192,12 @@ argument_specs:
         default: true
         description: "Forces TLS validation routines over communication sockets."
 
+      sssd_manage_ldap_keys:
+        type: "bool"
+        required: false
+        default: false
+        description: "Controls whether the role should actively collect, deploy and manage LDAP TLS certificates and private cryptographic keys on the system."
+
       sssd_ldap_servers:
         type: list
         elements: str
@@ -184,6 +251,24 @@ argument_specs:
         type: int
         default: 5
         description: "Diagnostics logging level for the secure shell authorized key retrieval engine."
+
+      sssd_kdc_debug_level:
+        type: "int"
+        required: false
+        default: 7
+        description: "Sets the diagnostic logging level for the Kerberos Key Distribution Center (KDC) locator proxy responder. Higher values yield more verbose output."
+
+      sssd_pac_debug_level:
+        type: "int"
+        required: false
+        default: 7
+        description: "Sets the diagnostic logging level for the Privileged Attribute Certificate (PAC) responder subsystem."
+
+      sssd_ifp_debug_level:
+        type: "int"
+        required: false
+        default: 7
+        description: "Sets the diagnostic logging level for the InfoPipe (IFP) D-Bus responder subsystem."
 
       sssd_ldap_tls_reqcert:
         type: str

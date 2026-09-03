@@ -2,16 +2,18 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 # Universal Service Unit and Configuration File Mappings
-ssh_service: "ssh"
+ssh_service: "{{ ssh_os_service | default('ssh') }}"
 
-ssh_pkg_names: []
+ssh_pkg_names: "{{ ssh_os_pkg_names | default(['openssh-server']) }}"
 
 ssh_directory:
   conf: "{{ ssh_os_directory.conf | default('/etc/ssh') }}"
+  default: "{{ ssh_os_directory.default | default('/etc/default') }}"
   pid: "{{ ssh_os_directory.pid | default('/var/run') }}"
   bin: "{{ ssh_os_directory.bin | default('/usr/lib/openssh') }}"
 
 ssh_file:
-  conf: "{{ ssh_directory.conf }}/sshd_config"
-  pid: "{{ ssh_directory.pid }}/sshd.pid"
-  sftp_server: "{{ ssh_directory.bin }}/sftp-server"
+  conf: "{{ ssh_directory.conf ~ '/sshd_config' | default('/etc/ssh/sshd_config') }}"
+  default: "{{ ssh_directory.default ~ '/ssh' | default('/etc/default/ssh') }}"
+  pid: "{{ ssh_directory.pid ~ '/sshd.pid' | default('/var/run/sshd.pid') }}"
+  sftp_server: "{{ ssh_directory.bin ~ '/sftp-server' | default('/usr/lib/openssh/sftp-server') }}"

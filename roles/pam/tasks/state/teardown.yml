@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# =================================================================
+# DEBIAN / UBUNTU PROFILE TEARDOWN
+# =================================================================
+- name: Forcefully disable non-default enterprise, custom, and MFA modules within Debian PAM stacks
+  ansible.builtin.command: >-
+    pam-auth-update --package
+    --disable keyinit
+    --disable sss
+    --disable mkhomedir
+    --disable fprintd
+    --disable duo-unix
+    --disable u2f
+    --disable yubico
+  # Note: 'systemd' and 'unix' are purposefully omitted. This causes pam-auth-update to
+  # completely purge all custom integrations and fall back strictly to Debian's defaults.
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: pam_disable_cmd
+  changed_when: "pam_disable_cmd.stdout != '' or 'Updating' in pam_disable_cmd.stderr"
+  failed_when: pam_disable_cmd.rc != 0
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+# =================================================================
+# RED HAT / ROCKY LINUX PROFILE TEARDOWN
+# =================================================================
+- name: Revert Red Hat authselect configuration profile back to local OS defaults
+  ansible.builtin.command: "authselect select local --force"
+  register: authselect_reset_cmd
+  changed_when: "'Profile' in authselect_reset_cmd.stdout or 'Writing' in authselect_reset_cmd.stdout"
+  failed_when: authselect_reset_cmd.rc != 0
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Restore default open UMASK permission parameters inside Red Hat environment contexts
+  ansible.builtin.lineinfile:
+    path: "/etc/login.defs"
+    regexp: "^UMASK"
+    line: "UMASK 022"
+    state: present
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'

@@ -21,23 +21,26 @@ virtualbox_selector:
 
 virtualbox_info: "{{ virtualbox_selector[virtualbox_selected] }}"
 
-virtualbox_user: vboxusers
-virtualbox_group: vboxusers
+virtualbox_user: "{{ virtualbox_os_user | default('vboxusers') }}"
+virtualbox_group: "{{ virtualbox_os_group | default('vboxusers') }}"
 
-# Determine the correct filename prefix based on the version
-# Legacy (6.1, 7.0): Oracle_VM_VirtualBox_Extension_Pack-
-# Modern (7.1+): Oracle_VirtualBox_Extension_Pack-
-virtualbox_extpack_prefix: >-
-  {{
-    (virtualbox_installed_version | default('7.1') is version('7.1', '>='))
-    | ternary('Oracle_VirtualBox_Extension_Pack-', 'Oracle_VM_VirtualBox_Extension_Pack-')
-  }}
+virtualbox_dep_pkg_names: "{{ virtualbox_os_dep_pkg_names | default([]) }}"
+virtualbox_pkg_names: "{{ virtualbox_os_pkg_names | default([]) }}"
 
-virtualbox_extpack_file: "{{ virtualbox_extpack_prefix }}{{ virtualbox_installed_version }}.vbox-extpack"
-virtualbox_extpack_url: "{{ virtualbox_download_url }}/{{ virtualbox_installed_version }}/{{ virtualbox_extpack_file }}"
-virtualbox_extpack_dest: "/tmp/{{ virtualbox_extpack_file }}"
+virtualbox_directory:
+  bin: "{{ virtualbox_os_directory.bin | default('/sbin') }}"
+  conf: "{{ virtualbox_os_directory.conf | default('/etc/vbox') }}"
+  modules: "{{ virtualbox_os_directory.modules | default('/etc/modules-load.d') }}"
+  modprobe: "{{ virtualbox_os_directory.modprobe | default('/etc/modprobe.d') }}"
 
-# The license acceptance string for the debconf module (Debian/Ubuntu)
-virtualbox_extpack_license:
-  name: "virtualbox-ext-pack"
-  question: "virtualbox-ext-pack/license"
+virtualbox_file:
+  networks_conf: "{{ virtualbox_directory.conf }}/networks.conf"
+  modules_conf: "{{ virtualbox_directory.modules }}/virtualbox.conf"
+  modprobe_conf: "{{ virtualbox_directory.modprobe }}/virtualbox.conf"
+
+virtualbox_command:
+  vboxconfig: "{{ virtualbox_directory.bin }}/vboxconfig"
+
+# Repository Configuration for jcook3701.utils.repo_add
+virtualbox_repo_id: "{{ virtualbox_os_repo_id | default('virtualbox') }}"
+virtualbox_repo_name: "{{ virtualbox_os_repo_name | default('Oracle VirtualBox Official Repository') }}"

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+gssproxy_service: "{{ gssproxy_os_service | default('gssproxy') }}"
+gssproxy_dep_pkg_names: "{{ gssproxy_os_dep_pkg_names | default(['keyutils']) }}"
+gssproxy_pkg_names: "{{ gssproxy_os_pkg_names | default(['gssproxy']) }}"
+
+gssproxy_directory:
+  bin: "{{ gssproxy_os_directory.bin | default('/usr/sbin') }}"
+  conf: "{{ gssproxy_os_directory.conf | default('/etc/gssproxy') }}"
+  request_key: "{{ gssproxy_os_directory.request_key | default('/etc') }}"
+  request_key_d: "{{ gssproxy_os_directory.request_key_d | default('/etc/request-key.d') }}"
+
+gssproxy_file:
+  conf: "{{ gssproxy_directory.conf ~ '/gssproxy.conf' | default('/etc/gssproxy/gssproxy.conf') }}"
+  default_nfs_conf: "{{ gssproxy_os_directory.conf ~ '/24-nfs-server.conf' | default('/etc/gssproxy/24-nfs-server.conf') }}" # vendor default file
+  request_key_conf: "{{ gssproxy_directory.request_key ~ '/request-key.conf' | default('/etc/request-key.conf') }}"

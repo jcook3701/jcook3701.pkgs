@@ -1,0 +1,93 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Configure and manage WireGuard VPN tunnels."
+    description: "This role installs WireGuard, configures host interfaces, manages firewall routing, and links VPN peers."
+    author: "Your Name"
+    options:
+      wireguard_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent"]
+        description: "The desired deployment state of WireGuard configuration files and services."
+
+      wireguard_interface:
+        type: "str"
+        required: false
+        default: "wg0"
+        description: "The name of the WireGuard interface configuration file (maps to `/etc/wireguard/{{ wireguard_interface }}.conf`)."
+
+      wireguard_address:
+        type: "str"
+        required: false
+        default: ""
+        description: "The local IP address and subnet mask assigned to this host's tunnel interface (e.g., '10.0.0.1/24')."
+
+      wireguard_port:
+        type: "int"
+        required: false
+        default: 51820
+        description: "The UDP port WireGuard will listen on for incoming VPN connections."
+
+      wireguard_private_key:
+        type: "str"
+        required: false
+        default: null
+        description: "The local private key for this node. If empty, tasks can automatically generate a persistent key inside `/etc/wireguard/keys/`."
+
+      wireguard_ip_forward:
+        type: "bool"
+        required: false
+        default: false
+        description: "Controls whether to configure kernel IP forwarding (`sysctl`) to route traffic between peers."
+
+      wireguard_post_up:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "PostUp shell commands executed when bringing the interface up (often used for iptables NAT routing)."
+
+      wireguard_post_down:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "PostDown shell commands executed when bringing the interface down."
+
+      wireguard_peers:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "A list of remote peers connected to this host."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "A descriptive name identifier for the peer."
+          public_key:
+            type: "str"
+            required: true
+            description: "The WireGuard public key of the remote peer."
+          preshared_key:
+            type: "str"
+            required: false
+            default: null
+            description: "Optional pre-shared key for an extra layer of symmetric encryption."
+          allowed_ips:
+            type: "list"
+            elements: "str"
+            required: true
+            description: "Subnets routed through this specific peer connection (e.g., `['10.0.0.2/32']`)."
+          endpoint:
+            type: "str"
+            required: false
+            description: "Optional public WAN IP and port if this peer sits on a static address (e.g., `1.2.3.4:51820`)."
+          persistent_keepalive:
+            type: "int"
+            required: false
+            description: "Optional interval in seconds to keep tunnels open through stateful firewalls or restrictive NATs."

@@ -3,7 +3,10 @@
 ---
 galaxy_info:
   author: Jared Cook
-  description: "Installs, sets up, or removes Virtualbox, ensuring all dependencies and configurations are managed."
+  description: >-
+    Installs, sets up, or removes Virtualbox, ensuring all
+    dependencies and configurations are managed.
+
   # company: "Optional Company Name"
 
   license: "AGPL-3.0-or-later"
@@ -32,3 +35,6 @@ galaxy_info:
     - apps
 
 dependencies: []
+
+collections:
+  - jcook3701.utils

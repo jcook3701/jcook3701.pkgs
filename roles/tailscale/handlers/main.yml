@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Restart tailscale
+- name: Restart tailscale service
   ansible.builtin.service:
-    name: "{{ tailscale_service }}"
+    name: "{{ tailscale_service | default('tailscaled') }}"
     state: restarted
+  become: true

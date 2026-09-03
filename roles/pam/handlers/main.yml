@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Rebuild system PAM configuration tables
+  ansible.builtin.command: pam-auth-update --package
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Apply Red Hat authselect modifications
+  ansible.builtin.command: authselect apply-changes
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'

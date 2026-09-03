@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Initialize runtime storage state directories for rsyslog configuration blocks
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  loop:
+    - "{{ rsyslog_directory.conf_d | default('/etc/rsyslog.d') }}"
+    - "{{ rsyslog_directory.state | default('/var/spool/rsyslog') }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating runtime directory: {{ directory }}"
+
+- name: Deploy primary rsyslog administrative engine configuration blueprint
+  ansible.builtin.template:
+    src: "rsyslog.conf.j2"
+    dest: "{{ rsyslog_file.conf | default('/etc/rsyslog.conf') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart rsyslog service
+
+- name: Deploy pluggable facilities matrix tracking snapshot layout
+  ansible.builtin.template:
+    src: "50-default.conf.j2"
+    dest: "{{ rsyslog_file.default_rules | default('/etc/rsyslog.d/50-default.conf') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart rsyslog service
+
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure rsyslog service is started and enabled
+  ansible.builtin.service:
+    name: "{{ rsyslog_service | default('rsyslog') }}"
+    state: started
+    enabled: true
+  become: true
+  when: (rsyslog_service ~ '.service' in ansible_facts.services)

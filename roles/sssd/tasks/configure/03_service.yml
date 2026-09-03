@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Orchestrate SSSD Dynamic Engine Responders (Desired Architecture)
+  ansible.builtin.systemd:
+    name: "sssd-{{ service.name }}.{{ sssd_activation_suffix_map[sssd_responder_activation_method] }}"
+    state: started
+    enabled: true
+    masked: false
+  become: true
+  loop:
+    - { name: 'nss',       enabled: "{{ sssd_enable_nss | bool }}" }
+    - { name: 'pam',       enabled: "{{ sssd_enable_pam | bool }}" }
+    - { name: 'pam-priv',  enabled: "{{ sssd_enable_pam | bool }}" }
+    - { name: 'autofs',    enabled: "{{ sssd_enable_autofs | bool }}" }
+    - { name: 'ssh',       enabled: "{{ sssd_enable_ssh | bool }}" }
+    - { name: 'sudo',      enabled: "{{ sssd_enable_sudo | bool }}" }
+    - { name: 'kcm',       enabled: "{{ sssd_enable_kdc | bool }}" }
+    - { name: 'pac',       enabled: "{{ sssd_enable_pac | bool }}" }
+  loop_control:
+    loop_var: service
+    label: "Service: {{ service }}"
+  when: service.enabled | default(false) | bool
+
+- name: Purge Alternative SSSD Responder Architecture (Prevent Conflicts)
+  ansible.builtin.systemd:
+    name: "sssd-{{ service.name }}.{{ 'service' if sssd_responder_activation_method == 'socket' else 'socket' }}"
+    state: stopped
+    enabled: false
+  become: true
+  loop:
+    - { name: 'nss',       enabled: "{{ sssd_enable_nss | bool }}" }
+    - { name: 'pam',       enabled: "{{ sssd_enable_pam | bool }}" }
+    - { name: 'autofs',    enabled: "{{ sssd_enable_autofs | bool }}" }
+    - { name: 'ssh',       enabled: "{{ sssd_enable_ssh | bool }}" }
+    - { name: 'sudo',      enabled: "{{ sssd_enable_sudo | bool }}" }
+    - { name: 'kcm',       enabled: "{{ sssd_enable_kdc | bool }}" }
+    - { name: 'pac',       enabled: "{{ sssd_enable_pac | bool }}" }
+  loop_control:
+    loop_var: service
+    label: "Service: {{ service }}"
+  when: service.enabled | default(false) | bool

@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-webmin_dependency_pkgs:
+webmin_os_dep_pkg_names:
   - python3-pexpect
 
-webmin_pkg_names:
+webmin_os_pkg_names:
   - webmin
   - libnet-ldap-perl
   - libdbd-pg-perl

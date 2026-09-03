@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Forcefully clean up active client CIFS network file system mounts
+  ansible.builtin.mount:
+    src: "{{ cifs_mount.src }}"
+    path: "{{ cifs_mount.path }}"
+    fstype: "cifs"
+    state: "absent"
+  become: true
+  loop: "{{ cifs_utils_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: cifs_mount
+    label: "Unmounting: {{ cifs_mount.src }}"
+  when:
+    - cifs_utils_client_mounts is defined
+    - cifs_utils_client_mounts | length > 0
+
+- name: Clean up custom SPNEGO snippet file
+  ansible.builtin.file:
+    path: "{{ cifs_utils_file.spnego_upcall_conf }}"
+    state: "absent"
+  become: true
+
+- name: Restore native request-key configurations
+  ansible.builtin.lineinfile:
+    path: "{{ cifs_utils_file.request_key_conf }}"
+    regexp: '^#\s*(create\s+cifs\.spnego\s+.*\/usr\/sbin\/cifs\.upcall\s+-c\s+%k)'
+    line: '\1'
+    backrefs: true
+    state: "present"
+  become: true
+
+- name: Ensure CIFS Utilities installation and configurations are purged
+  ansible.builtin.include_tasks: uninstall.yml

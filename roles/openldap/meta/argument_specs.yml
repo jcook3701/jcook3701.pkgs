@@ -361,6 +361,10 @@ argument_specs:
             type: "str"
             required: true
             description: "The common name identifier of the network share drive."
+          src:
+            type: "str"
+            required: true
+            description: "The fully qualified remote Windows/Samba network share destination URL, formatted as '//server_hostname/share_name'."
           fstype:
             type: "str"
             required: false
