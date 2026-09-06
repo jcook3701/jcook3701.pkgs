@@ -1,8 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-rsyslog_os_user: "root"
-rsyslog_os_group: "root"
+rsyslog_os_user: "rsyslog"
+rsyslog_os_group: "rsyslog"
+
+rsyslog_os_file_owner: "root"
+rsyslog_os_file_group: "root"
 
 rsyslog_os_service: "rsyslog"
 rsyslog_os_dep_pkg_names: []

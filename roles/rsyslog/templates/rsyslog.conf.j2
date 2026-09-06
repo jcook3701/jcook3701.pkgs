@@ -33,7 +33,9 @@
 #### MODULES ####
 #################
 
-module(load="imuxsock") # provides support for local system logging
+module(load="imuxsock" SysSock.Use="off") # Turn off legacy socket
+input(type="imuxsock" Socket="/run/systemd/journal/syslog") # Read systemd directly
+
 module(load="imklog")   # provides kernel logging support
 
 {% if rsyslog_node_type == 'master' %}
@@ -50,11 +52,13 @@ input(type="imtcp" port="{{ rsyslog_server_port | default(514) }}")
 #### GLOBAL DIRECTIVES ####
 ###########################
 
-$FileOwner {{ rsyslog_user | default('root') | trim }}
-$FileGroup {{ rsyslog_group | default('adm') | trim }}
+$FileOwner {{ rsyslog_file_owner | default('root') | trim }}
+$FileGroup {{ rsyslog_file_group | default('adm') | trim }}
 $FileCreateMode {{ rsyslog_file_create_mode | default('0640') | trim }}
 $DirCreateMode {{ rsyslog_dir_create_mode | default('0755') | trim }}
-$Umask {{ rsyslog_umask | default('0022') }}
+$Umask {{ rsyslog_umask | default('0022') | trim  }}
+$PrivDropToUser {{ rsyslog_user | default('syslog') | trim  }}
+$PrivDropToGroup {{ rsyslog_group | default('syslog') | trim  }}
 
 # Where to place spool and state files
 $WorkDirectory {{ rsyslog_directory.state | default('/var/spool/rsyslog') }}
@@ -68,11 +72,24 @@ $IncludeConfig {{ rsyslog_directory.conf_d | default('/etc/rsyslog.d') }}/*.conf
 
 {% if rsyslog_node_type == 'client' %}
 # Forward all traffic to the remote aggregation server
-{% if rsyslog_remote_protocol | lower == 'tcp' %}
-*.*    @@{{ rsyslog_remote_server_host }}:{{ rsyslog_remote_server_port | default(514) }}
-{% else %}
-*.*    @{{ rsyslog_remote_server_host }}:{{ rsyslog_remote_server_port | default(514) }}
+$ActionQueueType LinkedList
+$ActionQueueFileName fwdRule1
+$ActionResumeRetryCount -1
+$ActionQueueSaveOnShutdown on
+
+{% for host_entry in rsyslog_remote_server_hosts | default([]) %}
+{% if not loop.first %}
+$ActionExecOnlyWhenPreviousIsFailed on
 {% endif %}
+{% if rsyslog_remote_protocol | lower == 'tcp' %}
+*.*    @@{{ host_entry }}:{{ rsyslog_remote_server_port | default(514) }}
+{% else %}
+*.*    @{{ host_entry }}:{{ rsyslog_remote_server_port | default(514) }}
+{% endif %}
+{% if not loop.first %}
+$ActionExecOnlyWhenPreviousIsFailed off
+{% endif %}
+{% endfor %}
 {% endif %}
 
 *.emerg    :omusrmsg:*

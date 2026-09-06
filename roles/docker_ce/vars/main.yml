@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 # Service Settings
-docker_ce_group: "{{ docker_ce_os_group | default('docker') }}"
+docker_ce_service: "{{ docker_ce_os_service | default('docker') }}"
 
 # User/Group Settings
 docker_ce_user: "{{ docker_ce_os_user | default('docker') }}"
-docker_ce_service: "{{ docker_ce_os_service | default('docker') }}"
+docker_ce_group: "{{ docker_ce_os_group | default('docker') }}"
 
 # Package Settings
 docker_ce_unofficial_pkg_names: "{{ docker_ce_os_unofficial_pkg_names | default([]) }}"

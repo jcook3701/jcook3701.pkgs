@@ -30,7 +30,11 @@
 # STANDARD LOCAL FACILITY LOG ASSIGNMENTS
 # =================================================================
 {% for rule_item in rsyslog_facility_rules | default([]) %}
+{% if rule_item.target.startswith('-') %}
 {{ rule_item.rule }}    {{ rule_item.target }}
+{% else %}
+{{ rule_item.rule }}   -{{ rule_item.target }}
+{% endif %}
 {% endfor %}
 
 # =================================================================

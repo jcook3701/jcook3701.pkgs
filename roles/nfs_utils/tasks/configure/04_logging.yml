@@ -8,11 +8,21 @@
     owner: root
     group: root
     mode: "0755"
+  become: true
+
+- name: Enforce proper system ownership on nfs log files to prevent suspension loops
+  ansible.builtin.file:
+    path: "{{ nfs_utils_file.log | default('/var/log/nfs/debug.log') }}"
+    state: touch
+    owner: "{{ nfs_utils_rsyslog_file_owner | default('root') }}"
+    group: "{{ nfs_utils_rsyslog_file_group | default('adm') }}"
+    mode: "{{ nfs_utils_rsyslog_file_create_mode | default('0640') }}"
+  become: true
 
 - name: Enable NFS kernel debugging natively
   ansible.builtin.sysctl:
     name: sunrpc.nfsd_debug
-    value: '0x7fff'
+    value: "32767"
     state: present
     reload: true
   become: true
@@ -21,7 +31,7 @@
 - name: Enable NFS client-side kernel debugging
   ansible.builtin.sysctl:
     name: sunrpc.nfs_debug
-    value: '0x7fff'
+    value: "1023"
     state: present
     reload: true
   become: true
@@ -30,7 +40,8 @@
 - name: Deploy NFS rsyslog configuration on server
   ansible.builtin.template:
     src: nfs-rsyslog.conf.j2
-    dest: /etc/rsyslog.d/30-nfs.conf
+    dest: "{{ nfs_utils_file.rsyslog
+              | default('/etc/rsyslog.d/30-nfs.conf') }}"
     owner: root
     group: root
     mode: "0644"
@@ -40,7 +51,8 @@
 - name: Deploy NFS rsyslog configuration on client
   ansible.builtin.template:
     src: nfs-rsyslog.conf.j2
-    dest: /etc/rsyslog.d/30-nfs.conf
+    dest: "{{ nfs_utils_file.rsyslog
+              | default('/etc/rsyslog.d/30-nfs.conf') }}"
     owner: root
     group: root
     mode: "0644"

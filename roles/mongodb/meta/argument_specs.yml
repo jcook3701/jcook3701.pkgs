@@ -1,0 +1,120 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Enterprise-grade MongoDB role configuration"
+    description: "Configures global package variables, storage engines, memory footprints, network behaviors, and cluster security profiles for MongoDB."
+    author: "Ansible DevOps Engineer"
+    options:
+
+      # Lifecycle & Structural Settings
+      mongodb_state:
+        type: str
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The intended lifecycle state of the MongoDB installation."
+
+      # Package & Version Configuration
+      mongodb_download_url:
+        type: str
+        default: "https://mongodb.org"
+        description: "The base repository mirror server hosting upstream MongoDB assets."
+
+      mongodb_version:
+        type: str
+        default: "8.0"
+        description: "The targeted primary milestone generation or explicit patch version string."
+
+      # Enterprise Security & Authentication Defaults
+      mongodb_security_authorization:
+        type: str
+        default: "enabled"
+        choices: ["enabled", "disabled"]
+        description: "Enforces Role-Based Access Control (RBAC) across connections."
+
+      mongodb_tls_mode:
+        type: str
+        default: "disabled"
+        choices: ["disabled", "allowTLS", "preferTLS", "requireTLS"]
+        description: "Determines how tight encryption enforcement is on interface ports."
+
+      mongodb_tls_certificate_key_file:
+        type: str
+        default: ""
+        description: "Local path to the combined TLS certificate and private key file."
+
+      mongodb_tls_ca_file:
+        type: str
+        default: ""
+        description: "Local path to the Certificate Authority file validating client nodes."
+
+      mongodb_security_keyfile_contents:
+        type: str
+        default: ""
+        description: "The shared cryptographic block content used to authorize inter-node cluster syncing."
+
+      mongodb_security_keyfile_path:
+        type: str
+        default: "/var/lib/mongodb/pki/cluster.key"
+        description: "Absolute destination filepath where the intra-cluster authentication key is dropped."
+
+      # Enterprise Network & Binding Defaults
+      mongodb_net_port:
+        type: int
+        default: 27017
+        description: "The primary TCP network listening socket port."
+
+      mongodb_net_bind_ip:
+        type: str
+        default: "127.0.0.1"
+        description: "Comma-separated string listing interface IP addresses listening for incoming socket bindings."
+
+      mongodb_net_max_incoming_connections:
+        type: int
+        default: 65536
+        description: "Upper bound constraint limit for tracking maximum simultaneous open client sockets."
+
+      # Storage Engine & Performance Fine-Tuning
+      mongodb_storage_engine:
+        type: str
+        default: "wiredTiger"
+        choices: ["wiredTiger", "ephemeralForTest", "inMemory"]
+        description: "The specific primary core internal indexing and storage execution engine."
+
+      mongodb_wiredtiger_cache_size_gb:
+        type: str
+        default: ""
+        description: "Explicit limit in Gigabytes allocated for the WiredTiger engine pool execution room."
+
+      mongodb_storage_journal_enabled:
+        type: bool
+        default: true
+        description: "Toggles operation log durability logging patterns on or off to survive runtime kernel faults."
+
+      mongodb_storage_directory_per_db:
+        type: bool
+        default: true
+        description: "Instructs filesystem layers to cleanly split collections into isolated physical sub-folders."
+
+      # Enterprise Replication (Replica Set Setup)
+      mongodb_replset_name:
+        type: str
+        default: ""
+        description: "If declared, assigns the active database node instance to join a shared high-availability replica layout group."
+
+      # Enterprise System Resource Optimization (ulimits)
+      mongodb_ulimit_nofile:
+        type: int
+        default: 64000
+        description: "Sets the maximum count limitation boundary constraint for concurrent open handles."
+
+      mongodb_ulimit_nproc:
+        type: int
+        default: 64000
+        description: "Sets the maximum scheduling task threshold headroom boundary allowed for threads."
+
+      mongodb_ulimit_memlock:
+        type: str
+        default: "unlimited"
+        description: "Restricts memory pages allocation boundaries to prevent active blocks from page swapping."

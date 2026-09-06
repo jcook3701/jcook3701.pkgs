@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+mongodb_os_repo_id: "mongodb-org-{{ mongodb_version }}"
+mongodb_os_repo_name: "MongoDB {{ mongodb_version }} Repository"
+
+mongodb_redhat_baseurl: "{{ mongodb_download_url }}/yum/redhat/{{ ansible_distribution_major_version }}/mongodb-org/8.0/x86_64/"
+mongodb_redhat_gpgkey: "https://pgp.mongodb.com/server-8.0.asc"

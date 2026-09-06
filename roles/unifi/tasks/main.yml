@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Unifi OS-specific variables
+  ansible.builtin.include_vars: "{{ unifi_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: unifi_vars
+    label: "Loading variables file: {{ unifi_vars }}"
+
+- name: Ensure Unifi is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: unifi_state | default('present') == 'present'
+
+- name: Ensure Unifi is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: unifi_state | default('present') == 'absent'
+
+- name: Teardown Unifi, services, packages, and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: unifi_state | default('present') == 'teardown'

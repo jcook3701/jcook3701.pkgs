@@ -5,7 +5,7 @@ argument_specs:
   main:
     short_description: "Manage systemd-resolved configuration."
     description: "This role configures systemd-resolved DNS servers and domain settings."
-    author: "Your Name"
+    author: "Jared Cook"
     options:
       systemd_resolved_state:
         type: "str"

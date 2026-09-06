@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Unifi service is stopped and packages are purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Decommission Unifi Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ unifi_repo_id }}"
+    repo_add_name: "{{ unifi_repo_name }}"
+    repo_add_state: "absent"
+  when:
+    - unifi_repo_id is defined
+    - unifi_repo_id | length > 0
+    - ansible_os_family in ['Debian', 'RedHat']
+
+- name: Cleaning Up Core Engine Configuration Directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  become: true
+  loop:
+    - "{{ unifi_directory.conf }}"
+    - "{{ unifi_directory.systemd_override }}"
+    - "{{ unifi_directory.systemd_socket_override }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing directory footprint: {{ directory }}"

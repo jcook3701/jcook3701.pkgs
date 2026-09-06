@@ -12,11 +12,17 @@ nfs_utils_use_svcgssd: >-
   {{ nfs_utils_use_kerberos | bool
       and nfs_gss_provider | default('gssproxy') == 'svcgssd' }}
 
-nfs_utils_server_service: "{{ nfs_utils_os_server_service | default('nfs-kernel-server') }}"
-nfs_utils_server_helper_service: "{{ nfs_utils_os_server_helper_service | default('rpc-svcgssd') }}"
-nfs_utils_client_service: "{{ nfs_utils_os_client_service | default('rpc-gssd') }}"
-nfs_utils_rpc_pipefs_service: "{{ nfs_utils_os_rpc_pipefs_service | default('var-lib-nfs-rpc_pipefs.mount') }}"
-nfs_utils_rsyslog_service: "{{ nfs_utils_os_rsyslog_service | default('rsyslog') }}"
+# NFS Services
+nfs_utils_server_service: "{{ nfs_utils_os_server_service
+                          | default('nfs-kernel-server') }}"
+nfs_utils_server_helper_service: "{{ nfs_utils_os_server_helper_service
+                          | default('rpc-svcgssd') }}"
+nfs_utils_client_service: "{{ nfs_utils_os_client_service
+                          | default('rpc-gssd') }}"
+nfs_utils_rpc_pipefs_service: "{{ nfs_utils_os_rpc_pipefs_service
+                          | default('var-lib-nfs-rpc_pipefs.mount') }}"
+nfs_utils_rsyslog_service: "{{ nfs_utils_os_rsyslog_service
+                          | default('rsyslog') }}"
 
 nfs_utils_user: "{{ nfs_utils_os_user | default('nobody') }}"
 nfs_utils_group: "{{ nfs_utils_os_group | default('nogroup') }}"
@@ -85,11 +91,13 @@ nfs_utils_file:
                           | default('/etc/systemd/system/override.conf') }}"
   override_rpc_svcgssd: "{{ nfs_utils_directory.override_rpc_svcgssd ~ '/override.conf'
                           | default('/etc/systemd/system/override.conf') }}"
-  log: "{{ nfs_utils_directory.log ~ 'nfs-debug.log'
+  log: "{{ nfs_utils_directory.log ~ '/nfs-debug.log'
                           | default('/var/log/nfs/debug.log') }}"
 
 nfs_utils_command:
-  nfsidmap: "{{ nfs_utils_directory.bin }}/nfsidmap"
+  nfsidmap: "{{ nfs_utils_directory.bin ~ '/nfsidmap'
+                          | default('/usr/sbin/nfsidmap') }}"
 
 nfs_utils_socket:
-  gssproxy_socket: "{{ nfs_utils_directory.gssproxy_socket }}/nfs.sock"
+  gssproxy_socket: "{{ nfs_utils_directory.gssproxy_socket ~ '/nfs.sock'
+                          | default('/var/lib/gssproxy/nfs.sock') }}"

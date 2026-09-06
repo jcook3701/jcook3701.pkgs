@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure rsyslog service is started and enabled
+  ansible.builtin.service:
+    name: "{{ rsyslog_service | default('rsyslog') }}"
+    state: started
+    enabled: true
+  become: true
+  when: (rsyslog_service ~ '.service' in ansible_facts.services)

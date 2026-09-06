@@ -4,6 +4,9 @@
 rsyslog_os_user: "root"
 rsyslog_os_group: "root"
 
+rsyslog_os_file_owner: "root"
+rsyslog_os_file_group: "root"
+
 rsyslog_os_service: "rsyslogd"
 rsyslog_os_dep_pkg_names: []
 rsyslog_os_pkg_names:

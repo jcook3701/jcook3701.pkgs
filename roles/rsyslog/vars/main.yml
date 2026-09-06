@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 # System account asset mapping settings
-rsyslog_user: "{{ rsyslog_os_account.user | default('root') }}"
-rsyslog_group: "{{ rsyslog_os_account.group | default('adm') }}"
+rsyslog_user: "{{ rsyslog_os_account.user | default('syslog') }}"
+rsyslog_group: "{{ rsyslog_os_account.group | default('syslog') }}"
+
+rsyslog_file_owner: "{{ rsyslog_os_file_owner | default('syslog') }}"
+rsyslog_file_group: "{{ rsyslog_os_file_group | default('adm') }}"
 
 # Dynamic platform tracking properties
 rsyslog_service: "{{ rsyslog_os_service | default('rsyslog') }}"

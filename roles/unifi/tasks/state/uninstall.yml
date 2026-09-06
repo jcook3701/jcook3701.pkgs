@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure Unifi service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ unifi_service | default('unifi') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (unifi_service ~ '.service' in ansible_facts.services)
+
+- name: Force deep purge of Unifi packages
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ unifi_pkg_names | default(['unifi']) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete
+
+- name: Ensure removal of Unifi group
+  ansible.builtin.group:
+    name: "{{ unifi_group | default('unifi') }}"
+    state: absent
+  become: true

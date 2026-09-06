@@ -19,7 +19,7 @@
 #}
 
 {%- macro nfs_rsyslog_conf() -%}
-if $msg contains 'nfsd' or $msg contains 'rpc' then {{ nfs_utils_file.log | default('/var/log/nfs/debug.log') }}
+if $msg contains_i 'nfs' or $msg contains_i 'rpc' then {{ nfs_utils_file.log | default('/var/log/nfs/debug.log') }}
 & stop
 {%- endmacro -%}
 

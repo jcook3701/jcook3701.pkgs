@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Unifi group exists
+  ansible.builtin.group:
+    name: "{{ unifi_group | default('unifi') }}"
+    state: present
+  become: true
+
+- name: Add users to the Unifi group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: "{{ unifi_group | default('unifi') }}"
+    append: true
+  loop: "{{ unifi_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Adding {{ user.name }} to {{ unifi_group }} group"
+  become: true
+  when:
+    - user.name is defined
+    - user.name | length > 0
