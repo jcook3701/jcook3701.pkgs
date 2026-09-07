@@ -3,7 +3,7 @@
 ---
 - name: Ensure base NFS configuration directories exist
   ansible.builtin.file:
-    path: "{{ conf_dir }}"
+    path: "{{ directory }}"
     state: directory
     owner: root
     group: root
@@ -14,8 +14,8 @@
     - "{{ nfs_utils_directory.request_key_d }}"
     - "{{ nfs_utils_directory.state }}/rpc_pipefs"
   loop_control:
-    loop_var: conf_dir
-    label: "Creating directory: {{ conf_dir }}"
+    loop_var: directory
+    label: "Creating directory: {{ directory }}"
 
 - name: Deploy shared NFS config templates
   ansible.builtin.template:

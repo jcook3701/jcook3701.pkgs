@@ -108,6 +108,7 @@
         "jemalloc2",
         "kadmin",
         "kadmind",
+        "kcm",
         "kdcdefaults",
         "kdedir",
         "keyctl",

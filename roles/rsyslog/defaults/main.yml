@@ -14,6 +14,9 @@ rsyslog_users:
 # Controls whether the role should actively verify or generate the targeted system logging group
 rsyslog_manage_group: true
 
+# Toggle whether rsyslog should pull kernel logs directly from the systemd journal socket
+rsyslog_use_journald_socket: false
+
 # High-level tracking flags for target configurations (Evaluated only when type is client)
 rsyslog_remote_server_hosts:
   - "syslog.example.com"

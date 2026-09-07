@@ -5,8 +5,8 @@
   ansible.builtin.file:
     path: "{{ nfs_utils_directory.log | default('/var/log/nfs') }}"
     state: directory
-    owner: root
-    group: root
+    owner: "root"
+    group: "{{ nfs_utils_rsyslog_group | default('syslog') }}"
     mode: "0755"
   become: true
 
@@ -14,9 +14,9 @@
   ansible.builtin.file:
     path: "{{ nfs_utils_file.log | default('/var/log/nfs/debug.log') }}"
     state: touch
-    owner: "{{ nfs_utils_rsyslog_file_owner | default('root') }}"
-    group: "{{ nfs_utils_rsyslog_file_group | default('adm') }}"
-    mode: "{{ nfs_utils_rsyslog_file_create_mode | default('0640') }}"
+    owner: "root"
+    group: "{{ nfs_utils_rsyslog_file_group | default('syslog') }}"
+    mode: "{{ nfs_utils_rsyslog_file_create_mode | default('0660') }}"
   become: true
 
 - name: Enable NFS kernel debugging natively

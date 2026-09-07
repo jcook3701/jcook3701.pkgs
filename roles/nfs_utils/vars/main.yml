@@ -27,6 +27,9 @@ nfs_utils_rsyslog_service: "{{ nfs_utils_os_rsyslog_service
 nfs_utils_user: "{{ nfs_utils_os_user | default('nobody') }}"
 nfs_utils_group: "{{ nfs_utils_os_group | default('nogroup') }}"
 
+nfs_utils_rsyslog_user: "{{ nfs_utils_os_rsyslog_user | default('syslog') }}"
+nfs_utils_rsyslog_group: "{{ nfs_utils_os_rsyslog_group | default('syslog') }}"
+
 nfs_utils_dep_pkg_names: "{{ nfs_utils_os_dep_pkg_names | default([]) }}"
 
 nfs_utils_pkg_names: >-

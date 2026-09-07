@@ -33,8 +33,14 @@
 #### MODULES ####
 #################
 
+{% if rsyslog_use_journald_socket | bool %}
+# Use systemd socket to bypass dmesg_restrict kernel privilege barriers
 module(load="imuxsock" SysSock.Use="off") # Turn off legacy socket
 input(type="imuxsock" Socket="/run/systemd/journal/syslog") # Read systemd directly
+{% else %}
+# Standard default local logging socket allocation
+module(load="imuxsock")
+{% endif %}
 
 module(load="imklog")   # provides kernel logging support
 

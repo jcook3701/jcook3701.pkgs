@@ -39,6 +39,12 @@ argument_specs:
         default: true
         description: "Controls whether the role should actively verify or generate the targeted system logging group."
 
+      rsyslog_use_journald_socket:
+        type: "bool"
+        required: false
+        default: false
+        description: "Toggle whether rsyslog should pull kernel logs directly from the systemd journal socket to bypass dmesg_restrict privilege barriers."
+
       rsyslog_remote_server_hosts:
         type: "list"
         elements: "str"

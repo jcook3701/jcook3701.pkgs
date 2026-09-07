@@ -10,6 +10,7 @@
 | `rsyslog_node_type` | Architecture deployment target type determining local operations or streaming topologies. Choices: `local`, `client`, `master`. | `"local"` |
 | `rsyslog_users` | A declarative array of local system accounts to append to the system logging management group. Each list item is a dictionary containing:<br>• **`name`** *(str, required)*: The exact local username string to grant logging audit management access permissions. | `[{"name": "{{ ansible_user \| default(ansible_user_id) }}"}]` |
 | `rsyslog_manage_group` | Controls whether the role should actively verify or generate the targeted system logging group. | `true` |
+| `rsyslog_use_journald_socket` | Toggle whether rsyslog should pull kernel logs directly from the systemd journal socket to bypass dmesg_restrict privilege barriers. | `false` |
 | `rsyslog_remote_server_hosts` | High-availability list of target remote log collection hostnames or IP endpoints (evaluated sequentially when `rsyslog_node_type` is 'client'). | `["syslog.example.com"]` |
 | `rsyslog_remote_server_port` | Target destination transport port for remote event streaming paths. | `514` |
 | `rsyslog_remote_protocol` | Underlying network transport socket protocol utilized for remote shipping layers. Choices: `udp`, `tcp`. | `"udp"` |

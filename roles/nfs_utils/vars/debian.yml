@@ -8,6 +8,9 @@ nfs_utils_os_client_service: "rpc-gssd"
 nfs_utils_os_user: "nobody"
 nfs_utils_os_group: "nogroup"
 
+nfs_utils_rsyslog_os_user: "syslog"
+nfs_utils_rsyslog_os_group: "syslog"
+
 nfs_utils_os_dep_pkg_names:
   - keyutils
   - "{{ (nfs_utils_enable_debug_logging | default(true) | bool) | ternary('rsyslog', omit) }}"
