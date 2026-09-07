@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load AnyDesk OS-specific variables
+  ansible.builtin.include_vars: "{{ anydesk_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: anydesk_vars
+    label: "Loading variables file: {{ anydesk_vars }}"
+
+- name: Ensure AnyDesk is installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: anydesk_state | default('present') == 'present'
+
+- name: Ensure AnyDesk is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: anydesk_state | default('present') == 'absent'
+
+- name: Ensure AnyDesk is purged from the system
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: anydesk_state | default('present') == 'teardown'

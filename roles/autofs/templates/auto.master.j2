@@ -1,0 +1,35 @@
+{#
+# auto.master.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro auto_master() -%}
+# Managed by Ansible Platform Infrastructure Automation Engine
+# Master Map Directory Routing Control Sheet
+
+# 1. Native Top-Level Directory Automount Junction Mounts
+{% for mount in autofs_bootstrap_mounts | default([]) %}
+{{ mount.mount_point }} {{ autofs_directory.conf | default('/etc') }}/auto.{{ mount.name }} --timeout={{ mount.timeout | default(60) }}
+{% endfor %}
+
+# 2. Global Dynamic Multi-Tenant Directory Includes
++dir:{{ autofs_directory.conf | default('/etc') }}/auto.master.d
++auto.master
+{%- endmacro -%}
+
+{{- auto_master() }}

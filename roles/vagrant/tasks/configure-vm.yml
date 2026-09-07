@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create admin user
+  when: vagrant_admin_user is defined
+  delegate_to: "{{ vagrant_vm_name }}"
+  become: true
+  block:
+  - name: Create a dedicated admin user
+    ansible.builtin.user:
+      name: "{{ vagrant_admin_user }}"
+      password: "{{ 'vagrant' | password_hash('sha512') }}"
+      shell: /bin/bash
+      groups: sudo
+      append: true
+      generate_ssh_key: true
+      ssh_key_bits: 4096
+      state: present
+
+  - name: Ensure account is unlocked and not expired
+    ansible.builtin.shell: "usermod -U {{ vagrant_admin_user }} && chage -M 99999 {{ vagrant_admin_user }}"
+    become: true
+
+  - name: Allow admin user to use sudo without a password
+    ansible.builtin.lineinfile:
+      path: "/etc/sudoers.d/{{ vagrant_admin_user }}"
+      line: "{{ vagrant_admin_user }} ALL=(ALL) NOPASSWD: ALL"
+      state: present
+      mode: "0440"
+      create: true
+      validate: >-
+        visudo -cf %s
+
+  - name: Add local public key to admin user
+    ansible.posix.authorized_key:
+      user: "{{ vagrant_admin_user }}"
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"

@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Flatpak installation and repositories."
+    description: "This role ensures Flatpak is configured and manages remote repositories."
+    author: "Your Name"
+    options:
+      flatpak_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of the Flatpak package and configuration."
+
+      flatpak_users:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "A declarative array of local system accounts to be added to the Flatpak runtime group."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The exact local username string to grant Flatpak application management permissions."
+
+      flatpak_manage_group:
+        type: "bool"
+        default: true
+        description: "Toggles whether the role ensures the foundational 'flatpak' system group is actively declared and maintained."
+
+      flatpak_repos:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "A list of Flatpak remote repositories to configure."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The internal name for the Flatpak repository (e.g., flathub)."
+          url:
+            type: "str"
+            required: true
+            description: "The full URL pointing to the .flatpakrepo file."
+
+      flatpak_manage_repos:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls whether the role should actively manage Flatpak remote repositories."

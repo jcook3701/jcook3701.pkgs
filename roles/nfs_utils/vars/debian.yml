@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+nfs_utils_os_server_service: nfs-kernel-server
+nfs_utils_os_server_helper_service: "rpc-svcgssd"
+nfs_utils_os_client_service: "rpc-gssd"
+
+nfs_utils_os_user: "nobody"
+nfs_utils_os_group: "nogroup"
+
+nfs_utils_rsyslog_os_user: "syslog"
+nfs_utils_rsyslog_os_group: "syslog"
+
+nfs_utils_os_dep_pkg_names:
+  - keyutils
+  - "{{ (nfs_utils_enable_debug_logging | default(true) | bool) | ternary('rsyslog', omit) }}"
+
+nfs_utils_os_server_pkg_names:
+  - nfs-kernel-server
+
+nfs_utils_os_client_pkg_names:
+  - nfs-common
+
+nfs_utils_os_directory:
+  bin: "/usr/sbin"
+  conf: "/etc"
+  conf_d: "/etc/nfs.conf.d"
+  exports_d: "/etc/exports.d"
+  gssproxy_socket: "/var/lib/gssproxy"
+  request_key: "/etc"
+  request_key_d: "/etc/request-key.d"
+  state: "/var/lib/nfs"
+  defaults: "/etc/default"
+  override: "/etc/systemd/system"
+  log: "/var/log/nfs"

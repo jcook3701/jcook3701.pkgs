@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load Samba OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Load Samba Member Group variables
+  ansible.builtin.include_vars: "member_group.yml"
+
+- name: Install Samba
+  ansible.builtin.include_tasks: install.yml
+  when: samba_state | default('present') == 'present'
+
+- name: Uninstall Samba
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - samba_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - samba_pkg_names[0] in ansible_facts.packages
+
+- name: Complete Purge and Tear-Down of Samba Environment
+  ansible.builtin.include_tasks: teardown.yml
+  when:
+    - samba_state | default('present') == 'teardown'

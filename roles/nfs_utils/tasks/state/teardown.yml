@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure NFS service is stopped and configurations purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Forcefully clean up active client network file system mounts
+  ansible.builtin.mount:
+    src: "{{ mount.src }}"
+    path: "{{ mount.path }}"
+    fstype: "nfs"
+    state: "absent"
+  become: true
+  loop: "{{ nfs_utils_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: " {{ mount.src }}"
+  when:
+    - nfs_utils_node_type == 'client'
+    - nfs_utils_client_mounts is defined
+    - nfs_utils_client_mounts | length > 0
+
+- name: Forcefully evict stale Linux kernel keyring descriptors from active memory pools
+  ansible.builtin.command: "keyctl clear {{ kernel_ring }}"
+  become: true
+  changed_when: true
+  failed_when: false
+  loop:
+    - "@u"
+    - "@s"
+  loop_control:
+    loop_var: kernel_ring
+    label: "Flushing kernel crypto ring channel: {{ kernel_ring }}"
+
+- name: Clean up remaining persistent and transient NFS runtime state directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: "absent"
+  become: true
+  loop:
+    - "{{ nfs_utils_directory.state }}"
+    - "{{ nfs_utils_directory.conf_d }}"
+    - "{{ nfs_utils_directory.exports_d }}"
+    - "{{ nfs_utils_directory.override_nfs_server }}"
+    - "{{ nfs_utils_directory.override_rpc_gssd }}"
+    - "{{ nfs_utils_directory.override_rpc_svcgssd }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing directory: {{ directory }}"
+
+- name: Clean up remaining persistent and transient NFS runtime state files
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: "absent"
+  become: true
+  loop:
+    - "{{ nfs_utils_file.conf }}"
+    - "{{ nfs_utils_file.exports }}"
+    - "{{ nfs_utils_file.idmapd_conf }}"
+    - "{{ nfs_utils_file.nfs_idmap_conf }}"
+  loop_control:
+    loop_var: file
+    label: "Removing file: {{ file }}"

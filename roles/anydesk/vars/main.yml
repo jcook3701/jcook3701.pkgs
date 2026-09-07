@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Package Settings
+anydesk_pkg_dep_names: "{{ anydesk_os_dep_pkg_names | default([]) }}"
+anydesk_pkg_names: "{{ anydesk_os_pkg_names | default(['anydesk']) }}"
+
+# System File Settings
+anydesk_directory:
+  conf: "{{ anydesk_os_directory.conf | default('/etc/anydesk') }}"
+  cache: "{{ anydesk_os_directory.conf | default('/etc/anydesk/cache') }}"
+  log: "{{ anydesk_os_directory.log | default('/etc/log') }}"
+
+anydesk_file:
+  service_conf: "{{ anydesk_directory.conf }}/service.conf"
+  system_conf: "{{ anydesk_directory.conf }}/system.conf"
+  log: "{{ anydesk_directory.log }}/anydesk.trace"
+
+# Repository Specifics
+anydesk_repo_id: "{{ anydesk_os_repo_id | default('anydesk-stable') }}"
+anydesk_repo_name: "{{ anydesk_os_repo_name | default('AnyDesk') }}"

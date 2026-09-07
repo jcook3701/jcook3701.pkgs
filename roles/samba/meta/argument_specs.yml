@@ -1,0 +1,449 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Enterprise multi-OS hybrid Samba automation core"
+    description: "Deploys standalone, NT4 Classic PDC (OpenLDAP), Active Directory Domain Controllers, or storage mounting clients."
+    author: "Jared Cook"
+    options:
+      # Control switches
+      samba_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "Target operational configuration lifecycle state."
+
+      samba_is_file_server:
+        type: bool
+        default: false
+        description: "Enables provisioning of standard custom shares, print queues, and homes."
+
+      samba_deployment_mode:
+        type: "str"
+        default: "addc"
+        choices: ["addc", "ads_member", "nt4_pdc", "nt4_member", "standalone", "client"]
+        description: "Target identity backend model orchestration switch."
+
+      samba_client_target_mode:
+        type: str
+        default: "sssd"
+        required: false
+        choices: ["sssd", "addc", "legacy"]
+        description: >-
+          Dictates the identity mapping (IDMAP) layout strategy for workstation clients.
+          Only evaluated when 'samba_deployment_mode' is set to 'client'.
+          'sssd' triggers local TDB fallback limits and hooks the sss backend plugin.
+          'addc' completely suppresses IDMAP blocks to match domain controller native behaviors.
+          'legacy' evaluates traditional global fallback variable backends and ranges.
+
+      # Domain Options
+      samba_top_level_domain:
+        type: "str"
+        default: "com"
+        description: "Root namespace domain extension format identifier."
+
+      samba_second_level_domain:
+        type: "str"
+        default: "example"
+        description: "Core internal realm name cluster identifier string."
+
+      samba_domain_name:
+        type: "str"
+        description: "Unified compiled host fully qualified string token identifier address."
+
+      samba_workgroup:
+        type: "str"
+        default: "WORKGROUP"
+        description: "NetBIOS domain or workgroup token name."
+
+      samba_realm:
+        type: "str"
+        default: "EXAMPLE.COM"
+        description: "Target Kerberos Realm structure realm mapping indicator string."
+
+      # Server Naming and Identification
+      samba_netbios_name:
+        type: "str"
+        description: "Uppercase machine identity marker string."
+
+      # Networking & Interface Binding
+      samba_bind_interfaces_only:
+        type: "str"
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Enforces strict network service listening constraints on specific adapters."
+
+      samba_interfaces:
+        type: "str"
+        default: "lo eth0"
+        description: "The space-separated interfaces array binding block."
+
+      samba_port:
+        type: "str"
+        default: "445"
+        description: "Target SMB modern listening transport system port."
+
+      # NT4 Classic Legacy Services Configuration
+      samba_wins_support:
+        type: "str"
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Enables netbios WINS query registration name server resolutions."
+
+      samba_domain_master:
+        type: "str"
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Enables cross-subnet browser list tracking synch synchronization."
+
+      samba_local_master:
+        type: "str"
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Enables local subnet browser broadcast elections."
+
+      samba_preferred_master:
+        type: "str"
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Forces a master browser election request on startup loop initialization."
+
+      samba_os_level:
+        type: "str"
+        default: "65"
+        description: "Browser election weighting index threshold parameter value."
+
+      # NT4 Classic Legacy Directory Backend Integration
+      samba_ldap_proto:
+        type: "str"
+        default: "ldaps"
+        choices: ["ldap", "ldaps"]
+        description: "Underlying openldap protocol connection driver schema."
+
+      samba_ldap_host:
+        type: "str"
+        default: "ldap.internal.net"
+        description: "Target Directory service hostname destination marker."
+
+      samba_ldap_port:
+        type: int
+        default: 636
+        description: "The TCP network port number used for the external LDAP directory connection."
+
+      samba_passdb_backend:
+        type: "str"
+        description: "Compiled credential mapping query storage module backend syntax string."
+
+      # OpenLDAP Schema Offsets
+      samba_ldap_suffix:
+        type: "str"
+        default: "dc=example,dc=com"
+        description: "Root DN directory context string mapping base."
+
+      samba_ldap_user_suffix:
+        type: "str"
+        default: "ou=People"
+        description: "User leaf object organizational container schema extension."
+
+      samba_ldap_group_suffix:
+        type: "str"
+        default: "ou=Groups"
+        description: "Groups leaf object organizational container schema extension."
+
+      samba_ldap_machine_suffix:
+        type: "str"
+        default: "ou=Computers"
+        description: "Computer leaf object organizational container schema extension."
+
+      samba_ldap_idmap_suffix:
+        type: "str"
+        default: "ou=Idmap"
+        description: "Identity map translation mapping container layout."
+
+      samba_ldap_admin_dn:
+        type: "str"
+        default: "cn=ldap_admin,dc=example,dc=com"
+        description: "OpenLDAP management vault system bind entry address token."
+
+      samba_ldap_secret:
+        type: "str"
+        default: "LdapBindSecretPassword"
+        description: "Secure storage directory credential write bind authentication key."
+
+      # Identity Mapping (IDMAP) Real Estate Engine
+      samba_idmap_backend:
+        type: "str"
+        default: "autorid"
+        choices: ["tdb", "ldap", "autorid"]
+        description: "Internal local identity numeric mapper translation module database."
+
+      samba_idmap_range_low:
+        type: "str"
+        default: "10000"
+        description: "The minimum threshold boundary index integer string."
+
+      samba_idmap_range_high:
+        type: "str"
+        default: "99999"
+        description: "The maximum upper limit index ceiling sequence layout."
+
+      # Active Directory Domain Controller Specific Engine
+      samba_addc_dns_backend:
+        type: "str"
+        default: "SAMBA_INTERNAL"
+        choices: ["SAMBA_INTERNAL", "BIND9_DLZ", "BIND9_FLATFILE", "NONE"]
+        description: "Underlying integrated namespace authority platform name engine module."
+
+      samba_dns_forwarders:
+        type: list
+        elements: str
+        default: ["1.1.1.1", "8.8.8.8"]
+        description: "External target network name server entries handling outside links."
+
+      samba_primary_dc:
+        type: str
+        default: "localhost"
+        description: "Central bootstrap engine host identification entry."
+
+      samba_additional_dcs:
+        type: list
+        elements: str
+        default: []
+        description: "Additional cluster domain nodes tracking matrix array."
+
+      # Protocol Security Engine
+      samba_security_mode:
+        type: "str"
+        default: "user"
+        choices: ["user", "share", "domain", "ads"]
+        description: "Controls the underlying authentication method style for non-AD DC legacy server deployments."
+
+      samba_server_signing:
+        type: "str"
+        default: "mandatory"
+        choices: ["mandatory", "required", "auto", "disabled"]
+        description: "Enforces SMB cryptographic frame sign verification protection loops."
+
+      samba_smb_encrypt:
+        type: "str"
+        default: "mandatory"
+        choices: ["mandatory", "required", "auto", "disabled"]
+        description: "Enforces frame body wire cipher wrapping protections."
+
+      samba_server_min_protocol:
+        type: "str"
+        default: "SMB2_10"
+        description: "Minimum dialect server ingestion driver standard sequence threshold."
+
+      samba_server_max_protocol:
+        type: "str"
+        default: "SMB3"
+        description: "Maximum server transmission operational transport system capability."
+
+      samba_client_min_protocol:
+        type: "str"
+        default: "SMB2_10"
+        description: "Minimum client loop execution connection standard threshold sequence."
+
+      samba_client_max_protocol:
+        type: "str"
+        default: "SMB3"
+        description: "Maximum client dialect frame transport transmission execution option capability."
+
+      # Administrative Credentials
+      samba_admin_user:
+        type: "str"
+        default: "samba-admin"
+        description: "Samba localized cluster infrastructure manager security credential account."
+
+      samba_admin_password:
+        type: "str"
+        default: "SecretPassword123"
+        description: "Cleartext initialization structural cluster access credential passphrase string."
+
+      # Storage Allocation Schemas
+      samba_homes_base_dir:
+        type: "str"
+        default: "/home/samba/profiles"
+        description: "Local absolute platform partition target location root for user directories."
+
+      samba_addc_provision_users:
+        type: "list"
+        elements: "dict"
+        description: "Active Directory user database initialization matrix."
+        options:
+          username:
+            type: "str"
+            required: true
+            description: "Unique account logon identity string."
+          firstname:
+            type: "str"
+            description: "Given name utilized for display formatting."
+          lastname:
+            type: "str"
+            description: "Surname field utilized for display formatting."
+          description:
+            type: "str"
+            description: "Administrative notation regarding the account purpose."
+          title:
+            type: "str"
+            description: "Organizational job title designation."
+          company:
+            type: "str"
+            description: "Corporate entity grouping descriptor."
+          mail:
+            type: "str"
+            description: "Primary electronic email mapping destination address."
+          uid:
+            type: "int"
+            required: true
+            description: "Explicit corporate numeric POSIX User Identifier mapping."
+          gid:
+            type: "int"
+            required: true
+            description: "Explicit corporate numeric POSIX Group Identifier mapping."
+          primary_group:
+            type: "str"
+            description: "Default creation group ownership assignment parameter."
+          password:
+            type: "str"
+            required: true
+            description: "Passphrase verification security authentication token."
+          groups:
+            type: "list"
+            elements: "str"
+            description: "Collection array detailing supplementary security group memberships."
+          is_sudoer:
+            type: "bool"
+            description: "Controls privilege escalation assignments across client layers."
+          is_pxe_worker:
+            type: "bool"
+            description: "Custom network lifecycle flag tagging infrastructure automation profiles."
+          login_shell:
+            type: "str"
+            description: "Target execution command interpreter binary location path."
+          home_directory:
+            type: "str"
+            description: "Absolute localized system path for user desktop profile storage."
+          password_must_change:
+            type: "bool"
+            description: "Forces mandatory interactive security credential updates upon first login."
+          account_disabled:
+            type: "bool"
+            description: "Toggles headless lockout status without destructive database pruning."
+          ssh_public_keys:
+            type: "list"
+            elements: "str"
+            description: "Cryptographic validation matrices for public key terminal connections."
+
+      samba_shares:
+        type: list
+        elements: dict
+        default: []
+        description: "Custom volume storage shares exported from the server engine infrastructure node."
+        options:
+          name:
+            type: str
+            required: true
+            description: "Shared network access tracking string name header."
+          path:
+            type: str
+            required: true
+            description: "Target physical folder storage directory path map."
+          comment:
+            type: str
+            description: "Volume documentation information description text label."
+          public:
+            type: str
+            choices: ["yes", "no"]
+            description: "Exposes directory structures across discovery contexts."
+          valid_users:
+            type: "list"
+            elements: "dict"
+            required: false
+            description: "A structured list of target domain principals mapped to the file share gates."
+            options:
+              name:
+                type: "str"
+                required: true
+                description: "The targeted username or corporate network directory security group name."
+              type:
+                type: "str"
+                required: true
+                choices:
+                  - "user"
+                  - "group"
+                description: "Specifies whether the targeted entity identifier resolves as a local account user or an enterprise domain group map."
+          force_user:
+            type: str
+            description: "Overrides processing active system account contexts."
+          force_group:
+            type: str
+            description: "Overrides processing active group resource access tables."
+          read_only:
+            type: str
+            choices: ["yes", "no"]
+            description: "Locks down active processing contents from edits."
+          writable:
+            type: str
+            choices: ["yes", "no"]
+            description: "Grants modification capabilities to directory paths."
+          browsable:
+            type: str
+            choices: ["yes", "no"]
+            description: "Exposes mount names in discovery index sweeps."
+          guest_ok:
+            type: str
+            choices: ["yes", "no"]
+            description: "Grants access permissions without credential checks."
+          create_mask:
+            type: str
+            description: "Octal permissions map applied to newly written items."
+          force_create_mode:
+            type: str
+            description: "Forces octal bit flags onto file writes."
+          directory_mask:
+            type: str
+            description: "Octal permissions map applied to newly written folder blocks."
+          force_directory_mode:
+            type: str
+            description: "Forces octal bit flags onto directory generation actions."
+
+      samba_client_enable_mounts:
+        type: "bool"
+        default: false
+        description: "Safety switch allowing static fstab kernel client layouts to be enabled or skipped globally."
+
+      samba_client_mounts:
+        type: list
+        elements: dict
+        default: []
+        description: "Remote shares mapped into the local file directory tree via clients."
+        options:
+          name:
+            type: str
+            required: true
+            description: "The unique descriptive identifier naming the target file share asset block."
+          src:
+            type: str
+            required: true
+            description: "Remote UNC share target resource block path."
+          path:
+            type: str
+            required: true
+            description: "Local system directory anchor target link endpoint path."
+          username:
+            type: str
+            required: true
+            description: "Domain system client processing credential login."
+          password:
+            type: str
+            required: true
+            description: "Domain system client access passphrase key secret."
+          owner_uid:
+            type: str
+            description: "Assigned directory processing system mount owner mapping account."
+          owner_gid:
+            type: str
+            description: "Assigned directory processing system mount owner mapping group."

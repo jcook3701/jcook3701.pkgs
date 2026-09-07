@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure MongoDB directories exist
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ mongodb_user | default('mongodb') }}"
+    group: "{{ mongodb_group | default('mongodb') }}"
+    mode: "0755"
+  loop:
+    - "{{ mongodb_directory.data_root | default('/var/lib/mongodb') }}"
+    - "{{ mongodb_directory.log_root | default('/var/log/mongodb') }}"
+  loop_control:
+    loop_var: directory
+    label: "Create directory: {{ directory }}"
+
+- name: Ensure MongoDB configuration and log files exist
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: touch
+    owner: "{{ mongodb_user | default('mongodb') }}"
+    group: "{{ mongodb_group | default('mongodb') }}"
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+  loop:
+    - "{{ mongodb_file.mongod_log | default('/var/log/mongodb/mongod.log') }}"
+  loop_control:
+    loop_var: file
+    label: "Create file: {{ file }}"

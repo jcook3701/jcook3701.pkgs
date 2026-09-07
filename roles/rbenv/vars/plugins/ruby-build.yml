@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+rbenv_ruby_build_plugin:
+  name: "ruby-build"
+  repo_url: https://github.com/rbenv/ruby-build.git
+  bashrc: |
+    # ruby-build initialization
+    export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
+
+# - name: Clone ruby-build repository
+#  ansible.builtin.git:
+#    repo: https://github.com/rbenv/ruby-build.git
+#    dest: "{{ sudo_user_home }}/.rbenv/plugins/ruby-build"
+#    version: master
+#  become: true
+#  become_user: "{{ sudo_user }}"
+#  when: sudo_user != "root"

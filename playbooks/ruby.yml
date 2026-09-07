@@ -14,4 +14,3 @@
     - name: Install ruby
       ansible.builtin.include_role:
         name: jcook3701.pkgs.ruby
-        tasks_from: ruby-install.yml

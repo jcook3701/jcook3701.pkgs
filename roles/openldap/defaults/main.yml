@@ -1,0 +1,129 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+openldap_state: present
+# Node Role Configuration (Options: master, slave, client)
+openldap_node_type: master
+openldap_admin_servers: []
+openldap_slave_servers: [] # TODO: Use or remove
+
+## Domain Options ##
+openldap_top_level_domain: "com"
+openldap_second_level_domain: "example"
+openldap_domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
+
+openldap_organization_name: "Example IT Services"
+
+openldap_admin_user: admin
+openldap_admin_password: "SecretPassword123"
+
+# The persistent directory path where users want backups to sit on the controller
+openldap_backup_dir: "/var/backups/openldap"
+
+## Replication Parameters ##
+# Unique ID number for each slave replica (Must be unique per host if looping)
+openldap_replica_id: "001"
+
+# Replication account credentials used by slaves to query the master
+openldap_replication_user: syncrepluser
+openldap_replication_password: "SecretPassword123"
+
+## Security & Encryption (TLS) ##
+openldap_use_tls: true
+
+openldap_generate_ca: true
+
+openldap_tls_ca_cert: "{{ openldap_directory.certs }}/master_ca.pem"
+openldap_tls_ca_key: "{{ openldap_directory.certs }}/master_ca_key.pem"
+openldap_tls_ca_csr: "{{ openldap_directory.certs }}/master_ca_ldap.csr"
+openldap_tls_cert: "{{ openldap_directory.certs }}/cert.pem"
+openldap_tls_key: "{{ openldap_directory.certs }}/priv.pem"
+openldap_tls_csr: "{{ openldap_directory.certs }}/ldap.csr"
+openldap_tls_cipher_suite: "HIGH:MEDIUM:+SSLv3"
+
+openldap_sasl_nocanon: "on"
+openldap_tls_reqcert: "allow"
+
+openldap_cleartext_port: 389
+openldap_secure_port: 636
+
+## Core Database & Performance Tuning ##
+# Database engine type (MDB is standard for modern OpenLDAP installs)
+openldap_database_backend: mdb
+openldap_database_maxsize: 1073741824  # Max DB size in bytes (1 GB default)
+
+# Database caching and entry index limits
+openldap_size_limit: 500
+openldap_time_limit: 3600
+
+# Extra Schemas Activations Matrix Switches
+openldap_autofs: false
+openldap_guac: false
+openldap_ppolicy: false
+openldap_samba: false
+openldap_sudo: false
+openldap_openssh: false
+openldap_kerberos: false
+
+## Password Policy (ppolicy) Operational Constraints ##
+openldap_ppolicy_min_length: 8
+openldap_ppolicy_max_failure: 5
+openldap_ppolicy_lockout_duration: 1800 # 30 minutes in seconds
+openldap_ppolicy_history_count: 5
+openldap_ppolicy_expire_warning: 432000 # 5 days in seconds
+
+## Samba Policy Operational Constraints ##
+openldap_samba_domain: "{{ openldap_second_level_domain | upper }}"
+
+openldap_bootstrap_groups:
+  - name: "Domain Admins"
+    gid: 512
+    description: "Privileged directory administrators with global system access"
+  - name: "Domain Users"
+    gid: 513
+    description: "Standard directory network user account container"
+  - name: "Samba Operators"
+    gid: 547
+    description: "Service accounts and managers handling filesystem shares"
+
+openldap_bootstrap_users:
+  - username: "example-admin"
+    firstname: "Example"
+    lastname: "Admin"
+    description: "Primary Infrastructure Administrator Account"
+    title: "Systems Architect"
+    company: "Example Enterprises"
+    mail: "example-admin@example.com"
+    uid: 5001
+    gid: 5001
+    primary_group: "domain admins"
+    password: "SamplePassword123!"
+    groups: ["Domain Admins", "Domain Users"]
+    is_sudoer: true
+    login_shell: "/bin/bash"
+    home_directory: "/home/example-admin"
+    password_must_change: false
+    account_disabled: false
+    ssh_public_keys: []
+
+openldap_autofs_mounts:
+  - name: "drivers"
+    fstype: "cifs"
+    auth_mode: "krb5"
+    client_mount_parent: "/media/network_share"
+
+openldap_guac_connections:
+  - name: "ssh-example-computer"
+    protocol: "ssh"
+    parent_ou: "ssh"
+    parameters:
+      - "hostname=example-computer.example.com"
+      - "port=22"
+      - "color-scheme=white-black"
+      - "enable-sftp=true"
+      - "sftp-root-directory=/"
+    members:
+      - "example-user"
+
+# Ansible Developer Debugging
+openldap_template_debug: false

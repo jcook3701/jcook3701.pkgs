@@ -1,0 +1,111 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kerberos_propagation_servers: >-
+  {{ (kerberos_admin_servers
+      + kerberos_replica_servers)
+      | unique | list }}
+
+kerberos_all_nodes: >-
+  {{ (kerberos_admin_servers
+      + kerberos_replica_servers
+      + kerberos_client_nodes
+      + kerberos_samba_file_servers
+      + kerberos_nfs_file_servers
+      + kerberos_http_servers
+      + kerberos_ldap_servers)
+      | unique | list }}
+
+kerberos_user: "{{ kerberos_os_user | default('root') }}"
+kerberos_group: "{{ kerberos_os_group | default('root') }}"
+
+kerberos_server_pkgs: "{{ kerberos_os_server_pkgs | default([]) }}"
+kerberos_replica_pkgs: "{{ kerberos_os_replica_pkgs | default([]) }}"
+kerberos_client_pkgs: "{{ kerberos_os_client_pkgs | default([]) }}"
+kerberos_shared_libs: "{{ kerberos_os_shared_libs | default([]) }}"
+
+kerberos_raw_packages: >-
+  {% if kerberos_node_type == 'master' %}
+    {{ (kerberos_server_pkgs + kerberos_client_pkgs) | to_json }}
+  {% elif kerberos_node_type == 'replica' %}
+    {{ (kerberos_replica_pkgs + kerberos_client_pkgs) | to_json }}
+  {% else %}
+    {{ kerberos_client_pkgs | to_json }}
+  {% endif %}
+
+kerberos_pkg_names: "{{ kerberos_raw_packages | from_json }}"
+
+# 1. Compile the service structure as a raw YAML text block
+kerberos_raw_services: >-
+  {% if kerberos_node_type == 'master' %}
+    {{ [kerberos_kdc_service, kerberos_admin_service] | to_yaml }}
+  {% elif kerberos_node_type == 'replica' %}
+    {{ [kerberos_kdc_service, kerberos_kprop_service] | to_yaml }}
+  {% else %}
+    {{ [] | to_yaml }}
+  {% endif %}
+
+# 2. Convert it immediately into a native, true executable data list
+kerberos_services: "{{ kerberos_raw_services | from_yaml }}"
+
+# Dynamic references mapping directly to loaded OS variables
+kerberos_directory:
+  conf: "{{ kerberos_os_directory.conf | default('/etc') }}"
+  conf_d: "{{ kerberos_os_directory.conf_d | default('/etc/krb5.conf.d') }}"
+  kdc_conf: "{{ kerberos_os_directory.kdc_conf | default('/etc/krb5kdc') }}"
+  log: "{{ kerberos_os_directory.log | default('/var/log/krb5') }}"
+  state: "{{ kerberos_os_directory.state | default('/var/lib/krb5kdc') }}"
+  systemd: "{{ kerberos_os_directory.systemd | default('/etc/systemd/system') }}"
+  dict: "{{ kerberos_os_directory.dict | default('/usr/share/dict') }}"
+  defaults: "{{ kerberos_os_directory.defaults | default('/etc/default') }}"
+
+kerberos_file:
+  global_config: "{{ kerberos_directory.conf }}/krb5.conf"
+  kdc_config: "{{ kerberos_directory.kdc_conf }}/kdc.conf"
+  admin_acl: "{{ kerberos_directory.kdc_conf }}/kadm5.acl"
+  kprop_acl: "{{ kerberos_directory.kdc_conf }}/kpropd.acl"
+  stash: "{{ kerberos_directory.kdc_conf }}/{{ kerberos_os_stash_name | default('stash') }}"
+  replica_datatrans: "{{ kerberos_directory.kdc_conf }}/replica_datatrans"
+  principal: "{{ kerberos_directory.state }}/principal"
+  default_log: "{{ kerberos_directory.log }}/krb5libs.log"
+  kdc_log: "{{ kerberos_directory.log }}/krb5kdc.log"
+  admin_log: "{{ kerberos_directory.log }}/kadmind.log"
+  principal_ulog: "{{ kerberos_directory.state }}/principal.ulog"
+  replica_ulog: "{{ kerberos_directory.state }}/replica.ulog"
+  unlimited_ulog: "{{ kerberos_directory.state }}/unlimited.ulog"
+  dictionary: "{{ kerberos_directory.dict }}/words"
+  admin_defaults: "{{ kerberos_directory.defaults }}/{{ kerberos_os_admin_defaults_name | default('krb5-admin-server') }}"
+
+# Centralized Keytab Filename and Path Management Switchboard
+kerberos_keytabs:
+  # ---- The core system keytabs ----
+  kdc_admin: "{{ kerberos_directory.kdc_conf }}/kadm5.keytab"
+  system_default: "{{ kerberos_directory.conf }}/krb5.keytab"
+  cifs_default: "{{ kerberos_directory.conf }}/samba.keytab"
+  ldap_default: "{{ kerberos_directory.conf }}/ldap.keytab"
+  http_default: "{{ kerberos_directory.conf }}/http.keytab"
+  nfs_default: "{{ kerberos_directory.conf }}/nfs.keytab"
+
+  # ---- Locally generated files on the KDC master before transit ----
+  master_hosts_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.hosts.transit.keytab"
+  master_kiprop_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.kiprop.transit.keytab"
+  master_cifs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.cifs.transit.keytab"
+  master_ldap_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.ldap.transit.keytab"
+  master_http_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.http.transit.keytab"
+  master_nfs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.nfs.transit.keytab"
+
+  # ---- Controller staging cache names (/tmp on Ansible deployment machine) ----
+  controller_hosts_staging: "/tmp/ansible_hosts_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_kiprop_staging: "/tmp/ansible_kiprop_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_cifs_staging: "/tmp/ansible_cifs_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_ldap_staging: "/tmp/ansible_ldap_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_http_staging: "/tmp/ansible_http_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+  controller_nfs_staging: "/tmp/ansible_nfs_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"
+
+  # ---- Target destination placement names when files land on client/replica filesystem ----
+  client_hosts_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.hosts.delivered.keytab"
+  replica_kiprop_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.kiprop.delivered.keytab"
+  client_cifs_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.cifs.delivered.keytab"
+  client_ldap_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.ldap.delivered.keytab"
+  client_http_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.http.delivered.keytab"
+  client_nfs_delivered_transit: "/tmp/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.nfs.delivered.keytab"

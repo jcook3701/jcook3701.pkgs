@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Temporarily point system to public DNS to prevent network dropout
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver 8.8.8.8"
+    insertbefore: BOF
+    mode: "0644"
+  become: true
+
+- name: Stop Bind9 Services and Uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Force deep purge of Bind9 packages
+  ansible.builtin.apt:
+    name: "{{ bind9_pkg_names }}"
+    state: absent
+    purge: true
+    autoremove: true
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Remove configuration templates
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - "{{ bind9_file.named_conf }}"
+    - "{{ bind9_file.named_conf_local }}"
+    - "{{ bind9_file.named_conf_options }}"
+    - "{{ bind9_file.named_conf_controls }}"
+    - "{{ bind9_file.named_conf_log }}"
+    - "{{ bind9_file.forward_zone }}"
+    - "{{ bind9_file.reverse_zone }}"
+  loop_control:
+    loop_var: file
+    label: "Removing file: {{ file }}"
+
+- name: Remove runtime status files
+  ansible.builtin.file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - "{{ bind9_file.secroots_file }}"
+    - "{{ bind9_file.dump_file }}"
+    - "{{ bind9_file.statistics_file }}"
+    - "{{ bind9_file.memstatistics_file }}"
+  loop_control:
+    loop_var: file
+    label: "Removing file: {{ file }}"
+
+- name: Remove cryptographic key directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  loop:
+    - "{{ bind9_key_directory.tsig }}"
+    - "{{ bind9_key_directory.dnssec }}"
+    - "{{ bind9_key_directory.base }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing key directory: {{ directory }}"
+
+- name: Remove zone and log directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  loop:
+    - "{{ bind9_directory.zone }}"
+    - "{{ bind9_directory.log }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing zone directory: {{ directory }}"

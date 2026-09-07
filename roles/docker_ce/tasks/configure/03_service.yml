@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure Docker service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ docker_ce_service | default('docker') }}"
+    state: started
+    enabled: true
+  become: true
+  when: (docker_ce_service ~ '.service' in ansible_facts.services)

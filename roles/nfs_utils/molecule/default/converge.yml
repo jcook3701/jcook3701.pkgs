@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Converge NFS Utilities Role
+  hosts: all
+  gather_facts: true
+  vars:
+    # You can set default test overrides here if needed
+    nfs_utils_node_type: "client"
+    nfs_utils_use_gssproxy: false
+  tasks:
+    - name: Include the nfs_utils execution pipeline
+      ansible.builtin.include_role:
+        name: "nfs_utils"

@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Enterprise Kiprop OS Delivery Pipeline
+  ansible.builtin.include_tasks: kiprop/deploy.yml
+  when:
+    - kerberos_client_nodes | default([]) | length > 0
+
+- name: Execute Enterprise Host OS Delivery Pipeline
+  ansible.builtin.include_tasks: hosts/deploy.yml
+  when:
+    - kerberos_client_nodes | default([]) | length > 0
+
+- name: Execute Enterprise CIFS File Sharing Delivery Pipeline
+  ansible.builtin.include_tasks: cifs/deploy.yml
+  when:
+    - kerberos_samba_file_servers | default([]) | length > 0
+
+- name: Execute Enterprise NFS Secure UNIX Storage Delivery Pipeline
+  ansible.builtin.include_tasks: nfs/deploy.yml
+  when:
+    - kerberos_nfs_file_servers | default([]) | length > 0
+
+- name: Execute Enterprise HTTP Single Sign-On Delivery Pipeline
+  ansible.builtin.include_tasks: http/deploy.yml
+  when:
+    - kerberos_http_servers | default([]) | length > 0
+
+- name: Execute Enterprise LDAP Secure Directory Delivery Pipeline
+  ansible.builtin.include_tasks: ldap/deploy.yml
+  when:
+    - kerberos_ldap_servers | default([]) | length > 0

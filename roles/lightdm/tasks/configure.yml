@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Collect running user facts
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Ensure LightDM is the default (Debian/Ubuntu only)
+  ansible.builtin.copy:
+    content: "/usr/sbin/lightdm"
+    dest: /etc/X11/default-display-manager
+    mode: "0644"
+  when: ansible_facts['os_family'] | lower == "debian"
+
+- name: Disable conflicting display managers
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    enabled: no
+    state: stopped
+  loop: [gdm, gdm3, sddm]
+  loop_control:
+    loop_var: service
+    loop_control: "Disabling: {{ service }}"
+  ignore_errors: true
+
+- name: Deploy lightdm configuration from J2 template
+  ansible.builtin.template:
+    src: lightdm.conf.j2
+    dest: "{{ lightdm_file.config }}"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0775"
+  notify: Restart lightdm
+
+- name: Deploy lightdm user specific X sever configuration from J2 template
+  ansible.builtin.template:
+    src: .xsession.j2
+    dest: "{{ sudo_user_home }}/{{ lightdm_file.xsession }}"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    mode: "0775"
+  notify: Restart lightdm

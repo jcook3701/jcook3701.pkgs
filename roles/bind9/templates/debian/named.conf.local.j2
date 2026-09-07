@@ -1,39 +1,73 @@
+{#
+# named.conf.local.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro named_conf_local() -%}
 //
 // Do any local configuration here
 //
 
 {% for zone in bind9_zones %}
 zone "{{ zone.name }}" IN {
-  type {{ zone.type }};
-  file "{{ zone.path }}/{{ zone.filename }}";
-  {% if zone.allow_update is defined -%}
+    type {{ zone.type }};
+    {#  # NOTE: PRIMARY vs COMPANION RESOLUTION
+        # If the server is a secondary slave, BIND9 automatically appends the 'bak.' prefix
+        # to the path and file strings via your vars/main.yml tracking rules. #}
+
+    file "{{ zone.path }}/{{ zone.filename }}";
+
+    {% if zone.type == 'master' and zone.allow_update is defined -%}
     allow-update {
-    {%- if bind9_enable_dydns is true -%}
-      {{ ' ' }}key{{ ' ' }}
-      {%- for host in groups['all'] -%}
-	{%- set hostname = hostvars[host].hostname | default(host) -%}
-	{%- set keyname = hostname + '-tsig.key' -%}
-	{{ keyname }}{{ '; ' }}
-      {%- endfor -%}
-      {# This might require another if statement to handle tsig between primary/secondary without dydns #}
-    {%- else -%}
-      {{ ' ' }}{{ zone.allow_update }}{{ '; ' }}
-    {%- endif -%}
+        {% if bind9_enable_dydns | bool -%}
+            {%- for server in bind9_dydns_update_servers | default([]) -%}
+                {%- set keyname = server + '-tsig.key' -%}
+	            key "{{ keyname }}";
+            {% endfor -%}
+            {# This might require another if statement to handle tsig between primary/secondary without dydns #}
+        {% else -%}
+            {{ zone.allow_update }};
+        {% endif %}
     };
-  {% endif -%}
-  {% if zone.key_directory is defined -%}
+    {% endif %}
+
+    {% if zone.type == 'slave' and zone.masters_list is defined and zone.masters_list -%}
+    masters {
+        {% for master_ip in zone.masters_list -%}
+            {{ master_ip }};
+        {% endfor -%}
+    };
+    {% endif %}
+
+    {% if zone.dnssec_policy is defined and (bind9_enable_dnssec | bool) and zone.type == 'master' -%}
     key-directory "{{ zone.key_directory }}";
-  {% endif -%}
-  {% if zone.auto_dnssec is defined -%}
-    dnssec-policy {{ zone.dnssec-policy }};
-  {% endif -%}
-  {% if zone.inline_signing is defined -%}
+    dnssec-policy {{ zone.dnssec_policy }};
+    {% endif -%}
+
+    {% if zone.inline_signing is defined and zone.type == 'master' -%}
     inline-signing {{ zone.inline_signing }};
-  {% endif -%}
-  };
+    {% endif %}
+};
 
 {% endfor -%}
 
-// Consider adding the 1918 zones here, if they are not used in your
-// organization
+// Consider adding the 1918 zones here, if they are not used in your organization
 include "{{ bind9_file.rfc1918_zone }}";
+{%- endmacro -%}
+
+{{- named_conf_local() }}

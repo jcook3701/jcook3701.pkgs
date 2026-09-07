@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load cockpit OS-specific variables
+  ansible.builtin.include_vars: "{{ cockpit_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: cockpit_vars
+    label: "Loading variables file: {{ cockpit_vars }}"
+
+- name: Ensure Cockpit is installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: cockpit_state | default('present') == 'present'
+
+- name: Ensure Cockpit is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: cockpit_state | default('present') in ['absent', 'teardown']

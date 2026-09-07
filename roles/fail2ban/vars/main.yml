@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+fail2ban_service: fail2ban
+
+fail2ban_dep_pkg_names: []
+fail2ban_pkg_names: []
+
+fail2ban_directory:
+  conf: "{{ fail2ban_os_directory.conf }}"
+  jail: "{{ fail2ban_os_directory.jail }}"
+  filter: "{{ fail2ban_os_directory.filter }}"
+  action: "{{ fail2ban_os_directory.action }}"
+  data: "{{ fail2ban_os_directory.data }}"
+  run: "{{ fail2ban_os_directory.run }}"
+  log: "{{ fail2ban_os_directory.log }}"
+
+fail2ban_file:
+  log: "{{ fail2ban_directory.log }}/fail2ban.log"

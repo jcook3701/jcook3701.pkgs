@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Install and update the ctop container monitoring tool."
+    description: "This role downloads, installs, or removes the ctop binary based on GitHub release assets."
+    author: "Your Name"
+    options:
+      ctop_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "Lifecycle execution state for package installation or removal."
+
+      ctop_version:
+        type: "str"
+        required: false
+        default: "0.7.7"
+        description: "The target deployment version for the ctop binary."
+
+      ctop_base_bin_url:
+        type: "str"
+        required: false
+        default: "https://github.com/bcicen/ctop/releases/download/v{{ ctop_version }}"
+        description: "Base repository endpoint URL used for ctop release asset lookups."

@@ -1,0 +1,100 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage and configure Rsyslog logging architectures."
+    description: "This role deploys rsyslog, structures file creation masking, maps pluggable selector facilities, and orchestrates client-to-master streaming links."
+    author: "Jared Cook"
+    options:
+      rsyslog_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "Action state for package installation or removal."
+
+      rsyslog_node_type:
+        type: "str"
+        required: false
+        default: "local"
+        choices: ["local", "client", "master"]
+        description: "Architecture deployment target type determining local operations or streaming topologies."
+
+      rsyslog_users:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "A declarative array of local system accounts to append to the system logging management group."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The exact local username string to grant logging audit management access permissions."
+
+      rsyslog_manage_group:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls whether the role should actively verify or generate the targeted system logging group."
+
+      rsyslog_use_journald_socket:
+        type: "bool"
+        required: false
+        default: false
+        description: "Toggle whether rsyslog should pull kernel logs directly from the systemd journal socket to bypass dmesg_restrict privilege barriers."
+
+      rsyslog_remote_server_hosts:
+        type: "list"
+        elements: "str"
+        required: false
+        default: ["syslog.example.com"]
+        description: "High-availability list of target remote log collection hostnames or IP endpoints (evaluated sequentially when rsyslog_node_type is 'client')."
+
+      rsyslog_remote_server_port:
+        type: "int"
+        required: false
+        default: 514
+        description: "Target destination transport port for remote event streaming paths."
+
+      rsyslog_remote_protocol:
+        type: "str"
+        required: false
+        default: "udp"
+        choices: ["udp", "tcp"]
+        description: "Underlying network transport socket protocol utilized for remote shipping layers."
+
+      rsyslog_file_create_mode:
+        type: "str"
+        required: false
+        default: "0640"
+        description: "Default filesystem permissions applied to newly created log output files."
+
+      rsyslog_dir_create_mode:
+        type: "str"
+        required: false
+        default: "0755"
+        description: "Default filesystem permissions applied to newly generated parent log directory hierarchies."
+
+      rsyslog_umask:
+        type: "str"
+        required: false
+        default: "0022"
+        description: "Process file mode creation umask boundary assigned to the running rsyslog daemon process environment."
+
+      rsyslog_facility_rules:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "Pluggable facilities matching rules matrix mapping daemon logging channels straight into target files or endpoints."
+        options:
+          rule:
+            type: "str"
+            required: true
+            description: "Standard rsyslog facility-priority selector filter string (e.g., `auth,authpriv.*`)."
+          target:
+            type: "str"
+            required: true
+            description: "Output file directory storage location or remote streaming reference string mapping to the rule."

@@ -1,4 +1,64 @@
+{#
+# smb.conf.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro smb_header() -%}
+{#
+    Generates the base file header block.
+    Provides default file warnings and administrative execution notes for system operators.
+
+    Args:
+        None
+
+    Returns:
+        str: File warning and testparm command guidelines.
+#}
 # See smb.conf.example for a more detailed config file or
 # read the smb.conf manpage.
 # Run 'testparm' to verify the config is correct after
 # you modified it.
+{%- endmacro -%}
+
+{% import 'global.settings.j2' as smb_global_settings with context %}
+{% import 'shares.base.j2' as smb_shares_base with context %}
+{% import 'shares.custom.j2' as smb_shares_custom with context %}
+
+{%- macro smb_conf() -%}
+{#
+    Master layout engine for building the smb.conf configuration skeleton.
+    Dynamically orchestrates top-level blocks by pulling predefined block variables in sequence.
+
+    Args:
+        None
+
+    Returns:
+        str: A fully formatted, valid flat configuration file.
+#}
+    {{- smb_header() }}
+
+    {{- smb_global_settings.create() }}
+    {% if samba_is_server | bool %}
+        {{- smb_shares_base.create() }}
+        {% if samba_is_file_server | bool %}
+            {{- smb_shares_custom.create() }}
+        {% endif %}
+    {% endif %}
+{%- endmacro -%}
+
+{{- smb_conf() }}

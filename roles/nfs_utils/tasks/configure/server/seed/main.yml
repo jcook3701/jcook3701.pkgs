@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute NFS Server default configuration seeding tasks
+  ansible.builtin.include_tasks: "defaults.yml"
+
+- name: Execute NFS Server primary configuration seeding tasks
+  ansible.builtin.include_tasks: "configuration.yml"
+
+- name: Execute NFS Server rpc-svcgssd configuration seeding tasks
+  ansible.builtin.include_tasks: "rpc-svcgssd.yml"
+  when:
+    - nfs_utils_use_svcgssd | bool
+    - false

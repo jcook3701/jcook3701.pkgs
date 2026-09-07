@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+google_chrome_pkg_names:
+  - google-chrome-stable
+
+google_chrome_os_slug: "google-chrome-stable_current_amd64.deb"

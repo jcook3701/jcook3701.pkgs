@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure NFS server service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ nfs_utils_server_service | default('nfs-kernel-server') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (nfs_utils_server_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure helper NFS server daemon is stopped and disabled on clients
+  ansible.builtin.service:
+    name: "{{ nfs_utils_server_helper_service | default('rpc-svcgssd') }}"
+    state: "stopped"
+    enabled: false
+  become: true
+  when: (nfs_utils_server_helper_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure NFS GSS security daemon is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ nfs_utils_client_service | default('rpc-gssd')  }}"
+    state: "stopped"
+    enabled: false
+  become: true
+  when: (nfs_utils_client_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure native RPC Pipefs daemon is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ nfs_utils_rpc_pipefs_service | default('var-lib-nfs-rpc_pipefs.mount') }}"
+    state: "stopped"
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Unload active NFS and RPC kernel modules to clear parameters
+  community.general.modprobe:
+    name: "{{ module }}"
+    state: absent
+  loop:
+    - nfsd
+    - sunrpc
+  loop_control:
+    loop_var: module
+    label: "Unloading: {{ module }}"
+  failed_when: false
+  become: true
+
+- name: Force deep purge of NFS packages
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ nfs_utils_pkg_names | default([]) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete

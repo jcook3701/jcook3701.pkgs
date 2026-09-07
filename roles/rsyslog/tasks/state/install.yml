@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure rsyslog package and dependencies are installed
+  ansible.builtin.package:
+    name: >-
+      {{ rsyslog_dep_pkg_names | default([])
+          + rsyslog_pkg_names | default(['rsyslog']) }}
+    state: present
+  become: true
+
+- name: Ensure rsyslog is configured
+  ansible.builtin.include_tasks: configure/main.yml

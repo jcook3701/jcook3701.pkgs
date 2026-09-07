@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Mathematically calculate a stable network Domain SID based on domain string hash
+  ansible.builtin.set_fact:
+    openldap_system_domain_sid: >-
+      S-1-5-21-{{ domain_hash[0:9] | int % 2147483647 }}-{{ domain_hash[9:18] | int % 2147483647 }}-{{ domain_hash[18:27] | int % 2147483647 }}
+  vars:
+    domain_hash: "{{ (second_level_domain | default('example') | string | hash('md5') | int(base=16)) | string }}"
+  when: openldap_node_type == 'master'
+
+- name: Ingest optional feature schema extensions online
+  ansible.builtin.include_tasks: features/01_load_schema.yml
+  loop: "{{ openldap_custom_schemas }}"
+  loop_control:
+    loop_var: current_feature_name
+    label: "Loading schema extension: {{ current_feature_name }}"
+  when: openldap_node_type == 'master'
+
+- name: Deploy dynamic bootstrap users and groups data LDIF
+  ansible.builtin.template:
+    src: 02_data_seed.ldif.j2
+    dest: "{{ openldap_host_staging.data_seed }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: openldap_node_type == 'master'
+
+- name: Seed bootstrap users and groups into the active directory tree
+  ansible.builtin.command: >-
+    ldapadd -x -H ldapi:///
+    -D "cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+    -w "{{ openldap_admin_password }}"
+    -f "{{ openldap_host_staging.data_seed }}"
+  register: user_seed_result
+  failed_when:
+    - user_seed_result.rc != 0
+    - "'already exists' not in user_seed_result.stderr | lower"
+  changed_when: "'adding new entry' in user_seed_result.stdout | lower"
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Apply active feature configuration data objects online
+  ansible.builtin.include_tasks: features/02_apply_data.yml
+  loop: "{{ openldap_custom_schemas }}"
+  loop_control:
+    loop_var: current_feature_name
+    label: "Injecting feature data entries: {{ current_feature_name }}"
+  when: openldap_node_type == 'master'

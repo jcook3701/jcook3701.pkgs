@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Control switches
+autofs_state: present
+
+# The central lookup dispatcher provider backend for your system switchboards
+# Set to 'sss' for SSSD multi-user caching orchestration, or 'ldap' for direct queries
+autofs_lookup_provider: "sss"
+
+# Global Daemon Behavior Properties
+autofs_master_map_name: "auto.master"
+autofs_client_timeout: 60
+autofs_browse_mode: "yes"
+autofs_logging: "verbose"
+
+# AutoFS LDAP SASL Authentication Configuration Defaults
+autofs_sasl_usetls: "no"
+autofs_sasl_tlsrequired: "no"
+autofs_sasl_authrequired: "no"
+autofs_sasl_authmechanism: "GSSAPI"
+
+# LDAP Connector Performance Thresholds
+autofs_ldap_timeout: 30
+autofs_ldap_network_timeout: 30
+
+# Enterprise OpenLDAP Schema Attribute Mapping Definitions
+autofs_map_object_class: "automountMap"
+autofs_entry_object_class: "automount"
+autofs_map_attribute: "automountMapName"
+autofs_entry_attribute: "automountKey"
+autofs_value_attribute: "automountInformation"
+
+# Centralized On-Demand File System Mount Array
+autofs_bootstrap_mounts: []

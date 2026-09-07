@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy server-side NFS framework default configuration environment file
+  ansible.builtin.template:
+    src: "nfs-kernel-server.j2"
+    dest: "{{ nfs_utils_file.default_server }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  when: nfs_utils_is_server | bool
+  notify: Restart nfs server service

@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+webmin_service: webmin
+webmin_repo_url: https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repos.sh
+
+webmin_dep_pkg_names: "{{ webmin_os_dep_pkg_names | default([]) }}"
+webmin_pkg_names: "{{ webmin_os_pkg_names | default([]) }}"
+
+webmin_file:
+  script: /tmp/webmin-setup-repos.sh

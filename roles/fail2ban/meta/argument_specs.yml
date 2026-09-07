@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Configure Fail2ban service, core settings, and jails."
+    description: "This role manages Fail2ban installation, core options, and custom jail configurations."
+    author: "Your Name"
+    options:
+      fail2ban_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of Fail2ban installation."
+
+      fail2ban_core_conf:
+        type: "dict"
+        required: false
+        default: {}
+        description: "Dictionary containing main configuration blocks for fail2ban.conf."
+
+      fail2ban_jail_conf:
+        type: "dict"
+        required: false
+        default: {}
+        description: "Dictionary containing default and specific jail configurations for jail.local."

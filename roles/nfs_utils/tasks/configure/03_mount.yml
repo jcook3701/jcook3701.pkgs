@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute NFS Client Filesystem Mount Processing Tasks
+  ansible.builtin.include_tasks: "client/mount.yml"
+  when:
+    - nfs_utils_is_client | bool
+    - nfs_utils_client_mounts is defined
+    - nfs_utils_client_mounts | length > 0
+    - nfs_utils_client_enable_mounts | bool

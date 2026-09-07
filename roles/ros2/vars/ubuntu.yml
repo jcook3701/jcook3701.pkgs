@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+ros2_deb_architecture:
+  armv6l: "armhf"
+  armv7l: "armhf"
+  aarch64: "arm64"
+  x86_64: "amd64"
+  i386: "i386"
+
+ros2_pkg_deps:
+  - ca-certificates
+  - curl
+  - software-properties-common
+  - gnupg2
+  - lsb-release
+  - apt-transport-https
+  - build-essential
+  - dpkg
+  - locales
+  - software-properties-common
+  - curl
+  - gnupg
+  - lsb-release
+
+ros2_pkgs:
+  - ros-desktop-full-dev
+
+ros2_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d"
+
+ros2_file:
+  gpg: "{{ ros2_directory.keyrings }}/ros2.asc"
+  list: "{{ ros2_directory.sources }}/ros2.list"
+
+ros2_repo_url: "http://packages.ros.org/ros2/ubuntu"
+ros2_gpg_url: "https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc"
+
+ros2_repo_line: >-
+  deb [arch={{ ros2_deb_architecture[ansible_architecture] }}
+  signed-by={{ ros2_file.gpg }}]
+  {{ ros2_repo_url }}
+  {{ ansible_distribution_release }}
+  main

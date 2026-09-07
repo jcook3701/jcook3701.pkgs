@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate private key for the internal Root Certificate Authority
+  community.crypto.openssl_privatekey:
+    path: "{{ openldap_tls_ca_key }}"
+    select_crypto_backend: cryptography
+    size: 4096
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0600"
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Create temporary Certificate Signing Request for Root CA specifications
+  community.crypto.openssl_csr:
+    path: "{{ openldap_tls_ca_csr }}"
+    privatekey_path: "{{ openldap_tls_ca_key }}"
+    select_crypto_backend: cryptography
+    common_name: "{{ openldap_domain_name | string | lower }} Core Root CA"
+    basic_constraints:
+      - "CA:TRUE"
+    basic_constraints_critical: true
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Create public Root CA certificate asset (master_ca.pem)
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_ca_cert }}"
+    csr_path: "{{ openldap_tls_ca_csr }}"
+    privatekey_path: "{{ openldap_tls_ca_key }}"
+    provider: selfsigned
+    select_crypto_backend: cryptography
+    selfsigned_not_after: "+3650d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'master'

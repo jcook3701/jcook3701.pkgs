@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Push master stash file to Replicas
+  ansible.builtin.copy:
+    src: /tmp/kerberos_stash_file
+    dest: "{{ kerberos_file.stash }}"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+  when:
+    - kerberos_node_type == 'replica'
+    - kerberos_use_stash_file | bool

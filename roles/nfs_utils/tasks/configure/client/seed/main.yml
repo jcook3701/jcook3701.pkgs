@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute NFS Client primary configuration seeding tasks
+  ansible.builtin.include_tasks: "configuration.yml"
+
+- name: Execute NFS Client rpc-gssd configuration seeding tasks
+  ansible.builtin.include_tasks: "rpc-gssd.yml"
+  when: false

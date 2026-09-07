@@ -1,0 +1,77 @@
+{#
+# 02_data_structure.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro data_structure_02() -%}
+# 1a. Root Domain Suffix Entry Object
+dn: dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: modify
+replace: o
+o: {{ openldap_organization_name | trim }}
+-
+replace: description
+description: Root entry for the {{ openldap_organization_name | trim }} directory structure.
+
+# 1b. Directory Administrator Role Object
+dn: cn={{ openldap_admin_user | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: {{ openldap_admin_user | trim }}
+description: LDAP Administrator
+userPassword: "{{ openldap_admin_password_hashed }}"
+
+# 1c. Restricted Syncrepl Replication Service Account
+dn: cn={{ openldap_replication_user | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: {{ openldap_replication_user | trim }}
+description: Syncrepl Replication Service Account
+userPassword: {{ openldap_replication_password_hashed }}
+
+# 2. Main Identity Organizational Unit Root
+dn: ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+ou: {{ openldap_users_parent_ou | trim }}
+
+# 3. Human User Accounts Sub-Container
+dn: ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: {{ openldap_people_child_ou | trim }}
+
+# 4. Workstation and Connection Machine Objects Sub-Container
+dn: ou={{ openldap_computers_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: {{ openldap_computers_child_ou | trim }}
+
+# 5. Security and POSIX Group Management Container
+dn: ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+ou: {{ openldap_groups_ou | trim }}
+
+{%- endmacro -%}
+
+{{- data_structure_02() }}

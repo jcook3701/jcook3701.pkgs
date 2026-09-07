@@ -1,0 +1,127 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# TODO: Maybe -> {{ ansible_date_time.iso8601_basic_short }}
+openldap_timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}"
+
+openldap_user: "{{ openldap_os_user | default('openldap') }}"
+openldap_group: "{{ openldap_os_group | default('openldap') }}"
+
+openldap_service: "slapd"
+
+openldap_sysconfig_variable: "{{ openldap_os_sysconfig_variable | default('SLAPD_SERVICES') }}"
+
+openldap_shared_lib_pkg_names: >-
+  {{
+    _openldap_shared_lib_pkg_names_override
+      | default(openldap_os_shared_lib_pkg_names, true)
+  }}
+
+openldap_pkg_names: >-
+  {{
+    _openldap_pkg_names_override |
+      default(
+        (openldap_os_server_pkg_names + openldap_os_client_pkg_names)
+          if openldap_node_type in ['master', 'slave']
+          else openldap_os_client_pkg_names
+          if openldap_node_type == 'client' else []
+        )
+  }}
+
+openldap_directory:
+  conf: "{{ openldap_os_directory.conf | default('/etc/ldap') }}"
+  slapd: "{{ openldap_os_directory.slapd | default('/etc/ldap/slapd.d') }}"
+  cacerts: "{{ openldap_os_directory.cacerts | default('/etc/ssl/certs') }}"
+  certs: "{{ openldap_os_directory.certs | default('/etc/ldap/certs') }}"
+  database: "{{ openldap_os_directory.database | default('/var/lib/ldap') }}"
+  modules: "{{ openldap_os_directory.modules | default('/usr/lib/ldap') }}"
+  schema: "{{ openldap_os_directory.schema | default('/etc/ldap/schema') }}"
+  run: "{{ openldap_os_directory.run | default('/run/slapd') }}"
+  defaults: "{{ openldap_os_directory.defaults | default('/etc/default') }}"
+  override: "{{ openldap_os_directory.override | default('/etc/systemd/system/slapd.service.d') }}"
+  backup: "{{ openldap_backup_dir }}"
+
+openldap_file:
+  global_config: "{{ openldap_directory.conf }}/ldap.conf"
+  slapd_config: "{{ openldap_directory.conf }}/slapd.conf"
+  defaults: "{{ openldap_directory.defaults }}/slapd"
+  pid: "{{ openldap_directory.run }}/slapd.pid"
+  args: "{{ openldap_directory.run }}/slapd.args"
+  override: "{{ openldap_directory.override }}/override.conf"
+  keytab: "/etc/ldap.keytab"
+  backup: "{{ openldap_directory.backup }}/openldap_database_backup_{{ openldap_timestamp }}.ldif"
+
+# "{{ openldap_directory.backup }}/openldap_database_backup.ldif"
+openldap_staging_directory: "/tmp"
+openldap_controller_tmp_dir: "/tmp"
+
+openldap_host_staging:
+  bootstrap_config: "{{ openldap_staging_directory }}/01_config_bootstrap.ldif"
+  database_config: "{{ openldap_staging_directory }}/01_config_database.ldif"
+  data_structure: "{{ openldap_staging_directory }}/02_data_structure.ldif"
+  data_seed: "{{ openldap_staging_directory }}/02_data_seed.ldif"
+  feature_replication: "{{ openldap_staging_directory }}/03_feature_replication.ldif"
+  load_syncprov: "{{ openldap_staging_directory }}/load_syncprov.ldif"
+  backup: "{{ openldap_controller_tmp_dir }}openldap_database_backup.ldif"
+
+openldap_controller_staging:
+  root_ca_cert: "{{ openldap_controller_tmp_dir }}/openldap_master_root_ca.pem"
+  backup: "{{ openldap_controller_tmp_dir }}/ldap_backup_controller_staging.ldif"
+
+openldap_schemas_base:
+  - core
+  - cosine
+  - inetorgperson
+  - nis
+  - openldap
+  - collective
+  - corba
+  - duaconf
+  - dyngroup
+  - java
+  - misc
+  - namedobject
+  - pmi
+
+openldap_custom_schemas: >-
+  {{
+    ( ['ppolicy'] if (openldap_ppolicy | default(false)) else [] ) +
+    ( ['samba'] if (openldap_samba | default(false)) else [] ) +
+    ( ['sudo'] if (openldap_sudo | default(false)) else [] ) +
+    ( ['openssh-lpk'] if (openldap_openssh | default(false)) else [] ) +
+    ( ['autofs'] if (openldap_autofs | default(false)) else [] ) +
+    ( ['guacConfigGroup'] if (openldap_guac | default(false)) else [] )
+  }}
+
+## Network & Service Access Binding ##
+openldap_port: "{{ openldap_secure_port if (openldap_use_tls | bool) else openldap_cleartext_port }}"
+
+openldap_raw_listen_protocols: >-
+  {% if openldap_use_tls | bool %}
+    {{ ['ldap', 'ldaps'] | to_json }}
+  {% else %}
+    {{ ['ldap'] | to_json }}
+  {% endif %}
+
+openldap_listen_protocols: "{{ openldap_raw_listen_protocols | from_json }}"
+
+openldap_final_daemon_args: >-
+  {% set links = [] %}
+  {% for proto in openldap_listen_protocols %}
+    {% if proto == 'ldap' %}
+      {% set _ = links.append('ldap://0.0.0.0:' ~ openldap_cleartext_port) %}
+    {% elif proto == 'ldaps' %}
+      {% set _ = links.append('ldaps://0.0.0.0:' ~ openldap_secure_port) %}
+    {% endif %}
+  {% endfor %}
+  {% set _ = links.append('ldapi:///') %}
+  {{ links | join(' ') | trim }}
+
+# Organizational Unit Name Customizations
+openldap_users_parent_ou: "Users"
+openldap_people_child_ou: "People"
+openldap_computers_child_ou: "Computers"
+openldap_groups_ou: "Groups"
+openldap_sudoers_ou: "SUDOers"
+openldap_automount_ou: "AutoMount"
+openldap_idmap_ou: "Idmap"

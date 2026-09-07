@@ -1,0 +1,33 @@
+{#
+# autofs_ldap_auth.conf.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro autofs_ldap_auth_conf() -%}
+<?xml version="1.0" encoding="utf-8"?>
+<autofs_ldap_sasl_conf
+    usetls="{{ autofs_sasl_usetls | default('no') | trim }}"
+    tlsrequired="{{ autofs_sasl_tlsrequired | default('no') | trim }}"
+    authrequired="{{ autofs_sasl_authrequired | default('no') | trim }}"
+    authmechanism="{{ autofs_sasl_authmechanism | default('GSSAPI') | trim }}"
+/>
+{%- endmacro -%}
+
+{{- autofs_ldap_auth_conf() }}
+
+{# credentialcache="{{ autofs_file.sasl_credential_cache | trim }}" #}

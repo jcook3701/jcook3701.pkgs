@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate signed directory server certificate for the master node locally
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_cert }}"
+    csr_path: "{{ openldap_tls_csr }}"
+    ownca_path: "{{ openldap_tls_ca_cert }}"
+    ownca_privatekey_path: "{{ openldap_tls_ca_key }}"
+    provider: ownca
+    select_crypto_backend: cryptography
+    ownca_not_after: "+1095d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Slurp the private Root CA key from the master node into secure memory
+  ansible.builtin.slurp:
+    src: "{{ openldap_tls_ca_key }}"
+  register: master_root_ca_key_raw
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Use the slurped CA key payload to sign the slave certificate natively on the slave node
+  community.crypto.x509_certificate:
+    path: "{{ openldap_tls_cert }}"
+    csr_path: "{{ openldap_tls_csr }}"
+    ownca_path: "{{ openldap_tls_ca_cert }}"
+    ownca_privatekey_content: "{{ hostvars[openldap_admin_servers | first | default(ansible_play_hosts | first)]['master_root_ca_key_raw']['content'] | b64decode }}"
+    provider: ownca
+    select_crypto_backend: cryptography
+    ownca_not_after: "+1095d"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type == 'slave'

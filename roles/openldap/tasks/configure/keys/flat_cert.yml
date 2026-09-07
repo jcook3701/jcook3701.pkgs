@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if a valid public master CA certificate is already present on the disk
+  ansible.builtin.stat:
+    path: "{{ openldap_tls_ca_cert }}"
+  register: _openldap_active_ca_state
+  become: true
+
+- name: Execute Standalone Flat Master Key and Certificate Generation Phase
+  ansible.builtin.include_tasks: flat_cert/seed.yml
+  when:
+    - openldap_node_type == 'master'
+    - not _openldap_active_ca_state.stat.exists
+
+- name: Execute Fleet-wide Flat Self-Signed Certificate Distribution Phase
+  ansible.builtin.include_tasks: flat_cert/distribute.yml
+
+- name: Execute Standalone Flat Certificate Execution Cleanup Phase
+  ansible.builtin.include_tasks: flat_cert/cleanup.yml
+  when:
+    - openldap_node_type in ['master', 'slave']
+    - not _openldap_active_ca_state.stat.exists

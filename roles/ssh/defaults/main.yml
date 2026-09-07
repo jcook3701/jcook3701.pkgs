@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+ssh_state: present
+
+# Centralized Port and Protocol Boundaries
+ssh_port: 22
+ssh_listen_address: "0.0.0.0"
+ssh_protocol_version: "2"
+
+# Authentication Security Enforcers
+ssh_permit_root_login: "prohibit-password"
+ssh_pubkey_authentication: "yes"
+ssh_authorized_keys_file: ".ssh/authorized_keys"
+
+# MANDATORY TUNING PARAMETERS TO LINK WITH SSSD
+ssh_password_authentication: "yes"
+ssh_kbd_interactive_authentication: "yes"
+
+# System Execution Environment Restrictions
+ssh_use_pam: "yes"
+ssh_x11_forwarding: "no"
+ssh_max_auth_tries: 6
+ssh_login_grace_time: "2m"
+ssh_strict_modes: "yes"
+
+# Modern Cryptographic Compliance Layout Parameters
+ssh_ciphers:
+  - "chacha20-poly1305@openssh.com"
+  - "aes256-gcm@openssh.com"
+  - "aes128-gcm@openssh.com"
+
+ssh_macs:
+  - "hmac-sha2-256-etm@openssh.com"
+  - "hmac-sha2-512-etm@openssh.com"
+  - "umac-128-etm@openssh.com"
+
+ssh_kex_algorithms:
+  - "curve25519-sha256"
+  - "curve25519-sha256@libssh.org"
+  - "diffie-hellman-group16-sha512"
+  - "diffie-hellman-group18-sha512"

@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+rbenv_rbenv_default_gems_plugin:
+  name: "rbenv-default-gems"
+  repo_url: https://github.com/rbenv/rbenv-default-gems.git
+  bashrc: |
+    # rbenv-default-gems initialization
+    export PATH="$HOME/.rbenv/plugins/rbenv-default-gems/bin:$PATH"

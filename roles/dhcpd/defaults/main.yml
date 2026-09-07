@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Lifecycle Management
+dhcpd_state: present
+
+# Architecture & Cluster Topology (Failover Peer Setup)
+dhcpd_is_primary: true
+dhcpd_peer_server_ip: "192.168.0.3"  # Points to secondary DHCP server for HA replication
+
+# Domain Configurations (Direct Match to BIND9)
+dhcpd_domain_name: "example.com"
+dhcpd_dns_servers:
+  - "192.168.0.2"                    # Points to your BIND9 Primary Server
+  - "192.168.0.4"                    # Points to your BIND9 Secondary Server
+
+# Feature Switches
+dhcpd_enable_dydns: false            # Master toggle for sending dynamic dynamic DNS updates
+
+# Dynamic DNS (DyDNS) Configuration Options
+dhcpd_dydns_update_style: "interim"  # Standard method for concurrent BIND9 dynamic updates
+dhcpd_dydns_zones:
+  - name: "example.com"
+    primary_dns_ip: "192.168.0.2"
+    tsig_key_name: "dhcpd-update-key"
+  - name: "0.168.192.in-addr.arpa"
+    primary_dns_ip: "192.168.0.2"
+    tsig_key_name: "dhcpd-update-key"
+
+# Transaction Signatures (TSIG) Settings (Matches BIND9 Key Specs)
+dhcpd_tsig_algorithm: "hmac-sha256"
+dhcpd_tsig_secret: "GENERATED_BASE64_SECRET_STRING_GOES_HERE"
+
+# Network IP Layout & Subnet Declaration Pools
+dhcpd_ip_address_space: "192.168.0"
+dhcpd_netmask: "255.255.255.0"       # Matches prefix_length 24
+dhcpd_router_ip_address: "192.168.0.1"
+
+# DHCP Allocations Range
+dhcpd_pool_start: "192.168.0.100"
+dhcpd_pool_end: "192.168.0.200"
+
+# Lease time Bounds (in seconds)
+dhcpd_default_lease_time: 600        # 10 minutes
+dhcpd_max_lease_time: 7200           # 2 hours

@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+ssh_os_service: "ssh"
+
+ssh_os_pkg_names:
+  - "openssh-server"
+
+ssh_os_directory:
+  conf: "/etc/ssh"
+  default: "/etc/default"
+  pid: "/run/sshd"
+  bin: "/usr/lib/openssh"

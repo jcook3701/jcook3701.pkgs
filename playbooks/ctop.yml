@@ -15,4 +15,3 @@
     - name: Install ctop
       ansible.builtin.include_role:
         name: jcook3701.pkgs.ctop
-        tasks_from: ctop-install.yml

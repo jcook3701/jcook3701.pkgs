@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Erase temporary local controllers cached stash file
+  ansible.builtin.file:
+    path: "/tmp/kerberos_stash_file"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  become: false

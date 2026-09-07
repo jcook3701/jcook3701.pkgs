@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify if NFS service keys are already present on target endpoint
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.nfs_default }}"
+  register: endpoint_nfs_file_check
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([]))
+
+- name: Check if a staged NFS keytab file exists on the Ansible Controller
+  ansible.builtin.stat:
+    path: "{{ target_controller_staging }}"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_nfs_staging }}"
+  register: controller_nfs_staging_stat
+  delegate_to: localhost
+  become: false
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([]))
+
+- name: Securely deliver unique NFS service keytab file to the target node
+  ansible.builtin.copy:
+    src: "{{ target_controller_staging }}"
+    dest: "{{ kerberos_keytabs.client_nfs_delivered_transit }}"
+    owner: root
+    group: root
+    mode: "0600"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_nfs_staging }}"
+  when:
+    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+    - controller_nfs_staging_stat.stat.exists | default(false)
+    - ('nfs/' not in endpoint_nfs_file_check.stdout | lower)
+
+- name: Securely activate client standalone NFS keytab file from landing pad
+  ansible.builtin.copy:
+    src: "{{ kerberos_keytabs.client_nfs_delivered_transit }}"
+    dest: "{{ kerberos_keytabs.nfs_default }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+  when:
+    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+    - "'nfs/' not in endpoint_nfs_file_check.stdout | lower"

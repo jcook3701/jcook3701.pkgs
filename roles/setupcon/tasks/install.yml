@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Installing console-setup package and dependencies
+  ansible.builtin.package:
+    name: "{{ setupcon_pkg_names }}"
+    state: present

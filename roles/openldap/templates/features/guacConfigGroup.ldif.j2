@@ -1,0 +1,61 @@
+{#
+# guac.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro guac_ldif() -%}
+# 1. FOUNDATIONAL GUACAMOLE CONFIGURATION SUB-CONTAINERS
+dn: ou=rdp,ou={{ openldap_computers_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: rdp
+
+dn: ou=ssh,ou={{ openldap_computers_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: ssh
+
+dn: ou=vnc,ou={{ openldap_computers_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: vnc
+
+# 2. DYNAMIC GUACAMOLE CONNECTION PASS-THROUGH TUNNEL LOOP
+{% for conn in openldap_guac_connections | default([]) %}
+dn: cn={{ conn.name | trim }},ou={{ conn.parent_ou | trim }},ou={{ openldap_computers_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: guacConfigGroup
+objectClass: groupOfNames
+objectClass: top
+cn: {{ conn.name | trim }}
+guacConfigProtocol: {{ conn.protocol | trim }}
+{% for param in conn.parameters %}
+guacConfigParameter: {{ param | trim }}
+{% endfor %}
+{% for user in conn.members %}
+member: uid={{ user | trim }},ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+{% endfor %}
+
+{% endfor %}
+
+{%- endmacro -%}
+
+{{- guac_ldif() }}

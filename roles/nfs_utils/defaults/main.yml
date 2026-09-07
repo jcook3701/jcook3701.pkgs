@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Lifecycle execution state for package installation or removal
+nfs_utils_state: present
+
+# Architecture deployment target type ('client' or 'master')
+nfs_utils_node_type: client
+
+# The NFSv4 domain name used by idmapd to map UIDs/GIDs across nodes
+nfs_utils_top_level_domain: "com"
+nfs_utils_second_level_domain: "example"
+nfs_utils_domain_name: "{{ nfs_utils_second_level_domain }}.{{ nfs_utils_top_level_domain }}"
+
+# Toggle to determine if Kerberos (sssd-kdc) security layers are enabled
+nfs_utils_use_kerberos: false
+
+nfs_server_fqdn: "{{ ansible_fqdn | default(inventory_hostname) }}"
+nfs_utils_krb5_realm: "{{ nfs_utils_domain_name | upper }}"
+nfs_utils_krb5_principal: "nfs/{{ nfs_server_fqdn }}@{{ nfs_utils_krb5_realm | upper }}"
+
+# Specialized path tracking your feature-isolated NFS keytab
+nfs_utils_server_keytab_path: "/etc/nfs.keytab"
+nfs_utils_client_keytab_path:  "/etc/krb5.keytab"
+
+# Custom runtime argument overrides passed natively to the server-side rpc.svcgssd daemon
+nfs_utils_svcgssd_options: ""
+
+# GSS / Kerberos Daemon Defaults
+nfs_gss_provider: "gssproxy"  # Options: gssproxy, svcgssd
+
+# Name of the gssproxy socket to map inside the socket directory
+nfs_utils_gssproxy_socket_name: "gssproxy.sock"
+
+# Number of daemon threads the NFS server will start
+nfs_utils_server_threads: 8
+
+# Runtime kernel scheduling priority for NFS server daemon worker pools
+nfs_utils_server_priority: 0
+
+# Command line option flags passed directly to the rpc.mountd process
+nfs_utils_mountd_options: "--manage-gids"
+
+# List of NFS protocol versions to explicitly enable or disable
+nfs_utils_server_protocols:
+  v3: "no"
+  v4: "yes"
+  v4_0: "yes"
+  v4_1: "yes"
+  v4_2: "yes"
+
+# List of local paths and client ACLs exported by this server.
+nfs_utils_server_exports: []
+
+# Toggle client mount enforcement tasks on or off
+nfs_utils_client_enable_mounts: false
+
+# List of remote NFS shares and local mount points.
+nfs_utils_client_mounts: []
+
+# Toggles advanced verbosity and diagnostics trace logging loops across internal NFS utilities
+nfs_utils_enable_debug_logging: true

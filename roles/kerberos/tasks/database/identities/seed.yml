@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if bootstrap user principals already exist in KDC database
+  ansible.builtin.command: "kadmin.local -q 'get_principal {{ user.username }}'"
+  loop: "{{ kerberos_bootstrap_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Verifying account presence: {{ user.username }}"
+  register: kadmin_user_checks
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Seed missing bootstrap user principals into the Kerberos realm database
+  ansible.builtin.command: >-
+    kadmin.local -q "ank
+    -policy default_user_policy
+    -pw {{ check_result.user.password }}
+    {{ check_result.user.username }}"
+  loop: "{{ kadmin_user_checks.results | default([]) }}"
+  loop_control:
+    loop_var: check_result
+    label: "Provisioning account principal: {{ check_result.user.username }}"
+  no_log: true
+  become: true
+  register: identity_seed_cmd
+  failed_when:
+    - identity_seed_cmd.rc != 0 or
+      ('error' in identity_seed_cmd.stderr | lower or
+      'failed' in identity_seed_cmd.stderr | lower or
+      'does not contain enough character classes' in identity_seed_cmd.stderr | lower or
+      'does not contain enough character classes' in identity_seed_cmd.stdout | lower)
+  when:
+    - check_result.stderr is defined
+    - "'principal does not exist' in check_result.stderr | lower"

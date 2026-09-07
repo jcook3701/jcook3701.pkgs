@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+virtualbox_os_user: vboxusers
+virtualbox_os_group: vboxusers
+
+virtualbox_os_dep_pkg_names:
+  - "linux-headers-{{ ansible_kernel }}"
+  - build-essential
+  - dkms
+
+virtualbox_os_pkg_names:
+  - "{{ virtualbox_info.debian_pkg }}"
+
+virtualbox_os_directory:
+  bin: "/sbin"
+  conf: "/etc/vbox"
+  modules: "/etc/modules-load.d"
+  modprobe: "/etc/modprobe.d"
+
+# Repository Configuration for jcook3701.utils.repo_add
+virtualbox_os_repo_id: "virtualbox"
+virtualbox_os_repo_name: "Oracle VirtualBox"
+
+virtualbox_debian_uris: "{{ virtualbox_download_url }}/virtualbox/debian"
+virtualbox_debian_suites: "{{ ansible_distribution_release }}"
+virtualbox_debian_component: "contrib"
+virtualbox_debian_signed_by: "{{ virtualbox_debian_uris }}/oracle_vbox_2016.asc"
+
+# The license acceptance string for the debconf module (Debian/Ubuntu)
+virtualbox_extpack_license:
+  name: "virtualbox-ext-pack"
+  question: "virtualbox-ext-pack/license"

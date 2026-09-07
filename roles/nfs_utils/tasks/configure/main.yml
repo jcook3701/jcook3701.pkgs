@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute NFS shared seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Execute NFS service seeding tasks
+  ansible.builtin.include_tasks: "02_service.yml"
+
+- name: Execute NFS clint mount seeding tasks
+  ansible.builtin.include_tasks: "03_mount.yml"
+  when: nfs_utils_is_client | bool
+
+- name: Execute NFS logging seeding tasks
+  ansible.builtin.include_tasks: "04_logging.yml"
+  when: nfs_utils_enable_debug_logging | bool

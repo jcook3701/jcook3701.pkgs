@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name:  Run baseline server initialization seeds
+  ansible.builtin.include_tasks: 01_configuration.yml
+
+- name: Run baseline server initialization database seeds
+  ansible.builtin.include_tasks: 02_database.yml
+
+- name: Run baseline server initialization database seeds
+  ansible.builtin.include_tasks: 03_group.yml
+  when: jellyfin_manage_group | default(true) | bool
+
+- name: Process secondary plugin configurations
+  ansible.builtin.include_tasks: 04_plugins.yml
+  when: jellyfin_manage_plugins | default(true) | bool

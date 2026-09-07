@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure baseline system directories exist for pure client hosts.
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  loop:
+    - "{{ samba_directory.lib }}"
+    - "{{ samba_directory.cache }}"
+    - "{{ samba_directory.run }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating Directory: {{ directory }}"
+
+- name: Deploy Samba client configuration
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: "{{ samba_file.samba_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Prepare to mount samba file shares on client machines
+  ansible.builtin.include_tasks: mounts.yml
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool

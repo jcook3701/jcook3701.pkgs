@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute OpenLDAP Kerberos Keytab Environment Configuration Pass
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Execute OpenLDAP Kerberos Keytab Permission Synchronization Pass
+  ansible.builtin.include_tasks: online.yml

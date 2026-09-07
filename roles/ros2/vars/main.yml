@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Map Ubuntu LTS releases to their corresponding ROS 2 LTS distros
+ros2_distro_map:
+  noble: "jazzy"   # Ubuntu 24.04 -> ROS 2 Jazzy (LTS until 2029)
+  jammy: "humble"  # Ubuntu 22.04 -> ROS 2 Humble (LTS until 2027)
+
+# Dynamically pick the distro based on the target machine's OS
+# Default to 'humble' if the OS isn't recognized to prevent crashes
+ros2_selected_distro: "{{ ros2_distro_map[ansible_distribution_release] | default('humble') }}"
+
+# Build the package prefix dynamically (e.g., "ros-humble-")
+ros2_pkg_prefix: "ros-{{ ros2_selected_distro }}-"
+
+ros2_flavor_map:
+  base: "ros-base"
+  desktop: "desktop"
+  desktop_full: "desktop-full"
+
+# Final package name (e.g., "ros-humble-desktop")
+ros2_package_name: "{{ ros2_pkg_prefix }}{{ ros2_flavor_map[ros2_flavor] }}"

@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Setup Plex Package Repository across infrastructure
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ plex_repo_id }}"
+    repo_add_name: "{{ plex_repo_name }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ plex_repo_url | default(omit) }}"
+    repo_add_debian_suites: "{{ plex_codename | default(omit) }}"
+    repo_add_debian_components: "{{ plex_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ plex_gpg_url | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ plex_redhat_baseurl | default(omit) }}"
+    repo_add_redhat_gpgkey: "{{ plex_redhat_gpgkey | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ plex_arch_server | default(omit) }}"
+  when:
+    - ansible_os_family in ['Debian', 'Redhat']
+
+- name: Install Plex Media Server
+  ansible.builtin.package:
+    name: "{{ plex_pkg_names }}"
+    state: present
+
+- name: Add plex user to secondary groups for hardware and media access
+  ansible.builtin.user:
+    name: "{{ plex_user }}"
+    groups: "{{ plex_user_groups }}"
+    append: true
+  become: true
+
+- name: Ensure Plex application support directory has correct permissions
+  ansible.builtin.file:
+    path: "{{ plex_directory.data }}"
+    owner: "{{ plex_user }}"
+    group: "{{ plex_group }}"
+    recurse: true
+    state: directory
+
+- name: Ensure Plex Media Server is started and enable
+  ansible.builtin.systemd:
+    name: "{{ plex_service }}"
+    state: started
+    enabled: true

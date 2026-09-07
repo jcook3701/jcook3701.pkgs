@@ -1,6 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-flatpak_pkg_names:
-  - snap
-  - gnome-software-plugin-flatpak
+# User/Group Settings
+flatpak_user: "{{ flatpak_os_user | default('_flatpak') }}"
+flatpak_group: "{{ flatpak_os_group | default('_flatpak') }}"
+
+# Package Settings
+flatpak_dep_pkg_names: "{{ flatpak_os_dep_pkg_names | default([]) }}"
+flatpak_pkg_names: "{{ flatpak_os_pkg_names | default([]) }}"
+
+# System File Settings

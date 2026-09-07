@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Force stop and disable Chrony daemon service on teardown
+  ansible.builtin.service:
+    name: "{{ chrony_service }}"
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+
+- name: Force deep purge of Chrony package
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ chrony_pkg_names | default(['chrony']) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete

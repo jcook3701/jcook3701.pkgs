@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Include VirtualBox User Group Management Tasks
+  ansible.builtin.include_tasks: groups.yml
+  when: virtualbox_manage_group | default(true) | bool
+
+- name: Include VirtualBox Host Network Security Policy Tasks
+  ansible.builtin.include_tasks: "networking.yml"
+  when: virtualbox_manage_net_policy | default(true) | bool
+
+- name: Verify and Reconcile Host Kernel Driver States
+  ansible.builtin.include_tasks: "kernel.yml"
+  when: virtualbox_recompile_drivers | default(true) | bool
+
+- name: Include VirtualBox User Space Properties Configuration Tasks
+  ansible.builtin.include_tasks: "properties.yml"
+  when:
+    - (virtualbox_default_machine_folder is defined and virtualbox_default_machine_folder | length > 0) or
+      (virtualbox_global_properties_custom is defined and virtualbox_global_properties_custom | length > 0)
+
+- name: Ensure VirtualBox Extension Pack is added to installation
+  ansible.builtin.include_tasks: extension-pack.yml
+  when: virtualbox_install_extension_pack | default(true) | bool

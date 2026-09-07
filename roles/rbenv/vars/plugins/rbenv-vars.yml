@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+rbenv_rbenv_vars_plugin:
+  name: "rbenv-vars"
+  repo_url: https://github.com/rbenv/rbenv-vars.git
+  bashrc: |
+    # rbenv-vars initialization
+    export PATH="$HOME/.rbenv/plugins/rbenv-vars/bin:$PATH"

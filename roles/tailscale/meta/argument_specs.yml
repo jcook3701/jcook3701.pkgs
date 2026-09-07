@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Tailscale mesh VPN node lifecycle and configuration."
+    description: "This role automates Tailscale client provisioning, listens on customized tunnel ports, and handles automated node authentication."
+    author: "Jared Cook"
+    options:
+      tailscale_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices:
+          - "present"
+          - "absent"
+          - "teardown"
+        description: "The desired operational lifecycle state of the Tailscale package and system service."
+      tailscale_repo_url:
+        type: "str"
+        required: false
+        default: "https://tailscale.com/install.sh"
+        description: "The web URL pointing directly to the verified upstream setup script."
+      tailscale_port:
+        type: "int"
+        required: false
+        default: 41641
+        description: "The UDP port allocation where Tailscale listens for incoming direct connections."
+      tailscale_daemon_extra_flags:
+        type: "str"
+        required: false
+        default: ""
+        description: "Extra configurations passed into the service configuration script on disk."
+      tailscale_accept_dns:
+        type: "bool"
+        required: false
+        default: false
+        description: "Controls whether the host accepts MagicDNS rules. Set to false to prevent local resolver overrides from breaking Kerberos."
+      tailscale_hostname:
+        type: "str"
+        required: false
+        default: ""
+        description: "Overrides the automatically discovered system hostname in the admin console dashboard."
+      tailscale_advertise_exit_node:
+        type: "bool"
+        required: false
+        default: false
+        description: "Controls whether this host offers to behave as a full VPN gateway route endpoint."
+      tailscale_advertise_routes:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "A target matrix array of internal private network CIDRs to turn this device into a subnet router."
+      tailscale_auth_key:
+        type: "str"
+        required: false
+        default: null
+        description: "An optional, secure Tailnet onboarding secret token (tskey-auth-...) to bypass interactive browser logins."
+      tailscale_up_extra_flags:
+        type: "str"
+        required: false
+        default: ""
+        description: "Custom arbitrary command-line arguments to parse during execution."
+      tailscale_no_logs:
+        type: "bool"
+        required: false
+        default: false
+        description: "Appends security flags to drop local logging telemetry data collections entirely."
+      tailscale_enable_ssh:
+        type: "bool"
+        required: false
+        default: false
+        description: "Enables secure, policy-controlled SSH connectivity directly through the encrypted wire mesh layer."

@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manages native and bimodal GSSProxy-controlled NFS client and server configurations."
+    description: >-
+      This role installs, configures, and manages NFS server exports or client mounts.
+      It features bimodal operation, allowing it to function natively or dynamically
+      reconfigure itself to route kernel cryptographic upcalls through GSSProxy.
+    author: "jcook"
+    options:
+      nfs_utils_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The installation state of the NFS packages and configuration files."
+
+      nfs_utils_node_type:
+        type: "str"
+        default: "client"
+        choices: ["client", "master"]
+        description: "Determines if the target server should behave as a storage client or an NFS master server."
+
+      nfs_utils_use_kerberos:
+        type: "bool"
+        default: false
+        description: "Toggle to determine if Kerberos security layers are enabled."
+
+      nfs_utils_keytab_path:
+        type: "str"
+        default: "/etc/nfs.keytab"
+        description: "Specialized path tracking your feature-isolated NFS keytab."
+
+      nfs_utils_svcgssd_options:
+        type: "str"
+        default: ""
+        description: "Custom runtime argument overrides passed natively to the server-side rpc.svcgssd daemon."
+
+      nfs_utils_use_gssproxy:
+        type: "bool"
+        default: false
+        description: "Toggles whether NFS should bypass native rpc.gssd behavior to use a GSSProxy interception socket."
+
+      nfs_utils_gssproxy_socket_name:
+        type: "str"
+        default: "gssproxy.sock"
+        description: "The file name of the UNIX domain socket that GSSProxy will open for kernel interaction."
+
+      nfs_utils_top_level_domain:
+        type: "str"
+        default: "com"
+        description: "The top-level domain suffix used to construct the default ID mapping namespace."
+
+      nfs_utils_second_level_domain:
+        type: "str"
+        default: "example"
+        description: "The second-level domain name used to construct the default ID mapping namespace."
+
+      nfs_utils_domain_name:
+        type: "str"
+        default: "{{ nfs_utils_second_level_domain }}.{{ nfs_utils_top_level_domain }}"
+        description: "The fully qualified NFSv4 domain string utilized by idmapd to translate local user/group IDs to strings."
+
+      nfs_utils_server_threads:
+        type: "int"
+        default: 8
+        description: "The number of concurrent kernel worker threads spawned by the NFS server daemon to process I/O requests."
+
+      nfs_utils_server_priority:
+        type: "int"
+        default: 0
+        description: "Runtime kernel scheduling priority for NFS server daemon worker pools."
+
+      nfs_utils_mountd_options:
+        type: "str"
+        default: "--manage-gids"
+        description: "Command line option flags passed directly to the rpc.mountd process."
+
+      nfs_utils_server_protocols:
+        type: "dict"
+        description: "A key-value map defining which specific NFS network protocol versions are explicitly enabled or blocked."
+        options:
+          v3:
+            type: "str"
+            choices: ["yes", "no"]
+          v4:
+            type: "str"
+            choices: ["yes", "no"]
+          v4_0:
+            type: "str"
+            choices: ["yes", "no"]
+          v4_1:
+            type: "str"
+            choices: ["yes", "no"]
+          v4_2:
+            type: "str"
+            choices: ["yes", "no"]
+
+      nfs_utils_server_exports:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "A declarative array of local paths, client ACL hosts, and standard mount security options exported by the server."
+        options:
+          path:
+            type: "str"
+            required: true
+            description: "The absolute local filesystem path being shared by the NFS master server."
+          hosts:
+            type: "list"
+            elements: "dict"
+            required: true
+            description: "A list of target clients or subnets authorized to connect to this shared path."
+            options:
+              name:
+                type: "str"
+                required: true
+                description: "The hostname, IP address, or network CIDR range allowed to access the export."
+              options:
+                type: "str"
+                required: true
+                description: "The comma-separated string of NFS export attributes (e.g., 'rw,sync,no_subtree_check')."
+
+      nfs_utils_client_enable_mounts:
+        type: "bool"
+        default: false
+        description: "Master configuration toggle to enable or disable the execution of client-side NFS storage mounts during the playbook run."
+
+      nfs_utils_client_mounts:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "A declarative array of remote NFS resource URLs, local targets, and operational mount options managed on client nodes."
+        options:
+          src:
+            type: "str"
+            required: true
+            description: "The remote NFS export target path formatted as 'server:/exported/path'."
+          path:
+            type: "str"
+            required: true
+            description: "The local absolute directory path where the remote export should be mounted."
+          opts:
+            type: "str"
+            default: "defaults"
+            description: "The mount option string passed to the /etc/fstab configuration (e.g., 'rw,noatime,sec=krb5p')."
+          state:
+            type: "str"
+            default: "mounted"
+            choices: ["mounted", "unmounted", "present", "absent"]
+            description: "The operational state of the target mount within the client OS lifecycle."
+
+      nfs_utils_enable_debug_logging:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core utilities."

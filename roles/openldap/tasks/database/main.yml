@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# PHASE 1: PRE-FLIGHT AUTHENTICATION INITIALIZATION
+# ====================================================================
+- name: Initialize administrative credentials and cryptographic hashes
+  ansible.builtin.include_tasks: passwords.yml
+
+# ====================================================================
+# PHASE 2 & 3: FRESH INSTALLATION AND INITIALIZATION TIER
+# ====================================================================
+- name: Initialize and Bootstrap OpenLDAP Database Files Offline
+  when: not openldap_existing_config.stat.exists
+  become: true
+  block:
+    - name: Bootstrap core configuration database configuration offline
+      ansible.builtin.include_tasks: bootstrap_offline.yml
+
+    - name: Initialize operational directory tree and core structures online
+      ansible.builtin.include_tasks: bootstrap_online.yml
+
+# ====================================================================
+# PHASE 4: IDEMPOTENT RUNTIME DATA PROVISIONING PIPELINE
+# ====================================================================
+- name: Run online identity provisioning and feature ingestion routines
+  ansible.builtin.include_tasks: provision_data.yml
+
+# ====================================================================
+# PHASE 5: POST-DEPLOYMENT VERIFICATION TIER
+# ====================================================================
+- name: Run cluster authentication validation and network port checks
+  ansible.builtin.include_tasks: verify.yml
+
+# ====================================================================
+# PHASE 6: REPLICATION CLUSTERING LAYOUT SETUP
+# ====================================================================
+- name: OpenLDAP replication engine configuration
+  ansible.builtin.include_tasks: replication.yml
+
+# ====================================================================
+# PHASE 7: STAGE FILE CLEANUP
+# ====================================================================
+- name: OpenLDAP configuration staging cleanup
+  ansible.builtin.include_tasks: cleanup.yml
+  when: not openldap_template_debug | bool

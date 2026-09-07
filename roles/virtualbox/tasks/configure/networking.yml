@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure VirtualBox System Configuration Root Layout Folder Exists
+  ansible.builtin.file:
+    path: "{{ virtualbox_directory.conf }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  when: virtualbox_manage_net_policy | default(true) | bool
+
+- name: Deploy Global Host-Only Networking Access Security Policy Whitelist
+  ansible.builtin.template:
+    src: "networks.conf.j2"
+    dest: "{{ virtualbox_file.networks_conf }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  when: virtualbox_manage_net_policy | default(true) | bool

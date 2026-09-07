@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+samba_is_server: "{{ samba_deployment_mode != 'client' }}"
+
+# Strict mapping of built-in Windows AD groups that cannot be re-created
+samba_addc_builtin_groups:
+  - "Domain Admins"
+  - "Domain Users"
+  - "Schema Admins"
+  - "Enterprise Admins"
+  - "Backup Operators"
+  - "Remote Desktop Users"
+  - "Samba Operators"
+
+# samba_user_group
+samba_user: "{{ samba_os_user | default('sambashare') }}"
+samba_group: "{{ samba_os_group | default('sambashare') }}"
+
+samba_service: >-
+  {{ (samba_deployment_mode == 'addc')
+    | ternary(samba_os_service_addc, samba_os_service_nt4)
+  }}
+
+samba_server_pkg_names: >-
+  {{ (samba_deployment_mode == 'addc')
+    | ternary(samba_server_pkg_names_addc, samba_server_pkg_names_nt4)
+  }}
+
+samba_pkg_names: >-
+  {{ samba_server_pkg_names if samba_is_server | bool
+      else samba_client_pkg_names
+  }}
+
+samba_directory:
+  conf: "{{ samba_os_directory.conf | default('/etc/samba') }}"
+  spool: "{{ samba_os_directory.spool | default('/var/spool/samba') }}"
+  log: "{{ samba_os_directory.log | default('/var/log/samba') }}"
+  lib: "{{ samba_os_directory.lib | default('/var/lib/samba') }}"
+  cache: "{{ samba_os_directory.cache | default('/var/cache/samba') }}"
+  run: "{{ samba_os_directory.run | default('/run/samba') }}"
+  assets: "{{ samba_os_directory.assets | default('/usr/share/samba') }}"
+  sysvol: "{{ samba_os_directory.sysvol | default('/var/lib/samba/sysvol') }}"
+
+samba_file:
+  samba_conf: "{{ samba_directory.conf }}/smb.conf"
+  krb5_conf: "/etc/krb5.conf"
+  keytab: "/etc/samba.keytab"

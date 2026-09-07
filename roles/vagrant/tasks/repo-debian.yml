@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download HashiCorp GPG Key (Armored)
+  become: true
+  ansible.builtin.get_url:
+    url: https://apt.releases.hashicorp.com/gpg
+    dest: /tmp/hashicorp.asc
+    mode: "0644"
+
+- name: Dearmor HashiCorp GPG Key
+  become: true
+  ansible.builtin.shell: |
+    set -o pipefail
+    cat /tmp/hashicorp.asc | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  args:
+    executable: /bin/bash
+    creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+- name: Add HashiCorp Repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg]
+      https://apt.releases.hashicorp.com
+      {{ ansible_distribution_release }}
+      main
+    state: present
+    filename: hashicorp
+    update_cache: yes

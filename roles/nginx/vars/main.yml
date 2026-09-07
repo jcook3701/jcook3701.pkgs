@@ -1,27 +1,27 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-# Default directory for NGINX configurations
-nginx_config_dir: /etc/nginx/sites-available
-nginx_enabled_dir: /etc/nginx/sites-enabled
+nginx_sites_available_dir: /etc/nginx/sites-available
+nginx_sites_enabled_dir: /etc/nginx/sites-enabled
 
-# Default web root
-nginx_default_root: /var/www/html
+# A master list of all sites your role knows how to build
+nginx_sites:
+  - { server_vars: default.yml }
+  - { server_vars: pxeboot.yml }
+  - { server_vars: plex.yml }
+  - { server_vars: mixxx.yml }
 
-# Default site list (empty by default so the role doesn't fail if no sites are defined)
-nginx_sites: []
-
-# Common site-level defaults used if not specified in the environment vars
-nginx_site_defaults:
-  listen: 80
-  server_name: _
-  root: "{{ nginx_default_root }}"
-  location_path: /
-  autoindex: "on"
-  autoindex_exact_size: "off"
-  autoindex_localtime: "on"
-
-# Package management defaults
-nginx_package_state: present
-nginx_service_state: started
-nginx_service_enabled: yes
+nginx_main_config:
+  user: www-data
+  worker_processes: auto
+  pid: /run/nginx.pid
+  error_log: /var/log/nginx/error.log
+  events:
+    worker_connections: 768
+    multi_accept: "off"
+  http:
+    sendfile: "on"
+    tcp_nopush: "on"
+    ssl_protocols: "TLSv1.2 TLSv1.3"
+    gzip: "on"
+    access_log: "/var/log/nginx/access.log"

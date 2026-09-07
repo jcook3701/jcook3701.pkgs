@@ -1,0 +1,42 @@
+{#
+# openssh-lpk.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro openssh_lpk_ldif() -%}
+{# Iterate directly over your default user list variable #}
+{%- if openldap_bootstrap_users is defined -%}
+{%- for user in openldap_bootstrap_users -%}
+{# Only generate an entry if the user has one or more public keys explicitly listed #}
+{%- if user.ssh_public_keys is defined and user.ssh_public_keys | length > 0 %}
+dn: uid={{ user.username | trim }},ou=People,dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: modify
+add: objectClass
+objectClass: ldapPublicKey
+-
+add: sshPublicKey
+{%- for key in user.ssh_public_keys %}
+sshPublicKey: {{ key | trim }}
+{%- endfor %}
+
+{% endif %}
+{%- endfor -%}
+{%- endif -%}
+{%- endmacro -%}
+
+{{- openssh_lpk_ldif() }}

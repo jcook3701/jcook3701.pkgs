@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+plex_service: "plexmediaserver"
+
+plex_pkg_names:
+  - plexmediaserver
+
+plex_user_groups:
+  - video
+  - render
+
+plex_directory:
+  keyrings: "/etc/apt/keyrings"
+  sources: "/etc/apt/sources.list.d/"
+  data: "/var/lib/plexmediaserver"
+
+plex_file:
+  gpg: "{{ plex_directory.keyrings }}/plex.asc"
+  list: "{{ plex_directory.sources }}/plex.list"
+
+# OS Repository specifics
+plex_repo_url: "https://repo.plex.tv/deb/"
+plex_gpg_url: "https://downloads.plex.tv/plex-keys/PlexSign.v2.key"
+plex_codename: "public"
+plex_component: "main"

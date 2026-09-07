@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+plex_pkg_names:
+  - plex-media-server
+
+plex_user_groups:
+  - video
+  - render
+
+plex_directory:
+  data: "/var/lib/plexmediaserver"

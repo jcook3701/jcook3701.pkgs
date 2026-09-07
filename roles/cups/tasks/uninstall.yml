@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Force stop and disable printing daemon service on teardown
+  ansible.builtin.systemd:
+    name: "{{ cups_service }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Uninstall CUPS printing base packages
+  ansible.builtin.package:
+    name: "{{ cups_pkgs }}"
+    state: "absent"

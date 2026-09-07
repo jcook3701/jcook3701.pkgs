@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download Google Chrome stable package
+  ansible.builtin.get_url:
+    url: "{{ google_chrome_repo_url }}"
+    dest: "{{ google_chrome_file.package }}"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Install Google Chrome stable package
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs:
+      - "{{ google_chrome_file.package | default([]) }}"
+    pkg_manager_state: "present"
+    pkg_manager_update_cache: true

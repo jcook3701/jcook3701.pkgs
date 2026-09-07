@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate master automount routing configurations
+  ansible.builtin.template:
+    src: "auto.master.j2"
+    dest: "{{ autofs_file.auto_master }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  register: _autofs_master_config_state
+  notify: "Restart Autofs Services"
+
+- name: Isolate user-defined sub-map file targets dynamically
+  ansible.builtin.set_fact:
+    _autofs_target_maps: >-
+      {{ autofs_bootstrap_mounts
+          | map(attribute='name')
+          | map('regex_replace', '^', 'auto.')
+          | unique | list }}
+
+- name: Generate multi-tenant dynamic storage partition map files
+  ansible.builtin.template:
+    src: "auto.map.j2"
+    dest: "{{ autofs_directory.conf }}/{{ map_file }}"
+    owner: "root"
+    group: "root"
+    mode: "0600"
+  no_log: true
+  loop: "{{ _autofs_target_maps }}"
+  loop_control:
+    loop_var: map_file
+    label: "Autofs Map File -> {{ map_file }}"
+  register: _autofs_maps_config_state
+  notify: "Restart Autofs Services"

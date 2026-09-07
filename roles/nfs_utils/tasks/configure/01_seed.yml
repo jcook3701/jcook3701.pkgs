@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure base NFS configuration directories exist
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ nfs_utils_directory.conf }}"
+    - "{{ nfs_utils_directory.conf_d }}"
+    - "{{ nfs_utils_directory.request_key_d }}"
+    - "{{ nfs_utils_directory.state }}/rpc_pipefs"
+  loop_control:
+    loop_var: directory
+    label: "Creating directory: {{ directory }}"
+
+- name: Deploy shared NFS config templates
+  ansible.builtin.template:
+    src: "{{ conf_template.src }}"
+    dest: "{{ conf_template.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - src: "nfs.conf.j2"
+      dest: "{{ nfs_utils_file.conf }}"
+    - src: "idmapd.conf.j2"
+      dest: "{{ nfs_utils_file.idmapd_conf }}"
+  loop_control:
+    loop_var: conf_template
+    label: "Creating file: {{ conf_template.src }}"
+  notify:
+    - Restart nfs server service
+    - Restart nfs client service
+
+- name: Deploy client-side NFS framework default configuration environment file
+  ansible.builtin.template:
+    src: "nfs-common.j2"
+    dest: "{{ nfs_utils_file.default_common }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart nfs client service
+
+- name: Execute NFS Server File Export Table Seeding Tasks
+  ansible.builtin.include_tasks: "server/seed/main.yml"
+  when: nfs_utils_is_server | bool
+
+- name: Execute NFS Client Kernel Upcall Seeding Configuration Tasks
+  ansible.builtin.include_tasks: "client/seed/main.yml"
+  when: nfs_utils_is_client | bool

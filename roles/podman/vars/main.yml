@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+podman_dep_pkg_names: "{{ podman_os_dep_pkg_names | default([]) }}"
+podman_pkg_names: "{{ podman_os_pkg_names | default([]) }}"
+
+podman_system_directory:
+  conf: "{{ podman_os_system_directory.conf | default('/etc/containers') }}"
+  conf_dropdowns: "{{ podman_os_system_directory.conf_dropdowns | default('/etc/containers/containers.conf.d') }}"
+  storage: "{{ podman_os_system_directory.storage | default('/var/lib/containers/storage') }}"
+  cache: "{{ podman_os_system_directory.cache | default('/var/cache/containers') }}"
+  registries_d: "{{ podman_os_system_directory.registries_d | default('/etc/containers/registries.d') }}"
+
+podman_system_file:
+  security_auth: "/etc/subuid"
+  containers_conf: "{{ podman_directory.conf }}/containers.conf"
+  registries_conf: "{{ podman_directory.conf }}/registries.conf"
+  storage_conf: "{{ podman_directory.conf }}/storage.conf"
+  policy_json: "{{ podman_directory.conf }}/policy.json"
+
+podman_user_directory:
+  conf: "{{ podman_os_user_directory.conf | default('~/.config/containers') }}"
+  conf_dropdowns: "{{ podman_os_user_directory.conf_dropdowns | default('~/.config/containers/containers.conf.d') }}"
+  storage: "{{ podman_os_user_directory.storage | default('~/.local/share/containers/storage') }}"
+  cache: "{{ podman_os_user_directory.cache | default('~/.cache/containers') }}"
+  runtime_tmp: "{{ podman_os_user_directory.runtime_tmp | default('/run/user/{{ ansible_user_uid }}/containers') }}"
+  systemd_units: "{{ podman_os_user_directory.systemd_units | default('~/.config/systemd/user') }}"

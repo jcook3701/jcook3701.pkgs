@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+tftpd_hpa_service: tftpd-hpa
+
+tftpd_hpa_pkg_names:
+  - tftpd-hpa
+  - tftp-hpa
+
+tftpd_hpa_os_directory:
+  conf: "/etc/default"
+  root: "/srv/tftp"
+
+tftpd_hpa_os_file:
+  conf: "/etc/default/tftpd-hpa"

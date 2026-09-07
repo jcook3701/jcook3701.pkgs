@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop Autofs service cleanly
+  ansible.builtin.service:
+    name: "{{ autofs_service }}"
+    state: stopped
+  failed_when: false
+  when:
+    - ansible_facts.packages is defined
+    - autofs_service in ansible_facts.services | default({})
+
+- name: Uninstall Autofs package and dependencies
+  ansible.builtin.package:
+    name: "{{ autofs_package_names }}"
+    state: absent

@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely append required NFS application service keys on the Master KDC
+  ansible.builtin.command: >-
+    kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
+  vars:
+    target_node: "{{ nfs_server_fqdn.split('.') | first }}"
+    staging_keytab: "{{ kerberos_keytabs.master_nfs_transit_file }}"
+    service_principal: "nfs/{{ nfs_server_fqdn }}"
+  loop: "{{ kerberos_nfs_file_servers | default([]) }}"
+  loop_control:
+    loop_var: nfs_server_fqdn
+    index_var: loop_idx
+    label: "Injecting NFS keys for: {{ nfs_server_fqdn }}"
+  register: _nfs_key_injection
+  changed_when: "'added' in _nfs_key_injection.stdout | lower"
+  failed_when: >-
+    (_nfs_key_injection.rc is defined and _nfs_key_injection.rc != 0) or
+    ('error' in _nfs_key_injection.stdout | lower) or
+    ('failed' in _nfs_key_injection.stdout | lower)
+  when:
+    - kerberos_nfs_file_servers | default([]) | length > 0
+    - inventory_hostname in kerberos_admin_servers
+    - ('principal does not exist' in
+          master_nfs_db_check.results[loop_idx].stderr | lower)
+  become: true
+
+- name: Fetch fully compiled NFS service keytabs back to the Ansible controller
+  ansible.builtin.fetch:
+    src: "{{ target_client_file }}"
+    dest: "{{ target_controller_staging }}"
+    flat: true
+  vars:
+    target_node: "{{ nfs_server_fqdn.split('.') | first }}"
+    target_client_file: "{{ kerberos_keytabs.master_nfs_transit_file }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_nfs_staging }}"
+  loop: "{{ kerberos_nfs_file_servers | default([]) }}"
+  loop_control:
+    loop_var: nfs_server_fqdn
+    label: "Caching completed NFS passport to controller for: {{ nfs_server_fqdn }}"
+  when: kerberos_node_type == 'master'

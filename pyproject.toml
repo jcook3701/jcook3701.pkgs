@@ -51,9 +51,10 @@ Documentation = "https://github.com/jcook3701/jcook3701.pkgs/docs/jekyll"
 [project.optional-dependencies]
 dev = [
   "ansible>=12.0",
-  "ansible-core>=2.0",
+  "ansible-core>=2.18",
   "ansible-runner>=2.4",
   "galaxy-importer>=0.4",
+  "ruamel.yaml>=0.17.9,<0.18.0",
 ]
 tools = [
   "antsibull-changelog>=0.34",
@@ -68,9 +69,11 @@ tools = [
   "json-lint-tools>=0.1",
   "jinja2-cli>=0.8",
   "jinja2-time>=0.2",
+  "molecule==26.8",
   "mypy==1.9",
   "nameisok>=0.1",
   "nutri-matic>=0.1",
+  "passlib>=1.7",
   "pip-audit>=2.10",
   "pre-commit>=4.5",
   "pytest>=9.0",

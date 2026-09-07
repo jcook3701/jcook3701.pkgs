@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load tftpd-hpa OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Install tftpd-hpa
+  ansible.builtin.include_tasks: install.yml
+  when: tftpd_hpa_state | default('present') == 'present'
+
+- name: Uninstall tftpd-hpa
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - tftpd_hpa_state | default('present') == 'absent'
+    - tftpd_hpa_pkg_names[0] in ansible_facts.packages

@@ -3,7 +3,7 @@
 ---
 galaxy_info:
   author: Jared Cook
-  description: ""
+  description: "Installs, sets up, or removes AWX, ensuring all dependencies and configurations are managed."
   # company: "Optional Company Name"
 
   license: "AGPL-3.0-or-later"

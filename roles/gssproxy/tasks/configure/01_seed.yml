@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure GSSProxy configuration directories exist
+  ansible.builtin.file:
+    path: "{{ gssproxy_directory.conf | default('/etc/gssproxy') }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+
+- name: Deploy master global GSSProxy administrative configuration
+  ansible.builtin.template:
+    src: "gssproxy.conf.j2"
+    dest: "{{ gssproxy_file.conf | default('/etc/gssproxy/gssproxy.conf') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart gssproxy service
+
+- name: Prevent vendor configuration file collisions on unmanaged nodes
+  ansible.builtin.file:
+    path: "{{ gssproxy_file.default_nfs_conf | default('/etc/gssproxy/24-nfs-server.conf') }}"
+    state: absent
+  become: true
+  notify: Restart gssproxy service
+
+- name: Deploy enabled GSS-Proxy service snippets dynamically
+  ansible.builtin.template:
+    src: "service_snippet.conf.j2"
+    dest: "{{ gssproxy_directory.conf }}/{{ service.name }}.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  loop: "{{ gssproxy_services | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "{{ service.name }}"
+  when:
+    - gssproxy_services is defined
+    - gssproxy_services | length > 0
+    - service.enabled | bool
+  notify: Restart gssproxy service

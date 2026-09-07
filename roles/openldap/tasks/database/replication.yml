@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# ====================================================================
+# 1. PRIMARY MODULE INITIALIZATION
+# ====================================================================
+- name: Create temporary LDIF file to load replication module (Master Only)
+  ansible.builtin.copy:
+    content: |
+      dn: cn=module{0},cn=config
+      changetype: modify
+      add: olcModuleLoad
+      olcModuleLoad: syncprov.la
+    dest: "{{ openldap_host_staging.load_syncprov }}"
+    mode: "0600"
+  when: openldap_node_type == 'master'
+
+- name: Apply online module loading configuration (Master Only)
+  ansible.builtin.command:
+    cmd: ldapmodify -Y EXTERNAL -H ldapi:/// -f "{{ openldap_host_staging.load_syncprov }}"
+  when: openldap_node_type == 'master'
+  register: load_result
+  failed_when: >-
+    load_result.rc != 0 and
+    load_result.rc != 20 and
+    'already exists' not in load_result.stderr | lower and
+    'duplicate' not in load_result.stderr | lower
+  changed_when: "'modifying entry' in load_result.stdout | lower"
+
+# ====================================================================
+# 2. PROACTIVE MULTI-NODE SEQUENCING & PRE-FLIGHT CHECKS
+# ====================================================================
+- name: Ensure master server is accepting connections before configuring slave
+  ansible.builtin.wait_for:
+    host: "{{ openldap_admin_servers | first }}"
+    port: "{{ openldap_port | default(389) }}"
+    timeout: 30
+    state: started
+  when: openldap_node_type == 'slave'
+
+# ====================================================================
+# 3. RUNTIME REPLICA CONFIGURATION PASS
+# ====================================================================
+- name: Generate type-specific replication configuration file from template
+  ansible.builtin.template:
+    src: 03_feature_replication.ldif.j2
+    dest: "{{ openldap_host_staging.feature_replication }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply Replication Config to OpenLDAP online (Master & Slaves)
+  ansible.builtin.command:
+    cmd: ldapmodify -Y EXTERNAL -H ldapi:/// -f "{{ openldap_host_staging.feature_replication }}"
+  register: replication_result
+  failed_when: >-
+    replication_result.rc != 0 and
+    'type or value exists' not in replication_result.stderr | lower and
+    'already exists' not in replication_result.stderr | lower and
+    'already in list' not in replication_result.stderr | lower and
+    'attribute value is not unique' not in replication_result.stderr | lower
+  changed_when: >-
+    'modifying entry' in replication_result.stdout | lower or
+    'adding new entry' in replication_result.stdout | lower

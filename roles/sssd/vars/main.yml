@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+sssd_activation_suffix_map:
+  socket: "socket"
+  service: "service"
+
+sssd_service: "sssd"
+sssd_systemd_login_service: "systemd-logind"
+
+# SSSD Socket-Activated Units
+sssd_autofs_socket: "sssd-autofs.socket"
+sssd_ssh_socket: "sssd-ssh.socket"
+sssd_sudo_socket: "sssd-sudo.socket"
+sssd_kcm_socket: "sssd-kcm.socket"
+sssd_pac_socket: "sssd-pac.socket"
+
+# SSSD conflicting services
+sssd_nscd_service: "nscd"
+
+sssd_conflict_pkg_names: "{{ sssd_os_conflict_pkg_names | default([]) }}"
+sssd_dep_pkg_names: "{{ sssd_os_dep_pkg_names | default([]) }}"
+sssd_pkg_names: "{{ sssd_os_pkg_names | default([]) }}"
+
+sssd_directory:
+  conf: "{{ sssd_os_directory.conf | default('/etc/sssd') }}"
+  cacerts: "{{ sssd_os_directory.cacerts | default('/etc/ssl/certs/') }}"
+  certs: "{{ sssd_os_directory.certs | default('/etc/ldap/certs') }}"
+  default: "{{ sssd_os_directory.default | default('/etc/default') }}"
+  db: "{{ sssd_os_directory.db | default('/var/lib/sss/db') }}"
+  mc: "{{ sssd_os_directory.mc | default('/var/lib/sss/mc') }}"
+  pipes: "{{ sssd_os_directory.pipes | default('/var/lib/sss/pipes') }}"
+  private_pipes: "{{ sssd_os_directory.private_pipes | default('/var/lib/sss/pipes/private') }}"
+  log: "{{ sssd_os_directory.log | default('/var/log/sssd') }}"
+  keytab: "{{ sssd_os_directory.keytab | default('/etc') }}"
+
+sssd_file:
+  conf: "{{ sssd_directory.conf ~ '/sssd.conf' | default('/etc/sssd/sssd.conf') }}"
+  default: "{{ sssd_directory.default ~ '/sssd' | default('/etc/default/sssd') }}"
+  keytab: "{{ sssd_directory.keytab ~ '/krb5.keytab' | default('/etc/krb5.keytab') }}"
+
+# Dynamic transmission ports calculations
+sssd_ldap_port: "{{ (sssd_ldap_protocol == 'ldaps') | ternary(636, 389) }}"
+
+# Multi-Master Client Failover URI Constructor Loop Pass
+sssd_ldap_uri: >-
+  {% set uris = [] %}
+  {% for host in sssd_ldap_servers %}
+    {% set _ = uris.append(sssd_ldap_protocol ~ '://' ~ host ~ ':' ~ sssd_ldap_port) %}
+  {% endfor %}
+  {{ uris | join(',') | trim }}
+
+# Base Data Target Search Branches
+sssd_ldap_search_base: "dc={{ sssd_second_level_domain }},dc={{ sssd_top_level_domain }}"
+sssd_ldap_user_search_base: "ou={{ sssd_ldap_people_child_ou | trim }},ou={{ sssd_ldap_users_parent_ou | trim }},{{ sssd_ldap_search_base }}"
+sssd_ldap_group_search_base: "ou={{ sssd_ldap_groups_ou | trim }},{{ sssd_ldap_search_base }}"
+
+# MIT Kerberos Interception Construction
+sssd_krb5_server: "{{ sssd_krb5_servers | join(',') }}"
+sssd_krb5_realm: "{{ sssd_domain_name | upper }}"
+
+# Advanced Application Search Anchors
+sssd_ldap_autofs_search_base: "ou={{ sssd_ldap_automount_ou | trim }},{{ sssd_ldap_search_base }}"
+sssd_ldap_sudo_search_base: "ou={{ sssd_ldap_sudoers_ou | trim }},{{ sssd_ldap_search_base }}"

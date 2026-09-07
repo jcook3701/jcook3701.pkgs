@@ -1,3 +1,24 @@
+{#
+# ldap.conf.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro ldap_conf() -%}
 #
 # LDAP Defaults
 #
@@ -5,19 +26,17 @@
 # See ldap.conf(5) for details
 # This file should be world readable but not world writable.
 
-#BASE	dc=example,dc=com
-#URI	ldap://ldap.example.com ldap://ldap-master.example.com:666
-
-#SIZELIMIT	12
-#TIMELIMIT	15
-#DEREF		never
-
 # Turning this off breaks GSSAPI used with krb5 when rdns = false
-SASL_NOCANON	{{ openldap_conf.sasl_nocanon }}
-URI ldaps://modern-times.{{ openldap_conf.domain_name }}/
-BASE dc={{ openldap_conf.second_level_domain }},dc={{ openldap_conf.top_level_domain }}
+SASL_NOCANON	{{ openldap_sasl_nocanon }}
 
-# TLS_CACERT /etc/openldap/certs/cert.pem
-TLS_CERT {{ openldap_key.tls_cert }}
-TLS_KEY {{ openldap_key.tls_key }}
-TLS_REQCERT {{ openldap_conf.tls_reqcert }}
+# Core Client Mappings
+BASE dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+URI {{ 'ldaps' if openldap_use_tls else 'ldap' }}://{{ openldap_admin_servers | first | default(ansible_hostname + '.' + openldap_domain_name) }}:{{ openldap_port }}
+
+{% if openldap_use_tls | bool %}
+TLS_CACERT {{ openldap_tls_ca_cert }}
+TLS_REQCERT {{ openldap_tls_reqcert }}
+{% endif %}
+{%- endmacro -%}
+
+{{- ldap_conf() }}

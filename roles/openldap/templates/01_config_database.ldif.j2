@@ -1,0 +1,83 @@
+{#
+# 01_config_database.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro config_database_01() -%}
+{# Create the brand new Database #}
+dn: olcDatabase={1}{{ openldap_database_backend }},cn=config
+changetype: add
+objectClass: olcDatabaseConfig
+{% if openldap_database_backend == 'mdb' %}
+objectClass: olcMdbConfig
+{% elif openldap_database_backend == 'wiredtiger' %}
+objectClass: olcWiredTigerConfig
+{% elif openldap_database_backend == 'ldif' %}
+objectClass: olcLdifConfig
+{% elif openldap_database_backend == 'asyncmeta' %}
+objectClass: olcAsyncMetaConfig
+{% else %}
+objectClass: olc{{ openldap_database_backend | upper }}Config
+{% endif %}
+olcDatabase: {1}{{ openldap_database_backend }}
+olcDbDirectory: {{ openldap_directory.database }}
+{% if openldap_database_backend in ['mdb', 'wiredtiger'] %}
+olcDbMaxsize: {{ openldap_database_maxsize }}
+{% endif %}
+olcSuffix: dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+olcRootDN: cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}
+olcRootPW: {{ openldap_admin_password_hashed }}
+
+{# Rule 1: Secure password attribute access #}
+olcAccess: {0}to attrs=userPassword,shadowLastChange
+  by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+  by self write
+  by dn.exact="cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}" write
+  by anonymous auth
+  by * none
+
+{# Rule 2: Explicit permissions matching administrators, users, and the sync replication engine #}
+olcAccess: {1}to *
+  by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+  by dn.exact="cn={{ openldap_admin_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}" write
+  by dn.exact="cn={{ openldap_replication_user }},dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}" read
+  by self read
+  by users read
+  by * none
+
+{# Basic indexing for performance and stability #}
+olcDbIndex: objectClass eq
+olcDbIndex: cn,sn,mail pres,eq,sub
+olcDbIndex: uid pres,eq,sub
+
+{# Configure TLS/SSL #}
+{% if openldap_use_tls | bool %}
+dn: cn=config
+changetype: modify
+replace: olcTLSCACertificateFile
+olcTLSCACertificateFile: {{ openldap_tls_ca_cert }}
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: {{ openldap_tls_cert }}
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: {{ openldap_tls_key }}
+{% endif %}
+{%- endmacro %}
+
+{{- config_database_01() }}

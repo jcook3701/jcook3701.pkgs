@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Enforce external SSSD infrastructure pre-requisites
+  ansible.builtin.fail:
+    msg: >-
+      Deployment failed: 'samba_deployment_mode' is set to 'ads_member', but the 'sssd'
+      package was not detected on this host. Please ensure your central SSSD role runs
+      and configures the system identities before executing the Samba deployment.
+  when:
+    - samba_is_server | bool
+    - samba_deployment_mode == 'ads_member'
+    - ansible_facts.packages is defined
+    - ansible_facts.packages['sssd'] is not defined
+
+- name: Deploy Samba server configuration (SSSD Engine Profile)
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: "{{ samba_file.samba_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: _samba_sssd_config_state
+
+- name: Ensure Samba services are running and enabled
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: "{{ smb_state }}"
+    enabled: true
+  vars:
+    smb_state: "{{ (_samba_sssd_config_state.changed) | ternary('restarted', 'started') }}"
+  loop: "{{ samba_service }}"
+  loop_control:
+    loop_var: service
+    label: "Service status: {{ service }} -> state: {{ smb_state }}"
+
+- name: Execute Samba Kerberos Keytab Permission Synchronization Pass
+  ansible.builtin.include_tasks: keytabs.yml

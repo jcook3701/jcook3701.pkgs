@@ -1,0 +1,59 @@
+{#
+# global.settings.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro create() -%}
+{#
+    Generates the base global properties for all server environments.
+    Provides shared networking, debugging, protocol security, and printing options.
+
+    Args:
+        None
+
+    Returns:
+        str: Baseline global parameters for the main section.
+#}
+
+[global]
+    ## Browsing/Identification ##
+    workgroup = {{ samba_workgroup }}
+{% if samba_is_server | bool %}
+    netbios name = {{ samba_netbios_name }}
+    interfaces = {{ samba_interfaces }}
+    bind interfaces only = {{ samba_bind_interfaces_only }}
+    smb ports = {{ samba_port }}
+{% endif %}
+
+{% include 'global.' ~ samba_deployment_mode ~ '.j2' %}
+
+    ## Debugging/Accounting ##
+    log file = {{ samba_directory.log }}/log.%m
+    max log size = 1000
+    logging = file
+    log level = 3 auth:5 idmap:5 gensec:5
+    panic action = {{ samba_directory.assets }}/panic-action %d
+
+{% if samba_is_server | bool %}
+    ## Printing ##
+    load printers = yes
+    printing = cups
+    printcap name = cups
+    cups options = raw
+{% endif %}
+{%- endmacro -%}

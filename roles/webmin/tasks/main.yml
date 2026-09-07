@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Webmin OS-specific variables
+  ansible.builtin.include_vars: "{{ webmin_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: webmin_vars
+    label: "Loading variables file: {{ webmin_vars }}"
+
+- name: Webmin Install
+  ansible.builtin.include_tasks: state/install.yml
+  when: webmin_state | default('present') == 'present'
+
+- name: Webmin Uninstall
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - webmin_state | default('present') in ['absent', 'teardown']
+    - webmin_pkg_names[0] in ansible_facts.packages

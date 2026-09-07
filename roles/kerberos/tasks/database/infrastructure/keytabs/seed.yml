@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Enterprise Kiprop OS Seed Pipeline
+  ansible.builtin.include_tasks: kiprop/seed.yml
+  when:
+    - kerberos_client_nodes | default([]) | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise Host OS Seed Pipeline
+  ansible.builtin.include_tasks: hosts/seed.yml
+  when:
+    - kerberos_client_nodes | default([]) | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise CIFS File Sharing Seed Pipeline
+  ansible.builtin.include_tasks: cifs/seed.yml
+  when:
+    - kerberos_samba_file_servers | default([]) | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise NFS Secure UNIX Storage Seed Pipeline
+  ansible.builtin.include_tasks: nfs/seed.yml
+  when:
+    - kerberos_nfs_file_servers | default([]) | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise HTTP Single Sign-On Seed Pipeline
+  ansible.builtin.include_tasks: http/seed.yml
+  when:
+    - kerberos_http_servers | default([]) | length > 0
+    - kerberos_node_type == 'master'
+
+- name: Execute Enterprise LDAP Secure Directory Seed Pipeline
+  ansible.builtin.include_tasks: ldap/seed.yml
+  when:
+    - kerberos_ldap_servers | default([]) | length > 0
+    - kerberos_node_type == 'master'

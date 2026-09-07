@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure base WireGuard configuration directory exists
+  ansible.builtin.file:
+    path: "{{ wireguard_directory.conf }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  become: true

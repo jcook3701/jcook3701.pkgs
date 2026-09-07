@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy Docker Daemon Configuration Engine
+  ansible.builtin.template:
+    src: "daemon.json.j2"
+    dest: "{{ docker_ce_file.daemon_json | default('/etc/docker/daemon.json') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart docker service
+  when: docker_ce_manage_config | bool

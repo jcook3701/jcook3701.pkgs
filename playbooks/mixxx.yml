@@ -13,4 +13,3 @@
     - name: Install Mixxx
       ansible.builtin.include_role:
         name: jcook3701.pkgs.mixxx
-        tasks_from: ubuntu-mixxx.yml

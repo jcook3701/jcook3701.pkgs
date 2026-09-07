@@ -1,0 +1,43 @@
+{#
+# provider.ad.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro create() -%}
+{#
+    Generates the configuration options for the native Active Directory
+    driver backend track. Directly maps domain structures and offloads
+    all name resolution, discovery, and credential workflows to the AD
+    framework.
+
+    Args:
+        None
+
+    Returns:
+        str: A formatted block of native Active Directory provider parameters.
+#}
+# --- ACTIVE DIRECTORY NATIVE PROVIDER TRACK ---
+id_provider = ad
+auth_provider = ad
+chpass_provider = ad
+access_provider = ad
+ad_domain = {{ sssd_krb5_realm | lower | trim }}
+ad_server = {{ sssd_krb5_server | trim }}
+cache_credentials = {{ sssd_cache_credentials | string | lower }}
+krb5_store_password_if_offline = {{ sssd_krb5_store_password_if_offline | string | lower }}
+{%- endmacro -%}

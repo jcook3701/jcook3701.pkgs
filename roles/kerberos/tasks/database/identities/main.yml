@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Security Domain Password Policy Pass
+  ansible.builtin.include_tasks: policy.yml
+
+- name: Execute Human Core Account Seeding Pipeline
+  ansible.builtin.include_tasks: seed.yml
+
+- name: Enforce Account Lifecycle Rules and Deadlines
+  ansible.builtin.include_tasks: constraints.yml

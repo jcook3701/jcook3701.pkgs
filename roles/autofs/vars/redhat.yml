@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+autofs_os_service: "autofs"
+
+autofs_os_dep_package_names:
+  - "cifs-utils"
+
+autofs_os_package_names:
+  - "autofs"
+
+autofs_os_directory:
+  conf: "/etc"

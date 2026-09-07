@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Docker-CE OS-specific variables
+  ansible.builtin.include_vars: "{{ docker_ce_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: docker_ce_vars
+    label: "Loading variables file: {{ docker_ce_vars }}"
+
+- name: Ensure Docker Community Edition is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: docker_ce_state | default('present') == 'present'
+
+- name: Ensure Docker Community Edition is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: docker_ce_state | default('present') == 'absent'
+
+- name: Teardown Docker Community Edition, services, packages, and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: docker_ce_state | default('present') == 'teardown'

@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load UxPlay OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Collect running user facts
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: sudo_user_facts.yml
+  when: sudo_user is not defined
+
+- name: Install UxPlay packages
+  ansible.builtin.include_tasks: install.yml
+  when:
+    - uxplay_state | default('present') == 'present'
+    - uxplay_pkg_names[0] not in ansible_facts.packages
+
+- name: Uninstall UxPlay packages
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - uxplay_state | default('present') == 'absent'
+    - uxplay_pkg_names[0] in ansible_facts.packages

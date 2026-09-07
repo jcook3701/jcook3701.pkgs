@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely provision custom enterprise security groups into Active Directory
+  ansible.builtin.command: >
+    samba-tool group add "{{ group.name }}"
+    --description="{{ group.description | default('Automated Infrastructure Group') }}"
+    --gid-number={{ group.gid }}
+  register: _samba_group_add_output
+  changed_when: "('created successfully' in _samba_group_add_output.stdout | lower)"
+  failed_when: >
+    (_samba_group_add_output.rc != 0) and
+    ('already exists' not in _samba_group_add_output.stderr | lower)
+  loop: "{{ samba_addc_provision_groups }}"
+  loop_control:
+    loop_var: group
+    label: "AD Group Add -> {{ group.name }}"
+  when:
+    - ansible_fqdn == samba_primary_dc
+    - group.name not in samba_addc_builtin_groups
+
+- name: Enforce description and structural POSIX sync on built-in native Windows groups
+  ansible.builtin.command: >
+    samba-tool group mod "{{ group.name }}"
+    --description="{{ group.description }}"
+    --gid-number={{ group.gid }}
+  register: _samba_group_mod_output
+  changed_when: "('modified successfully' in _samba_group_mod_output.stdout | lower)"
+  failed_when: _samba_group_mod_output.rc != 0
+  loop: "{{ samba_addc_provision_groups }}"
+  loop_control:
+    loop_var: group
+    label: "AD Built-in Sync -> {{ group.name }}"
+  when:
+    - ansible_fqdn == samba_primary_dc
+    - group.name in samba_addc_builtin_groups

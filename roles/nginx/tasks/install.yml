@@ -2,13 +2,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install NGINX from the default system repositories
-  ansible.builtin.apt:
-    name: nginx
+  ansible.builtin.package:
+    name: "{{ nginx_pkg_names }}"
     state: present
-    update_cache: yes
 
 - name: Ensure NGINX is started and enabled on boot
   ansible.builtin.service:
-    name: nginx
+    name: "{{ nginx_service }}"
     state: started
-    enabled: yes
+    enabled: true
+
+- name: Configure NGINX sites and state
+  ansible.builtin.import_tasks: configure.yml

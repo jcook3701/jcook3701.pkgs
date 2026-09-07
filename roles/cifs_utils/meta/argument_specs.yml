@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manages native and bimodal GSSProxy-controlled SMB/CIFS client storage mounts."
+    description: >-
+      This role installs the necessary user-space tools for SMB/CIFS operations and
+      configures the Linux kernel SPNEGO upcall interface. It features bimodal operation,
+      allowing it to resolve Kerberos credentials natively via environment probing or
+      route cryptographic handshakes through a centralized GSSProxy socket interface.
+    author: "Jared Cook"
+    options:
+      cifs_utils_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The installation, configuration, or structural removal state of the CIFS client software packages."
+
+      cifs_utils_use_gssproxy:
+        type: "bool"
+        default: false
+        description: "Toggles whether the kernel cifs.upcall binary should bypass traditional filesystem lookups to utilize a GSSProxy interception socket."
+
+      cifs_utils_gssproxy_socket:
+        type: "str"
+        default: "/var/lib/gssproxy/cifs.sock"
+        description: "Specialized IPC socket path used when GSS-Proxy manages Kerberos upcalls."
+
+      cifs_utils_client_enable_mounts:
+        type: "bool"
+        default: false
+        description: "Master configuration toggle to enable or disable the execution of client-side SMB/CIFS storage mounts during the playbook run."
+
+      cifs_utils_client_mounts:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "A declarative array tracking active remote SMB/CIFS network share allocations managed on the target machine."
+        options:
+          src:
+            type: "str"
+            required: true
+            description: "The remote Windows/Samba export share target path formatted as '//server/share_name'."
+          path:
+            type: "str"
+            required: true
+            description: "The absolute local folder path on the client filesystem where the network share should be attached."
+          opts:
+            type: "str"
+            default: "defaults"
+            description: "The comma-separated parameter mount string passed to the /etc/fstab layout (e.g., 'rw,sec=krb5,vers=3.11,multiuser')."
+          state:
+            type: "str"
+            default: "mounted"
+            choices: ["mounted", "unmounted", "present", "absent"]
+            description: "The operational target state of the network share within the host OS lifecycle."

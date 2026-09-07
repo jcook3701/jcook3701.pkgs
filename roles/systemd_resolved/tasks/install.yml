@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install systemd-resolved package
+  ansible.builtin.package:
+    name: "{{ systemd_resolved_pkg_names }}"
+    state: present
+
+- name: Create systemd-resolved drop-in directory
+  ansible.builtin.file:
+    path: "{{ systemd_resolved_directory.conf }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy the custom DNS drop-in configuration
+  ansible.builtin.template:
+    src: 10-dns-overrides.conf.j2
+    dest: "{{ systemd_resolved_directory.conf }}/10-dns-overrides.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart systemd-resolved
+
+- name: Ensure system /etc/resolv.conf symlink points to the resolved stub
+  ansible.builtin.file:
+    src: "{{ systemd_resolved_file.stub_resolv }}"
+    dest: "{{ systemd_resolved_file.system_resolv }}"
+    state: link
+    force: true
+  notify: Restart systemd-resolved
+
+- name: Ensure systemd-resolved service is started and enable
+  ansible.builtin.systemd:
+    name: "{{ systemd_resolved_service }}"
+    state: started
+    enabled: true

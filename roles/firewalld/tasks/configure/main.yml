@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Firewalld deployment seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Execute Firewalld custom service generation tasks
+  ansible.builtin.include_tasks: "02_custom_services.yml"
+
+- name: Execute Firewalld structural zone configuration tasks
+  ansible.builtin.include_tasks: "03_zones.yml"
+
+- name: Execute Firewalld service configuration reload tasks
+  ansible.builtin.include_tasks: "04_reload.yml"

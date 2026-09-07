@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+wireguard_os_service: "{{ 'wg-quick@' ~ wireguard_interface }}" # ~ '.service'
+
+wireguard_os_dep_pkg_names:
+  - "qrencode"
+
+wireguard_os_pkg_names:
+  - "wireguard"
+  - "wireguard-tools"
+
+wireguard_os_directory:
+  conf: "/etc/wireguard"

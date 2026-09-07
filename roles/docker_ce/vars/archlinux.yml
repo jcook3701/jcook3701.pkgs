@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+docker_ce_os_group: "docker"
+docker_ce_os_user: "docker"
+
+docker_ce_os_service: "docker"
+
+docker_ce_os_unofficial_pkg_names: []
+
+docker_ce_os_pkg_names:
+  - docker
+
+docker_ce_os_compose_pkg_names:
+  - docker-compose
+
+docker_ce_os_buildx_pkg_names:
+  - docker-buildx
+
+docker_ce_os_directory:
+  conf: "/etc/docker"
+
+docker_ce_arch_server: ""

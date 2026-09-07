@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Fail2ban service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ fail2ban_service | default('fail2ban') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Uninstall Fail2ban packages
+  ansible.builtin.package:
+    name: "{{ fail2ban_pkg_names | default([]) }}"
+    state: absent
+  become: true

@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure systemd-resolved service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ systemd_resolved_service }}"
+    state: stopped
+    enabled: false
+
+- name: Uninstall systemd-resolved package and dependencies
+  ansible.builtin.package:
+    name: "{{ systemd_resolved_pkg_names }}"
+    state: absent

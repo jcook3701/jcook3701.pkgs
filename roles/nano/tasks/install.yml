@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install nano package
+  ansible.builtin.apt:
+    name: "{{ nano_pkg_names }}"
+    state: present
+
+- name: Filter interactive users
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: filters/users-with-home-directory.yml
+
+- name: Create nano configuration file
+  ansible.builtin.template:
+    src: ".nanorc.j2"
+    dest: "{{ user.split(':')[5] }}/.nanorc"
+    owner: "{{ user.split(':')[0] }}"
+    group: "{{ user.split(':')[0] }}"
+    mode: "0644"
+  loop: "{{ interactive_users }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.split(':')[0] }}"

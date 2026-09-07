@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Service Settings
+docker_ce_service: "{{ docker_ce_os_service | default('docker') }}"
+
+# User/Group Settings
+docker_ce_user: "{{ docker_ce_os_user | default('docker') }}"
+docker_ce_group: "{{ docker_ce_os_group | default('docker') }}"
+
+# Package Settings
+docker_ce_unofficial_pkg_names: "{{ docker_ce_os_unofficial_pkg_names | default([]) }}"
+docker_ce_pkg_names: "{{ docker_ce_os_pkg_names | default([]) }}"
+docker_ce_compose_pkgs: "{{ docker_ce_os_compose_pkgs | default([]) }}"
+docker_ce_buildx_pkg_names: "{{ docker_ce_os_buildx_pkg_names | default([]) }}"
+
+# System File Settings
+docker_ce_directory:
+  conf: "{{ docker_ce_os_directory.conf | default('/etc/docker') }}"
+  default: "{{ docker_ce_os_directory.default | default('/etc/default') }}"
+  data_root: "{{ docker_ce_os_directory.data_root | default('/var/lib/docker') }}"
+  systemd_override: "{{ docker_ce_os_directory.systemd_override | default('/etc/systemd/system/docker.service.d') }}"
+  systemd_socket_override: "{{ docker_ce_os_directory.systemd_socket_override | default('/etc/systemd/system/docker.socket.d') }}"
+  cli_plugins: "{{ docker_ce_os_directory.cli_plugins | default('/usr/local/lib/docker/cli-plugins') }}"
+
+docker_ce_file:
+  default: "{{ docker_ce_directory.default }}/docker"
+  daemon_json: "{{ docker_ce_directory.conf }}/daemon.json"
+  systemd_override_conf: "{{ docker_ce_directory.systemd_override }}/override.conf"
+  systemd_socket_override_conf: "{{ docker_ce_directory.systemd_socket_override }}/override.conf"
+
+# Repository Specifics
+docker_ce_repo_id: "{{ docker_ce_os_repo_id | default('docker-ce') }}"
+docker_ce_repo_name: "{{ docker_ce_os_repo_name | default('Docker Community Edition') }}"

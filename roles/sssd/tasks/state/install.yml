@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure NSCD (name service cache daemon) service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ sssd_nscd_service | default('nscd') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (sssd_nscd_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure Conflicting Packages are purged
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ sssd_conflict_pkg_names | default([]) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete
+
+- name: Install SSSD package and dependencies.
+  ansible.builtin.package:
+    name: >-
+      {{ sssd_pkg_names | default([])
+          + sssd_dep_pkg_names | default([]) }}
+    state: present
+  become: true
+
+- name: Configure SSSD service
+  ansible.builtin.include_tasks: configure/main.yml

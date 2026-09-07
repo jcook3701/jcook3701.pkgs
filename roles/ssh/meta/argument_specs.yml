@@ -1,0 +1,114 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Enterprise system access hardening specification blueprint for OpenSSH Server Daemon."
+    description: "Enforces typechecking, strict cryptographic choices, and required parameter bounds to align the secure shell server with centralized SSSD network lookups."
+    author: "Jared Cook"
+    options:
+      ssh_state:
+        type: str
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The intended configuration deployment state of the secure shell server infrastructure."
+
+      ssh_port:
+        type: int
+        default: 22
+        description: "The primary network socket port tracking inbound connection challenges."
+
+      ssh_listen_address:
+        type: str
+        default: "0.0.0.0"
+        description: "The network address boundary interface bound to the active daemon listener socket."
+
+      ssh_protocol_version:
+        type: str
+        default: "2"
+        choices: ["2"]
+        description: "The underlying protocol revision model mandatory for communication loops."
+
+      ssh_permit_root_login:
+        type: str
+        default: "prohibit-password"
+        choices: ["yes", "no", "prohibit-password", "forced-commands-only"]
+        description: "Security level constraints controlling root account administrative access over network boundaries."
+
+      ssh_pubkey_authentication:
+        type: str
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Toggles cryptographic signature token validation checks for secure public key authorizations."
+
+      ssh_authorized_keys_file:
+        type: str
+        default: ".ssh/authorized_keys"
+        description: "The targeted user home folder filename path tracking permitted authorization tokens."
+
+      ssh_password_authentication:
+        type: str
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "MANDATORY SSSD LINK: Permits the server daemon to route standard network text password validations down to system authorization layers."
+
+      ssh_kbd_interactive_authentication:
+        type: str
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "MANDATORY SSSD LINK: Enables multi-tier validation prompts necessary for processing centralized network cache validations."
+
+      ssh_use_pam:
+        type: str
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Hooks the listening socket directly into local Pluggable Authentication Module framework loops."
+
+      ssh_x11_forwarding:
+        type: str
+        default: "no"
+        choices: ["yes", "no"]
+        description: "Toggles GUI application packet encapsulation channels over the secure stream."
+
+      ssh_max_auth_tries:
+        type: int
+        default: 6
+        description: "The extreme limit boundary for validation attempts allowed per socket challenge before dropping."
+
+      ssh_login_grace_time:
+        type: str
+        default: "2m"
+        description: "The timeout constraint window permitted for authentication completion passes before forceful disconnection."
+
+      ssh_strict_modes:
+        type: str
+        default: "yes"
+        choices: ["yes", "no"]
+        description: "Forces checking on file permissions inside user home spaces prior to accepting login handles."
+
+      ssh_ciphers:
+        type: list
+        elements: str
+        default:
+          - "chacha20-poly1305@openssh.com"
+          - "aes256-gcm@openssh.com"
+          - "aes128-gcm@openssh.com"
+        description: "An array of authorized symmetric encryption algorithms conforming to modern corporate security architectures."
+
+      ssh_macs:
+        type: list
+        elements: str
+        default:
+          - "hmac-sha256-etm@openssh.com"
+          - "umac-128-etm@openssh.com"
+        description: "An array of data integrity checksum algorithms deployed for stream validation checks."
+
+      ssh_kex_algorithms:
+        type: list
+        elements: str
+        default:
+          - "curve25519-sha256"
+          - "curve25519-sha256@libssh.org"
+          - "diffie-hellman-group16-sha512"
+          - "diffie-hellman-group18-sha512"
+        description: "An array of key exchange algorithms mandated for the secure cryptographic tunnel initialization pass."

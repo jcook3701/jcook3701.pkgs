@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+nfs_utils_is_server: "{{ nfs_utils_node_type | default('client') == 'master' }}"
+nfs_utils_is_client: "{{ not nfs_utils_is_server | bool }}"
+
+nfs_utils_use_gssproxy: >-
+  {{ nfs_utils_use_kerberos | bool
+      and nfs_gss_provider | default('gssproxy') == 'gssproxy' }}
+
+nfs_utils_use_svcgssd: >-
+  {{ nfs_utils_use_kerberos | bool
+      and nfs_gss_provider | default('gssproxy') == 'svcgssd' }}
+
+# NFS Services
+nfs_utils_server_service: "{{ nfs_utils_os_server_service
+                          | default('nfs-kernel-server') }}"
+nfs_utils_server_helper_service: "{{ nfs_utils_os_server_helper_service
+                          | default('rpc-svcgssd') }}"
+nfs_utils_client_service: "{{ nfs_utils_os_client_service
+                          | default('rpc-gssd') }}"
+nfs_utils_rpc_pipefs_service: "{{ nfs_utils_os_rpc_pipefs_service
+                          | default('var-lib-nfs-rpc_pipefs.mount') }}"
+nfs_utils_rsyslog_service: "{{ nfs_utils_os_rsyslog_service
+                          | default('rsyslog') }}"
+
+nfs_utils_user: "{{ nfs_utils_os_user | default('nobody') }}"
+nfs_utils_group: "{{ nfs_utils_os_group | default('nogroup') }}"
+
+nfs_utils_rsyslog_user: "{{ nfs_utils_os_rsyslog_user | default('syslog') }}"
+nfs_utils_rsyslog_group: "{{ nfs_utils_os_rsyslog_group | default('syslog') }}"
+
+nfs_utils_dep_pkg_names: "{{ nfs_utils_os_dep_pkg_names | default([]) }}"
+
+nfs_utils_pkg_names: >-
+  {{
+    _nfs_utils_pkg_names_override |
+      default(
+        (nfs_utils_os_server_pkg_names + nfs_utils_os_client_pkg_names) | unique
+          if nfs_utils_node_type == 'master'
+        else nfs_utils_os_client_pkg_names if nfs_utils_node_type == 'client'
+        else []
+      )
+  }}
+
+nfs_utils_directory:
+  bin: "{{ nfs_utils_os_directory.bin
+                          | default('/usr/sbin') }}"
+  conf: "{{ nfs_utils_os_directory.conf
+                          | default('/etc') }}"
+  conf_d: "{{ nfs_utils_os_directory.nfs_conf_d
+                          | default('/etc/nfs.conf.d') }}"
+  exports_d: "{{ nfs_utils_os_directory.exports_d
+                          | default('/etc/exports.d') }}"
+  gssproxy_socket: "{{ nfs_utils_os_directory.gssproxy_socket
+                          | default('/var/lib/gssproxy') }}"
+  request_key: "{{ nfs_utils_os_directory.request_key
+                          | default('/etc') }}"
+  request_key_d: "{{ nfs_utils_os_directory.request_key_d
+                          | default('/etc/request-key.d') }}"
+  rsyslog: "{{ nfs_utils_os_directory.rsyslog
+                          | default('/etc/rsyslog.d') }}"
+  state: "{{ nfs_utils_os_directory.state
+                          | default('/var/lib/nfs') }}"
+  defaults: "{{ nfs_utils_os_directory.defaults
+                          | default('/etc/default') }}"
+  override_nfs_server: "{{ nfs_utils_os_directory.override
+                          | default('/etc/systemd/system') }}/{{ nfs_utils_server_service }}.service.d"
+  override_rpc_gssd: "{{ nfs_utils_os_directory.override
+                          | default('/etc/systemd/system') }}/{{ nfs_utils_client_service }}.service.d"
+  override_rpc_svcgssd: "{{ nfs_utils_os_directory.override
+                          | default('/etc/systemd/system') }}/{{ nfs_utils_server_helper_service }}.service.d"
+  log: "{{ nfs_utils_os_directory.log
+                          | default('/var/log/nfs') }}"
+
+nfs_utils_file:
+  conf: "{{ nfs_utils_directory.conf ~ '/nfs.conf'
+                          | default('/etc/nfs.conf') }}"
+  request_key_conf: "{{ nfs_utils_directory.request_key ~ '/request-key.conf'
+                          | default('/etc/request-key.conf') }}"
+  nfs_idmap_conf: "{{ nfs_utils_directory.request_key_d ~ '/nfs.idmap.conf'
+                          | default('/etc/request-key.d/nfs.idmap.conf') }}"
+  rsyslog: "{{ nfs_utils_directory.rsyslog ~ '/30-nfs.conf'
+                          | default('/etc/rsyslog.d/30-nfs.conf') }}"
+  exports: "{{ nfs_utils_directory.conf ~ '/exports'
+                          | default('/etc/exports') }}"
+  idmapd_conf: "{{ nfs_utils_directory.conf ~ '/idmapd.conf'
+                          | default('/etc/idmapd.conf') }}"
+  default_common: "{{ nfs_utils_directory.defaults ~ '/nfs-common'
+                          | default('/etc/default/nfs-common') }}"
+  default_server: "{{ nfs_utils_directory.defaults ~ '/nfs-server'
+                          | default('/etc/default/nfs-server') }}"
+  override_rpc_gssd: "{{ nfs_utils_directory.override_rpc_gssd ~ '/override.conf'
+                          | default('/etc/systemd/system/override.conf') }}"
+  override_rpc_svcgssd: "{{ nfs_utils_directory.override_rpc_svcgssd ~ '/override.conf'
+                          | default('/etc/systemd/system/override.conf') }}"
+  log: "{{ nfs_utils_directory.log ~ '/nfs-debug.log'
+                          | default('/var/log/nfs/debug.log') }}"
+
+nfs_utils_command:
+  nfsidmap: "{{ nfs_utils_directory.bin ~ '/nfsidmap'
+                          | default('/usr/sbin/nfsidmap') }}"
+
+nfs_utils_socket:
+  gssproxy_socket: "{{ nfs_utils_directory.gssproxy_socket ~ '/nfs.sock'
+                          | default('/var/lib/gssproxy/nfs.sock') }}"

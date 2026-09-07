@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate private key for OpenLDAP server workers
+  community.crypto.openssl_privatekey:
+    path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0600"
+  become: true
+
+- name: Generate Certificate Signing Request (CSR) for local hosts
+  community.crypto.openssl_csr:
+    path: "{{ openldap_tls_csr }}"
+    privatekey_path: "{{ openldap_tls_key }}"
+    select_crypto_backend: cryptography
+    common_name: "{{ ansible_hostname }}.{{ openldap_domain_name }}"
+    subject_alt_name:
+      - "DNS:{{ ansible_fqdn }}"
+      - "DNS:{{ ansible_hostname }}"
+      - "IP:{{ ansible_default_ipv4.address }}"
+    owner: "{{ openldap_user }}"
+    group: "{{ openldap_group }}"
+    mode: "0644"
+  become: true

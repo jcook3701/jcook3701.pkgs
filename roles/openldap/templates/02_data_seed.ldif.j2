@@ -1,0 +1,78 @@
+{#
+# 02_data_seed.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro data_seed_02() -%}
+# 1. Global Directory Group Bootstrapping
+{% for group in openldap_bootstrap_groups | default([]) %}
+dn: cn={{ group.name | trim }},ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+cn: {{ group.name | trim }}
+gidNumber: {{ group.gid | string | trim }}
+{% if group.description is defined and group.description | length > 0 %}
+description: {{ group.description | trim }}
+{% endif %}
+
+{% endfor %}
+
+# 2. Automated Infrastructure User Account Provisioning
+{% for user in openldap_bootstrap_users | default([]) %}
+dn: uid={{ user.username | trim }},ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: {{ (user.firstname is defined and user.lastname is defined) | ternary(user.firstname | trim ~ ' ' ~ user.lastname | trim, user.username | trim) }}
+sn: {{ user.lastname | default(user.username, true) | trim }}
+uid: {{ user.username | trim }}
+uidNumber: {{ user.uid | string | trim }}
+gidNumber: {{ user.gid | string | trim }}
+homeDirectory: {{ user.home_directory | default('/home/' ~ user.username) | trim }}
+loginShell: {{ user.login_shell | default('/bin/bash') | trim }}
+userPassword: {{ user.password | trim }}
+mail: {{ user.mail | default(user.username ~ '@' ~ openldap_second_level_domain | trim ~ '.' ~ openldap_top_level_domain | trim) | trim }}
+{% if user.description is defined and user.description | length > 0 %}
+description: {{ user.description | trim }}
+{% endif %}
+{% if user.title is defined and user.title | length > 0 %}
+title: {{ user.title | trim }}
+{% endif %}
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+
+# Primary Group Creation for Individual User Objects
+dn: cn={{ user.username | trim }},ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+cn: {{ user.username | trim }}
+gidNumber: {{ user.gid | string | trim }}
+memberUid: {{ user.username | trim }}
+
+{% endfor %}
+
+{%- endmacro -%}
+
+{{- data_seed_02() }}

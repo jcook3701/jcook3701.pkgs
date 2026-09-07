@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Lifecycle execution state for package installation or removal
+cifs_utils_state: present
+
+# Toggle to determine if gssproxy is steering this role
+cifs_utils_use_gssproxy: false
+
+# Specialized IPC socket path used when GSS-Proxy manages Kerberos upcalls
+cifs_utils_gssproxy_socket: "/var/lib/gssproxy/cifs.sock"
+
+# Toggle client mount tasks on or off
+cifs_utils_client_enable_mounts: false
+
+# Declarative array tracking SMB/CIFS network share allocations.
+# This structure mirrors the data models used across your other storage roles.
+cifs_utils_client_mounts: []
+# Example structure for inventory or group_vars overrides:
+#   - src: "//example-host.example.com"
+#     path: "/mnt/game_share"
+#     opts: "rw,sec=krb5,vers=3.11,multiuser"
+#     state: "mounted"

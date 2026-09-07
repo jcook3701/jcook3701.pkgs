@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+openldap_os_user: "openldap"
+openldap_os_group: "openldap"
+
+openldap_os_sysconfig_variable: SLAPD_SERVICES
+
+openldap_os_shared_lib_pkg_names:
+  - libsasl2-modules-gssapi-mit
+  - libnet-ldap-perl
+  - python3-passlib
+  - python3-ldap
+
+openldap_os_client_pkg_names:
+  - ldap-utils
+
+openldap_os_server_pkg_names:
+  - slapd
+  - slapd-contrib
+  # TODO: slapd-smbk5pwd
+
+openldap_os_directory:
+  conf: "/etc/ldap"
+  slapd: "/etc/ldap/slapd.d"
+  cacerts: "/etc/ssl/certs"
+  certs: "/etc/ldap/certs"
+  database: "/var/lib/ldap"
+  modules: "/usr/lib/ldap"
+  schema: "/etc/ldap/schema"
+  run: "/run/slapd"
+  override: "/etc/systemd/system/slapd.service.d"
+  defaults: "/etc/default"
