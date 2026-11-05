@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Execute Security Domain Password Policy Pass
-  ansible.builtin.include_tasks: policy.yml
+  ansible.builtin.include_tasks: 01_policy.yml
 
 - name: Execute Human Core Account Seeding Pipeline
-  ansible.builtin.include_tasks: seed.yml
+  ansible.builtin.include_tasks: 02_seed.yml
 
 - name: Enforce Account Lifecycle Rules and Deadlines
-  ansible.builtin.include_tasks: constraints.yml
+  ansible.builtin.include_tasks: 03_constraints.yml

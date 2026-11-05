@@ -1,21 +1,32 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Load Git OS-specific variables
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_facts['os_family'] | lower }}.yml"
-
 - name: Gather target host package facts
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Install Git packages
-  ansible.builtin.include_tasks: install.yml
+- name: Load Git OS-specific variables
+  ansible.builtin.include_vars: "{{ git_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: git_vars
+    label: "Loading variables file: {{ git_vars }}"
+
+- name: Ensure installation of Git package
+  ansible.builtin.include_tasks: state/install.yml
   when: git_state | default('present') == 'present'
 
-- name: Uninstall Git packages
-  ansible.builtin.include_tasks: uninstall.yml
+- name: Ensure uninstallation of Git package
+  ansible.builtin.include_tasks: state/uninstall.yml
   when:
     - git_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - git_pkg_names[0] in ansible_facts.packages
+
+- name: Ensure teardown of Git package and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when:
+    - git_state | default('present') == 'teardown'
+    - ansible_facts.packages is defined
     - git_pkg_names[0] in ansible_facts.packages

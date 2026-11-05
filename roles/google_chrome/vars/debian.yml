@@ -4,4 +4,13 @@
 google_chrome_pkg_names:
   - google-chrome-stable
 
-google_chrome_os_slug: "google-chrome-stable_current_amd64.deb"
+google_chrome_deb_architecture:
+  armv6l: "unsupported_arch"
+  armv7l: "unsupported_arch"
+  aarch64: "arm64"
+  x86_64: "amd64"
+  i386: "unsupported_arch"
+
+google_chrome_os_slug: "{{ 'google-chrome-stable_current_'
+  ~ google_chrome_deb_architecture[ansible_architecture]
+  | default(ansible_architecture) ~ '.deb' }}"

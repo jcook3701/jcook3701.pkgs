@@ -18,4 +18,3 @@ vagrant_roles:
     vars:
       nginx_enabled_sites:
         - { server_vars: pxeboot.yml }
-  # - role: jcook3701.homelab.pxeboot

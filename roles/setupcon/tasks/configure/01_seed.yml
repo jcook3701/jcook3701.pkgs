@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# TODO: Think about if we should back config files up before overwriting them.
+#       If so, we should probably do that here.
+
+- name: "Seed the configuration files for setupcon"
+  ansible.builtin.template:
+    src: "keyboard.j2"
+    dest: "{{ setupcon_file.keyboard_config
+                | default('/etc/default/keyboard') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: "Seed the configuration files for setupcon"
+  ansible.builtin.template:
+    src: "console-setup.j2"
+    dest: "{{ setupcon_file.console_setup_config
+                | default('/etc/default/console-setup') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true

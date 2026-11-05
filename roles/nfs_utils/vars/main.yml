@@ -50,6 +50,12 @@ nfs_utils_directory:
                           | default('/etc') }}"
   conf_d: "{{ nfs_utils_os_directory.nfs_conf_d
                           | default('/etc/nfs.conf.d') }}"
+  export: "{{ nfs_utils_os_directory.export
+                          | default('/export') }}"
+  export_public: "{{ nfs_utils_os_directory.export ~ '/public'
+                          | default('/export/public') }}"
+  export_secure: "{{ nfs_utils_os_directory.export ~ '/secure'
+                          | default('/export/secure') }}"
   exports_d: "{{ nfs_utils_os_directory.exports_d
                           | default('/etc/exports.d') }}"
   gssproxy_socket: "{{ nfs_utils_os_directory.gssproxy_socket

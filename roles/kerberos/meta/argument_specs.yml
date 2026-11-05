@@ -80,6 +80,34 @@ argument_specs:
           The Master KDC uses this array to iterate through and inject 'ldap/'
           service principals into the staging keytabs during infrastructure execution passes.
 
+      kerberos_samba_client_nodes:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "Target deployment vector listing client hostnames requiring isolated Samba service keytabs."
+
+      kerberos_nfs_client_nodes:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "Target deployment vector listing client hostnames requiring isolated NFS service keytabs."
+
+      kerberos_http_client_nodes:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "Target deployment vector listing client hostnames requiring isolated HTTP service keytabs."
+
+      kerberos_ldap_client_nodes:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "Target deployment vector listing client hostnames requiring isolated LDAP service keytabs."
+
       kerberos_propagation_servers:
         type: "list"
         elements: "str"

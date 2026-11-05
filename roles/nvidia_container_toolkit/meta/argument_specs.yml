@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: NVIDIA Container Toolkit installation and configuration
+    description:
+      - Installs and manages the NVIDIA Container Toolkit.
+    options:
+      nvidia_container_toolkit_state:
+        type: str
+        description:
+          - Desired lifecycle state of the NVIDIA Container Toolkit.
+        choices: [present, absent, teardown]
+        default: present
+
+      nvidia_container_toolkit_download_url:
+        type: str
+        description:
+          - Base URL used for NVIDIA Container Toolkit downloads.
+        default: "https://nvidia.github.io"

@@ -1,3 +1,4 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+git_pkg_names: "{{ git_os_pkg_names | default(['git']) }}"

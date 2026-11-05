@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+# Structural installation state ('present' or 'absent' or 'teardown')
+code_state: present
+
+# -------------------------------------------------------------------------
+# Visual Studio Code Package Configuration
+# -------------------------------------------------------------------------
+code_download_url: "https://packages.microsoft.com"
+
+# -------------------------------------------------------------------------
+# CLI Plugins & Companion Packages
+# -------------------------------------------------------------------------
+code_manage_plugins: false

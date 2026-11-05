@@ -4,11 +4,10 @@
 galaxy_info:
   author: Jared Cook
   description: >-
-    Manage native and bimodal rsyslog logging subsystem architecture configurations.
-  # company: "Optional Company Name"
-
+    Manage native and bimodal rsyslog logging subsystem
+    architecture configurations.
+  company: "Cook's Code, Inc."
   license: "AGPL-3.0-or-later"
-
   min_ansible_version: ">=2.10"
   role_name: rsyslog
 

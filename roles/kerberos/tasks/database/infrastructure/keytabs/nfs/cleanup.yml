@@ -8,7 +8,8 @@
   vars:
     target_node: "{{ nfs_server_fqdn.split('.') | first }}"
     target_transit_file: "{{ kerberos_keytabs.master_nfs_transit_file }}"
-  loop: "{{ kerberos_nfs_file_servers | default([]) }}"
+  loop: "{{ kerberos_nfs_file_servers | default([])
+            + kerberos_nfs_client_nodes | default([]) }}"
   loop_control:
     loop_var: nfs_server_fqdn
     label: "Purging master NFS transit scratch file -> nfs/{{ nfs_server_fqdn }}"
@@ -22,7 +23,8 @@
   vars:
     target_node: "{{ nfs_server_fqdn.split('.') | first }}"
     target_controller_nfs: "{{ kerberos_keytabs.controller_nfs_staging }}"
-  loop: "{{ kerberos_nfs_file_servers | default([]) }}"
+  loop: "{{ kerberos_nfs_file_servers | default([])
+            + kerberos_nfs_client_nodes | default([]) }}"
   loop_control:
     loop_var: nfs_server_fqdn
     label: "Purging controller NFS staging file -> nfs/{{ nfs_server_fqdn }}"
@@ -37,4 +39,5 @@
     target_node: "{{ inventory_hostname.split('.') | first }}"
     target_delivered_transit: "{{ kerberos_keytabs.client_nfs_delivered_transit }}"
   become: true
-  when: inventory_hostname in (kerberos_nfs_file_servers | default([]))
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([])
+                                + kerberos_nfs_client_nodes | default([]))

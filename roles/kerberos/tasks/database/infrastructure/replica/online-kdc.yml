@@ -3,7 +3,7 @@
 ---
 - name: Ensure Replica KDC server engine is started and enabled
   ansible.builtin.service:
-    name: "{{ kerberos_kdc_service }}"
+    name: "{{ kerberos_kdc_service | default('krb5-kdc') }}"
     state: started
     enabled: true
   become: true

@@ -1,4 +1,12 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
 google_chrome_state: present
+
+# -------------------------------------------------------------------------
+# Google Chrome Package Configuration
+# -------------------------------------------------------------------------
+google_chrome_base_repo_url: "https://dl.google.com"

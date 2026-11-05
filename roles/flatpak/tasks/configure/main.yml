@@ -1,12 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Execute Flatpak seeding tasks
+  ansible.builtin.include_tasks: 01_seed.yml
+
 - name: Ensure Flatpak group settings are configured
-  ansible.builtin.include_tasks: group.yml
+  ansible.builtin.include_tasks: 02_group.yml
   when:
     - ansible_os_family in ['Debian', 'Redhat']
     - flatpak_manage_group | default(true) | bool
 
 - name: Ensure Flatpak repositories are configured
-  ansible.builtin.include_tasks: repository.yml
+  ansible.builtin.include_tasks: 03_repository.yml
   when: flatpak_manage_repos | default(true) | bool

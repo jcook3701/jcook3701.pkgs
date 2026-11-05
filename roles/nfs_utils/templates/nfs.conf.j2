@@ -34,7 +34,7 @@ threads = {{ nfs_utils_server_threads | trim }}
 
 [gssd]
 # GSS-API Credential Security Daemon configuration
-{% if nfs_utils_use_gssproxy | bool and nfs_utils_node_type != 'master' %}
+{% if nfs_utils_use_gssproxy %}
 use-gss-proxy = 1
 {% else %}
 use-gss-proxy = 0

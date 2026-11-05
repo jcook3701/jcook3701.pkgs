@@ -18,6 +18,16 @@ sssd_pac_socket: "sssd-pac.socket"
 # SSSD conflicting services
 sssd_nscd_service: "nscd"
 
+sssd_sockets:
+  - { name: 'nss',       enabled: "{{ sssd_enable_nss | bool }}" }
+  - { name: 'pam',       enabled: "{{ sssd_enable_pam | bool }}" }
+  - { name: 'pam-priv',  enabled: "{{ sssd_enable_pam | bool }}" }
+  - { name: 'autofs',    enabled: "{{ sssd_enable_autofs | bool }}" }
+  - { name: 'ssh',       enabled: "{{ sssd_enable_ssh | bool }}" }
+  - { name: 'sudo',      enabled: "{{ sssd_enable_sudo | bool }}" }
+  - { name: 'kcm',       enabled: "{{ sssd_enable_kdc | bool }}" }
+  - { name: 'pac',       enabled: "{{ sssd_enable_pac | bool }}" }
+
 sssd_conflict_pkg_names: "{{ sssd_os_conflict_pkg_names | default([]) }}"
 sssd_dep_pkg_names: "{{ sssd_os_dep_pkg_names | default([]) }}"
 sssd_pkg_names: "{{ sssd_os_pkg_names | default([]) }}"

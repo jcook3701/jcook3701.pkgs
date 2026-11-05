@@ -23,9 +23,34 @@
 # Manual edits will be overwritten.
 
 {% if nfs_utils_server_exports is defined and nfs_utils_server_exports | length > 0 %}
-{% for share in nfs_utils_server_exports %}
-# Share definition for local path: {{ share.path }}
-{{ share.path }} {% for host in share.hosts %}{{ host.name }}({{ host.options }}) {% endfor %}
+# =========================================================================
+# NFSv4 GLOBAL MULTI-FLAVOR PSEUDO-ROOT GATEWAY (fsid=0)
+# =========================================================================
+{# MODIFICATION: Set up /export as the multi-flavor gate to allow both sys and krb5 clients to connect natively #}
+{{ nfs_utils_directory.export | default('/export') }} *(ro,sync,wdelay,crossmnt,no_subtree_check,fsid=0,sec=sys:krb5:krb5i:krb5p)
+
+# =========================================================================
+# STRICT DOMAIN INTERFACE EXPORTS
+# =========================================================================
+{# MODIFICATION: Explicitly lock down the public subdirectory to standard sys security #}
+{{ nfs_utils_directory.export_public | default('/export/public') }} *(ro,sync,wdelay,crossmnt,no_subtree_check,sec=sys)
+{# MODIFICATION: Explicitly lock down the secure subdirectory to Kerberos-only validation #}
+{{ nfs_utils_directory.export_secure | default('/export/secure') }} *(ro,sync,wdelay,crossmnt,no_subtree_check,sec=krb5:krb5i:krb5p)
+
+# =========================================================================
+# STANDALONE HOST EXPORT MAPS
+# =========================================================================
+{% for nfs_share in nfs_utils_server_exports %}
+# Share definition for local path: {{ nfs_share.path }}
+{% set is_secure = nfs_share.hosts | map(attribute='options') | select('search', 'sec=krb5') | list | length > 0 %}
+{% set target_root = nfs_utils_directory.export_secure | default('/export/secure') if is_secure else nfs_utils_directory.export_public | default('/export/public') %}
+{% for host in nfs_share.hosts %}
+{% set export_options = host.options %}
+{% if 'nohide' not in host.options and 'crossmnt' not in host.options %}
+  {% set export_options = host.options + ',nohide' %}
+{% endif %}
+{{ target_root }}/{{ nfs_share.name }} {{ host.name }}({{ export_options }})
+{% endfor %}
 
 {% endfor %}
 {% else %}

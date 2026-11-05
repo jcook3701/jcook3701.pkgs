@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Visual Studio Code seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Include Visual Studio Code Plugin Management Tasks
+  ansible.builtin.include_tasks: "02_plugins.yml"
+  when: code_manage_plugins | default(false) | bool

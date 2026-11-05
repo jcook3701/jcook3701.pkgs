@@ -6,7 +6,8 @@
   register: endpoint_nfs_file_check
   changed_when: false
   failed_when: false
-  when: inventory_hostname in (kerberos_nfs_file_servers | default([]))
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([])
+                                + kerberos_nfs_client_nodes | default([]))
 
 - name: Check if a staged NFS keytab file exists on the Ansible Controller
   ansible.builtin.stat:
@@ -17,7 +18,8 @@
   register: controller_nfs_staging_stat
   delegate_to: localhost
   become: false
-  when: inventory_hostname in (kerberos_nfs_file_servers | default([]))
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([])
+                                + kerberos_nfs_client_nodes | default([]))
 
 - name: Securely deliver unique NFS service keytab file to the target node
   ansible.builtin.copy:
@@ -30,7 +32,8 @@
     target_node: "{{ inventory_hostname.split('.') | first }}"
     target_controller_staging: "{{ kerberos_keytabs.controller_nfs_staging }}"
   when:
-    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+    - inventory_hostname in (kerberos_nfs_file_servers | default([])
+                              + kerberos_nfs_client_nodes | default([]))
     - controller_nfs_staging_stat.stat.exists | default(false)
     - ('nfs/' not in endpoint_nfs_file_check.stdout | lower)
 
@@ -44,5 +47,6 @@
     mode: "0600"
   become: true
   when:
-    - inventory_hostname in (kerberos_nfs_file_servers | default([]))
+    - inventory_hostname in (kerberos_nfs_file_servers | default([])
+                              + kerberos_nfs_client_nodes | default([]))
     - "'nfs/' not in endpoint_nfs_file_check.stdout | lower"

@@ -9,7 +9,7 @@
 
 - name: Force deep purge of Kerberos packages and configuration database from the OS
   ansible.builtin.apt:
-    name: "{{ kerberos_pkg_names }}"
+    name: "{{  kerberos_pkg_names | default([]) }}"
     state: absent
     purge: true
     autoremove: true
@@ -24,16 +24,16 @@
     path: "{{ db_file }}"
     state: absent
   loop:
-    - "{{ kerberos_file.principal }}"
-    - "{{ kerberos_file.principal }}.db"
-    - "{{ kerberos_file.principal }}.ok"
-    - "{{ kerberos_file.principal }}.kadm5"
-    - "{{ kerberos_file.principal }}.kadm5.lock"
-    - "{{ kerberos_file.principal_ulog }}"
-    - "{{ kerberos_file.replica_ulog }}"
-    - "{{ kerberos_file.unlimited_ulog }}"
-    - "{{ kerberos_file.replica_datatrans }}"
-    - "{{ kerberos_file.replica_datatrans }}.dump_ok"
+    - "{{ kerberos_file.principal | default('/var/lib/krb5kdc/principal') }}"
+    - "{{ kerberos_file.principal ~ '.db' | default('/var/lib/krb5kdc/principal.db') }}"
+    - "{{ kerberos_file.principal ~ '.ok' | default('/var/lib/krb5kdc/principal.ok') }}"
+    - "{{ kerberos_file.principal ~ '.kadm5' | default('/var/lib/krb5kdc/principal.kadm5') }}"
+    - "{{ kerberos_file.principal ~ '.kadm5.lock' | default('/var/lib/krb5kdc/principal.lock') }}"
+    - "{{ kerberos_file.principal_ulog | default('/var/lib/krb5kdc/principal.ulog') }}"
+    - "{{ kerberos_file.replica_ulog | default('/var/lib/krb5kdc/replica.ulog') }}"
+    - "{{ kerberos_file.unlimited_ulog | default('/var/lib/krb5kdc/unlimited.ulog') }}"
+    - "{{ kerberos_file.replica_datatrans | default('/etc/krb5kdc/replica_datatrans') }}"
+    - "{{ kerberos_file.replica_datatrans ~ '.dump_ok' | default('/etc/krb5kdc/replica_datatrans.dump_ok') }}"
     - "{{ kerberos_file.replica_datatrans }}.{{ ansible_hostname }}.{{ kerberos_domain_name }}.last_prop"
     - "{{ kerberos_file.replica_datatrans }}.{{ ansible_fqdn }}.last_prop"
   loop_control:
@@ -44,13 +44,13 @@
 
 - name: Verify if the Kerberos state directory exists on the filesystem
   ansible.builtin.stat:
-    path: "{{ kerberos_directory.state }}"
+    path: "{{ kerberos_directory.state | default('/var/lib/krb5kdc') }}"
   register: teardown_state_dir_stat
   become: true
 
 - name: Find all contents inside the Kerberos state directory
   ansible.builtin.find:
-    paths: "{{ kerberos_directory.state }}"
+    paths: "{{ kerberos_directory.state | default('/var/lib/krb5kdc') }}"
     recurse: true
     hidden: true
     file_type: any
@@ -73,12 +73,12 @@
     path: "{{ keytab }}"
     state: absent
   loop:
-    - "{{ kerberos_keytabs.system_default }}"
-    - "{{ kerberos_keytabs.kdc_admin }}"
-    - "{{ kerberos_keytabs.cifs_default }}"
-    - "{{ kerberos_keytabs.ldap_default }}"
-    - "{{ kerberos_keytabs.http_default }}"
-    - "{{ kerberos_keytabs.nfs_default }}"
+    - "{{ kerberos_keytabs.system_default | default('/etc/krb5.keytab') }}"
+    - "{{ kerberos_keytabs.kdc_admin | default('/etc/kadm5.keytab') }}"
+    - "{{ kerberos_keytabs.cifs_default | default('/etc/samba.keytab') }}"
+    - "{{ kerberos_keytabs.ldap_default | default('/etc/ldap.keytab') }}"
+    - "{{ kerberos_keytabs.http_default | default('/etc/http.keytab') }}"
+    - "{{ kerberos_keytabs.nfs_default | default('/etc/nfs.keytab') }}"
   loop_control:
     loop_var: keytab
     label: "Wiping production keytab file: {{ keytab }}"
@@ -155,11 +155,11 @@
     path: "{{ conf_file }}"
     state: absent
   loop:
-    - "{{ kerberos_file.global_config }}"
-    - "{{ kerberos_file.kdc_config }}"
-    - "{{ kerberos_file.admin_acl }}"
-    - "{{ kerberos_file.kprop_acl }}"
-    - "{{ kerberos_file.stash }}"
+    - "{{ kerberos_file.global_config | default('/etc/krb5.conf') }}"
+    - "{{ kerberos_file.kdc_config | default('/etc/krb5kdc/kdc.conf') }}"
+    - "{{ kerberos_file.admin_acl | default('/etc/krb5kdc/kadm5.acl') }}"
+    - "{{ kerberos_file.kprop_acl | default('/etc/krb5kdc/kpropd.acl') }}"
+    - "{{ kerberos_file.stash | default('/etc/krb5kdc/stash') }}"
   loop_control:
     loop_var: conf_file
     label: "Wiping text layout file: {{ conf_file }}"

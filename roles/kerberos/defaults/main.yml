@@ -1,12 +1,19 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# ====================================================================
+# Structural installation state ('present' or 'absent' or 'teardown')
+# ====================================================================
 kerberos_state: present
 
+# ====================================================================
 # Cluster Infrastructure Deployment Profile (Options: master, replica, client)
+# ====================================================================
 kerberos_node_type: client
 
+# ====================================================================
 # Topology Inventory Mappings (Populated via play inventory definitions)
+# ====================================================================
 kerberos_admin_servers: []
 kerberos_replica_servers: []
 kerberos_client_nodes: []
@@ -15,6 +22,11 @@ kerberos_samba_file_servers: []
 kerberos_nfs_file_servers: []
 kerberos_http_servers: []
 kerberos_ldap_servers: []
+
+kerberos_samba_client_nodes: []
+kerberos_nfs_client_nodes: []
+# kerberos_http_client_nodes: []
+# kerberos_ldap_client_nodes: []
 # ====================================================================
 # NETWORK DAEMON PORT BINDING & INTERFACE SECURITY
 # ====================================================================

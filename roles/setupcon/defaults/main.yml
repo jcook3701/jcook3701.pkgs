@@ -1,4 +1,26 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
 setupcon_state: present
+
+# -------------------------------------------------------------------------
+# Console Display Settings
+# -------------------------------------------------------------------------
+setupcon_active_consoles: "/dev/tty[1-6]"
+setupcon_charmap: "UTF-8"
+setupcon_codeset: "guess"
+setupcon_fontface: "TerminusBold"
+setupcon_fontsize: "16x32"
+setupcon_videomode: ""
+
+# -------------------------------------------------------------------------
+# Keyboard Layout Settings
+# -------------------------------------------------------------------------
+setupcon_xkbmodel: "pc105"
+setupcon_xkblayout: "us"
+setupcon_xkbvariant: ""
+setupcon_xkboptions: ""
+setupcon_backspace: "guess"

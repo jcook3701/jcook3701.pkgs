@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# User/Group Settings
+naps_user: "{{ naps_os_user | default('scanner') }}"
+naps_group: "{{ naps_os_group | default('scanner') }}"
+
+# Package Settings
+naps_pkg_names: "{{ naps_os_pkg_names | default(['naps2']) }}"
+
+# System File Settings
+naps_directory:
+  conf: "{{ naps_os_directory | default('/etc/naps') }}"
+
+# Repository Specifics
+naps_repo_id: "{{ naps_os_repo_id | default('naps2') }}"
+naps_repo_name: "{{ naps_os_repo_name | default('Not Another PDF Scanner 2') }}"

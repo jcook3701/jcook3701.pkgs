@@ -3,7 +3,7 @@
 ---
 - name: Ensure Replica update server daemon is active
   ansible.builtin.service:
-    name: "{{ kerberos_kprop_service }}"
+    name: "{{ kerberos_kprop_service | default('krb5-kpropd') }}"
     state: started
     enabled: true
   become: true

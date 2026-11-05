@@ -6,8 +6,7 @@ galaxy_info:
   description: >-
     Installs, sets up, or removes, HashiCorp Vault,
     ensuring all dependencies and configurations are managed.
-  # company: "Optional Company Name"
-
+  company: "Cook's Code, Inc."
   license: "AGPL-3.0-or-later"
 
   min_ansible_version: ">=2.10"

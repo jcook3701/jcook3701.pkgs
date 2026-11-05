@@ -59,4 +59,7 @@ nfs_utils_client_enable_mounts: false
 nfs_utils_client_mounts: []
 
 # Toggles advanced verbosity and diagnostics trace logging loops across internal NFS utilities
-nfs_utils_enable_debug_logging: true
+nfs_utils_enable_logging: true
+
+# Toggles NFS utilities role's internal ansible.builtin.debug on or off
+nfs_utils_debug_mode: false

@@ -13,4 +13,4 @@
 
 - name: Execute NFS logging seeding tasks
   ansible.builtin.include_tasks: "04_logging.yml"
-  when: nfs_utils_enable_debug_logging | bool
+  when: nfs_utils_enable_logging | bool

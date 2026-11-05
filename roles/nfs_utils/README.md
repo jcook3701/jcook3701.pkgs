@@ -16,7 +16,8 @@ The [nfs-utils](https://www.kali.org/tools/nfs-utils/) package provides essentia
 | **`nfs_utils_server_exports`** | A declarative array tracking local directory paths and authorized client ACLs exported by this server. | `[]` |
 | **`nfs_utils_client_enable_mounts`** | Master configuration toggle to enable or disable client-side NFS mount processing tasks. | `false` |
 | **`nfs_utils_client_mounts`** | A declarative array tracking remote NFS resource URLs and local client target directories. | `[]` |
-| **`nfs_utils_enable_debug_logging`** | Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core utilities. | `true` |
+| **`nfs_utils_enable_logging`** | Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core utilities. | `true` |
+| **`nfs_utils_debug_mode`** | Toggles NFS utilities role's internal ansible.builtin.debug on or off | `false` |
 
 ## Role Design
 

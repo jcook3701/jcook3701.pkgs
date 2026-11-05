@@ -5,26 +5,26 @@
 # PHASE 1:  DIRECTORY PROVISIONING AND SYSTEM LOG STORAGE LAYERS
 # ====================================================================
 - name: Ensure Kerberos log directories and system tracking files exist
-  ansible.builtin.include_tasks: logging.yml
+  ansible.builtin.include_tasks: 01_logging.yml
 
 # ====================================================================
 # PHASE 2: CENTRALIZED JINJA CORE TEMPLATE DEPLOYMENT
 # ====================================================================
 - name: Deploy dynamic configuration matrices and access control sheets
-  ansible.builtin.include_tasks: templates.yml
+  ansible.builtin.include_tasks: 02_templates.yml
 
 # ====================================================================
 # PHASE 3: CROSS-PLATFORM DAEMON NETWORK INTERFACE BINDING OVERRIDES
 # ====================================================================
 - name: Process administrative daemon network execution binding constraints
-  ansible.builtin.include_tasks: admin-bind.yml
+  ansible.builtin.include_tasks: 03_admin_bind.yml
   when: kerberos_node_type == 'master'
 
 # ====================================================================
 # PHASE 4: CROSS-PLATFORM SYSTEMD STORAGE SANDBOX OVERRIDES
 # ====================================================================
 - name: Apply explicit systemd storage sandbox configuration adjustments
-  ansible.builtin.include_tasks: systemd-sandbox.yml
+  ansible.builtin.include_tasks: 04_systemd_sandbox.yml
   when:
     - kerberos_node_type in ['master', 'replica']
     - ansible_distribution in ['Ubuntu', 'Archlinux']

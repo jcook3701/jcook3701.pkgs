@@ -1,4 +1,4 @@
-# Unifi
+# Unifi (legacy product)
 
 ## Role Variables
 

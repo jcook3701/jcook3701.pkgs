@@ -11,7 +11,9 @@
     state: stopped
     enabled: false
   become: true
-  when: (nfs_utils_server_service ~ '.service' in ansible_facts.services)
+  when:
+    - (nfs_utils_server_service ~ '.service' in ansible_facts.services)
+    - ansible_facts.services[nfs_utils_server_service ~ '.service'].status != 'not-found'
 
 - name: Ensure helper NFS server daemon is stopped and disabled on clients
   ansible.builtin.service:
@@ -19,7 +21,9 @@
     state: "stopped"
     enabled: false
   become: true
-  when: (nfs_utils_server_helper_service ~ '.service' in ansible_facts.services)
+  when:
+    - (nfs_utils_server_helper_service ~ '.service' in ansible_facts.services)
+    - ansible_facts.services[nfs_utils_server_helper_service ~ '.service'].status != 'not-found'
 
 - name: Ensure NFS GSS security daemon is stopped and disabled
   ansible.builtin.service:
@@ -27,7 +31,9 @@
     state: "stopped"
     enabled: false
   become: true
-  when: (nfs_utils_client_service ~ '.service' in ansible_facts.services)
+  when:
+    - (nfs_utils_client_service ~ '.service' in ansible_facts.services)
+    - ansible_facts.services[nfs_utils_client_service ~ '.service'].status != 'not-found'
 
 - name: Ensure native RPC Pipefs daemon is stopped and disabled
   ansible.builtin.service:

@@ -25,6 +25,10 @@ argument_specs:
             type: "str"
             required: true
             description: "The exact local username string to grant Flatpak application management permissions."
+          group:
+            type: "str"
+            required: false
+            description: "The group string associated with user account."
 
       flatpak_manage_group:
         type: "bool"

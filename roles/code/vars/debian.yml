@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+code_os_dep_package_names: []
+
+code_os_pkg_names:
+  - code
+
+code_os_directory: []
+
+# Repository Configuration for jcook3701.utils.repo_add
+code_os_repo_id: "code"
+code_os_repo_name: "Visual Studio Code"
+
+code_debian_uris: "{{ code_download_url }}/repos/code"
+code_debian_suites: "stable"
+code_debian_component: "main"
+code_debian_signed_by: "{{ code_download_url }}/keys/microsoft.asc"

@@ -4,7 +4,7 @@
 - name: Push master stash file to Replicas
   ansible.builtin.copy:
     src: /tmp/kerberos_stash_file
-    dest: "{{ kerberos_file.stash }}"
+    dest: "{{ kerberos_file.stash | default('/etc/krb5kdc/stash') }}"
     owner: root
     group: root
     mode: "0600"

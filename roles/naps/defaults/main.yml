@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+# Structural installation state ('present' or 'absent' or 'teardown')
+naps_state: present
+
+# Accounts granted rootless or direct access to the scanner daemon
+naps_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'scanner' system group
+naps_manage_group: true
+
+# -------------------------------------------------------------------------
+# NAPS2 Package Configuration
+# -------------------------------------------------------------------------
+naps_download_url: "https://downloads.naps2.com"

@@ -28,3 +28,4 @@
   loop_control:
     loop_var: directory
     label: "Removing directory footprint: {{ directory }}"
+  when: false

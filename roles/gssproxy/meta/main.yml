@@ -5,10 +5,8 @@ galaxy_info:
   author: Jared Cook
   description: >-
     Configures GSS-Proxy to bridge SSSD-KDC KCM caches with Kernel CIFS.
-  # company: "Optional Company Name"
-
+  company: "Cook's Code, Inc."
   license: "AGPL-3.0-or-later"
-
   min_ansible_version: ">=2.10"
   role_name: gssproxy
 

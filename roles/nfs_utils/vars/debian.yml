@@ -13,7 +13,7 @@ nfs_utils_rsyslog_os_group: "syslog"
 
 nfs_utils_os_dep_pkg_names:
   - keyutils
-  - "{{ (nfs_utils_enable_debug_logging | default(true) | bool) | ternary('rsyslog', omit) }}"
+  - "{{ (nfs_utils_enable_logging | default(true) | bool) | ternary('rsyslog', omit) }}"
 
 nfs_utils_os_server_pkg_names:
   - nfs-kernel-server
@@ -25,6 +25,7 @@ nfs_utils_os_directory:
   bin: "/usr/sbin"
   conf: "/etc"
   conf_d: "/etc/nfs.conf.d"
+  export: "/export"
   exports_d: "/etc/exports.d"
   gssproxy_socket: "/var/lib/gssproxy"
   request_key: "/etc"

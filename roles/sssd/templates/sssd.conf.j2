@@ -41,6 +41,7 @@
 config_file_version = 2
 domains = {{ sssd_domain_name | trim }}
 debug_level = {{ sssd_debug_level }}
+disable_netlink = true
 
 {# Native services routing builder #}
 {% if sssd_responder_activation_method == 'service' %}

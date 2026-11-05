@@ -10,3 +10,7 @@ flatpak_dep_pkg_names: "{{ flatpak_os_dep_pkg_names | default([]) }}"
 flatpak_pkg_names: "{{ flatpak_os_pkg_names | default([]) }}"
 
 # System File Settings
+
+# Repository Specifics
+flatpak_repo_id: "{{ flatpak_os_repo_id | default('flatpak') }}"
+flatpak_repo_name: "{{ flatpak_os_repo_name | default('Flatpak') }}"

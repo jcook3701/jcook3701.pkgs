@@ -14,7 +14,7 @@
     label: "Loading variables file: {{ virtualbox_vars }}"
 
 - name: Install Oracle VM VirtualBox
-  ansible.builtin.include_tasks:  state/install.yml
+  ansible.builtin.include_tasks: state/install.yml
   when: virtualbox_state | default('present') == 'present'
 
 - name: Uninstall Oracle VM VirtualBox

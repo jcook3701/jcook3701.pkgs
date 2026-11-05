@@ -17,6 +17,10 @@
   ansible.builtin.include_tasks:  state/install.yml
   when: flatpak_state | default('present') == 'present'
 
-- name: Ensure Flatpak is purged from system
+- name: Ensure Flatpak is uninstalled from system
   ansible.builtin.include_tasks: state/uninstall.yml
-  when: flatpak_state | default('present') in ['absent', 'teardown']
+  when: flatpak_state | default('present') == 'absent'
+
+- name: Ensure Flatpak is purged from system
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: flatpak_state | default('present') == 'teardown'

@@ -103,6 +103,10 @@ argument_specs:
         default: []
         description: "A declarative array of local paths, client ACL hosts, and standard mount security options exported by the server."
         options:
+          name:
+            type: "str"
+            required: true
+            description: "The explicit, clean naming handle used for the virtual sub-directory anchor inside the export root tree."
           path:
             type: "str"
             required: true
@@ -151,8 +155,14 @@ argument_specs:
             choices: ["mounted", "unmounted", "present", "absent"]
             description: "The operational state of the target mount within the client OS lifecycle."
 
-      nfs_utils_enable_debug_logging:
+      nfs_utils_enable_logging:
         type: "bool"
         required: false
         default: true
         description: "Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core utilities."
+
+      nfs_utils_debug_mode:
+        type: "bool"
+        required: false
+        default: false
+        description: "Toggles NFS utilities role's internal ansible.builtin.debug on or off."

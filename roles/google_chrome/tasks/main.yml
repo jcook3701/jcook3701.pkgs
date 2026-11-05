@@ -9,10 +9,14 @@
     loop_var: google_chrome_vars
     label: "Including variables from: {{ google_chrome_vars }}"
 
-- name: Google Chrome Install
-  ansible.builtin.include_tasks: install.yml
+- name: Install Google Chrome Web Browser
+  ansible.builtin.include_tasks: state/install.yml
   when: google_chrome_state | default('present') == 'present'
 
-- name: Uninstall Google Chrome
+- name: Uninstall Google Chrome Web Browser
   ansible.builtin.include_tasks: uninstall.yml
-  when: google_chrome_state | default('present') in ['absent', 'teardown']
+  when: google_chrome_state | default('present') == 'absent'
+
+- name: Teardown Google Chrome Web Browser
+  ansible.builtin.include_tasks: uninstall.yml
+  when: google_chrome_state | default('present') == 'teardown'

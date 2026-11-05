@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+nvidia_container_toolkit_state: present
+
+nvidia_container_toolkit_debug: true
+# -------------------------------------------------------------------------
+# NVIDIA Container Toolkit Package Configuration
+# -------------------------------------------------------------------------
+nvidia_container_toolkit_download_url: "https://nvidia.github.io"
