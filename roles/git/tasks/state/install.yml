@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Git package and dependencies
+  ansible.builtin.package:
+    name: "{{ git_pkg_names | default(['git']) }}"
+    state: present
+  become: true
+
+- name: Ensure Git is configured
+  ansible.builtin.include_tasks: configure/main.yml

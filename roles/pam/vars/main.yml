@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+pam_dep_pkg_names: "{{ pam_os_dep_pkg_names | default([]) }}"
+pam_pkg_names: "{{ pam_os_pkg_names | default([])  }}"
+
+pam_directory:
+  conf: "{{ pam_os_directory.conf| default('/etc/pam.d') }}"
+  shared: "{{ pam_os_directory.shared | default('/usr/share/') }}"
+  shared_pam: "{{ pam_os_directory.shared_pam | default('/usr/share/pam') }}"
+  shared_pam_configs: "{{ pam_os_directory.shared_pam_configs | default('/usr/share/pam-configs') }}"
+
+pam_config_files:
+  common_session: "{{ pam_directory.conf ~ '/common-session'
+    | default('/etc/pam.d/common-session') }}"
+  common_auth: "{{ pam_directory.conf ~ '/common-auth'
+    | default('/etc/pam.d/common-auth') }}"
+  common_account: "{{ pam_directory.conf ~ '/common-account'
+    | default('/etc/pam.d/common-account') }}"
+  keyinit: "{{ pam_directory.shared_pam_configs ~ '/keyinit'
+    | default('/usr/share/pam-configs/keyinit') }}"
+  mkhomedir: "{{ pam_directory.shared_pam_configs ~ '/mkhomedir'
+    | default('/usr/share/pam-configs/mkhomedir') }}"
+
+pam_authselect_directory:
+  conf: "{{ pam_os_authselect_directory.conf | default('/etc/authselect/') }}"
+  sssd_secure: "{{ pam_os_authselect_directory.sssd_secure
+    | default('/etc/authselect/custom/sssd-secure') }}"
+
+pam_authselect_file:
+  sssd_secure: "{{ pam_authselect_directory.sssd_secure ~ '/system-auth'
+    | default('/etc/authselect/custom/sssd-secure/system-auth') }}"

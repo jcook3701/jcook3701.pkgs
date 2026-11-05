@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop OpenLDAP service and uninstall
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Force deep purge of OpenLDAP packages and configuration database from the OS
+  ansible.builtin.apt:
+    name: "{{ openldap_pkg_names }}"
+    state: absent
+    purge: true
+    autoremove: true
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Completely wipe active OpenLDAP schema and database data directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  loop:
+    - "{{ openldap_directory.conf }}"
+    - "{{ openldap_directory.slapd }}"
+    - "{{ openldap_directory.database }}"
+    - "{{ openldap_directory.certs }}"
+    - "{{ openldap_directory.run }}"
+    - "{{ openldap_file.defaults }}"
+  loop_control:
+    loop_var: directory
+    label: "removed: {{ directory }}"
+  become: true
+
+- name: Scrub local system execution artifacts on the hosts
+  ansible.builtin.file:
+    path: "{{ host_tmp_file }}"
+    state: absent
+  loop:
+    - "{{ openldap_host_staging.bootstrap_config }}"
+    - "{{ openldap_host_staging.database_config }}"
+    - "{{ openldap_host_staging.data_structure }}"
+    - "{{ openldap_host_staging.data_seed }}"
+    - "{{ openldap_host_staging.feature_replication }}"
+    - "{{ openldap_host_staging.load_syncprov }}"
+    - "{{ openldap_host_staging.backup }}"
+  loop_control:
+    loop_var: host_tmp_file
+    label: "Removed host tmp artifact: {{ host_tmp_file }}"
+  become: true
+
+- name: Scrub staging artifacts on the Ansible Controller
+  ansible.builtin.file:
+    path: "{{ controller_tmp_file }}"
+    state: absent
+  loop:
+    - "{{ openldap_controller_staging.root_ca_cert }}"
+    - "{{ openldap_controller_staging.backup }}"
+  loop_control:
+    loop_var: controller_tmp_file
+    label: "Removed controller tmp artifact: {{ controller_tmp_file }}"
+  become: false
+
+- name: Clear controller controller staging backup files
+  ansible.builtin.file:
+    path: "/tmp/openldap_master_cert.pem"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+
+- name: Purge openldap system execution user from the nodes
+  ansible.builtin.user:
+    name: "{{ openldap_user }}"
+    state: absent
+    remove: true
+  become: true
+
+- name: Purge openldap system configuration group from the nodes
+  ansible.builtin.group:
+    name: "{{ openldap_group }}"
+    state: absent
+  become: true

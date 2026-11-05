@@ -1,0 +1,59 @@
+{#
+# 01_config_bootstrap.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro config_bootstrap_01() -%}
+# 1. Global Config (TLS and General)
+dn: cn=config
+objectClass: olcGlobal
+cn: config
+olcPidFile: {{ openldap_file.pid }}
+olcArgsFile: {{ openldap_file.args }}
+{% if openldap_use_tls | bool %}
+olcTLSCertificateFile: {{ openldap_tls_cert }}
+olcTLSCertificateKeyFile: {{ openldap_tls_key }}
+olcSecurity: ssf=64
+{% endif %}
+{% if openldap_kerberos | default(false) | bool %}
+# Dynamic Regular Expression Map: Translates incoming Kerberos principals into active user database DN strings
+olcAuthzRegexp: uid=([^,]+),cn={{ openldap_domain_name }},cn=gssapi,cn=auth
+  uid=$1,ou={{ openldap_people_child_ou | trim }},ou={{ openldap_users_parent_ou | trim }},dc={{ openldap_domain_name | replace('.', ',dc=') }}
+{% endif %}
+olcLogLevel: stats
+
+# 2. Module Container (Allows online module loading later)
+dn: cn=module{0},cn=config
+objectClass: olcModuleList
+cn: module{0}
+olcModulePath: {{ openldap_directory.modules }}
+olcModuleLoad: back_{{ openldap_database_backend }}.la
+
+# 3. Config Database (GRANTS LOCAL ROOT PERMISSIONS)
+dn: olcDatabase={0}config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: {0}config
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * break
+
+# 4. Schema Container (Must exist before importing schemas)
+dn: cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: schema
+{%- endmacro %}
+
+{{- config_bootstrap_01() }}

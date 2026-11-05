@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Service Settings
+unifi_service: "{{ unifi_os_service | default('unifi') }}"
+
+unifi_user: "{{ unifi_os_user | default('unifi') }}"
+unifi_group: "{{ unifi_os_group | default('unifi') }}"
+
+# Package Settings
+unifi_dep_pkg_names: "{{ unifi_os_dep_pkg_names | default([]) }}"
+unifi_pkg_names: "{{ unifi_os_pkg_names | default(['unifi']) }}"
+
+# System File Settings
+unifi_directory:
+  lib_root: "{{ unifi_os_directory.lib_root
+                    | default('/usr/lib/unifi') }}"
+  log_root: "{{ unifi_os_directory.log_root
+                    | default('/usr/lib/unifi/logs') }}"
+
+unifi_file:
+  server_log: "{{ unifi_directory.log_root ~ '/server.log'
+                    | default('/usr/lib/unifi/logs/server.log') }}"
+  mongod_log: "{{ unifi_directory.log_root ~ '/mongod.log'
+                    | default('/usr/lib/unifi/logs/mongod.log') }}"
+
+# Repository Specifics
+unifi_repo_id: "{{ unifi_os_repo_id | default('unifi') }}"
+unifi_repo_name: "{{ unifi_os_repo_name | default('UniFi Network Application') }}"

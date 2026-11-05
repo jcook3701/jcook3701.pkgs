@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+cups_state: present
+
+cups_server: false
+
+cups_port: "631"
+
+# Global toggle to expose CUPS and share the Rollo printer over the network
+cups_share_printers: false
+
+# The local subnets allowed to communicate with port 631 when sharing is true
+cups_allowed_networks:
+  - "192.168.1.0/24"
+
+cups_servers:
+  - "192.168.1.50"

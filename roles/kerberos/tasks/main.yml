@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Kerberos OS-specific variables
+  ansible.builtin.include_vars: "{{ kerberos_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: kerberos_vars
+    label: "Loading variables file: {{ kerberos_vars }}"
+
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install Kerberos
+  ansible.builtin.include_tasks: state/install.yml
+  when: kerberos_state | default('present') == 'present'
+
+- name: Uninstall Kerberos
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - kerberos_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - kerberos_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown Kerberos
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: kerberos_state | default('present') == 'teardown'

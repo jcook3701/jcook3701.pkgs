@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load Github CLI OS-specific variables
+  ansible.builtin.include_vars: "{{ gh_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: gh_vars
+    label: "Loading variables file: {{ gh_vars }}"
+
+- name: Install Github CLI packages
+  ansible.builtin.include_tasks: state/install.yml
+  when: gh_state | default('present') == 'present'
+
+- name: Uninstall Github CLI packages
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - gh_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - gh_pkg_names[0] in ansible_facts.packages
+
+- name: Ensure teardown of Github CLI package and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when:
+    - gh_state | default('present') == 'teardown'
+    - ansible_facts.packages is defined
+    - gh_pkg_names[0] in ansible_facts.packages

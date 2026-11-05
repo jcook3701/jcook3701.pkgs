@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Iterate over user-defined custom service structures
+  ansible.builtin.include_tasks: "service/create.yml"
+  loop: "{{ firewalld_custom_services | default([]) }}"
+  loop_control:
+    loop_var: custom_service
+    label: "Creating service: {{ custom_service.name }}"
+  when:
+    - firewalld_custom_services is defined
+    - firewalld_custom_services | length > 0

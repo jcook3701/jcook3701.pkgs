@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kerberos_os_user: "root"
+kerberos_os_group: "root"
+
+kerberos_sssd_group: "sssd"
+kerberos_sssd_service: "sssd"
+kerberos_nscd_service: "nscd"
+kerberos_systemd_login_service: "systemd-logind"
+
+# Standalone Protocol Service Daemons and Security Permission Groups
+kerberos_ldap_group: "ldap"
+kerberos_ldap_service: "slapd"
+kerberos_samba_group: "root"
+kerberos_samba_services: ["smb"]
+kerberos_nfs_group: "root"
+kerberos_nfs_service: "rpc-gssd"
+kerberos_http_group: "http"
+kerberos_http_service: "nginx"
+
+# Native Pacman Package Implementations (Unified MIT Kerberos Ecosystem)
+kerberos_os_server_pkgs:
+  - krb5
+kerberos_os_replica_pkgs:
+  - krb5
+kerberos_os_client_pkgs:
+  - krb5
+
+# Python Context Extensions (Arch Linux Native naming schema)
+kerberos_os_shared_libs:
+  - python-kerberos
+  - python-gssapi
+  - python-passlib
+  - python-cryptography
+  - python-pycryptodome
+
+# Core Systemd Service Daemons
+kerberos_kdc_service: "krb5-kdc"
+kerberos_admin_service: "krb5-kadmind"
+kerberos_kprop_service: "krb5-kpropd"
+
+# Filesystem Directory Layout Structural Specifications
+kerberos_os_directory:
+  conf: "/etc"
+  kdc_conf: "/var/lib/krb5kdc"
+  log: "/var/log/krb5"
+  state: "/var/lib/krb5kdc"
+  systemd: "/etc/systemd/system"
+  dict: "/usr/share/dict"
+  defaults: ""
+
+# Local System Runtime Configuration Parameters
+kerberos_os_stash_name: ".k5.YOUR_REALM"
+kerberos_os_admin_defaults_name: ""
+kerberos_os_admin_regexp: ""
+kerberos_os_admin_line: ""

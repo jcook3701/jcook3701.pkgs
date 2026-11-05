@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Tailscale VPN service is stopped and uninstalled
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Remove persistent daemon state directory
+  ansible.builtin.file:
+    path: "{{ tailscale_directory.state }}"
+    state: absent
+  become: true
+
+- name: Remove system default configuration file
+  ansible.builtin.file:
+    path: "{{ tailscale_file.tailscaled }}"
+    state: absent
+  become: true

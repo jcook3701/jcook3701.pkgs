@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Orchestrate SSSD Dynamic Engine Responders (Desired Architecture)
+  ansible.builtin.systemd:
+    name: "sssd-{{ service.name }}.{{ sssd_activation_suffix_map[sssd_responder_activation_method] }}"
+    state: started
+    enabled: true
+    masked: false
+  become: true
+  loop: "{{ sssd_sockets | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "Service: {{ service.name }}"
+  when: service.enabled | default(false) | bool
+
+- name: Ensure Globally Disabled SSSD Responders Are Stopped and Disabled
+  ansible.builtin.systemd:
+    name: "sssd-{{ service.name }}.{{ sssd_activation_suffix_map[sssd_responder_activation_method] }}"
+    state: stopped
+    enabled: false
+  become: true
+  loop: "{{ sssd_sockets | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "Disable Unwanted: {{ service.name }}"
+  when: not service.enabled | default(false) | bool
+
+- name: Purge Alternative SSSD Socket Units (Service Mode Only)
+  ansible.builtin.systemd:
+    name: "sssd-{{ service.name }}.socket"
+    state: stopped
+    enabled: false
+  become: true
+  loop: "{{ sssd_sockets | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "Purge Socket: {{ service.name }}"
+  when:
+    - service.enabled | default(false) | bool
+    - sssd_responder_activation_method == 'service'

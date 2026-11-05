@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Jellyfin plugin configuration directory exists
+  ansible.builtin.file:
+    path: "{{ jellyfin_directory.plugins }}/configurations"
+    state: directory
+    owner: "{{ jellyfin_user | default('jellyfin') }}"
+    group: "{{ jellyfin_group | default('jellyfin') }}"
+    mode: "0750"
+
+- name: Configure LDAP Authentication plugin
+  ansible.builtin.include_tasks: plugins/ldap.yml
+  when: jellyfin_ldap | default(true) | bool

@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Service Settings
+mongodb_os_service: "mongodb"
+
+# User/Group Settings
+mongodb_os_user: "mongodb"
+mongodb_os_group: "mongodb"
+
+mongodb_dep_pkg_names:
+  - ca-certificates
+  - apt-transport-https
+
+mongodb_os_pkg_names:
+  - mongodb-org
+
+# System File Settings
+mongodb_os_directory:
+  data_root: "/var/lib/mongodb"
+  log_root: "/var/log/mongodb"
+  conf_root: "/etc"
+  pid_root: "/run/mongodb"
+
+# Repository Specifics
+mongodb_os_repo_id: "mongodb-org-{{ mongodb_version }}"
+mongodb_os_repo_name: "MongoDB {{ mongodb_version }} Repository"
+
+mongodb_debian_uris: "{{ mongodb_download_url }}/apt/{{ ansible_distribution | lower }}"
+mongodb_debian_suites: "{{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }}"
+mongodb_debian_component: "{{ 'multiverse' if ansible_distribution == 'Ubuntu' else 'main' }}"
+mongodb_debian_signed_by: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"

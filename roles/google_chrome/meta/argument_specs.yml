@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Google Chrome installation and repository configuration"
+    description: "This role handles the lifecycle, system access management, and package repository configuration for Google Chrome."
+    options:
+      google_chrome_state:
+        type: str
+        required: false
+        default: "present"
+        choices: ["present", "absent", "latest"]
+        description: "The desired lifecycle state of Google Chrome on the managed system."
+
+      google_chrome_base_repo_url:
+        type: str
+        required: false
+        default: "https://dl.google.com"
+        description: "The base URL for the official Google Chrome package repository."

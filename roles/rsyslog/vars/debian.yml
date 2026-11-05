@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+rsyslog_os_user: "syslog"
+rsyslog_os_group: "syslog"
+
+rsyslog_os_file_owner: "syslog"
+rsyslog_os_file_group: "adm"
+
+rsyslog_os_service: "rsyslog"
+rsyslog_os_dep_pkg_names: []
+rsyslog_os_pkg_names:
+  - "rsyslog"
+
+rsyslog_os_directory:
+  conf: "/etc"
+  conf_d: "/etc/rsyslog.d"
+  state: "/var/spool/rsyslog"
+  log_root: "/var/log"

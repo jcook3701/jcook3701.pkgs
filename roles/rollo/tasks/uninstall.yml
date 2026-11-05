@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Uninstall Rollo generically across distributions
+  ansible.builtin.package:
+    name: "{{ rollo_pkg_names }}"
+    state: absent
+
+- name: Remove the Rollo printer configuration mapping from CUPS backend
+  ansible.builtin.command: >-
+    lpadmin -x "{{ rollo_printer_name }}"
+  failed_when: false
+  changed_when: true
+  notify: "Restart CUPS"
+
+- name: Force system changes to apply
+  ansible.builtin.meta: flush_handlers

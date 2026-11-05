@@ -6,9 +6,9 @@
   gather_facts: true
   become: true
   vars:
-    # This is the "Decision" part
-    enabled_site_names:
-      - pxe.local
-      - mixxx.local
+    # Use this variable to chose sites.
+    nginx_enabled_sites:
+      - { server_vars: pxeboot.yml }
+      - { server_vars: mixxx.yml }
   roles:
     - nginx

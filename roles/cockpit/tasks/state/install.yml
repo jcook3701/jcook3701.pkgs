@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Cockpit package is installed
+  ansible.builtin.package:
+    name: "{{ cockpit_pkg_names | default([]) }}"
+    state: present
+  environment:
+    DEBIAN_FRONTEND: "{{ 'noninteractive' if ansible_facts['os_family'] == 'Debian' else omit }}"
+  become: true
+  when: cockpit_pkg_names | length > 0
+
+- name: Ensure Cockpit socket is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ cockpit_socket | default('cockpit.socket') }}"
+    state: started
+    enabled: true
+  become: true
+  when: cockpit_node_type == 'client'

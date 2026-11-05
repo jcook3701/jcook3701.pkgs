@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate core autofs daemon profile configurations
+  ansible.builtin.template:
+    src: "autofs.conf.j2"
+    dest: "{{ autofs_file.conf }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  register: _autofs_core_config_state
+  notify: "Restart Autofs Services"
+
+- name: Generate secure autofs SASL authentication profiles
+  ansible.builtin.template:
+    src: "autofs_ldap_auth.conf.j2"
+    dest: "{{ autofs_file.ldap_auth_conf }}"
+    owner: "root"
+    group: "root"
+    mode: "0600"
+  register: _autofs_auth_config_state
+  notify: "Restart Autofs Services"

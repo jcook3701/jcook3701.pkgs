@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Service Settings
+mongodb_service: "{{ mongodb_os_service | default('mongodb') }}"
+
+# User/Group Settings
+mongodb_user: "{{ mongodb_os_user | default('mongodb') }}"
+mongodb_group: "{{ mongodb_os_group | default('mongodb') }}"
+
+# Package Settings
+mongodb_dep_pkg_names: "{{ mongodb_os_dep_pkg_names | default([]) }}"
+mongodb_pkg_names: "{{ mongodb_os_pkg_names | default(['mongodb-org']) }}"
+
+# System File Settings
+mongodb_directory:
+  data_root: "{{ mongodb_os_directory.data_root
+                  | default('/var/lib/mongodb') }}"
+  log_root: "{{ mongodb_os_directory.log_root
+                  | default('/var/log/mongodb') }}"
+  conf_root: "{{ mongodb_os_directory.conf_root
+                  | default('/etc') }}"
+  pid_root: "{{ mongodb_os_directory.pid_root
+                  | default('/var/run/mongodb') }}"
+
+mongodb_file:
+  config: "{{ mongodb_directory.conf_root ~ '/mongod.conf'
+                  | default('/etc/mongod.conf') }}"
+  mongod_log: "{{ mongodb_directory.log_root ~ '/mongod.log'
+                  | default('/var/log/mongodb/mongod.log') }}"
+  pid_file: "{{ mongodb_directory.pid_root ~ '/mongod.pid'
+                  | default('/var/run/mongodb/mongod.pid') }}"
+
+# Repository Specifics
+mongodb_repo_id: "{{ mongodb_os_repo_id | default('mongodb-org-8.0') }}"
+mongodb_repo_name: "{{ mongodb_os_repo_name | default('MongoDB 8.0 Repository') }}"

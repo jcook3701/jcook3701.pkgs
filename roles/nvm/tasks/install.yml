@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Download nvm install script
+  ansible.builtin.get_url:
+    url: "{{ nvm_repo_url }}"
+    dest: "{{ nvm_file.script }}"
+    mode: "0755"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Run nvm install script
+  ansible.builtin.command:
+    cmd: "{{ nvm_file.script }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"

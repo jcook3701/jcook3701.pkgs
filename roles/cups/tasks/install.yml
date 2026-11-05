@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install CUPS printing base packages
+  ansible.builtin.package:
+    name: "{{ cups_pkgs }}"
+    state: "present"
+
+- name: Deploy secure server configurations to CUPS daemon
+  ansible.builtin.template:
+    src: cupsd.conf.j2
+    dest: "{{ cups_directory.conf }}/cupsd.conf"
+    owner: root
+    group: lp
+    mode: "0644"
+  notify: "Restart CUPS Daemon"
+  when: cups_server | bool
+
+- name: Ensure CUPS service is started and enable
+  ansible.builtin.systemd:
+    name: "{{ cups_service }}"
+    state: started
+    enabled: true
+  when: cups_server | bool
+
+- name: Configure CUPS Client
+  ansible.builtin.template:
+    src: client.conf.j2
+    dest: "{{ cups_directory.conf }}/client.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not cups_server | bool

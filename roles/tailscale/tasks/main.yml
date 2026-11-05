@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Tailscale OS-specific variables
+  ansible.builtin.include_vars: "{{ tailscale_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: tailscale_vars
+    label: "Loading variables file: {{ tailscale_vars }}"
+
+- name: Tailscale Install
+  ansible.builtin.include_tasks: state/install.yml
+  when: tailscale_state | default('present') == 'present'
+
+- name: Ensure Tailscale VPN is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: tailscale_state | default('present') == 'absent'
+
+- name: Ensure Tailscale VPN purge of packages and configurations
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: tailscale_state | default('present') == 'teardown'

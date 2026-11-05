@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Restart docker service
+  ansible.builtin.service:
+    name: "{{ docker_ce_service | default('docker') }}"
+    state: restarted
+  become: true

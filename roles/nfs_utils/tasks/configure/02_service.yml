@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure native RPC Pipefs daemon is active for interception
+  ansible.builtin.service:
+    name: "{{ nfs_utils_rpc_pipefs_service | default('var-lib-nfs-rpc_pipefs.mount') }}"
+    state: "started"
+    enabled: true
+  failed_when: false
+  become: true
+
+- name: Execute NFS Server Active Kernel Service Subsystem Tasks
+  ansible.builtin.include_tasks: "server/service.yml"
+  when: nfs_utils_is_server | bool
+
+- name: Execute NFS Client Systemd Service Subsystem Tasks
+  ansible.builtin.include_tasks: "client/service.yml"
+  when: nfs_utils_is_client | bool

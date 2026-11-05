@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure rsyslog service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ rsyslog_service | default('rsyslog') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (rsyslog_service ~ '.service' in ansible_facts.services)
+
+- name: Force kill any orphaned rsyslog background processes lingering in memory
+  ansible.builtin.command: "pkill -9 {{ rsyslog_service | default('rsyslog') }}"
+  failed_when: false
+  become: true
+
+- name: Ensure removal of rsyslog packages and configuration files
+  ansible.builtin.package:
+    name: "{{ rsyslog_pkg_names | default(['rsyslog']) }}"
+    state: absent
+  become: true

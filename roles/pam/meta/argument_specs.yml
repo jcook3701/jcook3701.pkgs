@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage PAM (Pluggable Authentication Modules) stack configuration."
+    description: "This role manages the system security architecture, configures authentication hooks, handles automated directory creation, and toggles hardware token and multi-factor validation stacks."
+    author: "Jared Cook"
+    options:
+      pam_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices:
+          - "present"
+          - "absent"
+          - "teardown"
+        description: "The desired operational lifecycle state of the PAM packages and modular configurations."
+      pam_enable_network_authentication:
+        type: "bool"
+        required: false
+        default: true
+        description: "Determines if network session keyring isolation layers are enabled."
+      pam_enable_keyinit:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls the initialization of user session keyrings on login."
+      pam_enable_sssd:
+        type: "bool"
+        required: false
+        default: true
+        description: "Toggles SSSD subsystem integration within the PAM framework."
+      pam_enable_mkhomedir:
+        type: "bool"
+        required: false
+        default: true
+        description: "Toggles automatic skeleton-based home directory creation for missing user paths."
+      pam_mkhomedir_options:
+        type: "str"
+        required: false
+        default: "skel=/etc/skel umask=0022"
+        description: "Arguments and umask constraints passed straight to the pam_mkhomedir configuration directive."
+      pam_enable_systemd:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls session registration handlers via pam_systemd.so modules."
+      pam_enable_biometrics:
+        type: "bool"
+        required: false
+        default: false
+        description: "Enables fingerprint or alternative biometric token authentication subsystems."
+      pam_enable_duo:
+        type: "bool"
+        required: false
+        default: false
+        description: "Enables Duo Security MFA pipeline rules inside the system authorization stacks."
+      pam_enable_u2f:
+        type: "bool"
+        required: false
+        default: false
+        description: "Enables Universal 2nd Factor hardware authentication options."
+      pam_enable_yubico:
+        type: "bool"
+        required: false
+        default: false
+        description: "Controls structural integration options supporting legacy Yubico OTP validation stacks."

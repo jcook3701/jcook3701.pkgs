@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Reload shell
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    tasks_from: reload-shell.yml

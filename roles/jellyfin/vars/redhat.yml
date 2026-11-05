@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+jellyfin_redhat_baseurl: "https://jellyfin.org"
+jellyfin_redhat_gpgkey: "https://repo.jellyfin.org/jellyfin_team.gpg.key"

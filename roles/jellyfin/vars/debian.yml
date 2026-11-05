@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+jellyfin_os_user: jellyfin
+jellyfin_os_group: jellyfin
+
+jellyfin_os_service: jellyfin
+
+jellyfin_os_pkg_names:
+  - jellyfin
+
+# OS Repository specifics
+jellyfin_debian_repo_url: "https://repo.jellyfin.org/{{ ansible_distribution | lower }}"
+jellyfin_debian_gpg_url: "https://repo.jellyfin.org/jellyfin_team.gpg.key"
+jellyfin_debian_codename: "{{ ansible_distribution_release }}"
+jellyfin_debian_component: "main"
+
+jellyfin_os_directory:
+  conf: "/etc/jellyfin"
+  cache: "/var/cache/jellyfin"
+  data: "/var/lib/jellyfin"
+  default: "/var/default"
+  log: "/var/log/jellyfin"
+  plugin: "/var/lib/jellyfin/plugins"

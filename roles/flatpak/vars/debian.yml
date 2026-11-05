@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+flatpak_os_user: "_flatpak"
+flatpak_os_group: "_flatpak"
+
+flatpak_os_dep_pkg_names: []
+
+flatpak_os_pkg_names:
+  - flatpak
+  - gnome-software-plugin-flatpak
+
+# Repository Configuration for jcook3701.utils.repo_add
+flatpak_os_repo_id: "flatpak"
+flatpak_os_repo_name: "Flatpak"
+
+# The base URL for the repository archive server
+flatpak_download_url: "http://launchpad.net"
+
+# Maps directly to the template variable for the target URIs field
+flatpak_debian_uris: "{{ flatpak_download_url }}"
+
+# Evaluates the release name; forces 'focal' on 18.04 nodes to prevent a 404 error on the archive server
+flatpak_debian_suites: "{{ 'focal' if ansible_distribution_release == 'bionic' else ansible_distribution_release }}"
+
+# Set to 'main' to match the structural directory path layout on Launchpad
+flatpak_debian_components: "main"
+
+# The direct web URL to fetch the raw ASCII-armored PGP key block for verification
+flatpak_debian_signed_by: "https://ubuntu.com"

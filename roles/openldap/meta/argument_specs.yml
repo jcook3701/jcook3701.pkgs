@@ -1,0 +1,414 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Configure and bootstrap an OpenLDAP directory server"
+    description: >-
+      This role manages an OpenLDAP deployment, including multi-master or replica node types,
+      TLS encryption infrastructure, performance tuning, operational password policies,
+      organizational units, and standard directory group/user seeding.
+    author: "Jared Cook"
+    options:
+      # General Configuration
+      openldap_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown", "backup"]
+        description: "The targeted operational state of the OpenLDAP server components."
+
+      openldap_node_type:
+        type: "str"
+        default: "master"
+        choices: ["master", "slave", "client"]
+        description: "Designates if this instance acts as a write-capable provider (master) or a read-only consumer (slave)."
+
+      openldap_admin_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "A list of hostnames or IP addresses for administrative management servers."
+
+      openldap_slave_servers:
+        type: "list"
+        elements: "str"
+        default: []
+        description: "A list of downstream replica consumer engines connected to this cluster."
+
+      # Domain Options
+      openldap_top_level_domain:
+        type: "str"
+        default: "com"
+        description: "The top-level domain suffix (TLD) for the root directory tree."
+
+      openldap_second_level_domain:
+        type: "str"
+        default: "example"
+        description: "The organization's primary domain string used for directory component structure mapping."
+
+      openldap_domain_name:
+        type: "str"
+        default: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
+        description: "The computed full domain string representing the absolute root of the directory tree."
+
+      openldap_organization_name:
+        type: "str"
+        default: "Example IT Services"
+        description: "The display name representing the organization in the root directory entry."
+
+      openldap_admin_user:
+        type: "str"
+        default: "admin"
+        description: "The common name (cn) identifier string for the root directory management user."
+
+      openldap_admin_password:
+        type: "str"
+        default: "SecretPassword123"
+        description: "The cleartext password or hash used to secure the main administrative user."
+
+      openldap_backup_dir:
+        type: "str"
+        default: "/var/backups/openldap"
+        description: "The persistent directory path where directory data backups and dumps are archived."
+
+      # Replication Parameters
+      openldap_replica_id:
+        type: "str"
+        default: "001"
+        description: "A unique, three-digit numeric string identifier for tracking active slave consumers."
+
+      openldap_replication_user:
+        type: "str"
+        default: "syncrepluser"
+        description: "The service account identity used by downstream replica engines to authenticate against the master provider."
+
+      openldap_replication_password:
+        type: "str"
+        default: "SecretPassword123"
+        description: "The cleartext or hashed password protecting the replication service account."
+
+      # Security & Encryption (TLS)
+      openldap_use_tls:
+        type: "bool"
+        default: true
+        description: "Enables or disables forced TLS encryption wrappers across explicit communication ports."
+
+      openldap_generate_ca:
+        type: "bool"
+        default: true
+        description: "Determines if the deployment engine should generate a self-signed root Certification Authority asset internally."
+
+      openldap_tls_ca_cert:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/master_ca.pem"
+        description: "The fully qualified path pointing to the active Certificate Authority public certificate file."
+
+      openldap_tls_ca_key:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/master_ca_key.pem"
+        description: "The fully qualified path pointing to the secure Certificate Authority private cryptographic key."
+
+      openldap_tls_ca_csr:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/master_ca_ldap.csr"
+        description: "The destination path where the Certificate Authority certificate signing request file resides."
+
+      openldap_tls_cert:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/cert.pem"
+        description: "The server-specific public identity certificate used to encrypt transport channels."
+
+      openldap_tls_key:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/priv.pem"
+        description: "The server-specific private key verifying asymmetric transport encryption configurations."
+
+      openldap_tls_csr:
+        type: "str"
+        default: "{{ openldap_directory.certs }}/ldap.csr"
+        description: "The target system path indicating where the server node identity certificate signing request file is saved."
+
+      openldap_tls_cipher_suite:
+        type: "str"
+        default: "HIGH:MEDIUM:+SSLv3"
+        description: "The cryptographic cipher priority engine definitions accepted during active TLS negotiations."
+
+      openldap_sasl_nocanon:
+        type: "str"
+        default: "on"
+        choices: ["on", "off"]
+        description: "Configures canonical host-to-identity evaluation parameters within internal SASL authentication pipelines."
+
+      openldap_tls_reqcert:
+        type: "str"
+        default: "allow"
+        choices: ["never", "allow", "try", "demand", "hard"]
+        description: "Defines peer certificate validation strictly enforced by the server on incoming client connection contexts."
+
+      openldap_cleartext_port:
+        type: "int"
+        default: 389
+        description: "The unencrypted listen port reserved for standard lookup operations and explicit StartTLS elevations."
+
+      openldap_secure_port:
+        type: "int"
+        default: 636
+        description: "The legacy explicit SSL/TLS listening port handling immediate secure network handshakes."
+
+      # Core Database & Performance Tuning
+      openldap_database_backend:
+        type: "str"
+        default: "mdb"
+        choices: ["mdb", "bdb", "hdb"]
+        description: "The underlying transactional storage database type powering the OpenLDAP environment."
+
+      openldap_database_maxsize:
+        type: "int"
+        default: 1073741824
+        description: "The absolute maximum size in bytes allocated for data memory map boundaries (Default: 1GB)."
+
+      openldap_size_limit:
+        type: "int"
+        default: 500
+        description: "The hard ceiling capping the total number of directory objects returned in a single search operation query."
+
+      openldap_time_limit:
+        type: "int"
+        default: 3600
+        description: "The absolute runtime duration execution ceiling in seconds permitted before forcing a lookup request cancellation."
+
+      # Feature Activations Matrix Switches
+      openldap_autofs:
+        type: "bool"
+        default: false
+        description: "Toggles directory-based automount schema definitions enabling system file map tracking parameters over LDAP."
+
+      openldap_guac:
+        type: "bool"
+        default: false
+        description: "Enables configuration schema definitions handling client connection setups matching an Apache Guacamole engine."
+
+      openldap_ppolicy:
+        type: "bool"
+        default: false
+        description: "Activates standard overlay management modules handling complex user password policies and lockout logic rules."
+
+      openldap_samba:
+        type: "bool"
+        default: false
+        description: "Toggles schema extensions required for handling Windows NT/Active Directory network file shares and client data tracking."
+
+      openldap_sudo:
+        type: "bool"
+        default: false
+        description: "Injects explicit schema extensions designed to house and stream sudoers authorization policies via the centralized directory."
+
+      openldap_openssh:
+        type: "bool"
+        default: false
+        description: "Extends the directory schema to store OpenSSH public keys centrally, enabling servers to securely fetch and validate user authentication keys at login."
+
+      # Password Policy (ppolicy) Constraints
+      openldap_ppolicy_min_length:
+        type: "int"
+        default: 8
+        description: "The minimum character count enforced on user password change operations."
+
+      openldap_ppolicy_max_failure:
+        type: "int"
+        default: 5
+        description: "The continuous authentication failure limit permitted before triggering a target account lock state."
+
+      openldap_ppolicy_lockout_duration:
+        type: "int"
+        default: 1800
+        description: "The time duration in seconds an account remains completely locked following too many failure events (Default: 30 minutes)."
+
+      openldap_ppolicy_history_count:
+        type: "int"
+        default: 5
+        description: "The tracking ceiling of past passwords kept to block reuse sequences during updates."
+
+      openldap_ppolicy_expire_warning:
+        type: "int"
+        default: 432000
+        description: "The lead warning timeline in seconds reminding users of password expiry states (Default: 5 days)."
+
+      # Samba Policy Constraints
+      openldap_samba_domain:
+        type: "str"
+        default: "{{ openldap_second_level_domain | upper }}"
+        description: "The legacy uppercase NetBIOS domain identity string assigned for Windows client connectivity tracking."
+
+      # Directory Bootstrap Data Mapping
+      openldap_bootstrap_groups:
+        type: "list"
+        elements: "dict"
+        description: "The primary operational list used to create groups inside the directory structure."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The common name (cn) label specifying the security group."
+          gid:
+            type: "int"
+            required: true
+            description: "The explicit numeric group identifier assigned to the tracking element."
+          rid:
+            type: "int"
+            required: false
+            description: "The explicit Relative Identifier (RID) assigned to the group. If omitted, the template defaults to falling back on the native Linux gid value."
+          type:
+            type: "int"
+            required: false
+            default: 2
+            choices: [2, 4, 5]
+            description: "The Windows group scope descriptor type flag (e.g., 2 for Global Groups, 4 for Local Aliases/Built-ins, 5 for Universal Groups)."
+          display_name:
+            type: "str"
+            required: false
+            description: "The localized user-friendly string value printed on Windows client layout screens."
+          description:
+            type: "str"
+            required: false
+            description: "An open text line detailing the group's operational application boundaries."
+          is_samba_group:
+            type: "bool"
+            required: false
+            default: false
+            description: "A boolean execution flag specifying whether this element requires a Windows NT4 structural group mapping."
+
+      openldap_bootstrap_users:
+        type: "list"
+        elements: "dict"
+        description: "A comprehensive seed list defining initial target users created during setup iterations."
+        options:
+          username:
+            type: "str"
+            required: true
+            description: "Unique account logon identity string."
+          firstname:
+            type: "str"
+            description: "Given name utilized for display formatting."
+          lastname:
+            type: "str"
+            description: "Surname field utilized for display formatting."
+          description:
+            type: "str"
+            description: "Administrative notation regarding the account purpose."
+          title:
+            type: "str"
+            description: "Organizational job title designation."
+          company:
+            type: "str"
+            description: "Corporate entity grouping descriptor."
+          mail:
+            type: "str"
+            description: "Primary electronic email mapping destination address."
+          uid:
+            type: "int"
+            required: true
+            description: "Explicit corporate numeric POSIX User Identifier mapping."
+          gid:
+            type: "int"
+            required: true
+            description: "Explicit corporate numeric POSIX Group Identifier mapping."
+          primary_group:
+            type: "str"
+            description: "Default creation group ownership assignment parameter."
+          password:
+            type: "str"
+            required: true
+            description: "Passphrase verification security authentication token."
+          groups:
+            type: "list"
+            elements: "str"
+            description: "Collection array detailing supplementary security group memberships."
+          is_sudoer:
+            type: "bool"
+            description: "Controls privilege escalation assignments across client layers."
+          is_samba_user:
+            type: "bool"
+            description: "Enables structural generation of Windows-compatible NT password hashes and security descriptors required for central SMB/CIFS file share mounting."
+          is_pxe_worker:
+            type: "bool"
+            description: "Custom network lifecycle flag tagging infrastructure automation profiles."
+          login_shell:
+            type: "str"
+            description: "Target execution command interpreter binary location path."
+          home_directory:
+            type: "str"
+            description: "Absolute localized system path for user desktop profile storage."
+          password_must_change:
+            type: "bool"
+            description: "Forces mandatory interactive security credential updates upon first login."
+          account_disabled:
+            type: "bool"
+            description: "Toggles headless lockout status without destructive database pruning."
+          ssh_public_keys:
+            type: "list"
+            elements: "str"
+            description: "Cryptographic validation matrices for public key terminal connections."
+
+      # External Plugin Configurations
+      openldap_autofs_mounts:
+        type: "list"
+        elements: "dict"
+        required: false
+        description: "The raw share-drive configuration data collection passed dynamically to the OpenLDAP generation role."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The common name identifier of the network share drive."
+          src:
+            type: "str"
+            required: true
+            description: "The fully qualified remote Windows/Samba network share destination URL, formatted as '//server_hostname/share_name'."
+          fstype:
+            type: "str"
+            required: false
+            default: "cifs"
+            description: "The filesystem driver protocol execution type flag."
+          auth_mode:
+            type: "str"
+            required: false
+            default: "krb5"
+            choices:
+              - "krb5"
+              - "ntlmsspi"
+            description: "Specifies the primary transport security protocol architecture mode."
+          client_mount_parent:
+            type: "str"
+            required: false
+            default: "/media/network_share"
+            description: "The base operational absolute directory route serving as the mount parent on client hosts."
+
+      openldap_guac_connections:
+        type: "list"
+        elements: "dict"
+        description: "An environment mapping setup connecting central systems to Apache Guacamole portal tools."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The targeted human-readable remote environment layout entry label."
+          protocol:
+            type: "str"
+            required: true
+            choices: ["ssh", "rdp", "vnc", "telnet", "kubernetes"]
+            description: "The underlying protocol string assigned to build remote desktop links."
+          parent_ou:
+            type: "str"
+            required: true
+            description: "The explicit organizational subunit grouping these portal items."
+          parameters:
+            type: "list"
+            elements: "str"
+            required: false
+            description: "A string array configuring access connection variables like hostnames and target operational ports."
+          members:
+            type: "list"
+            elements: "str"
+            required: false
+            description: "A list of target account login strings given permission access routes over this endpoint channel."

@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Mkchromecast package and dependencies
+  ansible.builtin.package:
+    name: "{{ mkchromecast_pkg_names + mkchromecast_dep_pkg_names }}"
+    state: present

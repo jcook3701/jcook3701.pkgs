@@ -15,4 +15,3 @@
     - name: Install AppArmor directories
       ansible.builtin.include_role:
         name: jcook3701.pkgs.apparmor
-        tasks_from: apparmor-install.yml

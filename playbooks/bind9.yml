@@ -15,7 +15,6 @@
     - name: Bind9 install
       ansible.builtin.include_role:
         name: jcook3701.pkgs.bind9
-        tasks_from: bind9-install.yml
 
 #    - name: Import Bind9 Variables
 #      ansible.builtin.include_role:

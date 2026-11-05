@@ -34,7 +34,6 @@ tags:
   - infrastructure
 
 dependencies:
-  jcook3701.homelab: ">=1.0.0"
   jcook3701.utils: ">=1.0.0"
   community.general: ">=12.0.0"
 

@@ -3,3 +3,7 @@
 [ruby-build](https://github.com/rbenv/ruby-build)  
 
 [Install-Script](https://stackoverflow.com/questions/37720892/you-dont-have-write-permissions-for-the-var-lib-gems-2-3-0-directory)  
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

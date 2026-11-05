@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: "Include specific server variables from {{ vagrant_item.server_vars }}"
+  ansible.builtin.include_vars:
+    file: "vms/{{ vagrant_item.server_vars }}"
+
+- name: Vagrant directory creation
+  ansible.builtin.include_tasks: directory-creation.yml
+
+- name: Vagrant file generation
+  ansible.builtin.include_tasks: file-generation.yml
+
+- name: Bring up VirtualBox VM
+  ansible.builtin.command:
+    cmd: vagrant up --provider virtualbox
+    chdir: "{{ vagrant_build_dir }}"
+  async: 1200
+  become: true
+  become_user: "{{ sudo_user }}"
+  register: vagrant_up_result
+  changed_when: "'Machine booted and ready' in vagrant_up_result.stdout"
+
+- name: Report VM status
+  ansible.builtin.debug:
+    msg: "VM {{ vagrant_vm_name }} is now running in {{ vagrant_build_dir }}"
+
+- name: Get Vagrant SSH configuration
+  ansible.builtin.command:
+    cmd: vagrant ssh-config
+    chdir: "{{ vagrant_build_dir }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  register: vagrant_ssh_config
+  changed_when: false
+
+- name: Parse Vagrant SSH info and add to inventory
+  ansible.builtin.add_host:
+    name: "{{ vagrant_vm_name }}"
+    groups: "vagrant_vms"
+    # Grab whatever unique port Vagrant assigned to this specific VM
+    ansible_host: >-
+      {{ (vagrant_ssh_config.stdout | regex_search('HostName\s+(.*)', '\1')) | first | trim }}
+    ansible_port: >-
+      {{ (vagrant_ssh_config.stdout | regex_search('Port\s+(.*)', '\1')) | first | trim | int }}
+    ansible_user: >-
+      {{ (vagrant_ssh_config.stdout | regex_search('User\s+(.*)', '\1')) | first | trim }}
+    ansible_ssh_private_key_file: >-
+      {{ (vagrant_ssh_config.stdout | regex_search('IdentityFile\s+(.*)', '\1')) | first | trim }}
+    ansible_ssh_common_args: >-
+      -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null

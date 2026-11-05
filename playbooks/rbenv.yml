@@ -14,4 +14,3 @@
     - name: Install rbenv
       ansible.builtin.include_role:
         name: jcook3701.pkgs.rbenv
-        tasks_from: rbenv-install.yml

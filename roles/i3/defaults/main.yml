@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+i3_state: present
+
+i3_users:
+  - "{{ sudo_user }}"
+
+i3_video_ports:
+  - DP-1
+
+# Options: demnu, rofi, wofi
+i3_application_launcher: rofi

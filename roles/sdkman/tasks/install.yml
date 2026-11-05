@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install sdkman dependencies
+  ansible.builtin.package:
+    name: "{{ sdkman_pkgs }}"
+    state: present
+
+- name: Download sdkman install script
+  ansible.builtin.get_url:
+    url: "{{ sdkman_base_url }}"
+    dest: "{{ sdkman_file.package }}"
+    mode: "0755"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Run sdkman install script
+  ansible.builtin.command:
+    cmd: "{{ sdkman_file.package }}"
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"

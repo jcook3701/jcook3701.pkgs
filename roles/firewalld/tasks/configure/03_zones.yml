@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Iterate over defined firewalld zones
+  ansible.builtin.include_tasks: "zone/configure_rules.yml"
+  loop: "{{ firewalld_zones | default([]) }}"
+  loop_control:
+    loop_var: current_zone
+    label: "Iterating zone: {{ current_zone }}"
+  when: firewalld_zones | length > 0
+
+- name: Enforce global default system zone runtime setting
+  ansible.builtin.command: "firewall-cmd --set-default-zone={{ firewalld_default_zone }}"
+  register: firewalld_set_default_zone_result
+  changed_when: "'default zone already set' not in firewalld_set_default_zone_result.stderr"
+  when: firewalld_default_zone is defined and firewalld_default_zone != ""
+  become: true

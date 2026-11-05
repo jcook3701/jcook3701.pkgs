@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure UTF-8 locale is generated and set
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+  block:
+    - name: Generate en_US.UTF-8 locale
+      community.general.locale_gen:
+        name: en_US.UTF-8
+        state: present
+
+    - name: Set system-wide locale
+      ansible.builtin.debconf:
+        name: locales
+        question: locales/default_environment_locale
+        value: en_US.UTF-8
+        vtype: select
+
+- name: Pre-seed OpenLDAP installer to automatically populate default files
+  ansible.builtin.debconf:
+    name: slapd
+    question: "{{ config.question }}"
+    value: "{{ config.value }}"
+    vtype: "{{ config.vtype }}"
+  loop:
+    - { question: "slapd/no_configuration", value: "false", vtype: "boolean" }
+    - { question: "slapd/domain", value: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}", vtype: "string" }
+    - { question: "slapd/root_password", value: "{{ openldap_admin_password }}", vtype: "password" }
+    - { question: "slapd/root_password_again", value: "{{ openldap_admin_password }}", vtype: "password" }
+  loop_control:
+    loop_var: config
+    label: "Updating Installer Configuration: {{ config.question }}"
+  become: true
+  when:
+    - openldap_node_type in ['master', 'slave']
+    - ansible_facts['os_family'] == 'Debian'
+    - not openldap_existing_config.stat.exists
+
+- name: Install OpenLDAP package and dependencies
+  ansible.builtin.package:
+    name: >-
+      {{ openldap_pkg_names | default([])
+          + openldap_shared_lib_pkg_names | default([]) }}
+    state: latest
+  environment:
+    DEBIAN_FRONTEND: "{{ 'noninteractive' if ansible_facts['os_family'] == 'Debian' else omit }}"
+  become: true
+
+- name: OpenLDAP configuration
+  ansible.builtin.include_tasks: configure/main.yml
+
+- name: OpenLDAP database and replication tree setup
+  ansible.builtin.include_tasks: database/main.yml
+  when: openldap_node_type in ['master', 'slave']
+
+- name: Ensure OpenLDAP service is started and enabled
+  ansible.builtin.service:
+    name: "{{ openldap_service }}"
+    state: started
+    enabled: yes
+  when: openldap_node_type in ['master', 'slave']
+
+- name: Flush handlers to ensure openldap running with new ports
+  ansible.builtin.meta: flush_handlers

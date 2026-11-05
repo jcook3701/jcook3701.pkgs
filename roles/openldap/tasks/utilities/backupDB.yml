@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Backup OpenLDAP core database to local staging file
+  ansible.builtin.command:
+    cmd: "slapcat -F {{ config_dir }} -b {{ base_dn }} -l {{ backup_file }}"
+  vars:
+    backup_file: "{{ openldap_host_staging.backup }}"
+    config_dir: "{{ openldap_directory.slapd }}"
+    base_dn: "dc={{ openldap_second_level_domain }},dc={{ openldap_top_level_domain }}"
+  register: ldap_backup_cmd
+  failed_when:
+    - ldap_backup_cmd.rc != 0
+    - ('checksum error' not in ldap_backup_cmd.stderr | lower
+        and 'error' in ldap_backup_cmd.stderr | lower)
+  when: openldap_node_type == 'master'
+  become: true
+
+- name: Fetch database backup file to user-writable staging area
+  ansible.builtin.fetch:
+    src: "{{ openldap_host_staging.backup }}"
+    dest: "{{ openldap_controller_staging.backup }}"
+    flat: true
+  when: openldap_node_type == 'master'
+
+- name: Ensure custom user-defined backup directory exists on the controller
+  ansible.builtin.file:
+    path: "{{ openldap_backup_dir }}"
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
+  run_once: true
+  become: >-
+    {{ true if openldap_directory.backup.startswith('/var')
+    or openldap_directory.backup.startswith('/etc') else false }}
+  when: openldap_node_type == 'master'
+
+- name: Relocate backup file to final destination directory
+  ansible.builtin.copy:
+    src: "{{ openldap_controller_staging.backup }}"
+    dest: "{{ openldap_file.backup }}"
+    owner: >-
+      {{ 'root' if openldap_directory.backup.startswith('/var')
+            or openldap_directory.backup.startswith('/etc') else omit }}
+    group: >-
+      {{ 'root' if openldap_directory.backup.startswith('/var')
+            or openldap_directory.backup.startswith('/etc') else omit }}
+    mode: "0600"
+    remote_src: true
+  delegate_to: localhost
+  run_once: true
+  become: "{{ true if openldap_directory.backup.startswith('/var') or openldap_directory.backup.startswith('/etc') else false }}"
+  when: openldap_node_type == 'master'
+
+- name: Clean up temporary controller staging file
+  ansible.builtin.file:
+    path: "{{ openldap_controller_staging.backup }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when: openldap_node_type == 'master'
+
+- name: Scrub localized raw temp backup files from the host node
+  ansible.builtin.file:
+    path: "{{ openldap_host_staging.backup }}"
+    state: absent
+  when: openldap_node_type == 'master'
+  become: true

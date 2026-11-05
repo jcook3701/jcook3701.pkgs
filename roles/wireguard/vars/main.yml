@@ -1,3 +1,22 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# The systemd service unit name dynamically targeted by the interface name
+wireguard_service: "{{ wireguard_os_service | default('wg-quick@' ~ wireguard_interface) }}"
+
+# Platform-specific package matrices
+wireguard_dep_pkg_names: "{{ wireguard_os_dep_pkg_names | default([]) }}"
+wireguard_pkg_names: "{{ wireguard_os_pkg_names | default(['wireguard', 'wireguard-tools']) }}"
+
+# Base configuration directory structure
+wireguard_directory:
+  conf: "{{ wireguard_os_directory | default('/etc/wireguard') }}"
+
+# Dynamic file path-ing driven by the active interface name
+wireguard_file:
+  conf: "{{ wireguard_directory.conf }}/{{ wireguard_interface }}.conf"
+
+# The local keypair paths for this specific host
+wireguard_key:
+  private: "{{ wireguard_directory.conf }}/{{ wireguard_interface }}_private.key"
+  public: "{{ wireguard_directory.conf }}/{{ wireguard_interface }}_public.key"

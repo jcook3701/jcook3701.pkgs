@@ -1,0 +1,129 @@
+{#
+# .bash_aliases.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro gcc_aliases() -%}
+    {#
+    # gcc_aliases macro
+    #
+    # Configures the shell to support colored GCC diagnostics.
+    #
+    # Returns:
+    #   A commented-out export for GCC_COLORS to enable syntax highlighting
+    #   for compiler errors and warnings.
+    #}
+# colored GCC warnings and errors
+#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+{% endmacro %}
+
+{%- macro colors_aliases() -%}
+    {#
+    # colors_aliases macro
+    #
+    # Sets up conditional color support for core GNU utilities.
+    #
+    # Returns:
+    #   A bash script block that checks for dircolors and sets up
+    #   color-auto aliases for ls and grep.
+    #}
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+{% endmacro %}
+
+{%- macro alert_alias() -%}
+    {#
+    # alert_alias macro
+    #
+    # Creates a desktop notification alias for long-running terminal tasks.
+    #
+    # Returns:
+    #   An 'alert' alias that uses notify-send to show the success/fail
+    #   status of the last executed command.
+    #}
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+{% endmacro %}
+
+{%- macro cd_aliases() -%}
+    {#
+    # cd_aliases macro
+    #
+    # Defines shorthand navigation commands.
+    #
+    # Returns:
+    #   Navigation aliases for moving up directory levels.
+    #}
+alias ..='cd ..'
+{% endmacro %}
+
+{%- macro git_aliases() -%}
+    {#
+    # git_aliases macro
+    #
+    # Sets up high-frequency Git shortcuts for the jcook3701 environment.
+    #
+    # Returns:
+    #   Commonly used git aliases for status and pull operations.
+    #}
+alias gs='git status'
+alias gp='git pull'
+{% endmacro %}
+
+{%- macro ls_aliases() -%}
+    {#
+    # ls_aliases macro
+    #
+    # Defines standard directory listing shortcuts for daily use.
+    #
+    # Returns:
+    #   Aliases for ll (long), la (all), and l (compact) views.
+    #}
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+{% endmacro %}
+
+{%- macro bash_aliases() -%}
+    {#
+    # bash_aliases macro
+    #
+    # Aggregator macro that executes and sequences all sub-macros
+    # for the .bash_aliases file generation.
+    #
+    # Returns:
+    #   A complete list of shell aliases and environment settings.
+    #}
+    {{- cd_aliases() }}
+    {{- git_aliases() }}
+    {{- colors_aliases() }}
+    {{- ls_aliases() }}
+    {{- alert_alias() }}
+{%- endmacro -%}
+
+{{- bash_aliases() }}

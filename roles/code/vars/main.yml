@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Package Settings
+code_dep_pkg_names: "{{ code_os_dep_package_names | default([]) }}"
+code_pkg_names: "{{ code_os_pkg_names | default(['code']) }}"
+
+# System File Settings
+
+# Repository Specifics
+code_repo_id: "{{ code_os_repo_id | default('code') }}"
+code_repo_name: "{{ code_os_repo_name | default('Visual Studio Code') }}"

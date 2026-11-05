@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if the public master authority certificate is already present on the client disk
+  ansible.builtin.stat:
+    path: "{{ sssd_ldap_tls_cacert }}"
+  register: sssd_existing_ca_cert
+  become: true
+  when: sssd_ldap_tls | bool or 'ldaps' in sssd_ldap_protocol | lower
+
+- name: Ensure target certificate infrastructure directory exists on clients
+  ansible.builtin.file:
+    path: "{{ sssd_ldap_tls_cacert | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when: sssd_ldap_tls | bool or 'ldaps' in sssd_ldap_protocol | lower
+
+- name: Slurp the public root certificate directly from the primary master LDAP server
+  ansible.builtin.slurp:
+    src: "{{ sssd_ldap_tls_cacert }}"
+  delegate_to: "{{ sssd_ldap_servers | first | default(ansible_play_hosts | first) }}"
+  register: master_ca_raw_payload
+  become: true
+  run_once: true
+  when: sssd_ldap_tls | bool or 'ldaps' in sssd_ldap_protocol | lower
+
+- name: Securely distribute public master authority certificate file to clients
+  ansible.builtin.copy:
+    content: "{{ hostvars[sssd_ldap_servers | first | default(ansible_play_hosts | first)]['master_ca_raw_payload']['content'] | b64decode }}"
+    dest: "{{ sssd_ldap_tls_cacert }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - not sssd_existing_ca_cert.stat.exists | default(false)
+    - sssd_ldap_tls | bool or 'ldaps' in sssd_ldap_protocol | lower

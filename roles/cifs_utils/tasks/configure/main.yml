@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Include client infrastructure initialization tasks
+  ansible.builtin.include_tasks: "client/seed.yml"
+
+- name: Include client storage mounting loop tasks
+  ansible.builtin.include_tasks: "client/mount.yml"
+  when:
+    - cifs_utils_client_mounts is defined
+    - cifs_utils_client_mounts | length > 0
+    - cifs_utils_client_enable_mounts | bool

@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+uxplay_dep_pkg_names:
+  - gstreamer1.0-plugins-bad
+  - gstreamer1.0-libav
+  - gstreamer1.0-vaapi
+  - xfce4-genmon-plugin
+
+uxplay_pkg_names:
+  - uxplay

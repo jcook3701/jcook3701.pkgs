@@ -1,0 +1,119 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Lifecycle execution state for package installation or removal
+gssproxy_state: present
+
+# Global toggle to control systemd service management tasks
+gssproxy_manage_service: true
+
+# Global diagnostics logging level for the gssproxy daemon engine (ranges from 0 to 3)
+gssproxy_debug_level: "3"
+
+gssproxy_nfs_keytab: "/etc/nfs.keytab"
+gssproxy_ldap_keytab: "/etc/ldap.keytab"
+gssproxy_samba_keytab: "/etc/samba.keytab"
+gssproxy_http_keytab: "/etc/http.keytab"
+
+# The core list of applications and filesystems being proxied.
+# Even if features are disabled, keeping their structures here ensures
+# scalability without modifying the primary task engine later.
+gssproxy_services:
+  - name: "20-sssd"
+    enabled: true
+    section: "service/sssd"
+    mechs: "krb5"
+    socket: "/var/lib/gssproxy/sssd.sock"
+    cred_store:
+      - "keytab:/etc/krb5.keytab"
+      - "ccache:FILE:/var/lib/gssproxy/sssd/ccache_%U"
+    cred_usage: "both"
+    euid: 0
+    allow_any_uid: true
+    trusted: true
+
+  - name: "24-nfs-server"
+    enabled: false
+    section: "service/nfs-server"
+    mechs: "krb5"
+    socket: "/var/lib/gssproxy/nfs-server.sock"
+    cred_store:
+      - "keytab:{{ gssproxy_nfs_keytab | trim }}"
+    cred_usage: "accept"
+    euid: 0
+    trusted: true
+    kernel_nfsd: true
+
+  - name: "30-ldap"
+    enabled: "{{ 'openldap' in ansible_facts.packages or 'slapd' in ansible_facts.packages }}"
+    section: "service/ldap"
+    mechs: "krb5"
+    socket: "/var/lib/gssproxy/ldap.sock"
+    cred_store:
+      - "keytab:{{ gssproxy_ldap_keytab | trim }}"
+    cred_usage: "both"
+    euid: "{{ 'openldap' if ansible_os_family == 'Debian' else 'ldap' }}"
+    allow_any_uid: true
+    trusted: true
+
+  - name: "40-samba"
+    enabled: "{{ 'samba' in ansible_facts.packages or 'samba-common' in ansible_facts.packages }}"
+    section: "service/samba"
+    mechs: "krb5"
+    socket: "/var/lib/gssproxy/samba.sock"
+    cred_store:
+      - "keytab:{{ gssproxy_samba_keytab | trim }}"
+    cred_usage: "both"
+    euid: 0
+    allow_any_uid: true
+    trusted: true
+
+  - name: "50-http"
+    enabled: "{{ 'httpd' in ansible_facts.packages or 'apache2' in ansible_facts.packages or 'nginx' in ansible_facts.packages }}"
+    section: "service/HTTP"
+    mechs: "krb5"
+    socket: "/var/lib/gssproxy/default.sock"
+    cred_store:
+      - "keytab:{{ gssproxy_http_keytab | trim }}"
+      - "ccache:/var/lib/gssproxy/clients/krb5cc_%U"
+    cred_usage: "both"
+    euid: "{{ 'www-data' if ansible_os_family == 'Debian' else 'apache' }}"
+    allow_any_uid: true
+    trusted: true
+
+  - name: "99-cifs"
+    enabled: true
+    section: "service/cifs"
+    mechs: "krb5"
+    socket: "/var/lib/gssproxy/cifs.sock"
+    cred_store:
+      - "keytab:/etc/krb5.keytab"
+      - "ccache:FILE:/var/lib/gssproxy/clients/krb5cc_%U"
+    cred_usage: "initiate"
+    euid: 0
+    allow_any_uid: true
+    trusted: true
+    impersonate: true
+
+  - name: "99-nfs-client"
+    enabled: true
+    section: "service/nfs-client"
+    mechs: "krb5"
+    socket: "/run/gssproxy.sock"
+    cred_store:
+      - "keytab:/etc/krb5.keytab"
+    cred_usage: "initiate"
+    euid: 0
+    allow_any_uid: true
+    trusted: true
+
+  - name: "99-sshd"
+    enabled: false
+    section: "service/ssh"
+    mechs: "krb5"
+    socket: "/run/gssproxy-ssh.sock"
+    cred_store:
+      - "keytab:/etc/krb5.keytab"
+    cred_usage: "accept"
+    euid: 0
+    trusted: true

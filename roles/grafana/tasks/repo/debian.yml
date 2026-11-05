@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Installing Grafana Repository dependencies.
+  ansible.builtin.apt:
+    pkg:
+      - ca-certificates
+      - curl
+    state: present
+
+- name: Create APT repository keys directory.
+  ansible.builtin.file:
+    path: "{{ grafana_directory.keyrings }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Download Grafana GPG key
+  ansible.builtin.get_url:
+    url: "{{ grafana_gpg_url }}"
+    dest: "{{ grafana_file.gpg }}"
+    mode: "0644"
+    owner: root
+    group: root
+    force: true
+
+- name: Add Grafana repository
+  ansible.builtin.lineinfile:
+    path: "{{ grafana_file.list }}"
+    create: true
+    mode: "0644"
+    owner: root
+    group: root
+    line: "{{ grafana_repo_line }}"
+
+- name: Run apt-get update
+  ansible.builtin.apt:
+    update_cache: true

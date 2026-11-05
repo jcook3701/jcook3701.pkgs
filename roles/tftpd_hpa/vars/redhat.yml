@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+tftpd_hpa_service: tftp
+
+tftpd_hpa_pkg_names:
+  - tftp-server
+  - tftp
+
+tftpd_hpa_os_directory:
+  conf: "/etc/xinetd.d"
+  root: "/var/lib/tftpboot"
+
+tftpd_hpa_os_file:
+  conf: "/etc/systemd/system/tftp.service.d/override.conf"

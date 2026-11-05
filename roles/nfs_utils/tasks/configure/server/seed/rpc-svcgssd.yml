@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create systemd drop-in directory for rpc-svcgssd
+  ansible.builtin.file:
+    path: "{{ nfs_utils_directory.override_rpc_svcgssd }}"
+    state: directory
+    mode: "0755"
+  become: true
+  when:
+    - nfs_utils_use_svcgssd | bool
+    - (nfs_utils_server_helper_service ~ '.service' in ansible_facts.services)
+
+- name: Configure systemd drop-in override for rpc-svcgssd keytab path
+  ansible.builtin.copy:
+    dest: "{{ nfs_utils_file.override_rpc_svcgssd }}"
+    mode: "0644"
+    content: |
+      [Service]
+      Environment="KRB5_KTNAME=FILE:{{ nfs_utils_server_keytab_path }}"
+  become: true
+  when:
+    - nfs_utils_use_svcgssd | bool
+    - (nfs_utils_server_helper_service ~ '.service' in ansible_facts.services)
+  register: svcgssd_dropin
+
+- name: Reload systemd configuration if drop-in changed
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  become: true
+  when: svcgssd_dropin.changed
+  notify: Restart nfs server helper service

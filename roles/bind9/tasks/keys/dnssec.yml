@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure key directory exist
+  ansible.builtin.file:
+    path: "{{ zone.key_directory }}"
+    state: directory
+    owner: "{{ bind9_user }}"
+    group: "{{ bind9_user }}"
+    mode: "0750"
+
+- name: Generate ZSK (Zone Signing Key)
+  ansible.builtin.command: >-
+    dnssec-keygen -a {{ bind9_zsk_algorithm }} -n ZONE {{ zone.name }}
+  args:
+    chdir: "{{ zone.key_directory }}"
+  when: >-
+    (lookup('fileglob', zone.key_directory +
+    '/K' + zone.name + '.*.key', errors='ignore') | list | length) == 0
+
+- name: Generate KSK (Key Signing Key)
+  ansible.builtin.command: >-
+    dnssec-keygen -a {{ bind9_ksk_algorithm }} -n ZONE -f KSK {{ zone.name }}
+  args:
+    chdir: "{{ zone.key_directory }}"
+  when: >-
+    (lookup('fileglob', zone.key_directory +
+    '/K' + zone.name + '.*.key', errors='ignore') | list | length) == 0
+
+- name: Sign zone with DNS dnssec-signzone
+  ansible.builtin.command: >-
+    dnssec-signzone -o {{ zone.name }} -N increment -t {{ zone.path }}/{{ zone.filename }}
+  args:
+    chdir: "{{ zone.key_directory }}"
+  register: signed_output
+
+- name: Copy signed zone file to output location
+  ansible.builtin.copy:
+    src: "{{ zone.key_directory }}/{{ zone.signed_filename }}"
+    dest: "{{ zone.path }}/{{ zone.signed_zone_file }}"
+    remote_src: true
+    owner: root
+    group: "{{ bind9_user }}"
+    mode: "0644"
+
+- name: Find KSK public key file for zone
+  ansible.builtin.find:
+    paths: "{{ zone.key_directory }}"
+    patterns: "K{{ zone.name }}.*.key"
+    contains: "KSK"
+  register: ksk_keys
+  when: bind9_enable_public_access | bool
+
+- name: Generate DS record file from KSK public key
+  ansible.builtin.command: >-
+    dnssec-dsfromkey {{ ksk_keys.files[0].path }}
+  register: ds_records
+  when:
+    - bind9_enable_public_access | bool
+    - ksk_keys.files | length > 0
+
+- name: Save DS record for registrar/parent
+  ansible.builtin.copy:
+    content: "{{ ds_records.stdout }}"
+    dest: "{{ zone.key_directory }}/dsset-{{ zone.name }}"
+    owner: root
+    group: "{{ bind9_user }}"
+    mode: "0644"
+  when:
+    - bind9_enable_public_access | bool
+    - ds_records.stdout is defined

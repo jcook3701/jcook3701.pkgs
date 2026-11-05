@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure local mounting endpoints exist
+  ansible.builtin.file:
+    path: "{{ mount.path | default('/media/network_share') }}"
+    state: directory
+    owner: "{{ mount.owner_uid | default('root') }}"
+    group: "{{ mount.owner_gid | default('root') }}"
+    mode: "0755"
+  loop: "{{ samba_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: "Mount -> {{ mount.name | default('default') }}"
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool
+
+- name: Securely generate credentials files for mounts
+  ansible.builtin.copy:
+    dest: "{{ creds_file }}"
+    content: |
+      username={{ mount.username }}
+      password={{ mount.password }}
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  vars:
+    mount_name: "{{ mount.name | default('default') }}"
+    creds_file: "{{ samba_directory.conf }}/.creds-{{ mount_name }}"
+  loop: "{{ samba_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: "Mount -> {{ mount.name | default('default') }}"
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool
+
+- name: Bind remote shares to filesystem table natively
+  ansible.posix.mount:
+    path: "{{ mount.path }}"
+    src: "{{ mount.src }}"
+    fstype: cifs
+    opts: "{{ mount_options }}"
+    state: mounted
+  vars:
+    mount_name: "{{ mount.name | default('default') }}"
+    creds_file: "{{ samba_directory.conf }}/.creds-{{ mount_name }}"
+    mount_options: >-
+      credentials={{ creds_file }},
+      iocharset=utf8,
+      uid={{ mount.owner_uid | default('root') }},
+      gid={{ mount.owner_gid | default('root') }},
+      file_mode=0755,
+      dir_mode=0755
+  loop: "{{ samba_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: "Mount -> {{ mount.name | default('default') }}"
+  when:
+    - samba_client_mounts is defined
+    - samba_client_mounts | length > 0
+    - samba_client_enable_mounts | bool

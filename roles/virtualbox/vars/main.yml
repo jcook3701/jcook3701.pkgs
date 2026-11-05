@@ -1,12 +1,46 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+virtualbox_selector:
+  virtualbox_6_1:
+    version: "6.1"
+    debian_pkg: "virtualbox-6.1"
+    redhat_pkg: "VirtualBox-6.1"
+  virtualbox_7_0:
+    version: "7.0"
+    debian_pkg: "virtualbox-7.0"
+    redhat_pkg: "VirtualBox-7.0"
+  virtualbox_7_1:
+    version: "7.1"
+    debian_pkg: "virtualbox-7.1"
+    redhat_pkg: "VirtualBox-7.1"
+  virtualbox_7_2:
+    version: "7.2"
+    debian_pkg: "virtualbox-7.2"
+    redhat_pkg: "VirtualBox-7.2"
 
-virtualbox_directories:
-  asc: /etc/apt/keyrings/oracle-virtualbox-2016.asc
+virtualbox_info: "{{ virtualbox_selector[virtualbox_selected] }}"
 
-# NOTE: Not currently used.
-virtualbox_conf:
-  arch: amd64
-  signed_by: "{{ virtualbox_directories.asc }}"
-  url: https://download.virtualbox.org/virtualbox/debian
+virtualbox_user: "{{ virtualbox_os_user | default('vboxusers') }}"
+virtualbox_group: "{{ virtualbox_os_group | default('vboxusers') }}"
+
+virtualbox_dep_pkg_names: "{{ virtualbox_os_dep_pkg_names | default([]) }}"
+virtualbox_pkg_names: "{{ virtualbox_os_pkg_names | default([]) }}"
+
+virtualbox_directory:
+  bin: "{{ virtualbox_os_directory.bin | default('/sbin') }}"
+  conf: "{{ virtualbox_os_directory.conf | default('/etc/vbox') }}"
+  modules: "{{ virtualbox_os_directory.modules | default('/etc/modules-load.d') }}"
+  modprobe: "{{ virtualbox_os_directory.modprobe | default('/etc/modprobe.d') }}"
+
+virtualbox_file:
+  networks_conf: "{{ virtualbox_directory.conf }}/networks.conf"
+  modules_conf: "{{ virtualbox_directory.modules }}/virtualbox.conf"
+  modprobe_conf: "{{ virtualbox_directory.modprobe }}/virtualbox.conf"
+
+virtualbox_command:
+  vboxconfig: "{{ virtualbox_directory.bin }}/vboxconfig"
+
+# Repository Configuration for jcook3701.utils.repo_add
+virtualbox_repo_id: "{{ virtualbox_os_repo_id | default('virtualbox') }}"
+virtualbox_repo_name: "{{ virtualbox_os_repo_name | default('Oracle VirtualBox Official Repository') }}"

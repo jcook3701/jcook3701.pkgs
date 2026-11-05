@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# System account asset mapping settings
+rsyslog_user: "{{ rsyslog_os_account.user | default('syslog') }}"
+rsyslog_group: "{{ rsyslog_os_account.group | default('syslog') }}"
+
+rsyslog_file_owner: "{{ rsyslog_os_file_owner | default('syslog') }}"
+rsyslog_file_group: "{{ rsyslog_os_file_group | default('adm') }}"
+
+# Dynamic platform tracking properties
+rsyslog_service: "{{ rsyslog_os_service | default('rsyslog') }}"
+rsyslog_dep_pkg_names: "{{ rsyslog_os_dep_pkg_names | default([]) }}"
+rsyslog_pkg_names: "{{ rsyslog_os_pkg_names | default(['rsyslog']) }}"
+
+# Runtime file system infrastructure paths mapping
+rsyslog_directory:
+  conf: "{{ rsyslog_os_directory.conf | default('/etc') }}"
+  conf_d: "{{ rsyslog_os_directory.conf_d | default('/etc/rsyslog.d') }}"
+  state: "{{ rsyslog_os_directory.state | default('/var/spool/rsyslog') }}"
+  log_root: "{{ rsyslog_os_directory.log_root | default('/var/log') }}"
+
+# Holistic system file paths tracking definitions
+rsyslog_file:
+  conf: "{{ rsyslog_directory.conf ~ '/rsyslog.conf'
+                        | default('/etc/rsyslog.conf') }}"
+  default_rules: "{{ rsyslog_directory.conf_d ~ '/50-default.conf'
+                        | default('/etc/rsyslog.d/50-default.conf') }}"

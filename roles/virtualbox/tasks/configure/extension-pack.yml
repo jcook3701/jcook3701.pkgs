@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load VirtualBox Extension Pack variables
+  ansible.builtin.include_vars: extension-pack.yml
+
+- name: Query installed VirtualBox hypervisor version
+  ansible.builtin.command: "VBoxManage --version"
+  register: vbox_version_raw
+  changed_when: false
+  become: true
+
+- name: Normalize VirtualBox version fact
+  ansible.builtin.set_fact:
+    virtualbox_installed_version: "{{ (vbox_version_raw.stdout | trim).split('r')[0] }}"
+
+- name: Query currently installed VirtualBox Extension Packs
+  ansible.builtin.command: "VBoxManage list extpacks"
+  register: vbox_installed_extpacks
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Pre-accept VirtualBox Extension Pack license via debconf (Debian/Ubuntu)
+  ansible.builtin.debconf:
+    name: "{{ virtualbox_extpack_license.name }}"
+    question: "{{ virtualbox_extpack_license.question }}"
+    value: "true"
+    vtype: select
+  when: ansible_os_family == "Debian"
+
+- name: Handle Extension Pack Download and Installation
+  when: >-
+    ('Oracle VM VirtualBox Extension Pack' not in vbox_installed_extpacks.stdout) or
+    (virtualbox_installed_version not in vbox_installed_extpacks.stdout)
+  block:
+    - name: Download matching VirtualBox Extension Pack
+      ansible.builtin.get_url:
+        url: "{{ virtualbox_extpack_url }}"
+        dest: "{{ virtualbox_extpack_dest }}"
+        mode: "0644"
+        owner: root
+        group: root
+      become: true
+
+    - name: Install Oracle VM VirtualBox Extension Pack
+      ansible.builtin.command:
+        argv:
+          - "VBoxManage"
+          - "extpack"
+          - "install"
+          - "--replace"
+          - "{{ virtualbox_extpack_dest }}"
+        stdin: "y\n"
+      register: vbox_extpack_install_result
+      changed_when: ('successfully installed' in vbox_extpack_install_result.stdout)
+      become: true
+  always:
+    - name: Clean up Extension Pack installer archive from temporary storage
+      ansible.builtin.file:
+        path: "{{ virtualbox_extpack_dest }}"
+        state: "absent"
+      become: true
+      when: virtualbox_extpack_dest is defined

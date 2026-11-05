@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Clean up temporary HTTP transit files off the Master KDC disk
+  ansible.builtin.file:
+    path: "{{ target_transit_file }}"
+    state: absent
+  vars:
+    target_node: "{{ http_server_fqdn.split('.') | first }}"
+    target_transit_file: "{{ kerberos_keytabs.master_http_transit_file }}"
+  loop: "{{ kerberos_http_servers | default([]) }}"
+  loop_control:
+    loop_var: http_server_fqdn
+    label: "Purging master HTTP transit scratch file -> HTTP/{{ http_server_fqdn }}"
+  when: kerberos_node_type == 'master'
+  become: true
+
+- name: Clean up local controller staging HTTP keytab cache
+  ansible.builtin.file:
+    path: "{{ target_controller_http }}"
+    state: absent
+  vars:
+    target_node: "{{ http_server_fqdn.split('.') | first }}"
+    target_controller_http: "{{ kerberos_keytabs.controller_http_staging }}"
+  loop: "{{ kerberos_http_servers | default([]) }}"
+  loop_control:
+    loop_var: http_server_fqdn
+    label: "Purging controller HTTP staging file -> HTTP/{{ http_server_fqdn }}"
+  delegate_to: localhost
+  become: false
+
+- name: Clean up transient HTTP landing pad files off the remote target endpoints
+  ansible.builtin.file:
+    path: "{{ target_delivered_transit }}"
+    state: absent
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_delivered_transit: "{{ kerberos_keytabs.client_http_delivered_transit }}"
+  become: true
+  when: inventory_hostname in (kerberos_http_servers | default([]))

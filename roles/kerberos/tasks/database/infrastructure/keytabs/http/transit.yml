@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely append required application service keys on the Master KDC
+  ansible.builtin.command: >-
+    kadmin.local -q "ktadd -k {{ staging_keytab }} {{ service_principal }}"
+  vars:
+    target_node: "{{ http_server_fqdn.split('.') | first }}"
+    staging_keytab: "{{ kerberos_keytabs.master_http_transit_file }}"
+    service_principal: "HTTP/{{ http_server_fqdn }}"
+  loop: "{{ kerberos_http_servers | default([]) }}"
+  loop_control:
+    loop_var: http_server_fqdn
+    index_var: loop_idx
+    label: "Injecting HTTP keys for: {{ http_server_fqdn }}"
+  register: _http_key_injection
+  changed_when: "'added' in _http_key_injection.stdout | lower"
+  failed_when: >-
+    (_http_key_injection.rc is defined and _http_key_injection.rc != 0) or
+    ('error' in _http_key_injection.stdout | lower) or
+    ('failed' in _http_key_injection.stdout | lower)
+  when:
+    - kerberos_http_servers | default([]) | length > 0
+    - inventory_hostname in (kerberos_admin_servers | default([]))
+    - ('principal does not exist' in
+          master_http_db_check.results[loop_idx].stderr | lower)
+  become: true
+
+- name: Fetch fully compiled HTTP service keytabs back to the Ansible controller
+  ansible.builtin.fetch:
+    src: "{{ target_client_file }}"
+    dest: "{{ target_controller_staging }}"
+    flat: true
+  vars:
+    target_node: "{{ http_server_fqdn.split('.') | first }}"
+    target_client_file: "{{ kerberos_keytabs.master_http_transit_file }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_http_staging }}"
+  loop: "{{ kerberos_http_servers | default([]) }}"
+  loop_control:
+    loop_var: http_server_fqdn
+    label: "Caching completed HTTP passport to controller for: {{ http_server_fqdn }}"
+  when: kerberos_node_type == 'master'

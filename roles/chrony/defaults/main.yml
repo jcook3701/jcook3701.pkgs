@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+chrony_state: present
+chrony_is_server: false
+chrony_enable_nts: false
+
+chrony_upstream_servers:
+  - ://cloudflare.com
+  - nts.ntp.se
+  - nts.time.nl
+
+chrony_allow_networks:
+  - 192.168.1.0/24

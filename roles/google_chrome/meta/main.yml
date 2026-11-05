@@ -3,14 +3,12 @@
 ---
 galaxy_info:
   author: Jared Cook
-  description: ""
-  # company: "Optional Company Name"
-
+  description: "Installs, sets up, or removes Google Chrome,
+    ensuring all dependencies and configurations are managed."
+  company: "Cook's Code, Inc."
   license: "AGPL-3.0-or-later"
-
   min_ansible_version: ">=2.10"
   role_name: google_chrome
-
 
   platforms:
     - name: EL
@@ -33,3 +31,6 @@ galaxy_info:
     - apps
 
 dependencies: []
+
+collections:
+  - jcook3701.utils

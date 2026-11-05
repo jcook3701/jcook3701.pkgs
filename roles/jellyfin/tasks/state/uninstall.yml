@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure Jellyfin service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ jellyfin_service | default('jellyfin') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (jellyfin_service ~ '.service' in ansible_facts.services)
+
+- name: Force deep purge of Jellyfin packages
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ jellyfin_pkg_names | default(['jellyfin']) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete
+
+- name: Ensure removal of Jellyfin group
+  ansible.builtin.group:
+    name: "{{ jellyfin_group | default('jellyfin') }}"
+    state: absent
+  become: true

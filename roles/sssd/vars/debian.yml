@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+sssd_os_conflict_pkg_names:
+  - libnss-winbind
+  - libnss-ldap
+  - libnss-ldapd
+  - nslcd
+  - libpam-ldap
+  - libpam-ldapd
+  - libpam-krb5
+
+sssd_os_dep_pkg_names:
+  - libpam-sss
+  - libpam-runtime
+  - "{{ sssd_enable_autofs | bool | ternary('libnss-sss', omit) }}"
+
+sssd_os_pkg_names:
+  - sssd
+  - sssd-tools
+  - sssd-dbus
+  - sssd-ldap
+  - "{{ sssd_enable_kdc | bool | ternary('sssd-kcm', omit) }}"
+  - "{{ sssd_enable_kdc | bool | ternary('sssd-krb5', omit) }}"
+  - "{{ sssd_enable_sudo | bool | ternary('libsss-sudo', omit) }}"
+  # - libnss-winbind
+
+sssd_os_directory:
+  conf: "/etc/sssd"
+  cacerts: "/etc/ssl/certs/"
+  certs: "/etc/ldap/certs"
+  default: "/etc/default"
+  db: "/var/lib/sss/db"
+  mc: "/var/lib/sss/mc"
+  pipes: "/var/lib/sss/pipes"
+  private_pipes: "/var/lib/sss/pipes/private"
+  log: "/var/log/sssd"
+  keytab: "/etc"

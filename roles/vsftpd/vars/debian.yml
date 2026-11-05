@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+vsftpd_service: vsftpd
+vsftpd_pam_service_name: "ftp"
+
+vsftpd_pkg_names:
+  - vsftpd
+
+vsftpd_os_directory:
+  conf: "/etc/"
+  root: "/srv/ftp"
+
+vsftpd_file:
+  conf: "{{ vsftpd_directory.conf }}/vsftpd.conf"

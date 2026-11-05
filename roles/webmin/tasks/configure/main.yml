@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install necessary dependencies
+  ansible.builtin.package:
+    name: "{{ webmin_dep_pkg_names | default([]) }}"
+    state: present
+  become: true
+
+- name: Download Webmin setup script
+  ansible.builtin.get_url:
+    url: "{{ webmin_repo_url }}"
+    dest: "{{ webmin_file.script }}"
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Run Webmin setup script
+  ansible.builtin.expect:
+    command: "{{ webmin_file.script }}"
+    responses:
+      'repository\? \(y/N\)': "y"

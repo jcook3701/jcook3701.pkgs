@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create systemd override directories for active node services
+  ansible.builtin.file:
+    path: "{{ override_directory }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  vars:
+    override_directory: "{{ kerberos_directory.systemd }}/{{ service_name }}.service.d"
+  loop: >-
+    {{ [kerberos_kdc_service] + ((kerberos_node_type == 'master')
+        | ternary([kerberos_admin_service], [kerberos_kprop_service])) }}
+  loop_control:
+    loop_var: service_name
+    label: "Systemd Service Override Directory -> {{ override_directory }}"
+  when: kerberos_node_type in ['master', 'replica']
+
+- name: Inject systemd log path write overrides
+  ansible.builtin.copy:
+    dest: "{{ override_conf }}"
+    content: |
+      [Service]
+      ReadWritePaths={{ kerberos_directory.log }}/ {{ kerberos_directory.state }}/
+    mode: "0644"
+    owner: root
+    group: root
+  vars:
+    override_conf: "{{ kerberos_directory.systemd }}/{{ service_name }}.service.d/override.conf"
+  loop: >-
+    {{ [kerberos_kdc_service] + ((kerberos_node_type == 'master')
+        | ternary([kerberos_admin_service], [kerberos_kprop_service])) }}
+  loop_control:
+    loop_var: service_name
+    label: "Systemd Storage Sandbox Configuration -> {{ override_conf }}"
+  register: _sandbox_overrides_copied
+  when: kerberos_node_type in ['master', 'replica']
+
+- name: Force immediate systemd configuration refresh
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when:
+    - kerberos_node_type in ['master', 'replica']
+    - _sandbox_overrides_copied.changed

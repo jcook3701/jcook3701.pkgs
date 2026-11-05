@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure base NFS logging directory exists
+  ansible.builtin.file:
+    path: "{{ nfs_utils_directory.log | default('/var/log/nfs') }}"
+    state: directory
+    owner: "root"
+    group: "{{ nfs_utils_rsyslog_group | default('syslog') }}"
+    mode: "0755"
+  become: true
+
+- name: Enforce proper system ownership on nfs log files to prevent suspension loops
+  ansible.builtin.file:
+    path: "{{ nfs_utils_file.log | default('/var/log/nfs/debug.log') }}"
+    state: touch
+    owner: "root"
+    group: "{{ nfs_utils_rsyslog_file_group | default('syslog') }}"
+    mode: "{{ nfs_utils_rsyslog_file_create_mode | default('0660') }}"
+  become: true
+
+- name: Enable NFS kernel debugging natively
+  ansible.builtin.sysctl:
+    name: sunrpc.nfsd_debug
+    value: "32767"
+    state: present
+    reload: true
+  become: true
+  when: nfs_utils_is_server | bool
+
+- name: Enable NFS client-side kernel debugging
+  ansible.builtin.sysctl:
+    name: sunrpc.nfs_debug
+    value: "1023"
+    state: present
+    reload: true
+  become: true
+  when: nfs_utils_is_client | bool
+
+- name: Deploy NFS rsyslog configuration on server
+  ansible.builtin.template:
+    src: nfs-rsyslog.conf.j2
+    dest: "{{ nfs_utils_file.rsyslog
+              | default('/etc/rsyslog.d/30-nfs.conf') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: nfs_utils_is_server | bool
+
+- name: Deploy NFS rsyslog configuration on client
+  ansible.builtin.template:
+    src: nfs-rsyslog.conf.j2
+    dest: "{{ nfs_utils_file.rsyslog
+              | default('/etc/rsyslog.d/30-nfs.conf') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: nfs_utils_is_client | bool
+
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Restart rsyslog
+  ansible.builtin.service:
+    name: "{{ nfs_utils_rsyslog_service | default('rsyslog') }}"
+    state: restarted
+  become: true
+  when: (nfs_utils_rsyslog_service ~ '.service' in ansible_facts.services)

@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Rollo Printer Driver
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+    apply:
+      notify: "Restart CUPS"
+  vars:
+    pkg_manager_pkgs: "{{ rollo_url }}"
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Force system changes to apply immediately before registration step
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure user {{ sudo_user }} belongs to the lp printing group
+  ansible.builtin.user:
+    name: "{{ sudo_user }}"
+    groups: lp
+    append: true
+
+- name: Query current device path mapping status
+  ansible.builtin.command: >-
+    lpstat -v "{{ rollo_printer_name }}"
+  register: existing_device_map
+  failed_when: false
+  changed_when: false
+
+- name: Attach physical USB device path mapping profiles inside CUPS backend
+  ansible.builtin.command: >-
+    lpadmin -p "{{ rollo_printer_name }}"
+    -E
+    -v usb://Rollo/Printer
+    -m rollo-x1038.ppd
+    -L "{{ rollo_printer_location }}"
+    -o color-model-device-type=none
+  when: existing_device_map.rc != 0
+  changed_when: true
+  notify: "Restart CUPS"
+
+- name: Force default paper size parameters to 4x6 thermal labels
+  ansible.builtin.command: >-
+    lpadmin -p "{{ rollo_printer_name }}"
+    -o media=Custom.4.00x6.00in
+    -o PageSize=Custom.4.00x6.00in
+  changed_when: true

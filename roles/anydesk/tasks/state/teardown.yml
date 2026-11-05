@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure AnyDesk installation and configurations are purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Decommission AnyDesk Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ anydesk_repo_id }}"
+    repo_add_name: "{{ anydesk_repo_name }}"
+    repo_add_state: "absent"
+  when:
+    - anydesk_repo_id is defined
+    - anydesk_repo_id | length > 0
+    - ansible_os_family in ['Debian', 'RedHat']

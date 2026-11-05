@@ -1,0 +1,69 @@
+{#
+# provider.ldap_common.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro create() -%}
+{#
+    Generates shared connection tuning, cryptographic paths, timeouts, and operational
+    search bases. This macro centralizes low-level LDAP parameters shared across discrete
+    LDAP and mixed provider environments.
+
+Args:
+    None
+
+Returns:
+    str: Formatted block of TLS, network timeouts, and subsystem search schemas.
+#}
+
+# Security Access Verification
+access_provider = {{ sssd_access_provider | trim }}
+
+# --- UNIVERSAL PROTOCOL SERVICE PROVIDERS ---
+{% if sssd_enable_autofs | bool %}
+autofs_provider = {{ sssd_autofs_provider | trim }}
+{% endif %}
+{% if sssd_enable_sudo | bool %}
+sudo_provider = {{ sssd_sudo_provider | trim }}
+{% endif %}
+
+# --- NETWORK & TLS TIMEOUTS ---
+{% if sssd_ldap_tls | bool %}
+ldap_id_use_start_tls = {{ ('false' if 'ldaps' in sssd_ldap_protocol | lower else 'true') | string | lower }}
+ldap_tls_cacert = {{ sssd_ldap_tls_cacert | trim }}
+{% else %}
+ldap_id_use_start_tls = false
+{% endif %}
+ldap_search_timeout = {{ sssd_ldap_search_timeout }}
+ldap_network_timeout = {{ sssd_ldap_network_timeout }}
+
+# --- AUTOFS LDAP CONFIGURATION ---
+{% if sssd_enable_autofs | bool %}
+ldap_autofs_search_base = {{ sssd_ldap_autofs_search_base | trim }}
+ldap_autofs_map_object_class = {{ sssd_ldap_autofs_map_object_class | trim }}
+ldap_autofs_entry_object_class = {{ sssd_ldap_autofs_entry_object_class | trim }}
+ldap_autofs_map_name = {{ sssd_ldap_autofs_map_name | trim }}
+ldap_autofs_entry_key = {{ sssd_ldap_autofs_entry_key | trim }}
+ldap_autofs_entry_value = {{ sssd_ldap_autofs_entry_value | trim }}
+{% endif %}
+
+# --- SUDO LDAP CONFIGURATION ---
+{% if sssd_enable_sudo | bool %}
+ldap_sudo_search_base = {{ sssd_ldap_sudo_search_base | trim }}
+{% endif %}
+{%- endmacro -%}

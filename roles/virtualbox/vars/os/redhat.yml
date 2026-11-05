@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+virtualbox_os_user: "vboxusers"
+virtualbox_os_group: "vboxusers"
+
+virtualbox_os_dep_pkg_names:
+  - binutils
+  - gcc
+  - make
+  - patch
+  - libgomp
+  - glibc-headers
+  - glibc-devel
+  - kernel-devel-{{ ansible_kernel }}
+  - kernel-headers-{{ ansible_kernel }}
+  - dkms
+  - qt5-qtbase-devel
+
+virtualbox_os_pkg_names:
+  - "{{ virtualbox_info.redhat_pkg }}"
+
+virtualbox_os_directory:
+  bin: "/sbin"
+
+# Repository Configuration for jcook3701.utils.repo_add
+virtualbox_os_repo_id: "virtualbox"
+virtualbox_os_repo_name: "Oracle VirtualBox Official DNF Repository"
+
+virtualbox_redhat_baseurl: "{{ virtualbox_download_url }}/virtualbox/{{ ansible_distribution_major_version }}/$basearch"

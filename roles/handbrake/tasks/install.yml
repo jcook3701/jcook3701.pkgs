@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Pre-seed libdvd-pkg configuration to bypass prompt
+  ansible.builtin.debconf:
+    name: libdvd-pkg
+    question: "libdvd-pkg/first-install"
+    value: "true"
+    vtype: "boolean"
+  become: true
+  when: ansible_os_family == 'Debian'
+
+- name: Install ripping and encoding tools
+  ansible.builtin.package:
+    name: "{{ handbrake_pkgs }}"
+    state: present
+  become: true
+
+- name: Trigger the offline source compilation for libdvdcss2
+  ansible.builtin.command:
+    cmd: dpkg-reconfigure -f noninteractive libdvd-pkg
+  become: true
+  changed_when: true
+  when: ansible_os_family == 'Debian'

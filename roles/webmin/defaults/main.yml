@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Lifecycle execution state for package installation or removal
+webmin_state: present
+
+# The source repository configuration script URL
+webmin_repo_url: https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repos.sh

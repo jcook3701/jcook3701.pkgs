@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop Samba service cleanly
+  ansible.builtin.service:
+    name: "{{ samba_service }}"
+    state: stopped
+  failed_when: false
+
+- name: Uninstall Samba package and dependencies.
+  ansible.builtin.package:
+    name: "{{ samba_pkg_names }}"
+    state: absent

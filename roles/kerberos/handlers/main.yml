@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Restart Kerberos Services
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: restarted
+  loop: "{{ kerberos_services }}"
+  loop_control:
+    loop_var: service
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes

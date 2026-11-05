@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Generate default ssh server configuration file
+  ansible.builtin.template:
+    src: ssh.j2
+    dest: "{{ ssh_file.default | default('/etc/default/ssh') }}"
+    group: root
+    owner: root
+    mode: "0600"
+  notify: Restart SSH Service
+
+- name: Generate secure sshd_config server configuration file
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: "{{ ssh_file.conf | default('/etc/ssh/sshd_config') }}"
+    group: root
+    owner: root
+    mode: "0600"
+  notify: Restart SSH Service
+
+- name: Ensure SSH service is started and enable
+  ansible.builtin.service:
+    name: "{{ ssh_service | default('ssh') }}"
+    state: started
+    enabled: true
+  become: true

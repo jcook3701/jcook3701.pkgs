@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+dhcpd_service: "dhcpd"
+
+dhcpd_pkg_names:
+  - "dhcp-server"
+
+dhcpd_os_file:
+  dhcpd_conf: "/etc/dhcp/dhcpd.conf"
+  dhcpd_keys: "/etc/dhcp/dhcpd.keys"

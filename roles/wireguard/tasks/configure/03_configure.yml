@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Configure Linux kernel IP forwarding state
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+  when: wireguard_ip_forward | bool
+  become: true
+
+- name: Generate interface configuration mapping file
+  ansible.builtin.template:
+    src: wireguard.conf.j2
+    dest: "{{ wireguard_file.conf }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: wireguard_config_template
+  become: true
+  notify: Restart wireguard service

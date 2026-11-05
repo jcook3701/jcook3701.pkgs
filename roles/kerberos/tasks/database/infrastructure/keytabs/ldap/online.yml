@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely query local operating system group databases to check for LDAP environment presence
+  ansible.builtin.getent:
+    database: group
+    key: "{{ kerberos_ldap_group | default('openldap') }}"
+    fail_key: false
+  when: inventory_hostname in (kerberos_ldap_servers | default([]))
+
+- name: Determine if LDAP environment requirements are met
+  ansible.builtin.set_fact:
+    _ldap_environment_ready: >-
+      {{ ansible_facts.getent_group is defined and
+         (kerberos_ldap_group | default('openldap')) in ansible_facts.getent_group and
+         ansible_facts.getent_group[kerberos_ldap_group | default('openldap')] is not none }}
+  when: inventory_hostname in (kerberos_ldap_servers | default([]))
+
+- name: Execute LDAP Runtime Configuration and Service Reloads
+  when:
+    - inventory_hostname in (kerberos_ldap_servers | default([]))
+    - _ldap_environment_ready | default(false) | bool
+  block:
+
+    - name: Verify if LDAP service keys are already present on target endpoint for engine activation
+      ansible.builtin.command: "klist -k {{ kerberos_keytabs.ldap_default }}"
+      register: endpoint_ldap_engine_check
+      changed_when: false
+      failed_when: false
+
+    - name: Provide local OpenLDAP directory service daemons read-access to LDAP keys
+      ansible.builtin.file:
+        path: "{{ kerberos_keytabs.ldap_default }}"
+        owner: root
+        group: "{{ kerberos_ldap_group | default('openldap') }}"
+        mode: "0640"
+      become: true
+      when:
+        - endpoint_ldap_engine_check.stdout is defined
+        - ('ldap/' in endpoint_ldap_engine_check.stdout | lower)
+
+    - name: Populate system service availability facts for LDAP orchestration
+      ansible.builtin.service_facts:
+
+    - name: Force explicit LDAP server daemon reload to accept incoming network GSSAPI tokens
+      ansible.builtin.service:
+        name: "{{ kerberos_ldap_service | default('slapd') }}"
+        state: restarted
+      become: true
+      when:
+        - (kerberos_ldap_service | default('slapd') + '.service' in services
+            or kerberos_ldap_service | default('slapd') in services)
+        - endpoint_ldap_engine_check.stdout is defined
+        - ('ldap/' in endpoint_ldap_engine_check.stdout | lower)

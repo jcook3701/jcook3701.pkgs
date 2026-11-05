@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure SSSD service is stopped and disabled
+  ansible.builtin.service:
+    name: "{{ sssd_service | default('sssd') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (sssd_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure SSSD Autofs Socket is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_autofs_socket | default('sssd-autofs.socket') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Ensure SSSD SSH Socket is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_ssh_socket | default('sssd-ssh.socket') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Ensure SSSD SUDO Socket is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_sudo_socket | default('sssd-sudo.socket') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Ensure SSSD KCM Socket is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_kcm_socket | default('sssd-kcm.socket') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Ensure SSSD PAC Socket is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ sssd_pac_socket | default('sssd-pac.socket') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+  become: true
+
+- name: Force deep purge of SSSD packages
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ sssd_pkg_names | default([]) }}"
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete

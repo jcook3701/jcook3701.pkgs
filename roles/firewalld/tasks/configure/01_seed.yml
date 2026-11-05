@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure custom firewalld configuration directories exist
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+  loop:
+    - "{{ firewalld_directory.conf }}"
+    - "{{ firewalld_directory.services }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating: {{ directory }}"
+  become: true
+
+- name: Ensure firewalld system engine is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ firewalld_service | default('firewalld') }}"
+    state: started
+    enabled: true
+  become: true
+
+- name: Determine completely supported service profile list
+  ansible.builtin.set_fact:
+    firewalld_total_available_services: >-
+      {{ firewalld_native_services
+          | union(firewalld_custom_services
+          | map(attribute='name')
+          | list) }}

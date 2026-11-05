@@ -11,3 +11,7 @@ $ ansible-playbook jcook3701.pkgs.apparmor.yml -K
 ``` shell
 $ ansible-playbook jcook3701.pkgs.apparmor.yml -K -e "apparmor_state=absent"
 ```
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

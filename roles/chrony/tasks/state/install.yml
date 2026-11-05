@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install chrony package and dependencies.
+  ansible.builtin.package:
+    name: "{{ chrony_pkg_names | default(['chrony']) }}"
+    state: present
+  become: true
+
+- name: Deploy chrony configuration file
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: "{{ chrony_file.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: "Restart chrony"
+
+- name: Ensure chrony service is started and enabled
+  ansible.builtin.service:
+    name: "{{ chrony_service }}"
+    state: started
+    enabled: true
+  become: true

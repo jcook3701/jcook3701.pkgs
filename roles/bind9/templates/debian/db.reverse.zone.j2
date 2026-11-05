@@ -1,39 +1,76 @@
+{#
+# db.reverse.zone.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro db_reverse_zone() -%}
 $TTL 86400
-@   IN  SOA     dns.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
-        2011071001  ;Serial
+@   IN  SOA     {{ primary_hostname }}.{{ bind9_domain_name }}. root.{{ bind9_domain_name }}. (
+        {{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@            IN  NS    dns.{{ bind9_domain_name }}.
-@            IN  PTR   {{ bind9_domain_name }}.
-dns          IN  A     {{ bind9_dns_server_ip_address }}
+@ IN NS {{ primary_hostname }}.{{ bind9_domain_name }}.
+{% if secondary_hostname %}
+@ IN NS {{ secondary_hostname }}.{{ bind9_domain_name }}.
+{% endif %}
+
+{% if primary_ip and primary_hostname %}
+{{ primary_ip.split('.')[3] }} IN PTR {{ primary_hostname }}.{{ bind9_domain_name }}.
+{% endif %}
+{% if secondary_ip and secondary_hostname %}
+{{ secondary_ip.split('.')[3] }} IN PTR {{ secondary_hostname }}.{{ bind9_domain_name }}.
+{% endif %}
+
+{%- set ns1_octet = primary_ip.split('.')[3] | int if primary_ip else None %}
+{%- set ns2_octet = secondary_ip.split('.')[3] | int if secondary_ip else None %}
+{%- set processed_octets = [] %}
+{%- if ns1_octet is not none %}{%- set _ = processed_octets.append(ns1_octet) %}{%- endif %}
+{%- if ns2_octet is not none %}{%- set _ = processed_octets.append(ns2_octet) %}{%- endif %}
+
 {#- Collect IPs and hostnames into a list -#}
 {%- set ptr_records = [] %}
-{%- for host in groups['all'] %}
-  {%-   set hv = hostvars[host] %}
-  {%-   if hv.ip is defined %}
-    {%-     set ip_parts = hv.ip.split('.') %}
-    {%-     if ip_parts | length == 4 %}
-      {#- Add main hostname PTR -#}
-      {%- set _ = ptr_records.append({
-      'octet': ip_parts[3] | int,
-      'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ (hv.hostname | default(host)) ~ '.' ~ bind9_domain_name
-      }) %}
-
-      {#- Add PTRs for each alias -#}
-      {%- for alias in hv.aliases | default([]) %}
-        {%- set _ = ptr_records.append({
-        'octet': ip_parts[3] | int,
-        'record': ip_parts[3] ~ '\tIN\tPTR\t' ~ alias ~ '.' ~ bind9_domain_name
-        }) %}
-      {%- endfor %}
-    {%-     endif %}
-  {%-   endif %}
+{%- for zone_record in bind9_zone_records | default([]) %}
+    {%- if zone_record.ip is defined and zone_record.hostname is defined %}
+        {%- set ip_parts = zone_record.ip.split('.') %}
+        {%- if ip_parts | length == 4 %}
+            {%- set last_octet = ip_parts[3] | int %}
+            {#- Evaluate only if this specific zone_record octet has not been mapped yet -#}
+            {%- if last_octet not in processed_octets %}
+                {#- Add main hostname PTR -#}
+                {%- set _ = ptr_records.append({
+                    'octet': last_octet | int,
+                    'record': last_octet ~ '\tIN\tPTR\t' ~ zone_record.hostname ~ '.' ~ bind9_domain_name ~ '.'
+                }) %}
+                {#- Lock the octet to prevent duplicate alias iterations from rendering -#}
+                {%- set _ = processed_octets.append(last_octet) %}
+            {%- endif %}
+        {%- endif %}
+    {%- endif %}
 {%- endfor %}
 
+; --- Dynamic Reverse Zone Pointers ---
 {# Sort the list by the numeric octet #}
-{% for item in ptr_records | sort(attribute='octet') %}
-{{ item.record }}
+{% for ptr in ptr_records | sort(attribute='octet') %}
+{{ ptr.record }}
 {% endfor %}
+{%- endmacro -%}
+
+{{- db_reverse_zone() }}

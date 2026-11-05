@@ -1,8 +1,17 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Install NGINX binaries
-  ansible.builtin.import_tasks: install.yml
+- name: Load Nginx OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Configure NGINX sites and state
-  ansible.builtin.import_tasks: configure.yml
+- name: Install Nginx binaries
+  ansible.builtin.import_tasks: install.yml
+  when: nginx_state | default('present') == 'present'
+
+- name: Uninstall Nginx
+  ansible.builtin.include_tasks: uninstall.yml
+  when:
+    - nginx_state | default('present') == 'absent'
+    - nginx_pkg_names[0] in ansible_facts.packages

@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+docker_ce_os_group: "docker"
+docker_ce_os_user: "docker"
+
+docker_ce_os_service: "docker"
+
+docker_ce_os_unofficial_pkg_names:
+  - "docker.io"
+  - "docker-compose"
+  - "docker-compose-v2"
+  - "docker-doc"
+  - "docker-buildx"
+  - "podman-docker"
+
+docker_ce_os_pkg_names:
+  - "containerd.io"
+  - "docker-ce"
+  - "docker-ce-cli"
+
+docker_ce_os_compose_pkg_names:
+  - "docker-compose-plugin"
+
+docker_ce_os_buildx_pkg_names:
+  - "docker-buildx-plugin"
+
+docker_ce_os_directory:
+  conf: "/etc/docker"
+  default: "/etc/default"
+  data_root: "/var/lib/docker"
+  systemd_override: "/etc/systemd/system/docker.service.d"
+  systemd_socket_override: "/etc/systemd/system/docker.socket.d"
+  cli_plugins: "/usr/local/lib/docker/cli-plugins"
+
+# Repository Configuration for jcook3701.utils.repo_add
+docker_ce_os_repo_id: "docker-ce"
+docker_ce_os_repo_name: "Docker Community Edition"
+
+docker_ce_debian_uris: "{{ docker_ce_download_url }}/linux/{{ ansible_distribution | lower }}"
+docker_ce_debian_suites: "{{ ansible_distribution_release }}"
+docker_ce_debian_component: "stable"
+docker_ce_debian_signed_by: "{{ docker_ce_debian_uris }}/gpg"

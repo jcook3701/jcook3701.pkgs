@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Scrub local system execution artifacts on the hosts
+  ansible.builtin.file:
+    path: "{{ host_tmp_file }}"
+    state: absent
+  loop:
+    - "{{ openldap_host_staging.bootstrap_config }}"
+    - "{{ openldap_host_staging.database_config }}"
+    - "{{ openldap_host_staging.data_structure }}"
+    - "{{ openldap_host_staging.data_seed }}"
+    - "{{ openldap_host_staging.feature_replication }}"
+    - "{{ openldap_host_staging.load_syncprov }}"
+  loop_control:
+    loop_var: host_tmp_file
+    label: "Removed host tmp artifact: {{ host_tmp_file }}"
+  become: true

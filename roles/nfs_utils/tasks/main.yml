@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load NFS Utilities OS-specific variables
+  ansible.builtin.include_vars: "{{ nfs_utils_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: nfs_utils_vars
+    label: "Loading variables file: {{ nfs_utils_vars }}"
+
+- name: Install NFS Utilities
+  ansible.builtin.include_tasks: state/install.yml
+  when: nfs_utils_state | default('present') == 'present'
+
+- name: Uninstall NFS Utilities
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - nfs_utils_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - nfs_utils_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown NFS Utilities
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: nfs_utils_state | default('present') == 'teardown'

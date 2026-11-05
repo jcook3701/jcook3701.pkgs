@@ -1,0 +1,132 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Configure and manage authoritative Bind9 DNS servers"
+    description: >-
+      Deploys an authoritative Bind9 Domain Name System (DNS) server configuration.
+      Supports master/slave replication topologies, DNSSEC automatic inline signing,
+      Transaction Signatures (TSIG) access control, and dynamic DNS (DDNS) update policies.
+    options:
+      bind9_state:
+        type: str
+        default: "present"
+        required: false
+        choices: ["present", "absent", "teardown"]
+        description: "The targeted state of the Bind9 installation and service lifecycle."
+      bind9_is_primary:
+        type: bool
+        default: true
+        required: false
+        description: "Flags whether this host is the primary (master) zone controller or a secondary (slave) node."
+      bind9_primary_servers:
+        type: list
+        elements: str
+        default: []
+        required: false
+        description: "A list of IP addresses representing upstream primary master servers. Evaluated only by secondary nodes."
+      bind9_secondary_servers:
+        type: list
+        elements: str
+        default: []
+        required: false
+        description: "A list of downstream authorized secondary slave server IP addresses allowed to initiate zone transfers (AXFR/IXFR)."
+      bind9_zone_records:
+        type: list
+        elements: dict
+        default: []
+        required: false
+        description: "Collection of individual DNS resource record objects (A, AAAA, CNAME, MX, TXT) used to build zone contents."
+      bind9_top_level_domain:
+        type: str
+        default: "com"
+        required: false
+        description: "The top-level domain (TLD) suffix component used to calculate the authoritative zone scope."
+      bind9_second_level_domain:
+        type: str
+        default: "example"
+        required: false
+        description: "The second-level domain name segment used to build the authoritative zone scope."
+      bind9_enable_dnssec:
+        type: bool
+        default: true
+        required: false
+        description: "Enables automated inline cryptographic DNSSEC cryptographic signing and key policies for hosted zones."
+      bind9_enable_public_access:
+        type: bool
+        default: false
+        required: false
+        description: "Controls whether the DNS daemon exposes itself to broad network listening spaces outside the designated IP space."
+      bind9_enable_dydns:
+        type: bool
+        default: false
+        required: false
+        description: "Enables Dynamic DNS (DDNS) zone transaction modifications, allowing automated clients to push runtime entry updates."
+      bind9_dydns_update_servers:
+        type: list
+        elements: str
+        default: []
+        required: false
+        description: "A list of authorized network infrastructure hosts or clients permitted to submit Dynamic DNS transaction queries."
+      bind9_enable_tsig:
+        type: bool
+        default: false
+        required: false
+        description: "Enables Transaction Signatures (TSIG) symmetric key verification layers across replication channels."
+      bind9_tsig_clients:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: >-
+          A list of Fully Qualified Domain Names (FQDNs) representing the client
+          nodes that require cryptographic TSIG keys for secure zone transfers or updates.
+      bind9_dns_port:
+        type: int
+        default: 53
+        required: false
+        description: "The network UDP/TCP port number that the Bind9 daemon binds to for processing incoming DNS translation lookups."
+      bind9_rndc_port:
+        type: int
+        default: 953
+        required: false
+        description: "The network port number allocated for secure Remote Name Daemon Control (RNDC) management sockets."
+      bind9_ksk_algorithm:
+        type: str
+        default: "ECDSAP256SHA256"
+        required: false
+        description: "The cryptographic algorithm token used to generate DNSSEC Key Signing Keys (KSK)."
+      bind9_zsk_algorithm:
+        type: str
+        default: "ECDSAP256SHA256"
+        required: false
+        description: "The cryptographic algorithm token used to generate DNSSEC Zone Signing Keys (ZSK)."
+      bind9_tsig_algorithm:
+        type: str
+        default: "hmac-sha256"
+        required: false
+        description: "The hashing algorithm format utilized when generating symmetric TSIG communication keys."
+      bind9_ip_address_space:
+        type: str
+        default: "192.168.0"
+        required: false
+        description: "The primary 3-octet IPv4 network subnet string used to calculate local client access control list (ACL) spaces."
+      bind9_reverse_ip_address_space:
+        type: str
+        default: "0.168.192"
+        required: false
+        description: "The inverted 3-octet representation of your network subnet used to formulate standard in-addr.arpa lookup boundaries."
+      bind9_prefix_length:
+        type: str
+        default: "24"
+        required: false
+        description: "The subnet mask bits representing your internal address space limits for client ACL definition calculations."
+      bind9_forwarders:
+        type: list
+        elements: str
+        default:
+          - 1.1.1.1
+          - 8.8.8.8
+        required: false
+        description: "Upstream public recursive nameservers targeted for handling out-of-zone translation routing loops."

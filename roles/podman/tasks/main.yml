@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load Podman OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Ensure Podman is installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: podman_state | default('present') == 'present'
+
+- name: Ensure Podman is uninstall
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - podman_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - podman_pkg_names[0] in ansible_facts.packages
+
+- name: Ensure Podman is purged along with all configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: podman_state | default('present') == 'absent'

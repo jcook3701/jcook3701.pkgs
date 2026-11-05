@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Bring Master KDC Core Service Engines Online
+  ansible.builtin.include_tasks: master/online.yml
+  when: kerberos_node_type == 'master'
+
+- name: Execute Centralized Application Service Principal Generation Pipelines
+  ansible.builtin.include_tasks: "keytabs/seed.yml"
+  when: kerberos_node_type == 'master'
+
+- name: Execute Centralized Application Service Key Extraction Pipelines
+  ansible.builtin.include_tasks: keytabs/transit.yml
+  when: kerberos_node_type == 'master'
+
+- name: Execute unconditional global system keytab delivery passes
+  ansible.builtin.include_tasks: keytabs/deploy.yml
+
+- name: Execute Replica KDC Database Synchronization Phase
+  ansible.builtin.include_tasks: replica/seed.yml
+  when: kerberos_node_type == 'replica'
+
+- name: Execute Replica KDC Database Synchronization Phase
+  ansible.builtin.include_tasks: replica/online-kprop.yml
+  when: kerberos_node_type == 'replica'
+
+- name: Execute Master KDC Infrastructure Seeding Phase
+  ansible.builtin.include_tasks: master/broadcast.yml
+  when: kerberos_node_type == 'master'
+
+- name: Execute Replica KDC Database Synchronization Phase
+  ansible.builtin.include_tasks: replica/online-kdc.yml
+  when: kerberos_node_type == 'replica'
+
+- name: Execute Client Node OS Binding Verification Phase
+  ansible.builtin.include_tasks: client.yml
+  when:
+    - kerberos_node_type == 'client'
+    - false

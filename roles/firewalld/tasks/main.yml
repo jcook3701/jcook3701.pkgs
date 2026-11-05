@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Firewalld OS-specific variables
+  ansible.builtin.include_vars: "{{ firewalld_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: firewalld_vars
+    label: "Loading variables file: {{ firewalld_vars }}"
+
+- name: Ensure Firewalld is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: firewalld_state | default('present') == 'present'
+
+- name: Ensure Firewalld is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: firewalld_state | default('present') == 'absent'
+
+- name: Ensure Firewalld purge of packages and configurations
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: firewalld_state | default('present') == 'teardown'

@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create bind9 base directories
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    group: "{{ bind9_user }}"
+    owner: "{{ bind9_user }}"
+    mode: "0775"
+  loop: "{{ bind9_directory.values() | list }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Ensure key directories exist
+  ansible.builtin.file:
+    path: "{{ zone.key_directory }}"
+    state: directory
+    owner: "{{ bind9_user }}"
+    group: "{{ bind9_user }}"
+    mode: "0775"
+  loop: "{{ bind9_zones }}"
+  loop_control:
+    loop_var: zone
+    label: "{{ zone.key_directory }}"
+  when: zone.inline_signing | bool
+
+- name: Ensure files needed for Bind9 configuration
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ directory }}"
+    force: false
+    group: "{{ bind9_user }}"
+    owner: "{{ bind9_user }}"
+    mode: "0664"
+  loop:
+    - "{{ bind9_file.secroots_file }}"
+    - "{{ bind9_options.dump_file }}"
+    - "{{ bind9_file.statistics_file }}"
+    - "{{ bind9_file.memstatistics_file }}"
+    - "{{ bind9_file.log_file }}"
+    - "{{ bind9_file.security_log }}"
+    - "{{ bind9_file.update_log }}"
+    - "{{ bind9_file.dnssec_log }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating Directory: {{ directory }}"

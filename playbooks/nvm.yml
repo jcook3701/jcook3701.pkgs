@@ -14,4 +14,3 @@
     - name: Install nvm
       ansible.builtin.include_role:
         name: jcook3701.pkgs.nvm
-        tasks_from: nvm-install.yml

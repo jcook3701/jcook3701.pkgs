@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load ros2 OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+    - "default.yml"
+
+- name: Verify Ubuntu LTS compatibility for ROS 2
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution_release in ros2_distro_map.keys()
+    fail_msg: "Ubuntu {{ ansible_distribution_release }} is not in the supported ROS 2 LTS map!"
+  when: ansible_os_family == 'Debian'
+
+- name: Prepare ros2 repositories for {{ ansible_distribution }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo-{{ ansible_distribution | lower }}.yml"
+    - "repo-{{ ansible_os_family | lower }}.yml"
+    - "repo-default.yml"
+  # Arch doesn't need repo prep, so we skip it
+  when: ansible_distribution in ['Ubuntu', 'Debian', 'RedHat']
+
+- name: Install ros2
+  ansible.builtin.include_tasks: pkg-manager.yml

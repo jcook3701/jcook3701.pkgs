@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Clean up temporary replication transit files off the Master KDC disk
+  ansible.builtin.file:
+    path: "{{ target_transit_file }}"
+    state: absent
+  vars:
+    target_node: "{{ host_node_fqdn.split('.') | first }}"
+    target_transit_file: "{{ kerberos_keytabs.master_kiprop_transit_file }}"
+  loop: "{{ kerberos_propagation_servers | default([]) }}"
+  loop_control:
+    loop_var: host_node_fqdn
+    label: "Purging master replication transit scratch file -> kiprop/{{ host_node_fqdn }}"
+  when: kerberos_node_type == 'master'
+  become: true
+
+- name: Clean up local controller staging replication keytab cache
+  ansible.builtin.file:
+    path: "{{ target_controller_kiprop }}"
+    state: absent
+  vars:
+    target_node: "{{ host_node_fqdn.split('.') | first }}"
+    target_controller_kiprop: "{{ kerberos_keytabs.controller_kiprop_staging }}"
+  loop: "{{ kerberos_propagation_servers | default([]) }}"
+  loop_control:
+    loop_var: host_node_fqdn
+    label: "Purging controller replication staging file -> kiprop/{{ host_node_fqdn }}"
+  delegate_to: localhost
+  become: false
+
+- name: Clean up transient replication landing pad files off the target endpoints
+  ansible.builtin.file:
+    path: "{{ target_delivered_transit }}"
+    state: absent
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_delivered_transit: "{{ kerberos_keytabs.replica_kiprop_delivered_transit }}"
+  become: true
+  when: inventory_hostname in (kerberos_propagation_servers | default([]))

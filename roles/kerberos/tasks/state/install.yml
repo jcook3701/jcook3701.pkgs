@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Kerberos packages
+  ansible.builtin.package:
+    name: "{{ kerberos_pkg_names + kerberos_shared_libs | default([]) }}"
+    state: present
+  environment:
+    DEBIAN_FRONTEND: "{{ 'noninteractive' if ansible_facts['os_family'] == 'Debian' else omit }}"
+  become: true
+
+- name: Configure Kerberos
+  ansible.builtin.include_tasks: configure/main.yml
+
+- name: Generate Kerberos Database and Keys
+  ansible.builtin.include_tasks: database/main.yml
+
+- name: Ensure Kerberos infrastructure services are started and enabled
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: started
+    enabled: true
+  loop: "{{ kerberos_services | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "Activating service daemon: {{ service }}"
+  become: true
+  when:
+    - kerberos_node_type in ['master', 'replica']
+    - kerberos_services is defined
+    - kerberos_services | length > 0
+
+- name: Flush handlers to ensure kerberos running with new ports
+  ansible.builtin.meta: flush_handlers

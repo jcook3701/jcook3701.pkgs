@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Query system database for existing user account records
+  ansible.builtin.getent:
+    database: "passwd"
+    key: "{{ rsyslog_user | default('rsyslog') }}"
+  register: rsyslog_passwd_check
+  failed_when: false
+
+- name: Ensure dedicated rsyslog system execution user account exists
+  ansible.builtin.user:
+    name: "{{ rsyslog_user | default('rsyslog') }}"
+    group: "{{ rsyslog_group | default('rsyslog') }}"
+    shell: "/usr/sbin/nologin"
+    home: "/nonexistent"
+    create_home: false
+    system: true
+    state: "present"
+  become: true
+  when: rsyslog_passwd_check.ansible_facts.getent_passwd[rsyslog_user | default('rsyslog')] is not defined
+
+- name: Add users to the Rsyslog group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: "{{ rsyslog_group | default('rsyslog') }}"
+    append: true
+  loop: "{{ rsyslog_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Adding {{ user.name }} to {{ rsyslog_group }} group"
+  become: true
+  when:
+    - user.name is defined
+    - user.name | length > 0
