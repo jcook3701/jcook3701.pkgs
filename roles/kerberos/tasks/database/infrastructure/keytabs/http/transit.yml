@@ -22,8 +22,7 @@
   when:
     - kerberos_http_servers | default([]) | length > 0
     - inventory_hostname in (kerberos_admin_servers | default([]))
-    - ('principal does not exist' in
-          master_http_db_check.results[loop_idx].stderr | lower)
+    - ('principal does not exist' in master_http_db_check.results[loop_idx].stderr | lower)
   become: true
 
 - name: Fetch fully compiled HTTP service keytabs back to the Ansible controller

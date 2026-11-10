@@ -3,11 +3,8 @@
 ---
 - name: Determine if target Debian/Ubuntu host uses legacy apt
   ansible.builtin.set_fact:
-    repo_add_is_legacy_apt: "{{ true if (ansible_distribution == 'Ubuntu'
-                                          and ansible_distribution_major_version | int < 20)
-                                          or (ansible_distribution == 'Debian'
-                                          and ansible_distribution_major_version | int < 11)
-                                      else false }}"
+    repo_add_is_legacy_apt: "{{ true if (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version | int < 20)
+      or (ansible_distribution == 'Debian' and ansible_distribution_major_version | int < 11) else false }}"
   when: ansible_facts['os_family'] == 'Debian'
 
 - name: Setup Flatpak Package Repository for Legacy Systems

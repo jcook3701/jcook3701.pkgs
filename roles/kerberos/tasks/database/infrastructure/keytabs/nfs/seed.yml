@@ -8,14 +8,12 @@
   register: master_nfs_db_check
   changed_when: false
   failed_when: false
-  loop: "{{ kerberos_nfs_file_servers | default([])
-              + kerberos_nfs_client_nodes | default([]) }}"
+  loop: "{{ kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]) }}"
   loop_control:
     loop_var: nfs_server_fqdn
     label: "Querying database status for: nfs/{{ nfs_server_fqdn }}"
   when:
-    - (kerberos_nfs_file_servers | default([])
-        + kerberos_nfs_client_nodes | default([])) | length > 0
+    - (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([])) | length > 0
     - kerberos_node_type == 'master'
     - inventory_hostname in (kerberos_admin_servers | default([]))
 
@@ -24,8 +22,7 @@
     kadmin.local -q "add_principal -randkey {{ service_principal }}"
   vars:
     service_principal: "nfs/{{ nfs_server_fqdn }}"
-  loop: "{{ kerberos_nfs_file_servers | default([])
-              + kerberos_nfs_client_nodes | default([]) }}"
+  loop: "{{ kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]) }}"
   loop_control:
     loop_var: nfs_server_fqdn
     index_var: loop_idx
@@ -38,9 +35,7 @@
     (_nfs_db_seeding.rc is defined and _nfs_db_seeding.rc != 0) and
     ('already exists' not in _nfs_db_seeding.stderr | lower)
   when:
-    - (kerberos_nfs_file_servers | default([])
-        + kerberos_nfs_client_nodes | default([])) | length > 0
+    - (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([])) | length > 0
     - inventory_hostname in (kerberos_admin_servers | default([]))
-    - ('principal does not exist' in
-        master_nfs_db_check.results[loop_idx].stderr | lower)
+    - ('principal does not exist' in master_nfs_db_check.results[loop_idx].stderr | lower)
   become: true

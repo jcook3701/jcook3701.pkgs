@@ -345,7 +345,8 @@ argument_specs:
             description: "Custom network lifecycle flag tagging infrastructure automation profiles."
           is_samba_user:
             type: "bool"
-            description: "Enables structural generation of Windows-compatible NT password hashes and security descriptors required for central SMB/CIFS file share mounting."
+            description: "Enables structural generation of Windows-compatible NT password hashes and security descriptors
+              required for central SMB/CIFS file share mounting."
           login_shell:
             type: "str"
             description: "Target execution command interpreter binary location path."

@@ -7,8 +7,7 @@
 - name: "Seed the configuration files for setupcon"
   ansible.builtin.template:
     src: "keyboard.j2"
-    dest: "{{ setupcon_file.keyboard_config
-                | default('/etc/default/keyboard') }}"
+    dest: "{{ setupcon_file.keyboard_config | default('/etc/default/keyboard') }}"
     owner: root
     group: root
     mode: "0644"
@@ -17,8 +16,7 @@
 - name: "Seed the configuration files for setupcon"
   ansible.builtin.template:
     src: "console-setup.j2"
-    dest: "{{ setupcon_file.console_setup_config
-                | default('/etc/default/console-setup') }}"
+    dest: "{{ setupcon_file.console_setup_config | default('/etc/default/console-setup') }}"
     owner: root
     group: root
     mode: "0644"

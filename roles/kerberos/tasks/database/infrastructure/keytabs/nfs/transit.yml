@@ -8,8 +8,7 @@
     target_node: "{{ nfs_server_fqdn.split('.') | first }}"
     staging_keytab: "{{ kerberos_keytabs.master_nfs_transit_file }}"
     service_principal: "nfs/{{ nfs_server_fqdn }}"
-  loop: "{{ kerberos_nfs_file_servers | default([])
-              + kerberos_nfs_client_nodes | default([]) }}"
+  loop: "{{ kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]) }}"
   loop_control:
     loop_var: nfs_server_fqdn
     index_var: loop_idx
@@ -21,11 +20,9 @@
     ('error' in _nfs_key_injection.stdout | lower) or
     ('failed' in _nfs_key_injection.stdout | lower)
   when:
-    - (kerberos_nfs_file_servers | default([])
-          + kerberos_nfs_client_nodes | default([])) | length > 0
+    - (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([])) | length > 0
     - inventory_hostname in kerberos_admin_servers
-    - ('principal does not exist' in
-          master_nfs_db_check.results[loop_idx].stderr | lower)
+    - ('principal does not exist' in master_nfs_db_check.results[loop_idx].stderr | lower)
   become: true
 
 - name: Fetch fully compiled NFS service keytabs back to the Ansible controller
@@ -37,8 +34,7 @@
     target_node: "{{ nfs_server_fqdn.split('.') | first }}"
     target_client_file: "{{ kerberos_keytabs.master_nfs_transit_file }}"
     target_controller_staging: "{{ kerberos_keytabs.controller_nfs_staging }}"
-  loop: "{{ kerberos_nfs_file_servers | default([])
-              + kerberos_nfs_client_nodes | default([]) }}"
+  loop: "{{ kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]) }}"
   loop_control:
     loop_var: nfs_server_fqdn
     label: "Caching completed NFS passport to controller for: {{ nfs_server_fqdn }}"

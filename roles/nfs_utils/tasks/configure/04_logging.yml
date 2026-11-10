@@ -40,8 +40,7 @@
 - name: Deploy NFS rsyslog configuration on server
   ansible.builtin.template:
     src: nfs-rsyslog.conf.j2
-    dest: "{{ nfs_utils_file.rsyslog
-              | default('/etc/rsyslog.d/30-nfs.conf') }}"
+    dest: "{{ nfs_utils_file.rsyslog | default('/etc/rsyslog.d/30-nfs.conf') }}"
     owner: root
     group: root
     mode: "0644"
@@ -51,8 +50,7 @@
 - name: Deploy NFS rsyslog configuration on client
   ansible.builtin.template:
     src: nfs-rsyslog.conf.j2
-    dest: "{{ nfs_utils_file.rsyslog
-              | default('/etc/rsyslog.d/30-nfs.conf') }}"
+    dest: "{{ nfs_utils_file.rsyslog | default('/etc/rsyslog.d/30-nfs.conf') }}"
     owner: root
     group: root
     mode: "0644"

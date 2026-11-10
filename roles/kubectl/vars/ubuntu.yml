@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kubectl_os_pkg_names:
+  - kubectl
+
+kubectl_os_directory:
+  config: "/etc/kubectl"
+
+# Repository Configuration for jcook3701.utils.repo_add
+kubectl_os_repo_id: "kubectl"
+kubectl_os_repo_name: "Kubectl PPA"
+
+kubectl_debian_uris: >-
+  {{ kubectl_download_url ~ ':/stable:/v' ~ kubectl_kubernetes_major_minor_version ~ '/deb/'
+      | default('https://pkgs.k8s.io/core:/stable:/v1.37/deb/') }}
+kubectl_debian_suites: "/"
+kubectl_debian_component: "stable"
+kubectl_debian_signed_by: >-
+  {{ kubectl_download_url ~ ':/stable:/v' ~ kubectl_kubernetes_major_minor_version
+      ~ '/deb/Release.key' | lower ~ 'Release.gpg'
+      | default('https://pkgs.k8s.io/core:/stable:/v1.37/deb/Release.key') }}

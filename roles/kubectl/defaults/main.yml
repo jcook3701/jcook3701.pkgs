@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+kubectl_state: present
+kubectl_debug: true
+# -------------------------------------------------------------------------
+# Kubectl Repository Configuration
+# -------------------------------------------------------------------------
+kubectl_download_url: "https://pkgs.k8s.io/core"
+
+# -------------------------------------------------------------------------
+# Kubectl Package Configuration
+# -------------------------------------------------------------------------
+kubectl_manage_engine: true
+kubectl_engine: "docker"
+
+# TODO: Templates values need to be turned into variables for the role to be
+# more flexible and reusable.
+kubectl_kubernetes_version: "1.37.0"
+# TODO: kubectl_kubelet_version: "1.37.0"

@@ -6,8 +6,7 @@
     database: group
     key: "{{ kerberos_samba_group | default('sambashare') }}"
     fail_key: false
-  when: inventory_hostname in (kerberos_samba_file_servers | default([])
-                                + kerberos_samba_client_nodes | default([]))
+  when: inventory_hostname in (kerberos_samba_file_servers | default([]) + kerberos_samba_client_nodes | default([]))
 
 - name: Determine if Samba environment requirements are met
   ansible.builtin.set_fact:
@@ -15,13 +14,11 @@
       {{ ansible_facts.getent_group is defined and
           (kerberos_samba_group | default('sambashare')) in ansible_facts.getent_group and
           ansible_facts.getent_group[kerberos_samba_group | default('sambashare')] is not none }}
-  when: inventory_hostname in (kerberos_samba_file_servers | default([])
-                                + kerberos_samba_client_nodes | default([]))
+  when: inventory_hostname in (kerberos_samba_file_servers | default([]) + kerberos_samba_client_nodes | default([]))
 
 - name: Execute Samba Runtime Configuration and Service Reloads
   when:
-    - inventory_hostname in (kerberos_samba_file_servers | default([])
-                              + kerberos_samba_client_nodes | default([]))
+    - inventory_hostname in (kerberos_samba_file_servers | default([]) + kerberos_samba_client_nodes | default([]))
     - _samba_environment_ready | default(false) | bool
   block:
 

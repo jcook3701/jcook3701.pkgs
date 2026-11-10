@@ -16,15 +16,13 @@
 - name: Execute Enterprise CIFS File Sharing Transit Pipeline
   ansible.builtin.include_tasks: cifs/transit.yml
   when:
-    - (kerberos_samba_file_servers | default([])
-        + kerberos_samba_client_nodes | default([])) | length > 0
+    - (kerberos_samba_file_servers | default([]) + kerberos_samba_client_nodes | default([])) | length > 0
     - kerberos_node_type == 'master'
 
 - name: Execute Enterprise NFS Secure UNIX Storage Transit Pipeline
   ansible.builtin.include_tasks: nfs/transit.yml
   when:
-    - (kerberos_nfs_file_servers | default([])
-        + kerberos_nfs_client_nodes | default([])) | length > 0
+    - (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([])) | length > 0
     - kerberos_node_type == 'master'
 
 - name: Execute Enterprise HTTP Single Sign-On Transit Pipeline

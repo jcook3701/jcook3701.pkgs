@@ -101,12 +101,14 @@ argument_specs:
         type: "list"
         elements: "dict"
         default: []
-        description: "A declarative array of local paths, client ACL hosts, and standard mount security options exported by the server."
+        description: "A declarative array of local paths, client ACL hosts, and standard mount security options exported by
+          the server."
         options:
           name:
             type: "str"
             required: true
-            description: "The explicit, clean naming handle used for the virtual sub-directory anchor inside the export root tree."
+            description: "The explicit, clean naming handle used for the virtual sub-directory anchor inside the export root
+              tree."
           path:
             type: "str"
             required: true
@@ -129,13 +131,15 @@ argument_specs:
       nfs_utils_client_enable_mounts:
         type: "bool"
         default: false
-        description: "Master configuration toggle to enable or disable the execution of client-side NFS storage mounts during the playbook run."
+        description: "Master configuration toggle to enable or disable the execution of client-side NFS storage mounts during
+          the playbook run."
 
       nfs_utils_client_mounts:
         type: "list"
         elements: "dict"
         default: []
-        description: "A declarative array of remote NFS resource URLs, local targets, and operational mount options managed on client nodes."
+        description: "A declarative array of remote NFS resource URLs, local targets, and operational mount options managed
+          on client nodes."
         options:
           src:
             type: "str"
@@ -159,7 +163,8 @@ argument_specs:
         type: "bool"
         required: false
         default: true
-        description: "Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core utilities."
+        description: "Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core
+          utilities."
 
       nfs_utils_debug_mode:
         type: "bool"

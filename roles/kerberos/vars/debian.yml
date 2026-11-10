@@ -60,5 +60,5 @@ kerberos_os_directory:
 # Local System Runtime Configuration Parameters
 kerberos_os_stash_name: "stash"
 kerberos_os_admin_defaults_name: "krb5-admin-server"
-kerberos_os_admin_regexp: '^DAEMON_ARGS='
+kerberos_os_admin_regexp: "^DAEMON_ARGS="
 kerberos_os_admin_line: 'DAEMON_ARGS="-N"'

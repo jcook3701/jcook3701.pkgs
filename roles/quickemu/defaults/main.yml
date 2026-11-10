@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+quickemu_state: present
+quickemu_debug: true
+# -------------------------------------------------------------------------
+# Quickemu Repository Configuration
+# -------------------------------------------------------------------------
+quickemu_download_url: "https://ppa.launchpadcontent.net"
+
+# -------------------------------------------------------------------------
+# Quickemu Package Configuration
+# -------------------------------------------------------------------------
+quickemu_manage_engine: true
+quickemu_engine: "docker"
+
+# TODO: Templates values need to be turned into variables for the role to be
+# more flexible and reusable.

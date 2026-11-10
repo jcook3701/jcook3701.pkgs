@@ -70,60 +70,46 @@ kerberos_directory:
   defaults: "{{ kerberos_os_directory.defaults | default('/etc/default') }}"
 
 kerberos_file:
-  global_config: "{{ kerberos_directory.conf ~ '/krb5.conf'
-                      | default('/etc/krb5.conf') }}"
-  kdc_config: "{{ kerberos_directory.kdc_conf ~ '/kdc.conf'
-                      | default('/etc/krb5kdc/kdc.conf') }}"
-  admin_acl: "{{ kerberos_directory.kdc_conf ~ '/kadm5.acl'
-                      | default('/etc/krb5kdc/kadm5.acl') }}"
-  kprop_acl: "{{ kerberos_directory.kdc_conf ~ '/kpropd.acl'
-                      | default('/etc/krb5kdc/kpropd.acl') }}"
-  stash: "{{ kerberos_directory.kdc_conf ~ '/' ~ kerberos_os_stash_name
-                      | default('/etc/krb5kdc/stash') }}"
-  replica_datatrans: "{{ kerberos_directory.kdc_conf ~ '/replica_datatrans'
-                      | default('/etc/krb5kdc/replica_datatrans') }}"
-  principal: "{{ kerberos_directory.state ~ '/principal'
-                      | default('/var/lib/krb5kdc/principal') }}"
-  default_log: "{{ kerberos_directory.log ~ '/krb5libs.log'
-                      | default('/var/log/krb5/krb5libs.log') }}"
-  kdc_log: "{{ kerberos_directory.log ~ '/krb5kdc.log'
-                      | default('/var/log/krb5/krb5kdc.log') }}"
-  admin_log: "{{ kerberos_directory.log ~ '/kadmind.log'
-                      | default('/var/log/krb5/kadmind.log') }}"
-  principal_ulog: "{{ kerberos_directory.state ~ '/principal.ulog'
-                      | default('/var/lib/krb5kdc/principal.ulog') }}"
-  replica_ulog: "{{ kerberos_directory.state ~ '/replica.ulog'
-                      | default('/var/lib/krb5kdc/replica.ulog') }}"
-  unlimited_ulog: "{{ kerberos_directory.state ~ '/unlimited.ulog'
-                      | default('/var/lib/krb5kdc/unlimited.ulog') }}"
-  dictionary: "{{ kerberos_directory.dict ~ '/words'
-                      | default('/usr/share/dict/words') }}"
-  admin_defaults: "{{ kerberos_directory.defaults ~ '/' ~ kerberos_os_admin_defaults_name
-                      | default('/etc/default/krb5-admin-server') }}"
+  global_config: "{{ kerberos_directory.conf ~ '/krb5.conf' | default('/etc/krb5.conf') }}"
+  kdc_config: "{{ kerberos_directory.kdc_conf ~ '/kdc.conf' | default('/etc/krb5kdc/kdc.conf') }}"
+  admin_acl: "{{ kerberos_directory.kdc_conf ~ '/kadm5.acl' | default('/etc/krb5kdc/kadm5.acl') }}"
+  kprop_acl: "{{ kerberos_directory.kdc_conf ~ '/kpropd.acl' | default('/etc/krb5kdc/kpropd.acl') }}"
+  stash: "{{ kerberos_directory.kdc_conf ~ '/' ~ kerberos_os_stash_name | default('/etc/krb5kdc/stash') }}"
+  replica_datatrans: "{{ kerberos_directory.kdc_conf ~ '/replica_datatrans' | default('/etc/krb5kdc/replica_datatrans') }}"
+  principal: "{{ kerberos_directory.state ~ '/principal' | default('/var/lib/krb5kdc/principal') }}"
+  default_log: "{{ kerberos_directory.log ~ '/krb5libs.log' | default('/var/log/krb5/krb5libs.log') }}"
+  kdc_log: "{{ kerberos_directory.log ~ '/krb5kdc.log' | default('/var/log/krb5/krb5kdc.log') }}"
+  admin_log: "{{ kerberos_directory.log ~ '/kadmind.log' | default('/var/log/krb5/kadmind.log') }}"
+  principal_ulog: "{{ kerberos_directory.state ~ '/principal.ulog' | default('/var/lib/krb5kdc/principal.ulog') }}"
+  replica_ulog: "{{ kerberos_directory.state ~ '/replica.ulog' | default('/var/lib/krb5kdc/replica.ulog') }}"
+  unlimited_ulog: "{{ kerberos_directory.state ~ '/unlimited.ulog' | default('/var/lib/krb5kdc/unlimited.ulog') }}"
+  dictionary: "{{ kerberos_directory.dict ~ '/words' | default('/usr/share/dict/words') }}"
+  admin_defaults: "{{ kerberos_directory.defaults ~ '/' ~ kerberos_os_admin_defaults_name | default('/etc/default/krb5-admin-server')
+    }}"
 
 # Centralized Keytab Filename and Path Management Switchboard
 kerberos_keytabs:
   # ---- The core system keytabs ----
-  kdc_admin: "{{ kerberos_directory.kdc_conf ~ '/kadm5.keytab'
-                  | default('/etc/kadm5.keytab') }}"
-  system_default: "{{ kerberos_directory.conf ~ '/krb5.keytab'
-                  | default('/etc/krb5.keytab') }}"
-  cifs_default: "{{ kerberos_directory.conf ~ '/samba.keytab'
-                  | default('/etc/samba.keytab') }}"
-  ldap_default: "{{ kerberos_directory.conf ~ '/ldap.keytab'
-                  | default('/etc/ldap.keytab') }}"
-  http_default: "{{ kerberos_directory.conf ~ '/http.keytab'
-                  | default('/etc/http.keytab') }}"
-  nfs_default: "{{ kerberos_directory.conf ~ '/nfs.keytab'
-                  | default('/etc/nfs.keytab') }}"
+  kdc_admin: "{{ kerberos_directory.kdc_conf ~ '/kadm5.keytab' | default('/etc/kadm5.keytab') }}"
+  system_default: "{{ kerberos_directory.conf ~ '/krb5.keytab' | default('/etc/krb5.keytab') }}"
+  cifs_default: "{{ kerberos_directory.conf ~ '/samba.keytab' | default('/etc/samba.keytab') }}"
+  ldap_default: "{{ kerberos_directory.conf ~ '/ldap.keytab' | default('/etc/ldap.keytab') }}"
+  http_default: "{{ kerberos_directory.conf ~ '/http.keytab' | default('/etc/http.keytab') }}"
+  nfs_default: "{{ kerberos_directory.conf ~ '/nfs.keytab' | default('/etc/nfs.keytab') }}"
 
   # ---- Locally generated files on the KDC master before transit ----
-  master_hosts_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.hosts.transit.keytab"
-  master_kiprop_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.kiprop.transit.keytab"
-  master_cifs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.cifs.transit.keytab"
-  master_ldap_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.ldap.transit.keytab"
-  master_http_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.http.transit.keytab"
-  master_nfs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.nfs.transit.keytab"
+  master_hosts_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name
+    }}.hosts.transit.keytab"
+  master_kiprop_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name
+    }}.kiprop.transit.keytab"
+  master_cifs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name
+    }}.cifs.transit.keytab"
+  master_ldap_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name
+    }}.ldap.transit.keytab"
+  master_http_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name
+    }}.http.transit.keytab"
+  master_nfs_transit_file: "{{ kerberos_directory.kdc_conf }}/{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name
+    }}.nfs.transit.keytab"
 
   # ---- Controller staging cache names (/tmp on Ansible deployment machine) ----
   controller_hosts_staging: "/tmp/ansible_hosts_{{ target_node | default(ansible_hostname) }}.{{ kerberos_domain_name }}.keytab"

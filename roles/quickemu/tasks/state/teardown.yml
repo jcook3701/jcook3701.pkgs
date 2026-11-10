@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Quickemu package is uninstalled
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Decommission Quickemu Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ quickemu_os_repo_id | default('quickemu') }}"
+    repo_add_name: "{{ quickemu_os_repo_name | default('Quickemu PPA') }}"
+    repo_add_state: "absent"
+  when:
+    - quickemu_os_repo_id is defined
+    - quickemu_os_repo_id | length > 0
+    - ansible_facts['distribution'] | lower == 'ubuntu'

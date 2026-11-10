@@ -5,8 +5,7 @@
   ansible.builtin.command:
     cmd: "kdb5_util dump -b7 {{ dump_file }}"
   vars:
-    dump_file: "{{ kerberos_file.replica_datatrans
-                    | default('/etc/krb5kdc/replica_datatrans') }}"
+    dump_file: "{{ kerberos_file.replica_datatrans | default('/etc/krb5kdc/replica_datatrans') }}"
   become: true
   register: _master_db_dump
   changed_when: _master_db_dump.rc == 0

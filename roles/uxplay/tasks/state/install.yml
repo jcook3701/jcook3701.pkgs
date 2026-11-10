@@ -3,8 +3,7 @@
 ---
 - name: Install UxPlay package and dependencies
   ansible.builtin.package:
-    name: "{{ uxplay_pkg_names | default([])
-              + uxplay_dep_pkg_names | default([]) }}"
+    name: "{{ uxplay_pkg_names | default([]) + uxplay_dep_pkg_names | default([]) }}"
     state: present
 
 - name: Ensure local bin directory exists

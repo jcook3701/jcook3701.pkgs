@@ -14,7 +14,7 @@
     label: "Loading variables file: {{ flatpak_vars }}"
 
 - name: Ensure Flatpak is installed and configured
-  ansible.builtin.include_tasks:  state/install.yml
+  ansible.builtin.include_tasks: state/install.yml
   when: flatpak_state | default('present') == 'present'
 
 - name: Ensure Flatpak is uninstalled from system

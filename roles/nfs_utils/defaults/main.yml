@@ -21,13 +21,13 @@ nfs_utils_krb5_principal: "nfs/{{ nfs_server_fqdn }}@{{ nfs_utils_krb5_realm | u
 
 # Specialized path tracking your feature-isolated NFS keytab
 nfs_utils_server_keytab_path: "/etc/nfs.keytab"
-nfs_utils_client_keytab_path:  "/etc/krb5.keytab"
+nfs_utils_client_keytab_path: "/etc/krb5.keytab"
 
 # Custom runtime argument overrides passed natively to the server-side rpc.svcgssd daemon
 nfs_utils_svcgssd_options: ""
 
 # GSS / Kerberos Daemon Defaults
-nfs_gss_provider: "gssproxy"  # Options: gssproxy, svcgssd
+nfs_gss_provider: "gssproxy" # Options: gssproxy, svcgssd
 
 # Name of the gssproxy socket to map inside the socket directory
 nfs_utils_gssproxy_socket_name: "gssproxy.sock"

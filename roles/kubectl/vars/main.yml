@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+kubectl_kubernetes_major_minor_version: "{{ (kubectl_kubernetes_version | split('.') | batch(2) | first) | join('.') }}"
+
+kubectl_pkg_names: "{{ kubectl_os_pkg_names | default(['kubectl']) }}"
+
+kubectl_directory:
+  config: "{{ kubectl_os_directory.config | default('/etc/kubectl') }}"
+
+kubectl_file:
+  config: "{{ kubectl_directory.config ~ '/config.toml' | default('/etc/kubectl/config.toml') }}"
+
+# Repository Specifics
+kubectl_repo_id: "{{ kubectl_os_repo_id | default('kubectl') }}"
+kubectl_repo_name: "{{ kubectl_os_repo_name | default('Kubectl PPA') }}"

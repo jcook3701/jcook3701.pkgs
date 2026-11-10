@@ -26,11 +26,9 @@
   become: true
   register: identity_seed_cmd
   failed_when:
-    - identity_seed_cmd.rc != 0 or
-      ('error' in identity_seed_cmd.stderr | lower or
-      'failed' in identity_seed_cmd.stderr | lower or
-      'does not contain enough character classes' in identity_seed_cmd.stderr | lower or
-      'does not contain enough character classes' in identity_seed_cmd.stdout | lower)
+    - identity_seed_cmd.rc != 0 or ('error' in identity_seed_cmd.stderr | lower or 'failed' in identity_seed_cmd.stderr
+      | lower or 'does not contain enough character classes' in identity_seed_cmd.stderr | lower or 'does not contain
+      enough character classes' in identity_seed_cmd.stdout | lower)
   when:
     - check_result.stderr is defined
     - "'principal does not exist' in check_result.stderr | lower"

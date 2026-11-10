@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug Quickemu Variables
+  ansible.builtin.debug:
+    msg:
+      - "quickemu_pkg_names: {{ quickemu_pkg_names }}"
+      - "quickemu_directory: {{ quickemu_directory }}"
+      - "quickemu_file: {{ quickemu_file }}"
+      - "quickemu_repo_id: {{ quickemu_repo_id }}"
+      - "quickemu_repo_name: {{ quickemu_repo_name }}"
+  when: quickemu_debug | default(false) | bool
+
+- name: Setup Quickemu Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ quickemu_os_repo_id | default('quickemu') }}"
+    repo_add_name: "{{ quickemu_os_repo_name | default('Quickemu PPA') }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ quickemu_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ quickemu_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ quickemu_debian_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ quickemu_debian_signed_by | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ quickemu_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ quickemu_arch_server | default(omit) }}"
+  when: ansible_facts['distribution'] | lower == 'ubuntu'
+
+- name: Installing Quickemu
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ quickemu_os_pkg_names | default(['quickemu']) }}
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure Quickemu
+  ansible.builtin.include_tasks: configure/main.yml

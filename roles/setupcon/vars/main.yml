@@ -10,7 +10,5 @@ setupcon_directory:
   config: /etc/default
 
 setupcon_file:
-  console_setup_config: "{{ setupcon_directory.config ~ '/console-setup'
-                | default('/etc/default/console-setup') }}"
-  keyboard_config: "{{ setupcon_directory.config ~ '/keyboard'
-                | default('/etc/default/keyboard') }}"
+  console_setup_config: "{{ setupcon_directory.config ~ '/console-setup' | default('/etc/default/console-setup') }}"
+  keyboard_config: "{{ setupcon_directory.config ~ '/keyboard' | default('/etc/default/keyboard') }}"

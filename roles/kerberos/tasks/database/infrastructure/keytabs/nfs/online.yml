@@ -6,8 +6,7 @@
     database: group
     key: "{{ kerberos_nfs_group | default('root') }}"
     fail_key: false
-  when: inventory_hostname in (kerberos_nfs_file_servers | default([])
-                                + kerberos_nfs_client_nodes | default([]))
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]))
 
 - name: Determine if NFS environment requirements are met
   ansible.builtin.set_fact:
@@ -15,13 +14,11 @@
       {{ ansible_facts.getent_group is defined and
          (kerberos_nfs_group | default('root')) in ansible_facts.getent_group and
          ansible_facts.getent_group[kerberos_nfs_group | default('root')] is not none }}
-  when: inventory_hostname in (kerberos_nfs_file_servers | default([])
-                                + kerberos_nfs_client_nodes | default([]))
+  when: inventory_hostname in (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]))
 
 - name: Execute NFS Runtime Configuration and Service Reloads
   when:
-    - inventory_hostname in (kerberos_nfs_file_servers | default([])
-                              + kerberos_nfs_client_nodes | default([]))
+    - inventory_hostname in (kerberos_nfs_file_servers | default([]) + kerberos_nfs_client_nodes | default([]))
     - _nfs_environment_ready | default(false) | bool
   block:
 
@@ -52,7 +49,7 @@
       become: true
       when:
         - inventory_hostname in (kerberos_nfs_file_servers | default([]))
-        - kerberos_nfs_service | default('rpc-gssd') + '.service' in services
-            or kerberos_nfs_service | default('rpc-gssd') in services
+        - kerberos_nfs_service | default('rpc-gssd') + '.service' in services or kerberos_nfs_service |
+          default('rpc-gssd') in services
         - endpoint_nfs_engine_check.stdout is defined
         - ('nfs/' in endpoint_nfs_engine_check.stdout | lower)

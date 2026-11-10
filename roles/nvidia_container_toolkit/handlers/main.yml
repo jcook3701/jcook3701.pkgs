@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Restart Engine Service
+  ansible.builtin.service:
+    name: "{{ nvidia_container_toolkit_engine | default('docker') }}"
+    state: restarted
+  become: true
