@@ -12,11 +12,10 @@ quickemu_os_repo_id: "quickemu"
 quickemu_os_repo_name: "Quickemu PPA"
 
 quickemu_debian_uris: >-
-  {{ quickemu_download_url ~ '/flexiondotorg/quickemu/ubuntu'
+  {{ quickemu_base_download_url ~ '/flexiondotorg/quickemu/ubuntu'
       | default('https://ppa.launchpadcontent.net/flexiondotorg/quickemu/ubuntu') }}
 quickemu_debian_suites: "{{ ansible_distribution_release }}"
 quickemu_debian_component: "main"
 quickemu_debian_signed_by: >-
-  {{ quickemu_download_url ~ '/flexiondotorg/quickemu/ubuntu/dists'
-      ~ ansible_distribution_release | lower ~ 'Release.gpg'
-      | default('https://ppa.launchpadcontent.net/flexiondotorg/quickemu/ubuntu/dists/devel/Release.gpg') }}
+  {{ quickemu_key_download_url
+      | default('https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAC4983BC6500F2E768D0CF7F08C0EFB260A1EEF3') }}

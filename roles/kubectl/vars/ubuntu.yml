@@ -15,8 +15,8 @@ kubectl_debian_uris: >-
   {{ kubectl_download_url ~ ':/stable:/v' ~ kubectl_kubernetes_major_minor_version ~ '/deb/'
       | default('https://pkgs.k8s.io/core:/stable:/v1.37/deb/') }}
 kubectl_debian_suites: "/"
-kubectl_debian_component: "stable"
+kubectl_debian_component: ""
 kubectl_debian_signed_by: >-
   {{ kubectl_download_url ~ ':/stable:/v' ~ kubectl_kubernetes_major_minor_version
-      ~ '/deb/Release.key' | lower ~ 'Release.gpg'
+      ~ '/deb/Release.key'
       | default('https://pkgs.k8s.io/core:/stable:/v1.37/deb/Release.key') }}
