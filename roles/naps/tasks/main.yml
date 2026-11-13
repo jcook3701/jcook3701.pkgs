@@ -15,9 +15,7 @@
 
 - name: Install NAPS packages
   ansible.builtin.include_tasks: state/install.yml
-  when:
-    - naps_state | default('present') == 'present'
-    - naps_pkg_names[0] not in ansible_facts.packages
+  when: naps_state | default('present') == 'present'
 
 - name: Uninstall NAPS packages
   ansible.builtin.include_tasks: state/uninstall.yml

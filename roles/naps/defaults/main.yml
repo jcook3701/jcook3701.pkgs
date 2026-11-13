@@ -6,8 +6,9 @@
 # -------------------------------------------------------------------------
 # Structural installation state ('present' or 'absent' or 'teardown')
 naps_state: present
+naps_debug: false
 
-# Accounts granted rootless or direct access to the scanner daemon
+# Accounts granted rootless or direct access to the scanner group
 naps_users:
   - name: "{{ ansible_user | default(ansible_user_id) }}"
 

@@ -17,7 +17,7 @@ naps_os_directory:
 naps_os_repo_id: "naps2"
 naps_os_repo_name: "Not Another PDF Scanner 2"
 
-naps_debian_uris: "{{ naps_download_url }}/Packages"
-naps_debian_suites: "./"
+naps_debian_uris: "{{ naps_download_url | default('https://downloads.naps2.com') }}"
+naps_debian_suites: "/"
 naps_debian_component: ""
 naps_debian_signed_by: "https://www.naps2.com/naps2-public.pgp"
