@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure native client-side GSS security daemon is active for interception
+  ansible.builtin.service:
+    name: "{{ nfs_utils_client_service | default('rpc-gssd') }}"
+    state: "started"
+    enabled: true
+  become: true
+  when: (nfs_utils_client_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure helper NFS server daemon is stopped and disabled on clients
+  ansible.builtin.service:
+    name: "{{ nfs_utils_server_helper_service | default('rpc-svcgssd') }}"
+    state: "stopped"
+    enabled: false
+  become: true
+  when: (nfs_utils_server_helper_service ~ '.service' in ansible_facts.services)
+
+- name: Ensure master NFS server daemon is stopped and disabled on clients
+  ansible.builtin.service:
+    name: "{{ nfs_utils_server_service | default('nfs-kernel-server') }}"
+    state: "stopped"
+    enabled: false
+  become: true
+  when: (nfs_utils_server_service ~ '.service' in ansible_facts.services)

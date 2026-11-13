@@ -1,0 +1,92 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manages the central GSSProxy credential isolation daemon and security routing policy layers."
+    description: >-
+      This role installs, configures, and manages the GSSProxy authentication proxy ecosystem.
+      It uses a declarative list-driven structure to abstract configuration blocks for
+      network filesystems (CIFS/NFS), secure shells (SSH), and web platforms (HTTP SSO).
+    author: "Jared Cook"
+    options:
+      gssproxy_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The installation or lifecycle state of the GSSProxy daemon and its configuration templates."
+
+      gssproxy_manage_service:
+        type: "bool"
+        default: true
+        description: "Toggles whether the role should actively enforce systemd service runtime states and reloads."
+
+      gssproxy_debug_level:
+        type: "str"
+        required: false
+        default: "3"
+        description: "Global diagnostics logging level for the primary GSSProxy daemon service."
+
+      gssproxy_services:
+        type: "list"
+        elements: "dict"
+        description: "The core list of secure applications and filesystems being proxied through the GSS-API daemon layer."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The configuration filename prefix dropped into the /etc/gssproxy/ configuration directory."
+          enabled:
+            type: "bool"
+            required: true
+            description: "A boolean switch to determine if the specific service block profile should be rendered active."
+          section:
+            type: "str"
+            required: true
+            description: "The ini configuration header identifier specifying the proxy service target (e.g., 'service/cifs')."
+          mechs:
+            type: "str"
+            default: "krb5"
+            description: "The GSS-API authentication mechanism used by the service layer."
+          socket:
+            type: "str"
+            required: true
+            description: "The absolute path to the UNIX domain socket opened by the proxy to handle upcalls or streams."
+          cred_store:
+            type: "list"
+            elements: "str"
+            required: true
+            description: "An array of Kerberos credential strings, identifying keytabs, ccaches, or client keytab paths."
+          cred_usage:
+            type: "str"
+            choices: ["initiate", "accept", "both"]
+            required: true
+            description: "Specifies whether the proxied credentials should be used to initiate, accept, or handle both handshake scopes."
+          euid:
+            type: "raw"
+            required: true
+            description: "The effective user ID (numeric UID or string username) of the system process allowed to connect to the service socket."
+          allow_any_uid:
+            type: "bool"
+            default: false
+            description: "Determines if non-root user IDs are authorized to connect and interface with the proxy socket."
+          trusted:
+            type: "bool"
+            default: false
+            description: "Dictates whether the proxy socket is treated as an internally trusted administrative interface."
+          impersonate:
+            type: "bool"
+            default: false
+            description: "Allows the daemon to handle constrained delegation and impersonate user privileges securely."
+          kernel_nfsd:
+            type: "bool"
+            default: false
+            description: "Enables direct integration mapping with the kernel NFS daemon subsystem for server-side acceptor traffic."
+          program:
+            type: "str"
+            required: false
+            description: "The execution string or path of the calling process used by GSS-Proxy to distinguish shared socket connections."
+          set_gss_proxy:
+            type: "bool"
+            default: false
+            description: "Instructs the daemon to explicitly initialize the kernel-space GSS proxy activation flag state structures on boot."

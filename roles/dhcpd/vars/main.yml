@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Dynamic Netmask Translation Matrix
+dhcpd_netmask: >-
+  {{
+    '255.0.0.0' if dhcpd_prefix_length | string == '8' else
+    '255.255.0.0' if dhcpd_prefix_length | string == '16' else
+    '255.255.255.0'
+  }}
+
+# Calculated base network ID string
+dhcpd_subnet_network: "{{ dhcpd_ip_address_space }}.0"
+
+# Structural dynamic zone tracking database
+dhcpd_dydns_zones:
+  - name: "{{ dhcpd_domain_name }}"
+    primary_dns_ip: "{{ dhcpd_dns_servers[0] | default('127.0.0.1') }}"
+    tsig_key_name: "dhcpd-update-key"
+
+  - name: "{{ '0.168.192.in-addr.arpa' if dhcpd_ip_address_space == '192.168.0' else '0.0.10.in-addr.arpa' }}"
+    primary_dns_ip: "{{ dhcpd_dns_servers[0] | default('127.0.0.1') }}"
+    tsig_key_name: "dhcpd-update-key"
+
+# Global pipeline file pointers linked to your OS-specific files
+dhcpd_file:
+  dhcpd_conf: "{{ dhcpd_os_file.dhcpd_conf }}"
+  dhcpd_keys: "{{ dhcpd_os_file.dhcpd_keys }}"

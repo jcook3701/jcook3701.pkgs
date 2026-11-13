@@ -1,0 +1,66 @@
+{#
+# global.client.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro global_client() -%}
+{#
+    Pure Workstation Client-Side Kerberos Layer Configuration.
+    Establishes default global protocol standards for outbound mounting requests without hosting services.
+
+    Args:
+        None
+
+    Returns:
+        str: Baseline security parameters for outbound clients.
+#}
+    ## Core Client Domain Security Definer ##
+    security = {{ 'ads' if samba_client_target_mode == 'addc' else 'user' }}
+{% if samba_client_target_mode == 'addc' and samba_realm is defined %}
+    realm = {{ samba_realm | upper }}
+{% endif %}
+
+    ## Authentication Backends & Identity Mapping (IDMAP) ##
+{% if samba_client_target_mode == 'sssd' %}
+    idmap config * : backend = tdb
+    idmap config * : range = 3000-7999
+    idmap config {{ samba_workgroup }} : backend = sss
+    idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
+{% elif samba_client_target_mode == 'addc' %}
+    winbind cache time = 300
+    winbind nested groups = yes
+    winbind refresh tickets = yes
+    idmap config * : backend = tdb
+    idmap config * : range = 3000-7999
+    idmap config {{ samba_workgroup }} : backend = rid
+    idmap config {{ samba_workgroup }} : range = {{ samba_idmap_range_low }}-{{ samba_idmap_range_high }}
+{% else %}
+    idmap config * : backend = tdb
+    idmap config * : range = 3000-7999
+{% endif %}
+
+    ## Protocol Security Engine ##
+    client signing = mandatory
+
+    ## Security & Protocols ##
+    client min protocol = {{ samba_client_min_protocol }}
+    client max protocol = {{ samba_client_max_protocol }}
+    unix extensions = no
+{%- endmacro -%}
+
+{{- global_client() }}

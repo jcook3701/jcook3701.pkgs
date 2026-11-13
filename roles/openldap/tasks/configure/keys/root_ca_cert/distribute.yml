@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Fetch master Root CA certificate file to the controller staging space
+  ansible.builtin.fetch:
+    src: "{{ openldap_tls_ca_cert }}"
+    dest: "{{ openldap_controller_staging.root_ca_cert }}"
+    flat: true
+  become: true
+  when: openldap_node_type == 'master'
+
+- name: Enforce execution fence until Root CA file is cached on controller
+  ansible.builtin.wait_for:
+    path: "{{ openldap_controller_staging.root_ca_cert }}"
+    timeout: 30
+  delegate_to: localhost
+  when: openldap_node_type in ['slave', 'client']
+
+- name: Distribute master Root CA certificate to replica slave nodes
+  ansible.builtin.copy:
+    src: "{{ openldap_controller_staging.root_ca_cert }}"
+    dest: "{{ openldap_tls_ca_cert }}"
+    owner: "{{ openldap_user if openldap_node_type == 'slave' else 'root' }}"
+    group: "{{ openldap_group if openldap_node_type == 'slave' else 'root' }}"
+    mode: "0644"
+  become: true
+  when: openldap_node_type in ['slave', 'client']

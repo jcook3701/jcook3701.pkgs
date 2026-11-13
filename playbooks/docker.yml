@@ -14,4 +14,3 @@
     - name: Install Docker-CE
       ansible.builtin.include_role:
         name: jcook3701.pkgs.docker_ce
-        tasks_from: debian-docker.yml

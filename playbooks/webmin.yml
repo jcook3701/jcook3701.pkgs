@@ -14,4 +14,3 @@
     - name: Install Webmin
       ansible.builtin.include_role:
         name: jcook3701.pkgs.webmin
-        tasks_from: debian-webmin.yml

@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Add users to the NAPS scanner group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: "{{ naps_group | default('scanner') }}"
+    append: true
+  loop: "{{ naps_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Adding {{ user.name }} to {{ naps_group }} group"
+  become: true
+  when:
+    - user.name is defined
+    - user.name | length > 0

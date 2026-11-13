@@ -34,7 +34,6 @@ tags:
   - infrastructure
 
 dependencies:
-  jcook3701.homelab: ">=1.0.0"
   jcook3701.utils: ">=1.0.0"
   community.general: ">=12.0.0"
 
@@ -69,4 +68,3 @@ homepage: >-
   https://github.com/jcook3701/jcook3701.pkgs
 issues: >-
   https://github.com/jcook3701/jcook3701.pkgs/issues
-...

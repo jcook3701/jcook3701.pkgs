@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load GSS-Proxy OS-specific variables
+  ansible.builtin.include_vars: "{{ gssproxy_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: gssproxy_vars
+    label: "Including variables from: {{ gssproxy_vars }}"
+
+- name: Ensure GSS-Proxy packages are installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: gssproxy_state | default('present') == 'present'
+
+- name: Ensure GSS-Proxy packages are uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: gssproxy_state | default('present') == 'absent'
+
+- name: Teardown GSS-Proxy, services, packages, and configuration files
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: gssproxy_state | default('present') == 'teardown'

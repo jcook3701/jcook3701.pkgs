@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+mkchromecast_state: present
+
+# Control firewall deployment
+mkchromecast_manage_firewall: true
+mkchromecast_firewall_backend: "ufw"
+
+# Required network ports for streaming out to Apple TV / Chromecast
+mkchromecast_firewall_rules:
+  - port: 5000
+    proto: "tcp"
+    comment: "Mkchromecast HTTP server stream"

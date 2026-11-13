@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load SSH OS-specific variables
+  ansible.builtin.include_vars: "{{ ssh_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: ssh_vars
+    label: "Loading variables file: {{ ssh_vars }}"
+
+- name: Install SSH packages
+  ansible.builtin.include_tasks: state/install.yml
+  when: ssh_state | default('present') == 'present'
+
+- name: Safe Reversion and Recovery of Baseline SSH Configurations
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: ssh_state | default('present') == 'teardown'

@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Forcefully enable selected profiles within the system PAM authentication stacks
+  ansible.builtin.command: >-
+    pam-auth-update --package
+    {{ '--enable keyinit' if pam_enable_keyinit | default(true) | bool
+                            else '--disable keyinit' }}
+    {{ '--enable sss' if (pam_enable_sssd | default(true) | bool
+                            and pam_enable_network_authentication | default(true) | bool)
+                            else '--disable sss' }}
+    {{ '--enable mkhomedir' if pam_enable_mkhomedir | default(true) | bool
+                            else '--disable mkhomedir' }}
+    {{ '--enable systemd' if pam_enable_systemd | default(true) | bool
+                            else '--disable systemd' }}
+    {{ '--enable fprintd' if pam_enable_biometrics | default(false) | bool
+                            else '--disable fprintd' }}
+    {{ '--enable duo-unix' if (pam_enable_duo | default(false) | bool
+                            and pam_enable_network_authentication | default(true) | bool)
+                            else '--disable duo-unix' }}
+    {{ '--enable u2f' if pam_enable_u2f | default(false) | bool
+                            else '--disable u2f' }}
+    {{ '--enable yubico' if pam_enable_yubico | default(false) | bool
+                            else '--disable yubico' }}
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: pam_enable_cmd
+  changed_when: (pam_enable_cmd.stdout != ''
+                  or 'updating' in pam_enable_cmd.stderr | lower)
+  failed_when: pam_enable_cmd.rc != 0
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Forcefully select target configuration profile within Red Hat system authselect stacks
+  ansible.builtin.command: >-
+    authselect select
+    {{ 'sssd' if (pam_enable_sssd | default(true) | bool
+                            and pam_enable_network_authentication | default(true) | bool)
+                            else 'local' }}
+    {{ 'with-mkhomedir' if pam_enable_mkhomedir | default(true) | bool
+                            else '' }}
+    {{ 'with-fingerprint' if pam_enable_biometrics | default(false) | bool
+                            else '' }}
+    {{ 'with-smartcard' if (pam_enable_u2f | default(false) | bool
+                            or pam_enable_yubico | default(false) | bool)
+                            else '' }}
+    --force
+  register: authselect_cmd
+  changed_when: ('profile' in authselect_cmd.stdout | lower
+                  or 'writing' in authselect_cmd.stdout | lower)
+  failed_when: authselect_cmd.rc != 0
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'

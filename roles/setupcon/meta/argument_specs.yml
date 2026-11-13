@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage system console and keyboard layout configurations via setupcon."
+    description:
+      - "Configures console display fonts, active TTY terminals, and system-wide keyboard input layouts."
+      - "Deploys configurations parsed directly by setupcon and console-setup utilities."
+    options:
+      setupcon_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent"]
+        description: "The administrative state of the console-setup configurations."
+
+      setupcon_active_consoles:
+        type: "str"
+        default: "/dev/tty[1-6]"
+        description: "The specific virtual console device files to target for modification."
+
+      setupcon_charmap:
+        type: "str"
+        default: "UTF-8"
+        description: "The encoding system map applied to terminal output."
+
+      setupcon_codeset:
+        type: "str"
+        default: "guess"
+        description: "The specific font encoding or character set identifier to extract."
+
+      setupcon_fontface:
+        type: "str"
+        default: "TerminusBold"
+        description: "The visual style or typeface group of the console font."
+
+      setupcon_fontsize:
+        type: "str"
+        default: "16x32"
+        description: "The hardware resolution size or pixel density specification of the font face."
+
+      setupcon_videomode:
+        type: "str"
+        default: ""
+        required: false
+        description: "The raw video adapter terminal initialization string configuration."
+
+      setupcon_xkbmodel:
+        type: "str"
+        default: "pc105"
+        description: "The underlying hardware vendor mapping matrix schema definition."
+
+      setupcon_xkblayout:
+        type: "str"
+        default: "us"
+        description: "The localized geographical alpha-numeric layout identifier code."
+
+      setupcon_xkbvariant:
+        type: "str"
+        default: ""
+        required: false
+        description: "An alternate sub-mapping layer applied above the localized layout."
+
+      setupcon_xkboptions:
+        type: "str"
+        default: ""
+        required: false
+        description: "Supplementary control modifications, including layout swaps or option switches like 'ctrl:nocaps'."
+
+      setupcon_backspace:
+        type: "str"
+        default: "guess"
+        description: "The structural key-code emission style targeted for deletion handling sequence."

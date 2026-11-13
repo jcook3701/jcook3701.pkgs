@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if a valid public master CA certificate is already present on the disk
+  ansible.builtin.stat:
+    path: "{{ openldap_tls_ca_cert }}"
+  register: _openldap_active_ca_state
+  become: true
+
+- name: Execute Core Root Certificate Authority Generation Phase
+  ansible.builtin.include_tasks: root_ca_cert/seed.yml
+  when:
+    - openldap_node_type == 'master'
+    - not _openldap_active_ca_state.stat.exists
+
+- name: Execute Fleet-wide Root CA Distribution Phase
+  ansible.builtin.include_tasks: root_ca_cert/distribute.yml
+
+- name: Execute Local Worker Node Identity Registration Phase
+  ansible.builtin.include_tasks: root_ca_cert/csr_worker.yml
+  when:
+    - openldap_node_type in ['master', 'slave']
+    - not _openldap_active_ca_state.stat.exists
+
+- name: Execute Directory Server Certificate Signing Phase
+  ansible.builtin.include_tasks: root_ca_cert/sign_worker.yml
+  when:
+    - openldap_node_type in ['master', 'slave']
+    - not _openldap_active_ca_state.stat.exists
+
+- name: Execute Directory Server Certificate Transfer File Cleanup
+  ansible.builtin.include_tasks: root_ca_cert/cleanup.yml
+  when:
+    - openldap_node_type in ['master', 'slave']
+    - not _openldap_active_ca_state.stat.exists

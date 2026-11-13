@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+vagrant_vm_name: "openldap-server"
+vagrant_box: "debian/bookworm64"
+vagrant_box_version: ">= 0"
+vagrant_os_family: "debian"
+vagrant_memory_mb: 2048
+vagrant_cpus: 1
+vagrant_gui_enabled: false
+vagrant_ip: "10.0.1.53"
+vagrant_netmask: "255.0.0.0"
+vagrant_network_type: "public_network"
+vagrant_bridge: "enp8s0"
+vagrant_build_dir: "{{ '/vagrant_builds/' + vagrant_vm_name }}"
+vagrant_admin_user: "admin"

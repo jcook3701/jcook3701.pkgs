@@ -1,0 +1,42 @@
+{#
+# default.pa.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro default_pa() -%}
+# ==================== CORE HARDWARE ENGINE ====================
+# Always load core communication pipes and hardware card detectors natively
+load-module module-native-protocol-unix
+load-module module-udev-detect
+load-module module-default-device-restore
+load-module module-always-sink
+load-module module-position-event-sounds
+load-module module-switch-on-connect
+
+{% if pulseaudio_is_server and pulseaudio_enable_network %}
+# ==================== SERVER NETWORK ROUTING ====================
+# Listen securely on the network for client audio input streams
+load-module module-native-protocol-tcp port={{ pulseaudio_port }} auth-anonymous={{ pulseaudio_auth_anonymous }}
+{% elif not pulseaudio_is_server and pulseaudio_server_ip != "" %}
+# ==================== CLIENT NETWORK ROUTING ====================
+# Tunnel all local sound card outputs over the network to the central server
+load-module module-tunnel-sink-new server={{ pulseaudio_server_ip }}:{{ pulseaudio_port }}
+{% endif %}
+{%- endmacro -%}
+
+{{- default_pa() }}

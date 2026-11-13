@@ -1,3 +1,15 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+plex_user: plex
+plex_group: plex
+
+plex_service: "plexmediaserver"
+
+plex_pkg_dep_names: []
+plex_pkg_names:
+  - plexmediaserver
+
+# Repository Specifics
+plex_repo_id: "plex"
+plex_repo_name: "Plex Media Server"

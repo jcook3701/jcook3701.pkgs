@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure unified configuration parent directory exists
+  ansible.builtin.file:
+    path: "{{ autofs_directory.conf }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+
+- name: Ensure local service cache tracking directory exists
+  ansible.builtin.file:
+    path: "{{ autofs_directory.db }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true

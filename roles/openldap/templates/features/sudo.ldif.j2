@@ -1,0 +1,111 @@
+{#
+# sudo.ldif.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro sudo_ldif() -%}
+# 1. CENTRALIZED SUDOERS SECURITY CONTAINER
+dn: ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: organizationalUnit
+description: LDAP Centralized Sudo Roles Repository
+ou: {{ openldap_sudoers_ou | trim }}
+
+# Support for Red Hat / Rocky Linux Clients
+dn: cn=%wheel,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: sudoRole
+cn: %wheel
+sudoUser: %wheel
+sudoHost: ALL
+sudoCommand: ALL
+sudoOption: !authenticate
+sudoRunAsUser: ALL
+sudoOrder: 3
+
+# Support for Debian / Ubuntu Clients
+dn: cn=%sudo,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: sudoRole
+cn: %sudo
+sudoUser: %sudo
+sudoHost: ALL
+sudoCommand: ALL
+sudoOption: !authenticate
+sudoRunAsUser: ALL
+sudoOrder: 4
+
+dn: cn=root,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: sudoRole
+cn: root
+sudoUser: root
+sudoHost: ALL
+sudoRunAsUser: ALL
+sudoCommand: ALL
+sudoOrder: 2
+
+dn: cn=defaults,ou={{ openldap_sudoers_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: sudoRole
+cn: defaults
+description: Default sudoOption profile mappings
+sudoOption: !visiblepw
+sudoOption: always_set_home
+sudoOption: match_group_by_gid
+sudoOption: always_query_group_plugin
+sudoOption: env_reset
+sudoOption: env_keep = "COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR LS_COLORS"
+sudoOption: env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"
+sudoOption: env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"
+sudoOption: env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
+sudoOption: secure_path = /sbin:/bin:/usr/sbin:/usr/bin
+sudoOrder: 1
+
+# 2. CENTRALIZED CLUSTER PRIVILEGE GROUP
+dn: cn=sudo,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+cn: sudo
+gidNumber: 27
+{% for user in openldap_bootstrap_users | default([]) %}
+{% if user.is_sudoer | default(false) | bool %}
+memberUid: {{ user.username | trim }}
+{% endif %}
+{% endfor %}
+
+dn: cn=wheel,ou={{ openldap_groups_ou | trim }},dc={{ openldap_second_level_domain | trim }},dc={{ openldap_top_level_domain | trim }}
+changetype: add
+objectClass: top
+objectClass: posixGroup
+cn: wheel
+gidNumber: 10
+{% for user in openldap_bootstrap_users | default([]) %}
+{% if user.is_sudoer | default(false) | bool %}
+memberUid: {{ user.username | trim }}
+{% endif %}
+{% endfor %}
+
+{%- endmacro -%}
+
+{{- sudo_ldif() }}

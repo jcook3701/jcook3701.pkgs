@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# User/Group Settings
+naps_os_user: "lp"
+naps_os_group: "lp"
+
+# Package Settings
+naps_os_pkg_names:
+  - "naps2"
+
+# System File Settings
+naps_os_directory:
+  conf: ""
+
+# Repository Specifics
+naps_os_repo_id: "naps"
+naps_os_repo_name: "Not Another PDF Scanner 2"

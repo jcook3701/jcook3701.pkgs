@@ -1,0 +1,164 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Enterprise multi-OS hybrid AutoFS client integration core"
+    description: "Validates local filesystem mount parameters, daemon behavior properties, and database schema lookups."
+    author: "Jared Cook"
+    options:
+      # Control switches
+      autofs_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "Target operational configuration lifecycle state."
+
+      autofs_lookup_provider:
+        type: "str"
+        required: false
+        default: "sss"
+        choices:
+          - "sss"
+          - "ldap"
+          - "files"
+        description: "The primary centralized lookup dispatch source provider backend handling system name switches."
+
+      autofs_master_map_name:
+        type: "str"
+        required: false
+        default: "auto.master"
+        description: "The root-level central switchboard directory map name the engine scans for."
+
+      autofs_client_timeout:
+        type: "int"
+        required: false
+        default: 60
+        description: "System-level threshold defaults for dynamically unmounting inactive drives (in seconds)."
+
+      autofs_browse_mode:
+        type: "str"
+        required: false
+        default: "yes"
+        choices:
+          - "yes"
+          - "no"
+        description: "Controls the baseline visibility of underlying unmounted share directories on the filesystem."
+
+      autofs_logging:
+        type: "str"
+        required: false
+        default: "verbose"
+        choices:
+          - "none"
+          - "verbose"
+          - "debug"
+        description: "Configures the tracking output logging verbosity level of the system daemon process."
+
+      autofs_sasl_usetls:
+        type: "str"
+        required: false
+        default: "no"
+        choices:
+          - "yes"
+          - "no"
+        description: "Enables or disables TLS transport encryption layers for native SASL directory communication."
+
+      autofs_sasl_tlsrequired:
+        type: "str"
+        required: false
+        default: "no"
+        choices:
+          - "yes"
+          - "no"
+        description: "Enforces strict channel termination if an encrypted TLS frame cannot be safely negotiated."
+
+      autofs_sasl_authrequired:
+        type: "str"
+        required: false
+        default: "yes"
+        choices:
+          - "yes"
+          - "no"
+        description: "Instructs the lookup module whether explicit identity tokens are required to query the directory."
+
+      autofs_sasl_authmechanism:
+        type: "str"
+        required: false
+        default: "GSSAPI"
+        choices:
+          - "GSSAPI"
+          - "PLAIN"
+          - "LOGIN"
+        description: "The targeted SASL cryptographic authentication engine mechanism utilized over the connection channel."
+
+      autofs_ldap_timeout:
+        type: "int"
+        required: false
+        default: 30
+        description: "The execution timeout boundary threshold for individual network data queries (in seconds)."
+
+      autofs_ldap_network_timeout:
+        type: "int"
+        required: false
+        default: 30
+        description: "The transport network layer drop timeout metric limit for directory lookups (in seconds)."
+
+      autofs_map_object_class:
+        type: "str"
+        required: false
+        default: "automountMap"
+        description: "The targeted structural schema objectClass token representing container map dictionaries."
+
+      autofs_entry_object_class:
+        type: "str"
+        required: false
+        default: "automount"
+        description: "The targeted structural schema objectClass token representing individual file mount content entries."
+
+      autofs_map_attribute:
+        type: "str"
+        required: false
+        default: "automountMapName"
+        description: "The specific directory database attribute key identifying distinct map groupings."
+
+      autofs_entry_attribute:
+        type: "str"
+        required: false
+        default: "automountKey"
+        description: "The specific directory database attribute key tracking exact mounting trigger path tokens."
+
+      autofs_value_attribute:
+        type: "str"
+        required: false
+        default: "automountInformation"
+        description: "The directory database attribute key mapping UNC network share targets and connection flags."
+
+      # Centralized On-Demand File System Mount Array
+      autofs_bootstrap_mounts:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "Centralized client-side explicit master map and drive definitions."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The unique identifier string for the shared drive profile."
+          mount_point:
+            type: "str"
+            required: true
+            description: "The absolute local destination target path where this mount anchors."
+          server_path:
+            type: "str"
+            required: true
+            description: "The absolute file path locating the directory export on the remote storage node."
+          timeout:
+            type: "int"
+            default: 60
+            description: "The inactivity window threshold in seconds before dropping the connection state."
+          fstype:
+            type: "str"
+            required: false
+            default: "cifs"
+            description: "The explicit file system protocol type flag utilized by the mount engine, supporting keys like cifs or nfs."

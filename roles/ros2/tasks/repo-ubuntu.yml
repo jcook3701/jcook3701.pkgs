@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure dependencies for ros2 are present
+  become: true
+  ansible.builtin.apt:
+    name: "{{ ros2_pkg_deps }}"
+    update_cache: true
+    state: "{{ ros2_state }}"
+
+- name: Ensure {{ ros2_directory.keyrings }} directory exists
+  ansible.builtin.file:
+    path: "{{ ros2_directory.keyrings }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Download ros2 armored GPG key
+  ansible.builtin.get_url:
+    url: "{{ ros2_gpg_url }}"
+    dest: "{{ ros2_file.gpg }}"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Add ros2 repository to sources list
+  ansible.builtin.lineinfile:
+    path: "{{ ros2_file.list }}"
+    create: true
+    mode: "0644"
+    owner: root
+    group: root
+    line: "{{ ros2_repo_line }}"
+  notify: Run apt-get update

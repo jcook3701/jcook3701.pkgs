@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+roles:
+  - name: jcook3701.utils.pkg_manager
+    version: main
+  - name: jcook3701.utils.repo_add
+    version: main
+  - name: jcook3701.utils.general
+    version: main

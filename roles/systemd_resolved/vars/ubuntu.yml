@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+systemd_resolved_service: "systemd-resolved"
+
+systemd_resolved_os_pkg_names:
+  - "systemd"
+
+systemd_resolved_os_directory:
+  conf: "/etc/systemd/resolved.conf.d"
+  runtime: "/run/systemd/resolve"
+  state: "/var/lib/systemd/resolve"
+  dbus: "/etc/dbus-1/system.d"
+
+systemd_resolved_os_file:
+  main_config: "/etc/systemd/resolved.conf"
+  stub_resolv: "{{ systemd_resolved_os_directory.runtime }}/stub-resolv.conf"
+  static_resolv: "{{ systemd_resolved_os_directory.runtime }}/resolv.conf"
+  system_resolv: "/etc/resolv.conf"

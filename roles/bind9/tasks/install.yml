@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Bind9 package and dependencies
+  ansible.builtin.package:
+    name: "{{ bind9_pkg_names }}"
+    state: present
+
+- name: Bind9 configuration
+  ansible.builtin.include_tasks: configure/main.yml
+
+- name: Bind9 Key generation
+  ansible.builtin.include_tasks: keys/main.yml
+
+- name: Ensure Bind9 service is started and enable
+  ansible.builtin.systemd:
+    name: "{{ bind9_service }}"
+    state: started
+    enabled: true

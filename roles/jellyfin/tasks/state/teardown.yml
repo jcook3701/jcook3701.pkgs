@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Jellyfin service is stopped and packages are purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Decommission Jellyfin Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ jellyfin_repo_id }}"
+    repo_add_name: "{{ jellyfin_repo_name }}"
+    repo_add_state: "absent"
+  when:
+    - jellyfin_repo_id is defined
+    - jellyfin_repo_id | length > 0
+    - ansible_os_family in ['Debian', 'RedHat']
+
+- name: Clean up remaining persistent and transient Jellyfin runtime state directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: "absent"
+  become: true
+  loop:
+    - "{{ jellyfin_directory.conf }}"
+    - "{{ jellyfin_directory.cache }}"
+    - "{{ jellyfin_directory.data }}"
+    - "{{ jellyfin_directory.log }}"
+    - "{{ jellyfin_directory.plugin }}"
+  loop_control:
+    loop_var: directory
+    label: "Removing directory: {{ directory }}"
+
+- name: Clean up remaining persistent Jellyfin default configuration file
+  ansible.builtin.file:
+    path: "{{ jellyfin_file.default }}"
+    state: "absent"
+  become: true

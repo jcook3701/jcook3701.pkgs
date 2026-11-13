@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify if HTTP service keys are already present on target endpoint
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.http_default }}"
+  register: endpoint_http_file_check
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in (kerberos_http_servers | default())
+
+- name: Check if a staged HTTP keytab file exists on the Ansible Controller
+  ansible.builtin.stat:
+    path: "{{ target_controller_staging }}"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_http_staging }}"
+  register: controller_http_staging_stat
+  delegate_to: localhost
+  become: false
+  when: inventory_hostname in (kerberos_http_servers | default())
+
+- name: Securely deliver unique HTTP service keytab file to the target node
+  ansible.builtin.copy:
+    src: "{{ target_controller_staging }}"
+    dest: "{{ kerberos_keytabs.client_http_delivered_transit }}"
+    owner: root
+    group: root
+    mode: "0600"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_http_staging }}"
+  when:
+    - inventory_hostname in (kerberos_http_servers | default())
+    - controller_http_staging_stat.stat.exists | default(false)
+    - ('http/' not in endpoint_http_file_check.stdout | lower)
+
+- name: Securely activate client standalone HTTP keytab file from landing pad
+  ansible.builtin.copy:
+    src: "{{ kerberos_keytabs.client_http_delivered_transit }}"
+    dest: "{{ kerberos_keytabs.http_default }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+  when:
+    - inventory_hostname in kerberos_http_servers
+    - ('http/' not in endpoint_http_file_check.stdout | lower)

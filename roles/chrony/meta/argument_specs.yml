@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage Chrony NTP client and server configuration."
+    description: "This role configures Chrony, upstream NTP servers (including NTS support), and access control lists."
+    author: "Your Name"
+    options:
+      chrony_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of the Chrony service."
+
+      chrony_is_server:
+        type: "bool"
+        required: false
+        default: false
+        description: "Controls whether this host acts as an NTP server for other clients."
+
+      chrony_enable_nts:
+        type: "bool"
+        required: false
+        default: false
+        description: "Enables Network Time Security (NTS) for upstream time synchronization."
+
+      chrony_upstream_servers:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "A list of upstream NTP servers or NTS-enabled endpoints."
+
+      chrony_allow_networks:
+        type: "list"
+        elements: "str"
+        required: false
+        default: []
+        description: "A list of subnets or IP ranges allowed to query this Chrony server."

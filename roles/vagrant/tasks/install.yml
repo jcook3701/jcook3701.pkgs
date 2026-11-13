@@ -1,37 +1,34 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Download HashiCorp GPG Key (Armored)
-  become: true
-  ansible.builtin.get_url:
-    url: https://apt.releases.hashicorp.com/gpg
-    dest: /tmp/hashicorp.asc
-    mode: "0644"
+- name: Prepare Latest repositories for {{ ansible_distribution }}
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "repo-{{ ansible_os_family | lower }}.yml"
+    - "repo-default.yml"
+  when:
+    - ansible_os_family in ['Debian']
+  # TODO: Ensure will work with redhat in the future and remove above when.
 
-- name: Dearmor HashiCorp GPG Key
-  become: true
-  ansible.builtin.shell: |
-    set -o pipefail
-    cat /tmp/hashicorp.asc | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  args:
-    executable: /bin/bash
-    creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
-
-- name: Add HashiCorp Repository
-  become: true
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg]
-      https://apt.releases.hashicorp.com
-      {{ ansible_distribution_release }}
-      main
+- name: Install Vagrant
+  ansible.builtin.package:
+    name: "{{ vagrant_pkg_names }}"
     state: present
-    filename: hashicorp
-    update_cache: yes
-
-- name: Install Latest Vagrant
   become: true
-  ansible.builtin.apt:
-    name: vagrant
-    state: latest
-    update_cache: yes
+
+- name: Install Vagrant plugins
+  ansible.builtin.include_tasks: plugins.yml
+
+- name: Inspect the current Vagrant item being processed
+  ansible.builtin.debug:
+    msg: "Processing box with variables from: {{ vagrant_enabled_boxes }}"
+
+- name: Provision and Configure VMs
+  vars:
+    # Filter the list once at the block level for readability
+    enabled_vms: >-
+      {{ vagrant_boxes | selectattr('server_vars', 'in', vagrant_enabled_boxes | map(attribute='server_vars')) | list }}
+  ansible.builtin.include_tasks: process-vm.yml
+  loop: "{{ enabled_vms }}"
+  loop_control:
+    loop_var: vagrant_item

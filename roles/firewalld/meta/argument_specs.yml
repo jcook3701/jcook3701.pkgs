@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Manage and configure Firewalld zones, services, and ports."
+    description: "This role handles firewalld installation, default zone selection, zone runtime/permanent configurations, and custom service definitions."
+    author: "Your Name"
+    options:
+      firewalld_state:
+        type: "str"
+        required: false
+        default: "present"
+        choices: ["present", "absent"]
+        description: "Lifecycle execution state for package installation or removal."
+
+      firewalld_default_zone:
+        type: "str"
+        required: false
+        default: "public"
+        description: "Default operational zone assignment for new system network interfaces."
+
+      firewalld_permanent:
+        type: "bool"
+        required: false
+        default: true
+        description: "Define whether rules should be persistently written to disk (permanent) or applied only to the active runtime context."
+
+      firewalld_zones:
+        type: "dict"
+        required: false
+        default: {}
+        description: "A matrix defining network zones along with their respective permitted services, ports, masquerading, source blocks, and interfaces."
+
+      firewalld_custom_services:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "Add user-defined custom xml service definitions to `/etc/firewalld/services/`."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The unique short identifier string for the custom service file name (e.g., `custom-app`)."
+          short:
+            type: "str"
+            required: false
+            description: "A brief human-readable title label for the service."
+          description:
+            type: "str"
+            required: false
+            description: "A detailed description string explaining the business purpose of the service rules."
+          ports:
+            type: "list"
+            elements: "str"
+            required: true
+            description: "A list of target network port and protocol definitions mapping directly to the custom service (e.g., `['9000/tcp', '9001/udp']`)."

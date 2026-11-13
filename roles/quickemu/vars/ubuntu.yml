@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+quickemu_os_pkg_names:
+  - quickemu
+
+quickemu_os_directory:
+  config: "/etc/quickemu"
+
+# Repository Configuration for jcook3701.utils.repo_add
+quickemu_os_repo_id: "quickemu"
+quickemu_os_repo_name: "Quickemu PPA"
+
+quickemu_debian_uris: >-
+  {{ quickemu_base_download_url ~ '/flexiondotorg/quickemu/ubuntu'
+      | default('https://ppa.launchpadcontent.net/flexiondotorg/quickemu/ubuntu') }}
+quickemu_debian_suites: "{{ ansible_distribution_release }}"
+quickemu_debian_component: "main"
+quickemu_debian_signed_by: >-
+  {{ quickemu_key_download_url
+      | default('https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAC4983BC6500F2E768D0CF7F08C0EFB260A1EEF3') }}

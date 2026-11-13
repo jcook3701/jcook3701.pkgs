@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Rsyslog seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Include Rsyslog User Group Management Tasks
+  ansible.builtin.include_tasks: "02_groups.yml"
+  when: rsyslog_manage_group | default(true) | bool
+
+- name: Execute Rsyslog service seeding tasks
+  ansible.builtin.include_tasks: "03_service.yml"

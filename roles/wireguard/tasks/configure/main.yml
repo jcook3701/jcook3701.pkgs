@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute Wireguard configuration seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Execute Wireguard configuration seeding tasks
+  ansible.builtin.include_tasks: "02_keygen.yml"
+
+- name: Execute Wireguard kernel and template configuration tasks
+  ansible.builtin.include_tasks: "03_configure.yml"
+
+- name: Execute Wireguard systemd service management tasks
+  ansible.builtin.include_tasks: "04_service.yml"

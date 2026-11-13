@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+prometheus_pkg_names:
+  - prometheus2
+
+prometheus_exporters:
+  - name: node
+    package: node_exporter
+    port: 9100
+    enabled: true
+  - name: mysql
+    package: mysqld_exporter
+    port: 9104
+    enabled: false
+  - name: postgresql
+    package: postgres_exporter
+    port: 9187
+    enabled: false

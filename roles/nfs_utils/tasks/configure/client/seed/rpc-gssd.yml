@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create systemd override directory for rpc-gssd
+  ansible.builtin.file:
+    path: "{{ nfs_utils_directory.override_rpc_gssd }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+
+- name: Deploy custom environment and path overrides for secure NFS keytabs
+  ansible.builtin.copy:
+    dest: "{{ nfs_utils_file.override_rpc_gssd }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    content: |
+      [Service]
+      Environment=KRB5_KTNAME={{ nfs_utils_server_keytab_path }}
+  become: true
+  notify:
+    - Reload systemd daemon
+    - Restart rpc-gssd

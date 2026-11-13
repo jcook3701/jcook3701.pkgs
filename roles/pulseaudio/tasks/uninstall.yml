@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Pulse Audio service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ pulseaudio_service }}"
+    state: stopped
+    enabled: false
+
+- name: Uninstall Pulse Audio package and dependencies
+  ansible.builtin.package:
+    name: "{{ pulseaudio_pkg_names }}"
+    state: absent
+
+# - name: Clean Pulse Audio configuration files
+#  ansible.builtin.include_tasks: file-removal.yml

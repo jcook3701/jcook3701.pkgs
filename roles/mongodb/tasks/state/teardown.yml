@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure MongoDB service is stopped and packages are purged
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Decommission MongoDB Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ mongodb_repo_id }}"
+    repo_add_name: "{{ mongodb_repo_name }}"
+    repo_add_state: "absent"
+  when:
+    - mongodb_repo_id is defined
+    - mongodb_repo_id | length > 0
+    - ansible_os_family in ['Debian', 'RedHat']
+
+- name: Clean up remaining persistent and transient MongoDB directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: absent
+  loop:
+    - "{{ mongodb_directory.data_root | default('/var/lib/mongodb') }}"
+    - "{{ mongodb_directory.log_root | default('/var/log/mongodb') }}"
+  loop_control:
+    loop_var: directory
+    label: "Remove directory: {{ directory }}"

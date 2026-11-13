@@ -1,0 +1,139 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Enterprise-grade UniFi Network Application configuration"
+    description: "Configures memory architectures, performance Java execution paths, local listening socket arrays, and background database connection engines for UniFi."
+    author: "Ansible DevOps Engineer"
+    options:
+
+      # Lifecycle & Structural Settings
+      unifi_os_state:
+        type: str
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The intended lifecycle state of the UniFi application suite."
+
+      unifi_users:
+        type: "list"
+        elements: "dict"
+        required: false
+        default: []
+        description: "Accounts granted rootless or direct access to the unifi daemon socket."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The exact local username string to grant UniFi daemon socket access."
+
+      unifi_manage_group:
+        type: "bool"
+        required: false
+        default: true
+        description: "Controls whether the role should actively manage the lifecycle of the 'unifi' system group."
+
+      unifi_download_url:
+        type: str
+        default: "https://www.ui.com"
+        description: "The upstream base mirror server URL hosting UniFi application source distribution packages."
+
+      unifi_version:
+        type: "str"
+        required: false
+        default: "10.4"
+        description: "The major version suite path used to populate the APT repository Suite parameter."
+        choices:
+          - "10.4"
+          - "8.6"
+          - "8.5"
+          - "8.2"
+
+      # Enterprise Java Performance (JVM Tuning)
+      unifi_jvm_init_heap_size:
+        type: str
+        default: "1024m"
+        description: "Initial memory floor space assigned directly to the running Java Virtual Machine environment."
+
+      unifi_jvm_max_heap_size:
+        type: str
+        default: "2024m"
+        description: "Maximum safety boundary ceiling constraint for runtime Java virtual execution page tracking."
+
+      unifi_jvm_extra_opts:
+        type: str
+        default: "-XX:+UseG1GC -XX:+UseStringDeduplication"
+        description: "Appended explicit processing performance optimization flags passed straight to the Java daemon launcher."
+
+      # Core Database Engine Connection Configurations
+      unifi_db_mongo_connections_max:
+        type: int
+        default: 100
+        description: "Upper bound connection handle cap used when establishing application query processing loops."
+
+      unifi_db_mongo_timeout_ms:
+        type: int
+        default: 5000
+        description: "Maximum transaction threshold duration drop limit before a dead request block throws errors."
+
+      # Enterprise Networking & Port Configurations
+      unifi_port_inform:
+        type: int
+        default: 8080
+        description: "TCP port handling incoming heartbeat packet check-ins sent directly from adopted client hardware nodes."
+
+      unifi_port_https:
+        type: int
+        default: 8443
+        description: "The primary web control layout UI interface browser management link port."
+
+      unifi_port_api_redirect:
+        type: int
+        default: 8843
+        description: "Secure routing bridge callback intercept redirect endpoint tracking port."
+
+      unifi_port_portal_http:
+        type: int
+        default: 8880
+        description: "Standard web page capture redirect channel for local open visitor registration layouts."
+
+      unifi_port_portal_https:
+        type: int
+        default: 8843
+        description: "Encrypted landing engine endpoint used for parsing verified secure remote access tokens."
+
+      unifi_port_discovery_udp:
+        type: int
+        default: 10001
+        description: "Local Layer 2 UDP broadcast scan engine listener socket for automatic device configuration maps."
+
+      unifi_port_stun_udp:
+        type: int
+        default: 3478
+        description: "Session Traversal Utilities for NAT (STUN) communication verification engine socket."
+
+      unifi_port_speedtest:
+        type: int
+        default: 6789
+        description: "Internal speed testing metric analysis collection frame listener port."
+
+      # Enterprise Application & Optimization Tuning
+      unifi_system_backup_enabled:
+        type: bool
+        default: true
+        description: "Toggles background system backup creation routines on or off automatically."
+
+      unifi_system_backup_retention_max:
+        type: int
+        default: 30
+        description: "Sets the file history retention limit threshold boundary before historical archive drops occur."
+
+      unifi_system_bind_ip:
+        type: str
+        default: ""
+        description: "Explicit system adapter address locking point for isolation. Blank bounds to all interfaces."
+
+      unifi_system_analytics_enabled:
+        type: bool
+        default: false
+        description: "Toggles phone-home metric diagnostic analytical reporting engines completely off."

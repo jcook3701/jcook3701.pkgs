@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Quickemu OS-specific variables
+  ansible.builtin.include_vars: "{{ quickemu_toolkit_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['distribution'] | lower }}.yml"
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: quickemu_toolkit_vars
+    label: "Loading variables file: {{ quickemu_toolkit_vars }}"
+
+- name: Ensure Quickemu packages are installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: quickemu_toolkit_state | default('present') == 'present'
+
+- name: Ensure Quickemu is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: quickemu_toolkit_state | default('present') == 'absent'
+
+- name: Ensure Quickemu is uninstalled and configurations removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: quickemu_toolkit_state | default('present') == 'teardown'

@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+set imap_user = "{{ mutt_user }}"
+set imap_pass = "{{ mutt_password }}"
+set smtp_url = "smtps://{{ mutt_user }}@{{ smtp_host }}:465/"
+set smtp_pass = "{{ mutt_password }}"
+set from = "{{ mutt_user }}"
+set realname = "{{ mutt_realname }}"

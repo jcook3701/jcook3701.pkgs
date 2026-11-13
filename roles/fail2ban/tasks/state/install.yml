@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Fail2ban dependencies
+  ansible.builtin.package:
+    name: "{{ fail2ban_dep_pkg_names | default([]) }}"
+    state: present
+  become: true
+
+- name: Install Fail2ban Package
+  ansible.builtin.package:
+    name: "{{ fail2ban_pkg_names | default([]) }}"
+    state: present
+  become: true
+
+- name: Configure Fail2ban
+  ansible.builtin.include_tasks: configure/main.yml
+
+- name: Ensure Fail2ban service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ fail2ban_service | default('fail2ban') }}"
+    state: started
+    enabled: true
+  become: true

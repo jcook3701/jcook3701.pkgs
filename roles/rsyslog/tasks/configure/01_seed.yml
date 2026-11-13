@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Initialize runtime storage state directories for rsyslog configuration blocks
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  loop:
+    - "{{ rsyslog_directory.conf_d | default('/etc/rsyslog.d') }}"
+    - "{{ rsyslog_directory.state | default('/var/spool/rsyslog') }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating runtime directory: {{ directory }}"
+
+- name: Enforce proper system ownership on local output files to prevent suspension loops
+  ansible.builtin.file:
+    path: "{{ file.target | replace('-', '') }}" # Strips the rsyslog async dash modifier if present
+    state: "file"
+    owner: "{{ rsyslog_file_owner | default('root') }}"
+    group: "{{ rsyslog_file_group | default('adm') }}"
+    mode: "{{ rsyslog_file_create_mode | default('0640') }}"
+  loop: "{{ rsyslog_facility_rules | default([]) }}"
+  loop_control:
+    loop_var: file
+    label: "Securing log footprint: {{ file.target | replace('-', '') }}"
+  become: true
+
+- name: Deploy primary rsyslog administrative engine configuration blueprint
+  ansible.builtin.template:
+    src: "rsyslog.conf.j2"
+    dest: "{{ rsyslog_file.conf | default('/etc/rsyslog.conf') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart rsyslog service
+
+- name: Deploy pluggable facilities matrix tracking snapshot layout
+  ansible.builtin.template:
+    src: "50-default.conf.j2"
+    dest: "{{ rsyslog_file.default_rules | default('/etc/rsyslog.d/50-default.conf') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  notify: Restart rsyslog service

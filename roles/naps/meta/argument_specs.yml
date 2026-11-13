@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: Manage NAPS2 installation and scanner access
+    description:
+      - Install, remove, or tear down NAPS2.
+      - Manage scanner group membership and repository configuration.
+    options:
+      naps_state:
+        type: str
+        required: false
+        default: present
+        choices:
+          - present
+          - absent
+          - teardown
+        description:
+          - Defines the desired lifecycle state of NAPS2.
+          - Use present to install, absent to remove, or teardown for complete cleanup.
+
+      naps_debug:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Enable debugging output during role execution.
+
+      naps_users:
+        type: list
+        elements: dict
+        required: false
+        default:
+          - name: "{{ ansible_user | default(ansible_user_id) }}"
+        description:
+          - List of user accounts granted access to scanner devices.
+        options:
+          name:
+            type: str
+            required: true
+            description:
+              - Username to grant scanner access.
+
+      naps_manage_group:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Manage the lifecycle of the scanner system group.
+
+      naps_download_url:
+        type: str
+        required: false
+        default: "https://downloads.naps2.com"
+        description:
+          - Base URL of the official NAPS2 APT package repository.

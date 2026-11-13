@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug NVIDIA Container Toolkit Variables
+  ansible.builtin.debug:
+    msg:
+      - "nvidia_container_toolkit_pkg_names: {{ nvidia_container_toolkit_pkg_names }}"
+      - "nvidia_container_toolkit_directory: {{ nvidia_container_toolkit_directory }}"
+      - "nvidia_container_toolkit_file: {{ nvidia_container_toolkit_file }}"
+      - "nvidia_container_toolkit_repo_id: {{ nvidia_container_toolkit_repo_id }}"
+      - "nvidia_container_toolkit_repo_name: {{ nvidia_container_toolkit_repo_name }}"
+  when: nvidia_container_toolkit_debug | default(false) | bool
+
+- name: Setup NVIDIA Container Toolkit Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ nvidia_container_toolkit_os_repo_id }}"
+    repo_add_name: "{{ nvidia_container_toolkit_os_repo_name }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ nvidia_container_toolkit_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ nvidia_container_toolkit_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ nvidia_container_toolkit_debian_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ nvidia_container_toolkit_debian_signed_by | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ nvidia_container_toolkit_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ nvidia_container_toolkit_arch_server | default(omit) }}"
+  when: ansible_os_family in ['Debian'] # TODO: 'Redhat' variables.
+
+- name: Installing NVIDIA Container Toolkit
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ nvidia_container_toolkit_os_pkg_names | default([]) }}
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure NVIDIA Container Toolkit
+  ansible.builtin.include_tasks: configure/main.yml

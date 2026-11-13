@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check for existing passdb backend file initialization
+  ansible.builtin.stat:
+    path: "{{ samba_directory.lib }}/private/secrets.tdb"
+  register: _samba_nt4_secrets_stat
+
+- name: Deploy Samba server configuration
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: "{{ samba_file.samba_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: _samba_nt4_config_state
+
+- name: Store OpenLDAP administrative secret in Samba database vault
+  ansible.builtin.command: >-
+    net idmap set secret "{{ samba_ldap_admin_dn }}" "{{ samba_ldap_secret }}"
+  register: _samba_idmap_secret_set
+  no_log: true
+  when:
+    - not _samba_nt4_secrets_stat.stat.exists
+    - samba_idmap_backend == 'ldap'
+  failed_when: >-
+    (_samba_idmap_secret_set.rc != 0) or
+    ('failed' in _samba_idmap_secret_set.stdout | lower) or
+    ('error' in _samba_idmap_secret_set.stderr | lower)
+
+- name: Store OpenLDAP passdb manager secret in Samba database vault (Standalone TDB)
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "{{ samba_ldap_secret }}" | \
+    smbpasswd \
+      -w "{{ samba_ldap_secret }}" \
+      -an "{{ samba_ldap_admin_dn }}"
+  args:
+    executable: "/bin/bash"
+  register: _samba_passdb_secret_set
+  no_log: true
+  when: samba_idmap_backend == 'tdb'
+  changed_when: "'Setting stored password' in _samba_passdb_secret_set.stdout"
+  failed_when:
+    - _samba_passdb_secret_set.rc != 0
+    - ('error' in _samba_passdb_secret_set.stderr | lower)
+
+- name: Execute Classic domain account engine structures provisioning
+  ansible.builtin.include_tasks: provision.yml
+  when: samba_deployment_mode == 'nt4_pdc'
+
+- name: Ensure Samba services are running and enabled
+  ansible.builtin.systemd:
+    name: "{{ service }}"
+    state: "{{ smb_state }}"
+    enabled: true
+  vars:
+    smb_state: "{{ (_samba_nt4_config_state.changed) | ternary('restarted', 'started') }}"
+  loop: "{{ samba_service }}"
+  loop_control:
+    loop_var: service
+    label: "Service status: {{ service }} -> state: {{ smb_state }}"

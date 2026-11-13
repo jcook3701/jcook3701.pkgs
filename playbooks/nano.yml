@@ -13,4 +13,3 @@
     - name: Install nano directories
       ansible.builtin.include_role:
         name: jcook3701.pkgs.nano
-        tasks_from: nano-install.yml

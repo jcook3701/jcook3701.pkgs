@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Forcefully enable SSSD profiles within the system PAM authentication stacks
+  ansible.builtin.command: >-
+    pam-auth-update --package --enable sss --enable mkhomedir
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: pam_enable_cmd
+  changed_when: pam_enable_cmd.rc == 0
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Forcefully select SSSD profile within Red Hat system authselect stacks
+  ansible.builtin.command: >-
+    authselect select sssd with-mkhomedir --force
+  register: authselect_cmd
+  changed_when: authselect_cmd.rc == 0
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Ensure oddjobd background service is running on Red Hat systems
+  ansible.builtin.service:
+    name: oddjobd
+    state: started
+    enabled: true
+  become: true
+  when: ansible_facts['os_family'] == 'RedHat'

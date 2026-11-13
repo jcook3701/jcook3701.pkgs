@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+tftpd_hpa_state: present
+
+tftpd_hpa_port: "69"
+
+tftpd_hpa_options: "--secure -c"

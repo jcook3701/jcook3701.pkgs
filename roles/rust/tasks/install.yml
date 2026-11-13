@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install rust packages
+  ansible.builtin.package:
+    name: "{{ rust_pkg_names }}"
+    state: present
+
+- name: Update .bashrc for rust
+  ansible.builtin.blockinfile:
+    dest: "{{ sudo_user_home }}/.bashrc"
+    marker: "{{ rust_marker }}"
+    block: "{{ rust_bashrc }}"
+    state: present
+  when: sudo_user != "root" and rust_bashrc is defined
+
+- name: Reload Shell
+  ansible.builtin.include_role:
+    name: jcook3701.utils.general
+    task_from: reload-shell.yml

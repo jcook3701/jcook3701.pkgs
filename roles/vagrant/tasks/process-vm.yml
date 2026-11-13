@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create virtualbox with vagrant
+  ansible.builtin.include_tasks: create-vm.yml
+
+- name: Configure virtualbox VM
+  ansible.builtin.include_tasks: configure-vm.yml

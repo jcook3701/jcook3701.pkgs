@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Converge Enterprise Docker CE Core Package and Runtime State
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Execute Main Docker Runtime Configuration Lifecycle Sweep
+      ansible.builtin.include_role:
+        name: "docker_ce"

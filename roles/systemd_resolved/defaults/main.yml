@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+systemd_resolved_state: present
+
+systemd_resolved_dns_servers:
+  - "192.168.0.2"
+  - "192.168.0.3"
+
+# Domain Configurations
+systemd_resolved_top_level_domain: "com"
+systemd_resolved_second_level_domain: "example"
+systemd_resolved_domain_name: "{{ systemd_resolved_second_level_domain }}.{{ systemd_resolved_top_level_domain }}"

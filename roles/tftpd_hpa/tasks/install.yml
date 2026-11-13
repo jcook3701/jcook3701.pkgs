@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install tftpd-hpa package and dependencies.
+  ansible.builtin.package:
+    name: "{{ tftpd_hpa_pkg_names }}"
+    state: present
+
+- name: Ensure target configuration directories exist
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ tftpd_hpa_directory.values() | list }}"
+  loop_control:
+    loop_var: dir
+    label: "{{ dir }}"
+
+- name: Generate TFTP configuration file from template
+  ansible.builtin.template:
+    src: "{{ ansible_facts['os_family'] | lower }}/tftp.conf.j2"
+    dest: "{{ tftpd_hpa_file.conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart tftpd-hpa
+
+- name: Ensure tftpd-hpa service is started and enabled
+  ansible.builtin.service:
+    name: "{{ tftpd_hpa_service }}"
+    state: started
+    enabled: true

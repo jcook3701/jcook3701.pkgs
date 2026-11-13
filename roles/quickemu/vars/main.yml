@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+quickemu_pkg_names: "{{ quickemu_os_pkg_names | default(['quickemu']) }}"
+
+quickemu_directory:
+  config: "{{ quickemu_os_directory.config | default('/etc/quickemu') }}"
+
+quickemu_file:
+  config: "{{ quickemu_directory.config ~ '/config.toml' | default('/etc/quickemu/config.toml') }}"
+
+# Repository Specifics
+quickemu_repo_id: "{{ quickemu_os_repo_id | default('quickemu') }}"
+quickemu_repo_name: "{{ quickemu_os_repo_name | default('Quickemu PPA') }}"

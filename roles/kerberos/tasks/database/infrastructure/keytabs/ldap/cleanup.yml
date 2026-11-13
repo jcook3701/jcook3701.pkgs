@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Clean up temporary LDAP transit files off the Master KDC disk
+  ansible.builtin.file:
+    path: "{{ target_transit_file }}"
+    state: absent
+  vars:
+    target_node: "{{ ldap_server_fqdn.split('.') | first }}"
+    target_transit_file: "{{ kerberos_keytabs.master_ldap_transit_file }}"
+  loop: "{{ kerberos_ldap_servers | default([]) }}"
+  loop_control:
+    loop_var: ldap_server_fqdn
+    label: "Purging master LDAP transit scratch file -> ldap/{{ ldap_server_fqdn }}"
+  become: true
+  when: kerberos_node_type == 'master'
+
+- name: Clean up local controller staging LDAP keytab cache
+  ansible.builtin.file:
+    path: "{{ target_controller_ldap }}"
+    state: absent
+  vars:
+    target_node: "{{ ldap_server_fqdn.split('.') | first }}"
+    target_controller_ldap: "{{ kerberos_keytabs.controller_ldap_staging }}"
+  loop: "{{ kerberos_ldap_servers | default([]) }}"
+  loop_control:
+    loop_var: ldap_server_fqdn
+    label: "Purging controller LDAP staging file -> ldap/{{ ldap_server_fqdn }}"
+  delegate_to: localhost
+  become: false
+
+- name: Clean up transient LDAP landing pad files off the remote target endpoints
+  ansible.builtin.file:
+    path: "{{ target_delivered_transit }}"
+    state: absent
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_delivered_transit: "{{ kerberos_keytabs.client_ldap_delivered_transit }}"
+  become: true
+  when: inventory_hostname in (kerberos_ldap_servers | default([]))

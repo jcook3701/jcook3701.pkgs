@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+quickemu_state: present
+quickemu_debug: true
+# -------------------------------------------------------------------------
+# Quickemu Repository Configuration
+# -------------------------------------------------------------------------
+quickemu_base_download_url: "https://ppa.launchpadcontent.net"
+quickemu_key_download_url: >-
+  https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAC4983BC6500F2E768D0CF7F08C0EFB260A1EEF3
+# -------------------------------------------------------------------------
+# Quickemu Package Configuration
+# -------------------------------------------------------------------------
+quickemu_manage_engine: true
+quickemu_engine: "docker"
+
+# TODO: Templates values need to be turned into variables for the role to be
+# more flexible and reusable.

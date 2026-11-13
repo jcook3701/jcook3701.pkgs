@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load NAPS OS-specific variables
+  ansible.builtin.include_vars: "{{ naps_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: naps_vars
+    label: "Loading variables file: {{ naps_vars }}"
+
+- name: Install NAPS packages
+  ansible.builtin.include_tasks: state/install.yml
+  when: naps_state | default('present') == 'present'
+
+- name: Uninstall NAPS packages
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - naps_state | default('present') == 'absent'
+    - naps_pkg_names[0] in ansible_facts.packages
+
+- name: Teardown NAPS packages
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: naps_state | default('present') == 'teardown'

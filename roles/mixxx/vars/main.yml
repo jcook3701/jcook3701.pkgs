@@ -1,6 +1,4 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-
-mixxx_conf:
-  gpg: "0x4716DAB5"
+mixxx_repo_distro: "{{ ansible_distribution | lower }}"

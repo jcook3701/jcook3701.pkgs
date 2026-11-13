@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Postgres package and dependencies.
+  ansible.builtin.package:
+    name: "{{ postgres_pkg_names }}"
+    state: present
+
+- name: Ensure Postgres service is started and enabled
+  ansible.builtin.service:
+    name: "{{ postgres_service }}"
+    state: started
+    enabled: yes

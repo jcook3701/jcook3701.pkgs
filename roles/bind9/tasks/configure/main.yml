@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Create Bind9 configuration directories and files
+  ansible.builtin.include_tasks: seed.yml
+
+- name: Generate Template files needed for Bind9 configuration
+  ansible.builtin.include_tasks: "os/{{ ansible_facts['os_family'] | lower }}.yml"
+  when: ansible_facts['os_family'] | lower in ['debian']

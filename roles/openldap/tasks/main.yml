@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load Openldap OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Load Samba Bootstrap Groups
+  ansible.builtin.include_vars: "groups/samba.yml"
+  when: openldap_samba | bool
+
+- name: Unified Merge of Samba Groups into Bootstrap Inventory
+  ansible.builtin.set_fact:
+    openldap_bootstrap_groups: >-
+      {{
+        openldap_bootstrap_groups | default([])
+          + (openldap_samba_groups | default([])
+            | rejectattr('name', 'in', openldap_bootstrap_groups | default([])
+            | map(attribute='name') | list) | list)
+      }}
+  when: openldap_samba | bool
+
+- name: Check if OpenLDAP configuration database already exists on host
+  ansible.builtin.stat:
+    path: "{{ openldap_directory.slapd }}/cn=config.ldif"
+  register: openldap_existing_config
+  become: true
+
+- name: OpenLDAP database backup
+  ansible.builtin.include_tasks: utilities/backupDB.yml
+  when:
+    - openldap_state | default('present') in ['present', 'teardown', 'backup']
+    - openldap_existing_config.stat.exists
+    - openldap_node_type == 'master'
+    - ansible_facts.packages is defined
+    - openldap_pkg_names[0] in ansible_facts.packages
+
+- name: Install Openldap
+  ansible.builtin.include_tasks: state/install.yml
+  when:
+    - openldap_state | default('present') == 'present'
+
+- name: OpenLDAP database restoration and import
+  ansible.builtin.include_tasks: utilities/importDB.yml
+  when:
+    - openldap_state | default('present') == 'present'
+    - not openldap_existing_config.stat.exists
+
+- name: Uninstall Openldap
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when:
+    - openldap_state | default('present') == 'absent'
+    - ansible_facts.packages is defined
+    - openldap_pkg_names[0] in ansible_facts.packages
+
+- name: Complete Purge and Tear-Down of OpenLDAP Environment
+  ansible.builtin.include_tasks: state/teardown.yml
+  when:
+    - openldap_state | default('present') == 'teardown'

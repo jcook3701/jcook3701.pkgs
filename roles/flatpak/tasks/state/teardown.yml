@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Flatpak is Uninstalled
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Look up user account information
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ user.name }}"
+  loop: "{{ flatpak_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Fetching passwd entry for {{ user.name }}"
+  become: true
+  when:
+    - user.name is defined
+    - user.name | length > 0
+
+- name: Ensure Flatpak User Directories are removed
+  ansible.builtin.file:
+    path: "{{ getent_passwd[user.name][4] }}/.local/share/flatpak"
+    state: absent
+  loop: "{{ flatpak_users | default([]) }}"
+  loop_control:
+    loop_var: user
+    label: "Removing {{ user.name }} flatpak share directory"
+  become: true
+  when:
+    - user.name is defined
+    - user.name | length > 0
+    - getent_passwd[user.name] is defined

@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify if replication sync keys are already present on target endpoints
+  ansible.builtin.command: "klist -k {{ kerberos_keytabs.system_default }}"
+  register: endpoint_kiprop_file_check
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in (kerberos_propagation_servers | default([]))
+
+- name: Check if a staged replication keytab file exists on the Ansible Controller
+  ansible.builtin.stat:
+    path: "{{ target_controller_staging }}"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_kiprop_staging }}"
+  register: controller_kiprop_staging_stat
+  delegate_to: localhost
+  become: false
+  when: inventory_hostname in (kerberos_propagation_servers | default([]))
+
+- name: Securely deliver unique replication keytab file to the target node transit landing pad
+  ansible.builtin.copy:
+    src: "{{ target_controller_staging }}"
+    dest: "{{ kerberos_keytabs.replica_kiprop_delivered_transit }}"
+    owner: root
+    group: root
+    mode: "0600"
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    target_controller_staging: "{{ kerberos_keytabs.controller_kiprop_staging }}"
+  when:
+    - inventory_hostname in (kerberos_propagation_servers | default([]))
+    - controller_kiprop_staging_stat.stat.exists | default(false)
+    - ('kiprop/' not in endpoint_kiprop_file_check.stdout | lower)
+
+- name: Merge replication transit keys natively into the target default system keytab
+  ansible.builtin.shell:
+    cmd: |
+      ktutil <<EOF
+      read_kt {{ staging_keytab }}
+      write_kt {{ kerberos_keytabs.system_default }}
+      quit
+      EOF
+  vars:
+    target_node: "{{ inventory_hostname.split('.') | first }}"
+    staging_keytab: "{{ kerberos_keytabs.replica_kiprop_delivered_transit }}"
+  args:
+    executable: /bin/bash
+  register: kiprop_merge_output
+  become: true
+  changed_when: >-
+    (kiprop_merge_output.rc == 0) and
+    ('error' not in kiprop_merge_output.stdout | lower) and
+    ('failed' not in kiprop_merge_output.stdout | lower)
+  failed_when: >-
+    (kiprop_merge_output.rc != 0) or
+    ('error' in kiprop_merge_output.stdout | lower) or
+    ('failed' in kiprop_merge_output.stdout | lower) or
+    ('error' in kiprop_merge_output.stderr | lower) or
+    ('failed' in kiprop_merge_output.stderr | lower) or
+    ('permission denied' in kiprop_merge_output.stderr | lower)
+  when:
+    - inventory_hostname in (kerberos_propagation_servers | default([]))
+    - ('kiprop/' not in endpoint_kiprop_file_check.stdout | lower)

@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install and configure nano package
+  ansible.builtin.include_tasks:
+    file: install.yml
+  when: nano_state | default('present') == 'present'
+
+- name: Uninstall nano package
+  ansible.builtin.include_tasks:
+    file: uninstall.yml
+  when:
+    - nano_state | default('present') == 'absent'
+    - nano_pkg_names[0] in ansible_facts.packages

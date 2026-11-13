@@ -1,0 +1,48 @@
+{#
+# system.conf.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro system_conf() -%}
+ad.security.frontend_clipboard=1
+ad.ancl.cached_config.v1=
+ad.anynet.fpr=bbf72c619b5d7618437e5ffb1bfe8e33cd2fcfdf
+ad.security.frontend_clipboard_files=1
+ad.anynet.last_relay=relay-fa5d0cf9.net.anydesk.com:80:443:6568
+ad.anynet.client_stats_hash=0fd486266a40d2cc25b4109b73bef3e243c23547
+ad.security.permission_profiles._default.permissions.sas=1
+ad.wol.mac_hash=b444fe1cfe53d84625cb22484439fe893ebfb15d
+ad.license.expiry=0
+ad.security.permission_profiles._unattended_access.permissions.sas=1
+ad.anynet.relay.fatal_result=1.0
+ad.telemetry.active_consents=
+ad.anynet.did.hash=1130882816
+ad.telemetry.unacked_consents=
+ad.license.name=free-1
+ad.inst.id=96970a4a36e060638fb3b98356a5a272
+ad.security.permission_profiles.version=1
+ad.security.update_version=1
+ad.anynet.alias=
+ad.anynet.network_id=main
+ad.anynet.id=1093912131
+ad.security.frontend_clipboard_version=1
+ad.anynet.cur_version=34359738372
+ad.anynet.relay.state=2
+{%- endmacro -%}
+
+{{- system_conf() }}

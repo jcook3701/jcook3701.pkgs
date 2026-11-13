@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug Kubectl Variables
+  ansible.builtin.debug:
+    msg:
+      - "kubectl_pkg_names: {{ kubectl_pkg_names }}"
+      - "kubectl_directory: {{ kubectl_directory }}"
+      - "kubectl_file: {{ kubectl_file }}"
+      - "kubectl_repo_id: {{ kubectl_repo_id }}"
+      - "kubectl_repo_name: {{ kubectl_repo_name }}"
+  when: kubectl_debug | default(false) | bool
+
+- name: Setup Kubectl Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ kubectl_os_repo_id | default('kubectl') }}"
+    repo_add_name: "{{ kubectl_os_repo_name | default('Kubectl PPA') }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ kubectl_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ kubectl_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ kubectl_debian_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ kubectl_debian_signed_by | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ kubectl_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ kubectl_arch_server | default(omit) }}"
+  when: ansible_facts['distribution'] | lower == 'ubuntu'
+
+- name: Installing Kubectl
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ kubectl_os_pkg_names | default(['kubectl']) }}
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure Kubectl
+  ansible.builtin.include_tasks: configure/main.yml

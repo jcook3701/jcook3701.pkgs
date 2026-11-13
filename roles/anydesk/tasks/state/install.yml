@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Setup Anydesk Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ anydesk_repo_id }}"
+    repo_add_name: "{{ anydesk_repo_name }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ anydesk_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ anydesk_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ anydesk_debian_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ anydesk_debian_signed_by | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ anydesk_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ anydesk_arch_server | default(omit) }}"
+  when: ansible_os_family in ['Debian', 'Redhat']
+
+- name: Installing Anydesk
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ anydesk_pkg_names | default(['anydesk']) }}"
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+# TODO: Setup configuration tasks here.

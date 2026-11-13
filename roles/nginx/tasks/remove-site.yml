@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: "Include variables from {{ site_item.server_vars }} for cleanup"
+  ansible.builtin.include_vars:
+    file: "{{ site_item.server_vars }}"
+
+- name: "Remove symbolic link for {{ nginx_site.server_name }}"
+  ansible.builtin.file:
+    path: "/etc/nginx/sites-enabled/{{ nginx_site.server_name }}.conf"
+    state: absent
+  notify: Reload NGINX

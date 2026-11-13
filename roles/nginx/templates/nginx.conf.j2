@@ -18,48 +18,92 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
-{% macro nginx_mail_conf() %}
+{%- macro nginx_mail_conf(mail_settings) -%}
+	{#
+	# nginx_mail_conf macro
+	#
+	# Configures the NGINX mail proxy module for POP3 and IMAP.
+	#
+	# Parameters:
+	#   mail_settings (dict): Configuration for mail proxying.
+	#     - auth_http (str): URL to the external HTTP authentication server.
+	#     - pop3_proxy (str): Toggle for POP3 proxying (Default: on).
+	#     - imap_proxy (str): Toggle for IMAP proxying (Default: on).
+	#
+	# Returns:
+	#   A rendered 'mail' configuration block.
+	#}
 mail {
 	# See sample authentication script at:
 	# http://wiki.nginx.org/ImapAuthenticateWithApachePhpScript
 
-	# auth_http localhost/auth.php;
+	# auth_http {{ mail_settings.auth_http | default('localhost/auth.php') }};
 	# pop3_capabilities "TOP" "USER";
 	# imap_capabilities "IMAP4rev1" "UIDPLUS";
 
 	server {
 		listen     localhost:110;
 		protocol   pop3;
-		proxy      on;
+		proxy      {{ mail_settings.pop3_proxy | default('on') }};
 	}
 
 	server {
 		listen     localhost:143;
 		protocol   imap;
-		proxy      on;
+		proxy      {{ mail_settings.imap_proxy | default('on') }};
 	}
 }
-{% endmacro%}
+{%- endmacro -%}
 
-{% macro nginx_events_conf() %}
+{%- macro nginx_events_conf(events_settings) -%}
+	{#
+	# nginx_events_conf macro
+	#
+	# Sets global options for how NGINX handles network connections.
+	#
+	# Parameters:
+	#   events_settings (dict): Event processing constants.
+	#     - worker_connections (int): Max simultaneous connections per worker (Default: 768).
+	#     - multi_accept (str): Whether to accept all new connections at once (Default: off).
+	#
+	# Returns:
+	#   A rendered 'events' configuration block.
+	#}
 events {
-	worker_connections 768;
-	# multi_accept on;
+	worker_connections {{ events_settings.worker_connections | default(768) }};
+	# multi_accept {{ events_settings.multi_accept | default('off') }};
 }
-{% endmacro %}
+{%- endmacro -%}
 
-{% macro nginx_http_conf() %}
+{%- macro nginx_http_conf(http_settings) -%}
+	{#
+	# nginx_http_conf macro
+	#
+	# Configures the primary HTTP core functionality, including SSL, Logs, and Gzip.
+	#
+	# Parameters:
+	#   http_settings (dict): Global HTTP settings.
+	#     - sendfile (str): Toggle for kernel-space file copying (Default: on).
+	#     - tcp_nopush (str): Optimize data packets for FreeBSD/Linux (Default: on).
+	#     - types_hash_max_size (int): Max size of the types hash tables (Default: 2048).
+	#     - ssl_protocols (str): Supported SSL/TLS versions (Default: TLSv1.2 TLSv1.3).
+	#     - access_log (str): Absolute path to the access log (Default: /var/log/nginx/access.log).
+	#     - gzip (str): Toggle for on-the-fly response compression (Default: on).
+	#
+	# Returns:
+	#   A rendered 'http' configuration block.
+	#}
 http {
 
 	##
 	# Basic Settings
 	##
 
-	sendfile on;
-	tcp_nopush on;
-	types_hash_max_size 2048;
-	# server_tokens off;
+	sendfile {{ http_settings.sendfile | default('on') }};
+	tcp_nopush {{ http_settings.tcp_nopush | default('on') }};
+	types_hash_max_size {{ http_settings.types_hash_max_size | default(2048) }};
 
+	# server_tokens off;
 	# server_names_hash_bucket_size 64;
 	# server_name_in_redirect off;
 
@@ -70,20 +114,20 @@ http {
 	# SSL Settings
 	##
 
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+	ssl_protocols {{ http_settings.ssl_protocols | default('TLSv1.2 TLSv1.3') }};
 	ssl_prefer_server_ciphers on;
 
 	##
 	# Logging Settings
 	##
 
-	access_log /var/log/nginx/access.log;
+	access_log {{ http_settings.access_log | default('/var/log/nginx/access.log') }};
 
 	##
 	# Gzip Settings
 	##
 
-	gzip on;
+	gzip {{ http_settings.gzip | default('on') }};
 
 	# gzip_vary on;
 	# gzip_proxied any;
@@ -99,18 +143,36 @@ http {
 	include /etc/nginx/conf.d/*.conf;
 	include /etc/nginx/sites-enabled/*;
 }
-{% endmacro%}
+{%- endmacro -%}
 
-{% macro nginx_conf() %}
-user www-data;
-worker_processes auto;
-pid /run/nginx.pid;
-error_log /var/log/nginx/error.log;
+{%- macro nginx_conf(global_settings) -%}
+	{#
+	# nginx_conf macro
+	#
+	# The main entry point for generating the global nginx.conf file.
+	# Integrates events and http modules via sub-macros.
+	#
+	# Parameters:
+	#   global_settings (dict): Root-level directives and sub-config blocks.
+	#     - user (str): System user for worker processes (Default: www-data).
+	#     - worker_processes (str/int): Number of worker processes (Default: auto).
+	#     - pid (str): Path to the PID file (Default: /run/nginx.pid).
+	#     - error_log (str): Path to the error log (Default: /var/log/nginx/error.log).
+	#     - events (dict): Dictionary passed to nginx_events_conf.
+	#     - http (dict): Dictionary passed to nginx_http_conf.
+	#
+	# Returns:
+	#   A fully rendered nginx.conf file.
+	#}
+user {{ global_settings.user | default('www-data') }};
+worker_processes {{ global_settings.worker_processes | default('auto') }};
+pid {{ global_settings.pid | default('/run/nginx.pid') }};
+error_log {{ global_settings.error_log | default('/var/log/nginx/error.log') }};
 include /etc/nginx/modules-enabled/*.conf;
 
-	{{- nginx_events_conf }}
+	{{- nginx_events_conf(global_settings.events | default({})) }}
 
-	{{- nginx_http_conf }}
-{% endmacro %}
+	{{- nginx_http_conf(global_settings.http | default({})) }}
+{%- endmacro -%}
 
-{{- nginx_conf() }}
+{{- nginx_conf(nginx_main_config | default({})) }}

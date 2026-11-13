@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+nvidia_container_toolkit_os_pkg_names:
+  - nvidia-container-toolkit
+  - nvidia-container-toolkit-base
+  - libnvidia-container-tools
+  - libnvidia-container1
+
+nvidia_container_toolkit_os_directory:
+  config: "/etc/nvidia-container-runtime"
+  env: "/etc/nvidia-container-toolkit"
+
+# Repository Configuration for jcook3701.utils.repo_add
+nvidia_container_toolkit_os_repo_id: "nvidia-container-toolkit"
+nvidia_container_toolkit_os_repo_name: "NVIDIA Container Toolkit"
+
+nvidia_container_toolkit_debian_uris: >-
+  {{ nvidia_container_toolkit_download_url ~ '/libnvidia-container/stable/deb/$(ARCH)'
+      | default('https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH)') }}
+nvidia_container_toolkit_debian_suites: "/"
+nvidia_container_toolkit_debian_component: ""
+nvidia_container_toolkit_debian_signed_by: >-
+  {{ nvidia_container_toolkit_download_url ~ '/libnvidia-container/gpgkey'
+      | default('https://nvidia.github.io/libnvidia-container/gpgkey') }}

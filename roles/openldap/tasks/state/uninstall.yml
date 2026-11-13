@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Stop OpenLDAP service cleanly
+  ansible.builtin.service:
+    name: "{{ openldap_service | default('slapd') }}"
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Force kill any orphaned slapd background processes lingering in memory
+  ansible.builtin.command: "pkill -9 {{ openldap_service | default('slapd') }}"
+  failed_when: false
+  changed_when: false
+  become: true
+
+- name: Remove OpenLDAP binary packages
+  ansible.builtin.package:
+    name: "{{ openldap_pkg_names | default([]) }}"
+    state: absent
+  become: true

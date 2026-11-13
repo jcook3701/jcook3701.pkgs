@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+setupcon_user: root
+setupcon_group: root
+
+setupcon_dep_pkg_names: "{{ setupcon_os_dep_pkg_names | default([]) }}"
+
+setupcon_directory:
+  config: /etc/default
+
+setupcon_file:
+  console_setup_config: "{{ setupcon_directory.config ~ '/console-setup' | default('/etc/default/console-setup') }}"
+  keyboard_config: "{{ setupcon_directory.config ~ '/keyboard' | default('/etc/default/keyboard') }}"

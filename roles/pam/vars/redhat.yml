@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+pam_os_dep_pkg_names:
+  - libcap
+  - gnome-keyring
+  - pam-devel
+  - pam_pwquality
+  - sssd-common
+  - systemd-udev
+
+pam_os_pkg_names:
+  - pam
+  - fprintd-pam
+  - duo_unix
+  - pam_u2f
+  - pam_yubico
+
+pam_os_directory:
+  path: "/etc/pam.d"
+  shared: "/usr/share"
+  # Red Hat manages dynamic configurations using authselect profiles instead of standard pam-configs
+  shared_pam: "/usr/share/authselect"
+  shared_pam_configs: "/usr/share/authselect/vendor"

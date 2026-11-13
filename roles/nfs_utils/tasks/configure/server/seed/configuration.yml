@@ -1,0 +1,95 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure server export directories exist
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ nfs_utils_directory.export | default('/export') }}"
+    - "{{ nfs_utils_directory.export_public | default('/export/public') }}"
+    - "{{ nfs_utils_directory.export_secure | default('/export/secure') }}"
+    - "{{ nfs_utils_directory.exports_d | default('/etc/exports.d') }}"
+  loop_control:
+    loop_var: directory
+    label: "Creating: {{ directory }}"
+  become: true
+
+- name: "DEBUG: Inspect raw nfs_utils_server_exports structure"
+  ansible.builtin.debug:
+    msg:
+      - "Type of variable: {{ nfs_utils_server_exports | type_debug }}"
+      - "Raw Content: {{ nfs_utils_server_exports | default([]) }}"
+  when: nfs_utils_debug_mode | bool
+
+- name: "DEBUG: Verify configuration target paths"
+  ansible.builtin.debug:
+    msg: "Will map local source '{{ nfs_share.path }}' to target destination '{{ calculated_export_path }}'"
+  vars:
+    calculated_export_path: >-
+      {{ nfs_utils_directory.export | default('/export') }}/{% if nfs_share.hosts
+          | map(attribute='options') | select('search', 'sec=krb5')
+          | list | length > 0 %}secure{% else %}public{% endif %}/{{ nfs_share.name }}
+  loop: "{{ nfs_utils_server_exports | default([]) }}"
+  loop_control:
+    loop_var: nfs_share
+    label: "Path Check: {{ calculated_export_path }}"
+  when: nfs_utils_debug_mode | bool
+
+- name: Ensure server export mount directories exist
+  ansible.builtin.file:
+    path: "{{ calculated_export_path }}"
+    state: directory
+    mode: "0755"
+  vars:
+    calculated_export_path: >-
+      {% if nfs_share.hosts | map(attribute='options') | select('search', 'sec=krb5')
+        | list | length > 0 %}{{ nfs_utils_directory.export_secure
+        | default('/export/secure') }}{% else %}{{ nfs_utils_directory.export_public
+        | default('/export/public') }}{% endif %}/{{ nfs_share.name }}
+  loop: "{{ nfs_utils_server_exports | default([]) }}"
+  loop_control:
+    loop_var: nfs_share
+    label: "Creating sub-directory: {{ calculated_export_path }}"
+
+- name: Bind mount server storage paths into host export directories
+  ansible.posix.mount:
+    src: "{{ nfs_share.path }}"
+    path: "{{ calculated_export_path }}"
+    opts: "bind"
+    state: "mounted"
+    fstype: "none"
+  vars:
+    calculated_export_path: >-
+      {% if nfs_share.hosts | map(attribute='options') | select('search', 'sec=krb5')
+        | list | length > 0 %}{{ nfs_utils_directory.export_secure
+        | default('/export/secure') }}{% else %}{{ nfs_utils_directory.export_public
+        | default('/export/public') }}{% endif %}/{{ nfs_share.name }}
+  loop: "{{ nfs_utils_server_exports | default([]) }}"
+  loop_control:
+    loop_var: nfs_share
+    label: "Mounting: {{ nfs_share.path }} -> {{ calculated_export_path }}"
+
+- name: Deploy NFS master exports configuration template
+  ansible.builtin.template:
+    src: "exports.j2"
+    dest: "{{ nfs_utils_file.exports | default('/etc/exports') }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Restart nfs server service
+
+- name: Deploy client-side NFS upcall request-key configuration
+  ansible.builtin.template:
+    src: "nfs.idmap.conf.j2"
+    dest: "{{ nfs_utils_file.nfs_idmap_conf | default('/etc/idmapd.conf') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  # Only deploy if running in native mode; gssproxy overrides this logic later
+  when: not nfs_utils_use_gssproxy | bool

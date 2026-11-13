@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install ros2
+  ansible.builtin.package:
+    name: "{{ ros2_pkgs }}"
+    state: "{{ ros2_state }}"

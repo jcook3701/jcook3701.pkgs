@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check if private key already exists on disk
+  ansible.builtin.stat:
+    path: "{{ wireguard_key.private }}"
+  register: wireguard_private_key_file
+  become: true
+
+- name: Generate local private key if not explicitly provided
+  ansible.builtin.command: wg genkey
+  register: wireguard_generated_private_key
+  when:
+    - wireguard_private_key is none or wireguard_private_key == ""
+    - not wireguard_private_key_file.stat.exists
+  changed_when: true
+  no_log: true
+  become: true
+
+- name: Save generated private key to disk secure storage
+  ansible.builtin.copy:
+    content: "{{ wireguard_generated_private_key.stdout }}"
+    dest: "{{ wireguard_key.private }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - wireguard_private_key is none or wireguard_private_key == ""
+    - not wireguard_private_key_file.stat.exists
+  become: true
+
+- name: Read local private key string into execution memory
+  ansible.builtin.slurp:
+    src: "{{ wireguard_key.private }}"
+  register: wireguard_slurped_private_key
+  become: true
+
+- name: Set runtime private key variable fact
+  ansible.builtin.set_fact:
+    wireguard_private_key: "{{ wireguard_slurped_private_key.content | b64decode | trim }}"
+  no_log: true

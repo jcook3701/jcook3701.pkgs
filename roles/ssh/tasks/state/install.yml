@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install SSH package and dependencies
+  ansible.builtin.package:
+    name: "{{ ssh_pkg_names | default(['openssh-server']) }}"
+    state: present
+  become: true
+
+- name: Configure SSH service
+  ansible.builtin.include_tasks: configure/main.yml

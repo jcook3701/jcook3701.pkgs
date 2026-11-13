@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Kubectl OS-specific variables
+  ansible.builtin.include_vars: "{{ kubectl_toolkit_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['distribution'] | lower }}.yml"
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: kubectl_toolkit_vars
+    label: "Loading variables file: {{ kubectl_toolkit_vars }}"
+
+- name: Ensure Kubectl packages are installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: kubectl_toolkit_state | default('present') == 'present'
+
+- name: Ensure Kubectl is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: kubectl_toolkit_state | default('present') == 'absent'
+
+- name: Ensure Kubectl is uninstalled and configurations removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: kubectl_toolkit_state | default('present') == 'teardown'

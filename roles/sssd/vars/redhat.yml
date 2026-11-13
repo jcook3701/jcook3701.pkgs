@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+sssd_os_pkg_names:
+  - sssd
+  - sssd-tools
+
+sssd_os_directory:
+  conf: "/etc/sssd"
+  cacerts: "/etc/pki/tls/certs"
+  certs: "/etc/openldap/certs"
+  db: "/var/lib/sss/db"
+  mc: "/var/lib/sss/mc"
+  pipes: "/var/lib/sss/pipes"

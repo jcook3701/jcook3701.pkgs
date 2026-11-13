@@ -14,4 +14,3 @@
     - name: Install sdkman
       ansible.builtin.include_role:
         name: jcook3701.pkgs.sdkman
-        tasks_from: sdkman-install.yml

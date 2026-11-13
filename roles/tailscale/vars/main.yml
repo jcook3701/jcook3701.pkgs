@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+tailscale_service: "{{ tailscale_os_service | default('tailscaled') }}"
+
+tailscale_directory:
+  default: "{{ tailscale_os_directory.default | default('/etc/default') }}"
+  state: "{{ tailscale_os_directory.state | default('/var/lib/tailscale') }}"
+
+tailscale_file:
+  script: /tmp/tailscale-install.sh
+  tailscaled: "{{ tailscale_directory.default }}/tailscaled"
+
+tailscale_pkg_names: "{{ tailscale_os_pkg_names | default(['tailscale']) }}"

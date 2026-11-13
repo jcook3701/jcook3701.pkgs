@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Display NAPS2 Role Configuration - Debug Information
+  ansible.builtin.debug:
+    msg: |
+      NAPS2 Role Configuration
+      ----------------------------------------
+      Lifecycle & Debugging:
+        State:           {{ naps_state }}
+        Debug Mode:      {{ naps_debug }}
+
+      User & Group Management:
+        System User:     {{ naps_user }}
+        System Group:    {{ naps_group }}
+        Manage Group:    {{ naps_manage_group }}
+        Allowed Users:   {{ naps_users | map(attribute='name') | join(', ') }}
+
+      Package Configuration:
+        Packages:        {{ naps_pkg_names | join(', ') }}
+        Download URL:    {{ naps_download_url }}
+
+      System Directories:
+        Configuration:   {{ naps_directory.conf }}
+
+      Repository Configuration:
+        Repository ID:   {{ naps_repo_id }}
+        Repository Name: {{ naps_repo_name }}
+  when: naps_debug | default(false) | bool

@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Installing necessary packages for rbenv
+  ansible.builtin.package:
+    name: "{{ rbenv_pkg_deps }}"
+    state: present
+
+- name: Clone rbenv repository
+  ansible.builtin.git:
+    repo: "{{ rbenv_repo_url }}"
+    dest: "{{ sudo_user_home }}/.rbenv"
+    version: master
+  become: true
+  become_user: "{{ sudo_user }}"
+  when: sudo_user != "root"
+
+- name: Update .bashrc for rbenv
+  ansible.builtin.blockinfile:
+    dest: "{{ sudo_user_home }}/.bashrc"
+    marker: "{{ rbenv_marker }}"
+    block: "{{ rbenv_bashrc }}"
+    state: present
+  notify: Rbenv shell reload
+  when:
+    - sudo_user != "root"
+    - rbenv_bashrc is defined
+
+- name: Force system changes to apply
+  ansible.builtin.meta: flush_handlers
+
+- name: Rbenv Plugins
+  ansible.builtin.include_tasks: plugins.yml

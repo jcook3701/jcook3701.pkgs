@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+nvidia_container_toolkit_pkg_names: "{{ nvidia_container_toolkit_os_pkg_names | default(['nvidia-container-toolkit']) }}"
+
+nvidia_container_toolkit_directory:
+  config: "{{ nvidia_container_toolkit_os_directory.config | default('/etc/nvidia-container-runtime') }}"
+  env: "{{ nvidia_container_toolkit_os_directory.env | default('/etc/nvidia-container-toolkit') }}"
+
+nvidia_container_toolkit_file:
+  config: "{{ nvidia_container_toolkit_directory.config ~ '/config.toml' | default('/etc/nvidia-container-runtime/config.toml')
+    }}"
+  env: "{{ nvidia_container_toolkit_directory.env ~ '/nvidia-cdi-refresh.env' | default('/etc/nvidia-container-toolkit/nvidia-cdi-refresh.env')
+    }}"
+
+# Repository Specifics
+nvidia_container_toolkit_repo_id: "{{ nvidia_container_toolkit_os_repo_id | default('nvidia-container-toolkit') }}"
+
+nvidia_container_toolkit_repo_name: "{{ nvidia_container_toolkit_os_repo_name | default('NVIDIA Container Toolkit') }}"

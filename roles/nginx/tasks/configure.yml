@@ -6,26 +6,35 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: Create configurations only for selected sites
+- name: "Create Nginx configuration file"
   ansible.builtin.template:
-    src: nginx_site.j2
-    dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+    src: nginx.conf.j2
+    dest: "/etc/nginx/nginx.conf"
     mode: "0644"
-  # Filters the master list to only include sites in our enabled list
-  loop: "{{ nginx_sites | selectattr('server_name', 'in', nginx_enabled_site_names) | list }}"
   notify: Reload NGINX
 
-- name: Enable only the selected NGINX sites
-  ansible.builtin.file:
-    src: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
-    state: link
-  loop: "{{ nginx_sites | selectattr('server_name', 'in', nginx_enabled_site_names) | list }}"
-  notify: Reload NGINX
+- name: Generate configuration files for ALL potential sites
+  ansible.builtin.include_tasks: create-site.yml
+  loop: "{{ nginx_sites }}"
+  loop_control:
+    loop_var: site_item
+
+- name: Deploy selected NGINX sites
+  ansible.builtin.include_tasks: deploy-site.yml
+  loop: >-
+    {{
+      nginx_sites | selectattr('server_vars', 'in', nginx_enabled_sites |
+      map(attribute='server_vars') | list) | list
+    }}
+  loop_control:
+    loop_var: site_item
 
 - name: Remove symbolic links for sites that are NOT enabled
-  ansible.builtin.file:
-    path: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
-    state: absent
-  loop: "{{ nginx_sites | rejectattr('server_name', 'in', nginx_enabled_site_names) | list }}"
-  notify: Reload NGINX
+  ansible.builtin.include_tasks: remove-site.yml
+  loop: >-
+    {{
+      nginx_sites | rejectattr('server_vars', 'in', nginx_enabled_sites |
+      map(attribute='server_vars') | list) | list
+    }}
+  loop_control:
+    loop_var: site_item

@@ -1,0 +1,108 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Provisions Oracle VirtualBox and manages hypervisor configuration policies."
+    description: >-
+      This role automates the cross-platform setup of Oracle VirtualBox across Debian, Red Hat,
+      and Arch Linux. It handles kernel headers verification, host-only network security
+      whitelists, VBoxManage application defaults, and Extension Pack deployments.
+    author: "Jared Cook"
+    options:
+      # -------------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------------
+      virtualbox_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The targeted structural execution state. Setting this to 'absent' purges packages and kernel drivers."
+
+      virtualbox_users:
+        type: "list"
+        elements: "dict"
+        default: []
+        description: "A declarative array of local system accounts appended to the managed hypervisor execution group."
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "The exact local username string to grant VirtualBox hardware management access."
+
+      virtualbox_manage_group:
+        type: "bool"
+        default: true
+        description: "Toggles whether the role ensures the foundational hypervisor execution group is actively maintained."
+
+      # -------------------------------------------------------------------------
+      # CLI Plugins & Companion Packages
+      # -------------------------------------------------------------------------
+      virtualbox_install_extension_pack:
+        type: "bool"
+        default: true
+        description: "Controls whether the Oracle VM Extension Pack (enabling VRDE, USB 3.0, and NVMe boot) is automatically deployed."
+
+      # -------------------------------------------------------------------------
+      # Hypervisor Selection Matrix & Mirrors
+      # -------------------------------------------------------------------------
+      virtualbox_selected:
+        type: "str"
+        default: "virtualbox_7_1"
+        choices: ["virtualbox_6_1", "virtualbox_7_0", "virtualbox_7_1", "virtualbox_7_2"]
+        description: "The major package matrix version selector utilized to map structural platform package names."
+
+      virtualbox_download_url:
+        type: "str"
+        default: "https://virtualbox.org"
+        description: "The primary upstream URL base path used to fetch individual Extension Pack files."
+
+      # -------------------------------------------------------------------------
+      # Kernel Module & Compilation Tuning
+      # -------------------------------------------------------------------------
+      virtualbox_enable_dkms:
+        type: "bool"
+        default: true
+        description: "Enforces continuous module tracking to compile VirtualBox drivers automatically upon host kernel upgrades."
+
+      virtualbox_recompile_drivers:
+        type: "bool"
+        default: true
+        description: "Toggles whether tasks should run a fallback module recompilation swipe if kernel drivers are found missing."
+
+      # -------------------------------------------------------------------------
+      # Host Networking & Security Constraints
+      # -------------------------------------------------------------------------
+      virtualbox_manage_net_policy:
+        type: "bool"
+        default: true
+        description: "Determines whether the role strictly renders the global host-only networking access whitelist configuration sheet."
+
+      virtualbox_hostonly_allowed_subnets:
+        type: "list"
+        elements: "str"
+        default: ["192.168.56.0/21"]
+        description: "CIDR blocks that unprivileged local users are authorized to bind when allocating hypervisor bridge interfaces."
+
+      # -------------------------------------------------------------------------
+      # System Environment & Default Path Configurations
+      # -------------------------------------------------------------------------
+      virtualbox_default_machine_folder:
+        type: "str"
+        default: ""
+        description: "An absolute path to relocate default VM disk creation space away from the user's home partition."
+
+      virtualbox_headless_enabled:
+        type: "bool"
+        default: false
+        description: "Toggles whether VM execution tasks omit graphic user interfaces, optimizing execution for server layers."
+
+      virtualbox_headless_vrde_port:
+        type: "int"
+        default: 3389
+        description: "The default TCP listener port assigned to surface the structural VRDP system connection matrix."
+
+      virtualbox_global_properties_custom:
+        type: "dict"
+        default: {}
+        description: "A free-form nested map passed downwards to apply unstructured global preferences via VBoxManage commands."

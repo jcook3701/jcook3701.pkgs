@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Samba administrative user exists on the local system
+  ansible.builtin.user:
+    name: "{{ samba_admin_user }}"
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+    groups: "{{ samba_group }}"
+    append: yes
+
+- name: Check if Samba administrative user exists in SAM database
+  ansible.builtin.command: "pdbedit -u {{ samba_admin_user }}"
+  register: _samba_admin_check
+  failed_when: false
+  changed_when: false
+
+- name: Provision Samba administrative user into SAM database
+  ansible.builtin.shell: >-
+      (echo "{{ samba_admin_password }}";
+      echo "{{ samba_admin_password }}")
+      | smbpasswd -s -a "{{ samba_admin_user }}"
+  no_log: true
+  when: _samba_admin_check.rc != 0
+
+- name: Ensure Samba administrative user is enabled and not locked
+  ansible.builtin.command: "smbpasswd -e {{ samba_admin_user }}"
+  changed_when: false

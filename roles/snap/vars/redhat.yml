@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+snap_os_socket: "snapd.socket"
+snap_os_service: "snapd.service"
+
+snap_os_pkg_names:
+  - snapd
+
+snap_os_directory:
+  state: "/var/lib/snapd"
+  mount: "/snap"

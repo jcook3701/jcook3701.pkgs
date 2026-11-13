@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Include NAPS2 Seeding Tasks
+  ansible.builtin.include_tasks: 01_debug.yml
+  when: naps_debug | default(false) | bool
+
+- name: Include NAPS2 User Group Management Tasks
+  ansible.builtin.include_tasks: 02_groups.yml
+  when: naps_manage_group | default(true) | bool

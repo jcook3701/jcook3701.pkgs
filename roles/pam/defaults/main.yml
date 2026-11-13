@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Lifecycle execution state for package installation or removal
+pam_state: present
+
+# Toggle to determine if network session keyring isolation layers are enabled
+pam_enable_network_authentication: true
+
+# Enables the pam_keyinit.so module to manage user session keyrings
+pam_enable_keyinit: true
+
+# Enables SSSD integration within the PAM stack for network-based authentication
+pam_enable_sssd: true
+
+# Global switch to automatically generate user home directories upon initial network login
+pam_enable_mkhomedir: true
+
+# Shell string declaration passed natively to the pam_mkhomedir.so configuration hook
+pam_mkhomedir_options: "skel=/etc/skel umask=0022"
+
+# Enables pam_systemd.so to track and register active user sessions into systemd-logind
+pam_enable_systemd: true
+
+# Enables biometric authentication mechanisms (e.g., pam_fprintd.so) in the stack
+pam_enable_biometrics: false
+
+# Enables Duo Security multi-factor authentication (pam_duo.so) integration
+pam_enable_duo: false
+
+# Enables U2F hardware token authentication support across the PAM layers
+pam_enable_u2f: false
+
+# Enables Yubico authentication module handlers for YubiKey hardware validation
+pam_enable_yubico: false

@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute SSSD seeding tasks
+  ansible.builtin.include_tasks: "01_seed.yml"
+
+- name: Collect and load LDAP security certificate assets for SSSD
+  ansible.builtin.include_tasks: "02_keys.yml"
+  when: sssd_manage_ldap_keys | bool
+
+- name: Ensure SSSD services and sockets are started and enabled
+  ansible.builtin.include_tasks: "03_service.yml"
+
+- name: Execute PAM integration routines
+  ansible.builtin.include_tasks: "04_pam.yml"
+  when: sssd_enable_pam | default(false) | bool

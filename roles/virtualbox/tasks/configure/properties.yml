@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Query Current VirtualBox Default Machine Folder Configuration
+  ansible.builtin.command: "VBoxManage list systemproperties"
+  register: vbox_system_properties
+  changed_when: false
+  become: true
+
+- name: Configure Default VM Core Disk Storage Target Path
+  ansible.builtin.command: "VBoxManage setproperty defaultfolder '{{ virtualbox_default_machine_folder }}'"
+  become: true
+  when:
+    - virtualbox_default_machine_folder is defined
+    - virtualbox_default_machine_folder | length > 0
+    - "('Default machine folder: ' ~ virtualbox_default_machine_folder) not in vbox_system_properties.stdout"
+
+- name: Enforce VRDE Authentication Library Preferences via Custom Properties
+  ansible.builtin.command: "VBoxManage setproperty vrdeauthlibrary '{{ custom_property.key }}'"
+  become: true
+  loop: "{{ virtualbox_global_properties_custom | dict2items }}"
+  loop_control:
+    loop_var: custom_property
+    label: "Applying VBoxManage property: {{ custom_property.key }} => {{ custom_property.value }}"
+  when:
+    - virtualbox_global_properties_custom is defined
+    - virtualbox_global_properties_custom is mapping

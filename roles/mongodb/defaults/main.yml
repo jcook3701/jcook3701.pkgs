@@ -1,0 +1,78 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Structural installation state ('present' or 'absent' or 'teardown')
+mongodb_state: present
+
+# ('primary' or 'secondary')
+mongodb_node_type: "primary"
+
+# Accounts granted rootless or direct access to the mongodb daemon socket
+mongodb_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'mongodb' system group
+mongodb_manage_group: true
+
+# ==============================================================================
+# Package Configuration
+# ==============================================================================
+mongodb_download_url: https://repo.mongodb.org
+mongodb_version: "8.0"
+
+# ==============================================================================
+# Enterprise Security & Authentication Defaults
+# ==============================================================================
+# Enable or disable role-based access control (RBAC)
+mongodb_security_authorization: "enabled"
+
+# TLS/SSL Cryptographic Configuration
+mongodb_tls_mode: "disabled" # Options: disabled, allowTLS, preferTLS, requireTLS
+mongodb_tls_certificate_key_file: ""
+mongodb_tls_ca_file: ""
+
+# Internal cluster authorization key for replica sets
+mongodb_security_keyfile_contents: ""
+mongodb_security_keyfile_path: "/var/lib/mongodb/pki/cluster.key"
+
+# ==============================================================================
+# Enterprise Network & Binding Defaults
+# ==============================================================================
+# Default network port
+mongodb_net_port: 27017
+
+# Interface binding (localhost only by default for safety; override with node IPs)
+mongodb_net_bind_ip: "127.0.0.1"
+
+# Maximum number of concurrent connections the engine will accept
+mongodb_net_max_incoming_connections: 65536
+
+# ==============================================================================
+# Storage Engine & Performance Fine-Tuning
+# ==============================================================================
+# High-performance enterprise default engine
+mongodb_storage_engine: "wiredTiger"
+
+# WiredTiger Cache Allocation Size in GB (Leave blank to use MongoDB's auto-calc)
+# Formula baseline: 50% of (RAM - 1 GB). Example: for 16GB RAM, set to 7.5
+mongodb_wiredtiger_cache_size_gb: ""
+
+# Enable or disable journaling for crash recovery durability
+mongodb_storage_journal_enabled: true
+
+# Enable directory per database structure for cleaner filesystem management
+mongodb_storage_directory_per_db: true
+
+# ==============================================================================
+# Enterprise Replication (Replica Set Setup)
+# ==============================================================================
+# Define the name of the cluster replica set (Blank means standalone instance)
+mongodb_replset_name: ""
+
+# ==============================================================================
+# Enterprise System Resource Optimization (ulimits)
+# ==============================================================================
+# Recommended production system resource bounds for the mongodb user
+mongodb_ulimit_nofile: 64000
+mongodb_ulimit_nproc: 64000
+mongodb_ulimit_memlock: "unlimited"

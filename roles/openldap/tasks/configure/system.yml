@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Deploy client configuration (ldap.conf)
+  ansible.builtin.template:
+    src: ldap.conf.j2
+    dest: "{{ openldap_file.global_config }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Restart openldap service
+
+- name: Ensure OpenLDAP daemon system settings are fully populated
+  ansible.builtin.lineinfile:
+    path: "{{ openldap_file.defaults }}"
+    regexp: "^{{ setting.variable }}="
+    line: '{{ setting.variable }}="{{ setting.value }}"'
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - { variable: "{{ openldap_sysconfig_variable | trim }}", value: "{{ openldap_final_daemon_args | trim }}" }
+    - { variable: "SLAPD_OPTIONS", value: "" }
+  loop_control:
+    loop_var: setting
+    label: "Updating Daemon Setting: {{ setting.variable }}"
+  notify: Restart openldap service
+  become: true
+  when: openldap_node_type in ['master', 'slave']

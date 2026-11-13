@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Execute System Directory Pre-staging
+  ansible.builtin.include_tasks: 01_system_prep.yml
+
+- name: Execute Core AutoFS Daemon Configuration Profile Setup
+  ansible.builtin.include_tasks: 02_daemon_config.yml
+
+- name: Generate Local Static File Maps and Overrides
+  ansible.builtin.include_tasks: 03_local_maps.yml
+  when:
+    - autofs_lookup_provider != 'sss'
+    - autofs_bootstrap_mounts | default([]) | length > 0

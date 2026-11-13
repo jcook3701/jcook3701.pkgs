@@ -1,0 +1,137 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+sssd_state: present
+
+# Additional options that are passed to the Daemon.
+sssd_daemon_opts: "-D -f"
+
+# Where to direct debug output, valid options are 'files', 'journald', 'stderr'.
+sssd_debug_logger: "journald"
+
+# Responder orchestration architecture strategy
+sssd_responder_activation_method: "socket"
+
+# ====================================================================
+# DYNAMIC ENGINE SERVICE LIFECYCLE TOGGLES
+# ====================================================================
+sssd_enable_nss: true
+sssd_enable_pam: true
+sssd_enable_autofs: true
+sssd_enable_ssh: true
+sssd_enable_sudo: true
+sssd_enable_kdc: true
+sssd_enable_pac: false
+sssd_enable_ifp: true
+
+# ====================================================================
+# CORE BACKEND PROVIDER DEFINITIONS
+# ====================================================================
+sssd_id_provider: "ldap"
+sssd_auth_provider: "krb5"
+sssd_chpass_provider: "krb5"
+sssd_access_provider: "ldap"
+sssd_autofs_provider: "ldap"
+sssd_sudo_provider: "ldap"
+
+# Anti-spoofing Kerberos KDC server token validation gate
+sssd_krb5_validate: true
+sssd_cache_credentials: true
+sssd_krb5_store_password_if_offline: true
+
+# ====================================================================
+# NETWORK DOMAIN NAMING & REALM STRUCTURAL DESIGNATIONS
+# ====================================================================
+sssd_top_level_domain: "com"
+sssd_second_level_domain: "example"
+sssd_domain_name: "{{ sssd_second_level_domain }}.{{ sssd_top_level_domain }}"
+
+# ====================================================================
+# DIRECTORY INFORMATION TREE DISTINGUISHED NAME COMPARTMENTS
+# ====================================================================
+sssd_ldap_users_parent_ou: "Users"
+sssd_ldap_people_child_ou: "People"
+sssd_ldap_groups_ou: "Groups"
+sssd_ldap_sudoers_ou: "SUDOers"
+sssd_ldap_automount_ou: "AutoMount"
+
+# ====================================================================
+# DIRECTORY BACKEND CONNECTION LAYER STRINGS & HOSTS
+# ====================================================================
+# LDAP Protocol (ldaps or ldap)
+sssd_ldap_protocol: "ldaps"
+
+# SSL/TLS Toggle (Switched to false because role uses direct ldaps:// over port 636 natively)
+sssd_ldap_tls: false
+
+# Controls whether the role should actively collect, deploy and manage LDAP TLS certificates
+sssd_manage_ldap_keys: false
+
+# LDAP and Kerberos Server Settings
+sssd_ldap_servers:
+  - "ldap-server.{{ sssd_domain_name }}"
+
+sssd_krb5_servers:
+  - "kerberos.{{ sssd_domain_name }}"
+
+# ==================================================================== #
+# SASL AND AUTHENTICATION PRINCIPAL SETTINGS
+# ==================================================================== #
+sssd_ldap_sasl_mech: "GSSAPI"
+sssd_ldap_user_principal: "nosubst"
+
+# ====================================================================
+# SUBSYSTEM RUNTIME VERBOSITY & DEEP DIAGNOSTIC MATRICES
+# ====================================================================
+sssd_debug_level: 7
+sssd_pam_debug_level: 10
+sssd_autofs_debug_level: 10
+sssd_ldap_debug_level: 6
+sssd_sudo_debug_level: 5
+sssd_ssh_debug_level: 5
+sssd_kdc_debug_level: 7
+sssd_pac_debug_level: 7
+sssd_ifp_debug_level: 7
+
+# ====================================================================
+# INDUSTRIAL CRYPTOGRAPHIC ENGINE PATH TRANSPORT PARAMETERS
+# ====================================================================
+sssd_ldap_tls_reqcert: "never"
+sssd_ldap_tls_cacert: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/master_ca.pem"
+sssd_ldap_tls_cert: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/cert.pem"
+sssd_ldap_tls_key: "{{ sssd_directory.certs | default('/etc/ldap/certs') }}/priv.pem"
+
+# ====================================================================
+# ENGINE PERFORMANCE METRICS & CACHE TUNING TIMEOUTS
+# ====================================================================
+sssd_ldap_schema: "rfc2307"
+sssd_ldap_rfc2307_fallback_to_local_users: true
+
+# Explicitly bind identity mapping attributes
+sssd_ldap_group_object_class: posixGroup
+sssd_ldap_group_name: cn
+sssd_ldap_group_gid_number: gidNumber
+sssd_ldap_group_member: memberUid
+sssd_ldap_group_uuid: nsUniqueId
+sssd_ldap_user_uuid: nsUniqueId
+
+sssd_ldap_id_mapping: false
+sssd_nss_homedir_substring: "/home"
+sssd_ldap_search_timeout: 90
+sssd_ldap_network_timeout: 90
+sssd_timeout: 30
+sssd_ifp_users: ['root', 'cockpit']
+# ====================================================================
+# DYNAMIC EXTERNAL APPLICATION OBJECT ATTRIBUTE MAPS
+# ====================================================================
+sssd_ldap_autofs_map_object_class: "automountMap"
+sssd_ldap_autofs_entry_object_class: "automount"
+sssd_ldap_autofs_map_name: "automountMapName"
+sssd_ldap_autofs_entry_key: "automountKey"
+sssd_ldap_autofs_entry_value: "automountInformation"
+sssd_ssh_hash_known_hosts: "true"
+
+# ====================================================================
+# STRUCTURAL AUTHORIZATION SECURITY SEARCH LIMITING FILTERS
+# ====================================================================
+sssd_ldap_access_filter: "(objectClass=posixAccount)"

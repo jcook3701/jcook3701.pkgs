@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+tailscale_os_service: "tailscaled"
+
+tailscale_os_dep_pkg_names:
+  - curl
+  - ca-certificates
+
+tailscale_os_pkg_names:
+  - tailscale
+
+tailscale_os_directory:
+  default: "/etc/default"
+  state: "/var/lib/tailscale"

@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Provision standardized POSIX-extended user accounts inside AD DC database
+  ansible.builtin.command: >
+    samba-tool user create "{{ user.username }}" "{{ user.password }}"
+    --given-name="{{ user.firstname | default(user.username) }}"
+    --surname="{{ user.lastname | default(user.username) }}"
+    --description="{{ user.description | default('Automated Provisioned Account') }}"
+    --mail-address="{{ user.mail | default(user.username ~ '@' ~ samba_realm | lower) }}"
+    --uid-number={{ user.uid }}
+    --gid-number={{ user.gid }}
+    --login-shell="{{ user.login_shell | default('/bin/bash') }}"
+    --home-directory="{{ user.home_directory | default('/home/' ~ user.username) }}"
+  register: _samba_user_create_output
+  no_log: true
+  loop: "{{ samba_addc_provision_users }}"
+  loop_control:
+    loop_var: user
+    label: "AD User Sync -> {{ user.username }}"
+  when: ansible_fqdn == samba_primary_dc
+  changed_when: >
+    ('created successfully' in _samba_user_create_output.stdout | lower)
+  failed_when: >
+    (_samba_user_create_output.rc != 0 and 'already exists' not in _samba_user_create_output.stderr | lower)
+
+- name: Enforce dynamic interactive password change controls on next login
+  ansible.builtin.command: >
+    samba-tool user setexpiry "{{ user.username }}"
+    {{ user.password_must_change | bool | ternary('--must-change-at-next-login', '--noexpiry') }}
+  register: _samba_expiry_output
+  changed_when: false
+  failed_when: >
+    (_samba_expiry_output.rc != 0) or
+    ('error' in _samba_expiry_output.stderr | lower) or
+    ('failed' in _samba_expiry_output.stdout | lower)
+  loop: "{{ samba_addc_provision_users }}"
+  loop_control:
+    loop_var: user
+    label: "Password Expiry Lock -> {{ user.username }}"
+  when: ansible_fqdn == samba_primary_dc
+
+- name: Enforce headless account administrative disable locks
+  ansible.builtin.command: >
+    samba-tool user {{ user.account_disabled | bool | ternary('disable', 'enable') }} "{{ user.username }}"
+  register: _samba_lock_output
+  changed_when: false
+  failed_when: >
+    (_samba_lock_output.rc != 0) or
+    ('error' in _samba_lock_output.stderr | lower) or
+    ('failed' in _samba_lock_output.stdout | lower)
+  loop: "{{ samba_addc_provision_users }}"
+  loop_control:
+    loop_var: user
+    label: "Account Lockout State -> {{ user.username }}"
+  when: ansible_fqdn == samba_primary_dc

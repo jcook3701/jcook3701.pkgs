@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Apply service access rules to zone '{{ current_zone.name }}'
+  ansible.posix.firewalld:
+    zone: "{{ current_zone.name }}"
+    service: "{{ service }}"
+    permanent: "{{ firewalld_permanent }}"
+    state: enabled
+  loop: "{{ current_zone.services | default([]) }}"
+  loop_control:
+    loop_var: service
+    label: "{{ service }}"
+  when: current_zone.services is defined and current_zone.services | length > 0
+  become: true
+
+- name: Apply raw port access rules to zone '{{ current_zone.name }}'
+  ansible.posix.firewalld:
+    zone: "{{ current_zone.name }}"
+    port: "{{ port }}"
+    permanent: "{{ firewalld_permanent }}"
+    state: enabled
+  loop: "{{ current_zone.ports | default([]) }}"
+  loop_control:
+    loop_var: port
+    label: "{{ port }}"
+  when: current_zone.ports is defined and current_zone.ports | length > 0
+  become: true
+
+- name: Configure network source subnets for zone '{{ current_zone.name }}'
+  ansible.posix.firewalld:
+    zone: "{{ current_zone.name }}"
+    source: "{{ source }}"
+    permanent: "{{ firewalld_permanent }}"
+    state: enabled
+  loop: "{{ current_zone.sources | default([]) }}"
+  loop_control:
+    loop_var: source
+    label: "{{ source }}"
+  when: current_zone.sources is defined and current_zone.sources | length > 0
+  become: true
+
+- name: Bind physical network interfaces to zone '{{ current_zone.name }}'
+  ansible.posix.firewalld:
+    zone: "{{ current_zone.name }}"
+    interface: "{{ interface }}"
+    permanent: "{{ firewalld_permanent }}"
+    state: enabled
+  loop: "{{ current_zone.interfaces | default([]) }}"
+  loop_control:
+    loop_var: interface
+    label: "{{ interface }}"
+  when: current_zone.interfaces is defined and current_zone.interfaces | length > 0
+  become: true
+
+- name: Configure masquerading toggle on zone '{{ current_zone.name }}'
+  ansible.posix.firewalld:
+    zone: "{{ current_zone.name }}"
+    masquerade: "{{ current_zone.masquerade | ternary('yes', 'no') }}"
+    permanent: "{{ firewalld_permanent }}"
+    state: enabled
+  when: current_zone.masquerade is defined
+  become: true

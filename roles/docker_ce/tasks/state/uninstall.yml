@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather active target systemd service units
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Ensure Docker Community Edition service is stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ docker_ce_service | default('docker') }}"
+    state: stopped
+    enabled: false
+  become: true
+  when: (docker_ce_service ~ '.service' in ansible_facts.services)
+
+- name: Force deep purge of Docker Community Edition packages
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ docker_ce_pkg_names | default([])
+          + docker_ce_compose_pkgs | default([])
+          + docker_ce_buildx_pkg_names | default([]) }}
+    pkg_manager_state: absent
+    pkg_manager_remove_level: complete
+
+- name: Ensure removal of Docker group
+  ansible.builtin.group:
+    name: "{{ docker_ce_group | default('docker') }}"
+    state: absent
+  become: true

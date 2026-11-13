@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Manage systemd-resolved on localhost
+  hosts: localhost
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Install systemd-resolved
+      ansible.builtin.include_role:
+        name: jcook3701.pkgs.systemd_resolved
+      when: ansible_distribution == "Ubuntu"

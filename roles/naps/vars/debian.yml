@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# User/Group Settings
+naps_os_user: "scanner"
+naps_os_group: "scanner"
+
+# Package Settings
+naps_os_pkg_names:
+  - "naps2"
+
+# System File Settings
+naps_os_directory:
+  conf: "/etc/naps"
+
+# Repository Specifics
+naps_os_repo_id: "naps2"
+naps_os_repo_name: "Not Another PDF Scanner 2"
+
+naps_debian_uris: "{{ naps_download_url | default('https://downloads.naps2.com') }}"
+naps_debian_suites: "/"
+naps_debian_component: ""
+naps_debian_signed_by: "https://www.naps2.com/naps2-public.pgp"

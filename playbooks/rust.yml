@@ -14,4 +14,3 @@
     - name: Installing rust
       ansible.builtin.include_role:
         name: jcook3701.pkgs.rust
-        tasks_from: rust-install.yml

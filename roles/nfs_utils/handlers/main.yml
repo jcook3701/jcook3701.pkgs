@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Restart nfs server service
+  ansible.builtin.service:
+    name: "{{ nfs_utils_server_service }}"
+    state: restarted
+  when:
+    - nfs_utils_state == 'present'
+    - nfs_utils_node_type == 'master'
+    - ansible_facts.services is defined
+    - nfs_utils_server_service ~ '.service' in ansible_facts.services
+
+- name: Restart nfs server helper service
+  ansible.builtin.service:
+    name: "{{ nfs_utils_server_helper_service }}"
+    state: restarted
+  when:
+    - nfs_utils_state == 'present'
+    - nfs_utils_node_type == 'master'
+    - ansible_facts.services is defined
+    - nfs_utils_server_helper_service ~ '.service' in ansible_facts.services
+
+- name: Restart nfs client service
+  ansible.builtin.service:
+    name: "{{ nfs_utils_client_service }}"
+    state: restarted
+  when:
+    - nfs_utils_state == 'present'
+    - nfs_utils_node_type == 'client'
+    - ansible_facts.services is defined
+    - nfs_utils_client_service ~ '.service' in ansible_facts.services

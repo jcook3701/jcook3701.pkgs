@@ -21,3 +21,4 @@
     owner: "{{ sudo_user }}"
     group: "{{ sudo_user }}"
     mode: "0644"
+  when: vagrant_roles is defined and (vagrant_roles | length > 0)

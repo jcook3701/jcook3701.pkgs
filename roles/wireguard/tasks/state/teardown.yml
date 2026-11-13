@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Wireguard VPN service is stopped and uninstalled
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Completely purge WireGuard configuration and key files
+  ansible.builtin.file:
+    path: "{{ conf_file }}"
+    state: absent
+  loop:
+    - "{{ wireguard_file.conf }}"
+    - "{{ wireguard_key.private }}"
+    - "{{ wireguard_key.public }}"
+  loop_control:
+    loop_var: conf_file
+    label: "Removing: {{ conf_file }}"
+  become: true
+
+- name: Remove persistent daemon configuration directory
+  ansible.builtin.file:
+    path: "{{ wireguard_directory.conf }}"
+    state: absent
+  become: true

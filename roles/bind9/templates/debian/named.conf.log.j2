@@ -1,8 +1,65 @@
+{#
+# named.conf.log.j2 for jcook3701.pkgs
+#
+# SPDX-FileCopyrightText: Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{%- macro named_conf_log() -%}
 // DNS BIND logging clause
 
 logging {
-        channel default_debug {
-                file "{{ bind9_logging.channel.default_debug.file }}";
-                severity {{ bind9_logging.channel.default_debug.severity }};
-        };
+    // Operational and General Debugging Channel
+    channel default_debug {
+        file "{{ bind9_logging.channel.default_debug.file }}";
+        severity {{ bind9_logging.channel.default_debug.severity }};
+        print-time yes;
+        print-category yes;
+        print-severity yes;
+    };
+
+    // Dedicated channel to track rogue traffic, unauthorized queries, or spoofing attempts
+    channel security_file {
+        file "{{ bind9_directory.log }}/security.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+    };
+
+    // Dedicated channel to log Dynamic DNS (DyDNS) modifications
+    channel update_file {
+        file "{{ bind9_directory.log }}/update.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+    };
+
+    // Dedicated channel to track DNSSEC signature expiration or verification issues
+    channel dnssec_file {
+        file "{{ bind9_directory.log }}/dnssec.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+    };
+
+    // --- Category Mappings ---
+    category default { default_debug; };
+    category general { default_debug; };
+    category security { security_file; default_debug; };
+    category update { update_file; default_debug; };
+    category update-security { update_file; security_file; };
+    category dnssec { dnssec_file; default_debug; };
 };
+{%- endmacro -%}
+
+{{- named_conf_log() }}

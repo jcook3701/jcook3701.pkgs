@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+unifi_service: "unifi"
+
+unifi_os_user: "unifi"
+unifi_os_group: "unifi"
+
+unifi_dep_pkg_names:
+  - ca-certificates
+  - apt-transport-https
+
+unifi_os_pkg_names:
+  - "unifi"
+
+unifi_os_directory:
+  lib_root: "/usr/lib/unifi"
+  log_root: "/usr/lib/unifi/logs"
+
+# Repository Configuration for jcook3701.utils.repo_add
+unifi_os_repo_id: "unifi"
+unifi_os_repo_name: "UniFi Network Application"
+
+unifi_debian_uris: "{{ unifi_download_url }}/downloads/unifi/debian"
+unifi_debian_suites: "unifi-{{ unifi_version }}"
+unifi_debian_component: "ubiquiti"
+unifi_debian_signed_by: "https://dl.ui.com/unifi/unifi-repo.gpg"

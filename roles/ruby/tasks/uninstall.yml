@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+  # TODO: Actually remove ruby and directories related.
+
+- name: Update .bashrc for ruby removal
+  ansible.builtin.blockinfile:
+    dest: "{{ sudo_user_home }}/.bashrc"
+    marker: "{{ ruby_marker }}"
+    block: "{{ ruby_bashrc }}"
+    state: absent
+  when: sudo_user != "root" and ruby_bashrc is defined
+
+- name: Uninstall Ruby
+  ansible.builtin.package:
+    name: "{{ ruby_pkg_names }}"
+    state: absent

@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+rollo_driver_version: "1.8.4-1"
+rollo_state: present
+
+# Target configuration names
+rollo_printer_name: "Rollo_Printer"
+rollo_printer_location: "Local USB"

@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Install Xfce
+  ansible.builtin.package:
+    name: "{{ xfce_pkg_names }}"
+    state: present
+
+- name: Stop XFCE config daemon before editing XML files
+  ansible.builtin.command: xfconfd --quit
+  become: true
+  become_user: "{{ xfce_user }}"
+  failed_when: false
+  changed_when: false
+
+- name: Deploy Core XFCE XML Configuration Channels
+  ansible.builtin.template:
+    src: "{{ xml_file.src }}"
+    dest: "/home/{{ xfce_user }}/.config/xfce4/xfconf/xfce-perchannel-xml/{{ xml_file.dest }}"
+    owner: "{{ xfce_user }}"
+    group: "{{ xfce_user }}"
+    mode: "0644"
+  loop:
+    - { src: "xfwm4.xml.j2", dest: "xfwm4.xml" }
+    - { src: "xsettings.xml.j2", dest: "xsettings.xml" }
+  loop_control:
+    loop_var: xml_file
+    label: "{{ xml_file.dest }}"
+
+- name: Deploy Autostart Desktop Applications
+  ansible.builtin.template:
+    src: autostart.desktop.j2
+    dest: "/home/{{ xfce_user }}/.config/autostart/{{ app.name | lowercase | replace(' ', '-') }}.desktop"
+    owner: "{{ xfce_user }}"
+    group: "{{ xfce_user }}"
+    mode: "0644"
+  loop: "{{ xfce_autostart_apps }}"
+  loop_control:
+    loop_var: app
+
+- name: Reload XFCE Settings and Window Manager if in active session
+  ansible.builtin.shell: |
+    export DISPLAY=:0
+    xfwm4 --replace &
+    xfce4-panel --restart
+  become: true
+  become_user: "{{ xfce_user }}"
+  failed_when: false
+  changed_when: false

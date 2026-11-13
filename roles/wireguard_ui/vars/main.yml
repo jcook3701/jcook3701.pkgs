@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+wireguard_ui_dep_pkg_names: "{{ wireguard_ui_os_dep_pkg_names | default([]) }}"
+wireguard_ui_pkg_names: "{{ wireguard_ui_os_pkg_names | default([]) }}"
+
+wireguard_ui_directory:
+  conf: "{{ wireguard_ui_os_directory.conf | default('/etc/wireguard/') }}"
+  data: "{{ wireguard_ui_os_directory.data | default('/var/lib/wireguard-ui') }}"
+  default: "{{ wireguard_ui_os_directory.default  | default('/etc/default') }}"
+  override: "{{ wireguard_ui_os_directory.override  | default('/etc/systemd/system/') }}"
+
+wireguard_ui_file:
+  conf: "{{ wireguard_ui_directory.conf }}"

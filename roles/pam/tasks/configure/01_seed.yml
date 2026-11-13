@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Print live runtime value of the target PAM configuration variables
+  ansible.builtin.debug:
+    msg: "{{ pam_config_files.keyinit }}"
+
+- name: Deploy native Debian PAM configuration profile template for session keyring isolation
+  ansible.builtin.template:
+    src: "keyinit.j2"
+    dest: "{{ pam_config_files.keyinit
+                | default('/usr/share/pam-configs/keyinit') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+  notify: Rebuild system PAM configuration tables
+
+- name: Deploy Debian PAM configuration profile template for automated directory creation
+  ansible.builtin.template:
+    src: "mkhomedir.j2"
+    dest: "{{ pam_config_files.mkhomedir | default('/usr/share/pam-configs/mkhomedir') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    force: false
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+  notify: Rebuild system PAM configuration tables

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Remove rbenv directory
+  ansible.builtin.file:
+    path: "{{ sudo_user_home }}/.rbenv"
+    state: absent
+  when: sudo_user != "root"
+
+- name: Remove rbenv and ruby-build lines from .bashrc
+  ansible.builtin.blockinfile:
+    path: "{{ sudo_user_home }}/.bashrc"
+    marker: "{{ rbenv_marker }}"
+    block: "{{ rbenv_bashrc }}"
+    state: absent
+  when:
+    - sudo_user != "root"
+    - rbenv_bashrc is defined

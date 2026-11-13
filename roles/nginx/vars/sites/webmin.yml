@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+nginx_site:
+  server_name: "webmin"
+  listen: 80
+  proxy_pass: "https://127.0.0.1:10000"
+  append_port: true

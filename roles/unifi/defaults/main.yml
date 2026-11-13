@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Structural installation state ('present' or 'absent' or 'teardown')
+unifi_state: present
+
+# Accounts granted rootless or direct access to the unifi daemon socket
+unifi_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# Manage lifecycle of the 'unifi' system group
+unifi_manage_group: true
+
+# Package Configuration
+unifi_download_url: "https://www.ui.com"
+unifi_version: "10.4"
+
+# ==============================================================================
+# Enterprise Java Performance (JVM Tuning)
+# ==============================================================================
+# Initial Java heap size allocation (e.g., 1024m, 2g, 4g)
+unifi_jvm_init_heap_size: "1024m"
+
+# Maximum Java heap size allocation (Crucial to prevent out-of-memory faults)
+unifi_jvm_max_heap_size: "2024m"
+
+# Additional custom JVM arguments for optimization (Garbage Collection, etc.)
+unifi_jvm_extra_opts: "-XX:+UseG1GC -XX:+UseStringDeduplication"
+
+# ==============================================================================
+# Core Database Engine Connection Configurations
+# ==============================================================================
+# Maximum number of concurrent connections UniFi can open to its database
+unifi_db_mongo_connections_max: 100
+
+# Timeout duration in milliseconds for database operations
+unifi_db_mongo_timeout_ms: 5000
+
+# ==============================================================================
+# Enterprise Networking & Port Configurations
+# ==============================================================================
+# Device inform port (Devices communicate with the application via this port)
+unifi_port_inform: 8080
+
+# HTTPS Management Interface Web URL UI Port
+unifi_port_https: 8443
+
+# HTTPS API redirect port
+unifi_port_api_redirect: 8843
+
+# HTTP portal redirect port for guest networks
+unifi_port_portal_http: 8880
+
+# HTTPS portal redirect port for secure guest networks
+unifi_port_portal_https: 8843
+
+# UDP Local network discovery port
+unifi_port_discovery_udp: 10001
+
+# UDP STUN server execution listening port
+unifi_port_stun_udp: 3478
+
+# Speed test listening port
+unifi_port_speedtest: 6789
+
+# ==============================================================================
+# Enterprise Application & Optimization Tuning
+# ==============================================================================
+# Enable or disable automated global daily backups
+unifi_system_backup_enabled: true
+
+# Maximum number of retained backup files before auto-purging
+unifi_system_backup_retention_max: 30
+
+# Explicitly bind the application web interfaces to a specific IP (Blank listens everywhere)
+unifi_system_bind_ip: ""
+
+# Enable or disable data analytics tracking metrics sent upstream to Ubiquiti
+unifi_system_analytics_enabled: false

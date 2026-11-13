@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure target local mount directories exist
+  ansible.builtin.file:
+    path: "{{ mount.path }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  loop: "{{ nfs_utils_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: "Creating directory: {{ mount.path }}"
+  when:
+    - nfs_utils_client_mounts is defined
+    - nfs_utils_client_mounts | length > 0
+    - nfs_utils_client_enable_mounts | bool
+
+- name: Manage declarative remote NFS file system mounts
+  ansible.builtin.mount:
+    src: "{{ mount.src }}"
+    path: "{{ mount.path }}"
+    fstype: "nfs"
+    opts: "{{ mount.opts | default('defaults') }}"
+    state: "{{ mount.state | default('mounted') }}"
+  become: true
+  loop: "{{ nfs_utils_client_mounts | default([]) }}"
+  loop_control:
+    loop_var: mount
+    label: "Mounting: {{ mount.src }}"
+  when:
+    - nfs_utils_client_mounts is defined
+    - nfs_utils_client_mounts | length > 0
+    - nfs_utils_client_enable_mounts | bool

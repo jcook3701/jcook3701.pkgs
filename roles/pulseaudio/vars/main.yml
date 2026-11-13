@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+pulseaudio_dep_pkg_names: []
+pulseaudio_pkg_names: []
+
+pulseaudio_service: pulseaudio
+pulseaudio_systemd_scope: "{{ 'system' if pulseaudio_system_wide else 'user' }}"
+pulseaudio_file_owner: "{{ 'root' if pulseaudio_system_wide else ansible_user_id }}"
+
+pulseaudio_directory:
+  conf: "{{ pulseaudio_os_directory.conf if pulseaudio_system_wide else '~/.config/pulse' }}"
+  service: "{{ pulseaudio_os_directory.service }}"
+  pid: "{{ pulseaudio_os_directory.pid }}"
+
+pulseaudio_file:
+  conf: "{{ pulseaudio_directory.conf }}/default.pa"
+  daemon: "{{ pulseaudio_directory.conf }}/daemon.conf"
+  cookie: "{{ pulseaudio_directory.conf }}/cookie"
+  service: "{{ pulseaudio_directory.service }}/{{ pulseaudio_service }}.service"
+  pid: "{{ pulseaudio_directory.pid }}/pid"

@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Securely query local operating system group databases to check for Samba environment presence
+  ansible.builtin.getent:
+    database: group
+    key: "{{ samba_group | default('sambashare') }}"
+    fail_key: false
+
+- name: Determine if Samba environment requirements are met
+  ansible.builtin.set_fact:
+    _samba_environment_ready: >-
+      {{ ansible_facts.getent_group is defined and
+         (samba_group | default('sambashare')) in ansible_facts.getent_group and
+         ansible_facts.getent_group[samba_group | default('sambashare')] is not none }}
+
+- name: Check if the breakout Samba keytab file is physically present on disk
+  ansible.builtin.stat:
+    path: "{{ samba_file.keytab | default('/etc/samba.keytab') }}"
+  register: _samba_keytab_file_stat
+  become: true
+
+- name: Enforce secure filesystem group permissions on the breakout Samba keytab file
+  ansible.builtin.file:
+    path: "{{ samba_file.keytab | default('/etc/samba.keytab') }}"
+    owner: root
+    group: "{{ samba_group | default('sambashare') }}"
+    mode: "0640"
+  become: true
+  when:
+    - _samba_environment_ready | default(false) | bool
+    - _samba_keytab_file_stat.stat.exists | default(false)
