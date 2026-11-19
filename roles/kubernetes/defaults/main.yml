@@ -6,6 +6,7 @@
 # -------------------------------------------------------------------------
 kubernetes_state: present
 kubernetes_debug: true
+
 # -------------------------------------------------------------------------
 # Kubernetes Repository Configuration
 # -------------------------------------------------------------------------
@@ -60,3 +61,12 @@ kubernetes_join_ca_cert_hashes: []
 kubernetes_join_control_plane: false
 kubernetes_join_certificate_key: ""
 kubernetes_join_advertise_address: ""
+
+# -------------------------------------------------------------------------
+# Kubernetes CRI Tools Configuration
+# -------------------------------------------------------------------------
+kubernetes_manage_crictl_config: true
+kubernetes_crictl_runtime_endpoint: ""
+kubernetes_crictl_image_endpoint: ""
+kubernetes_crictl_timeout: 2
+kubernetes_crictl_debug: false

@@ -4,14 +4,14 @@
 # -------------------------------------------------------------------------
 # Kubernetes Version Configuration
 # -------------------------------------------------------------------------
-kubernetes_kubernetes_major_minor_version: "{{ (kubernetes_kubernetes_version | split('.')
-                                                  | batch(2) | first) | join('.') }}"
+kubernetes_kubernetes_major_minor_version: >-
+  {{ kubernetes_kubernetes_version.split('.')[:2] | join('.') }}
 
 # -------------------------------------------------------------------------
 # Kubernetes Package Configuration
 # -------------------------------------------------------------------------
 kubernetes_pkg_names: >-
-  {{ kubernetes_os_pkg_names | default(['kubelet', 'kubeadm', 'kubectl']) }}
+  {{ kubernetes_os_pkg_names | default(['kubelet', 'kubeadm', 'kubectl', 'cri-tools']) }}
 
 # -------------------------------------------------------------------------
 # Kubernetes Directory Configuration
@@ -23,11 +23,30 @@ kubernetes_directory:
 # Kubernetes Configuration Files
 # -------------------------------------------------------------------------
 kubernetes_file:
-  config: "{{ kubernetes_directory.config ~ '/config.toml'
-                | default('/etc/kubernetes/config.toml') }}"
+  config: "{{ kubernetes_directory.config }}/config.toml"
   kubeadm_init: "{{ kubernetes_directory.config }}/kubeadm-init-config.yaml"
   kubeadm_join: "{{ kubernetes_directory.config }}/kubeadm-join-config.yaml"
   kubelet: "{{ kubernetes_directory.config }}/kubelet-config.yaml"
+  crictl: "/etc/crictl.yaml"
+
+# -------------------------------------------------------------------------
+# Kubernetes Container Runtime Configuration
+# -------------------------------------------------------------------------
+kubernetes_crictl_runtime_endpoint_effective: >-
+  {{
+    kubernetes_crictl_runtime_endpoint
+    if kubernetes_crictl_runtime_endpoint | length > 0
+    else (
+      kubernetes_cri_socket
+      if kubernetes_cri_socket | length > 0
+      else {
+        'docker': 'unix:///var/run/cri-dockerd.sock',
+        'containerd': 'unix:///run/containerd/containerd.sock',
+        'cri-o': 'unix:///var/run/crio/crio.sock',
+        'crio': 'unix:///var/run/crio/crio.sock'
+      }.get(kubernetes_engine, '')
+    )
+  }}
 
 # -------------------------------------------------------------------------
 # Kubernetes Repository Configuration

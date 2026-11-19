@@ -7,6 +7,7 @@ argument_specs:
     description:
       - Manage Kubernetes packages and related configuration.
       - Support Kubernetes cluster initialization and node joining.
+      - Configure kubeadm, kubelet, and crictl.
       - Delegate package repository management to jcook3701.utils.repo_add.
     author:
       - Jared Cook
@@ -58,7 +59,7 @@ argument_specs:
         default: "docker"
         description:
           - Container engine selected for Kubernetes integration.
-          - Kubernetes requires a CRI-compatible runtime.
+          - Used as a fallback when determining the CRI socket.
 
       kubernetes_kubernetes_version:
         type: str
@@ -145,8 +146,8 @@ argument_specs:
         default: ""
         description:
           - Unix socket endpoint of the container runtime.
-          - Examples include containerd and cri-dockerd sockets.
           - An empty value allows kubeadm runtime detection.
+          - Also serves as a fallback for crictl configuration.
 
       # -------------------------------------------------------------------
       # Kubernetes Kubelet Configuration
@@ -159,7 +160,7 @@ argument_specs:
           - cgroupfs
         description:
           - Cgroup driver used by the Kubernetes kubelet.
-          - Must be compatible with the container runtime configuration.
+          - Must match the container runtime configuration.
 
       kubernetes_kubelet_rotate_certificates:
         type: bool
@@ -190,7 +191,7 @@ argument_specs:
         default: ""
         description:
           - Kubernetes API server endpoint used when joining a cluster.
-          - Must be configured before executing kubeadm join.
+          - Required before executing kubeadm join.
 
       kubernetes_join_token:
         type: str
@@ -206,7 +207,7 @@ argument_specs:
         default: []
         description:
           - List of trusted Kubernetes control-plane CA public key hashes.
-          - Hashes are normally specified using the sha256 prefix.
+          - Hashes use the sha256 prefix.
 
       kubernetes_join_control_plane:
         type: bool
@@ -229,3 +230,41 @@ argument_specs:
         description:
           - Local API server advertise address for a joining control-plane node.
           - An empty value allows kubeadm to determine the address.
+
+      # -------------------------------------------------------------------
+      # Kubernetes CRI Tools Configuration
+      # -------------------------------------------------------------------
+      kubernetes_manage_crictl_config:
+        type: bool
+        default: true
+        description:
+          - Manage the crictl configuration file.
+          - When enabled, deploy /etc/crictl.yaml.
+
+      kubernetes_crictl_runtime_endpoint:
+        type: str
+        default: ""
+        description:
+          - CRI runtime endpoint used by crictl.
+          - When empty, derive the endpoint from kubernetes_cri_socket.
+          - Otherwise, use the selected container engine as a fallback.
+
+      kubernetes_crictl_image_endpoint:
+        type: str
+        default: ""
+        description:
+          - CRI image service endpoint used by crictl.
+          - When empty, use the effective runtime endpoint.
+
+      kubernetes_crictl_timeout:
+        type: int
+        default: 2
+        description:
+          - CRI connection timeout in seconds.
+
+      kubernetes_crictl_debug:
+        type: bool
+        default: false
+        description:
+          - Enable debug output for crictl commands.
+          - Independent of kubernetes_debug.

@@ -2,69 +2,61 @@
 
 [Kubernetes](https://kubernetes.io/) is an open-source container orchestration platform for automating the deployment, scaling, and management of containerized applications.
 
-This Ansible role, part of the `jcook3701.pkgs` collection, manages Kubernetes package installation, removal, and related configuration on supported Linux distributions.
+This Ansible role, part of the `jcook3701.pkgs` collection, manages the installation, configuration, and removal of Kubernetes packages and supporting command-line tools on supported Linux distributions.
 
-Core Kubernetes components include:
+The primary Kubernetes components include:
 
-- **[kubectl](https://kubernetes.io/docs/reference/kubectl/)** — Command-line interface for managing Kubernetes clusters.
-- **[kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/)** — Tool for initializing Kubernetes clusters and joining nodes.
-- **[kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/)** — Node agent responsible for managing Kubernetes Pods.
+- **[kubectl](https://kubernetes.io/docs/reference/kubectl/)** — Command-line interface for communicating with Kubernetes clusters and managing cluster resources.
+- **[kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/)** — Tool for initializing Kubernetes clusters and joining additional nodes.
+- **[kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/)** — Node agent responsible for managing containers running in Kubernetes Pods.
+- **[crictl](https://github.com/kubernetes-sigs/cri-tools)** — Command-line utility for inspecting and troubleshooting Container Runtime Interface (CRI) compatible runtimes.
 
-APT repository management is delegated to `jcook3701.utils.repo_adder`.
+Package repository management is delegated to `jcook3701.utils.repo_add`, while installation and removal operations are handled through `jcook3701.utils.pkg_manager`.
 
 ## Role Variables
 
+### Lifecycle & System Access Management
+
 | Variable | Type | Description / Choices | Default |
 | :--- | :--- | :--- | :--- |
-| `kubernetes_state` | str | Desired lifecycle state of the Kubernetes installation. | `present` |
+| `kubernetes_state` | str | Desired lifecycle state. Choices: `present`, `absent`, `teardown`. | `present` |
 | `kubernetes_debug` | bool | Enable debugging during role execution. | `true` |
-| `kubernetes_download_url` | str | Base URL for the official Kubernetes package repositories. | `https://pkgs.k8s.io/core` |
-| `kubernetes_manage_engine` | bool | Control whether the role manages the selected container engine. | `true` |
-| `kubernetes_engine` | str | Selected container engine. | `docker` |
-| `kubernetes_kubernetes_version` | str | Target Kubernetes release version used to derive the repository series. | `1.37.0` |
 
-### Internal Role Variables
-
-The following variables are defined in `vars/main.yml` and `vars/ubuntu.yml`.
+### Kubernetes Repository Configuration
 
 | Variable | Type | Description / Choices | Default |
 | :--- | :--- | :--- | :--- |
-| `kubernetes_kubernetes_major_minor_version` | str | Major and minor version derived from the configured Kubernetes version. | `1.37` |
-| `kubernetes_pkg_names` | list | Package list determined by OS-specific variables. | `['kubernetes']` |
-| `kubernetes_directory` | dict | Kubernetes configuration directory paths. | `config: /etc/kubernetes` |
-| `kubernetes_file` | dict | Kubernetes configuration file paths. | `config: /etc/kubernetes/config.toml` |
-| `kubernetes_repo_id` | str | Repository identifier. | `kubernetes` |
-| `kubernetes_repo_name` | str | Human-readable repository description. | `Kubernetes (k8s) PPA` |
-| `kubernetes_os_pkg_names` | list | Ubuntu-specific package selection. | `['kubernetes']` |
-| `kubernetes_os_directory` | dict | Ubuntu-specific configuration directory paths. | `config: /etc/kubernetes` |
-| `kubernetes_os_repo_id` | str | Ubuntu repository identifier. | `kubernetes` |
-| `kubernetes_os_repo_name` | str | Ubuntu repository description. | `Kubernetes (k8s) PPA` |
-| `kubernetes_debian_uris` | str | Version-specific Kubernetes Debian repository URL. | `https://pkgs.k8s.io/core:/stable:/v1.37/deb/` |
-| `kubernetes_debian_suites` | str | Debian repository suite. | `/` |
-| `kubernetes_debian_component` | str | Debian repository component. | Empty string |
-| `kubernetes_debian_signed_by` | str | URL of the official Kubernetes repository signing key. | `https://pkgs.k8s.io/core:/stable:/v1.37/deb/Release.key` |
+| `kubernetes_download_url` | str | Base URL for the official Kubernetes package repositories. | `https://pkgs.k8s.io/core` |
 
-## Authors Notes
+### Kubernetes Package Configuration
 
-The Kubernetes role separates package management from repository configuration.
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_manage_engine` | bool | Flag reserved for managing the container engine; runtime provisioning is not yet implemented by this role. | `true` |
+| `kubernetes_engine` | str | Selected container engine, used to determine the default CRI endpoint. Common values include `docker`, `containerd`, and `cri-o`. | `docker` |
+| `kubernetes_kubernetes_version` | str | Target Kubernetes release, used to derive the package repository's minor version. | `1.37.0` |
 
-Repository configuration is managed through `jcook3701.utils.repo_adder`, allowing the same repository management system to be reused across other Ansible roles.
+### Kubernetes Configuration API
 
-Kubernetes publishes separate package repositories for each minor release series. The configured version determines the appropriate repository URL.
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_kubeadm_api_version` | str | Configuration API version used for kubeadm initialization and joining. | `kubeadm.k8s.io/v1beta4` |
+| `kubernetes_kubelet_api_version` | str | Configuration API version used for kubelet configuration. | `kubelet.config.k8s.io/v1beta1` |
 
-Selecting a repository series does not independently pin the installed package to an exact patch version. Kubernetes upgrades should be coordinated with cluster version compatibility requirements.
+### Kubernetes Cluster Configuration
 
-Installing Kubernetes packages does not automatically initialize a Kubernetes cluster. Additional configuration is required for container runtimes, networking, and cluster initialization.
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_cluster_name` | str | Logical name assigned to the Kubernetes cluster. | `kubernetes` |
+| `kubernetes_control_plane_endpoint` | str | Stable IP address or DNS endpoint for the Kubernetes control plane. | `""` |
+| `kubernetes_api_advertise_address` | str | IP address advertised by the Kubernetes API server. An empty value allows kubeadm to determine the address. | `""` |
+| `kubernetes_api_bind_port` | int | Port used by the Kubernetes API server. | `6443` |
+| `kubernetes_pod_subnet` | str | CIDR subnet allocated to Kubernetes Pods; should match the selected CNI configuration. | `""` |
+| `kubernetes_service_subnet` | str | CIDR subnet allocated to Kubernetes Services. | `10.96.0.0/12` |
+| `kubernetes_dns_domain` | str | DNS domain used for Kubernetes cluster services. | `cluster.local` |
 
-**List of helpful links:**
+### Kubernetes Node Configuration
 
-1. [Kubernetes Documentation](https://kubernetes.io/docs/home/)
-2. [Installation Guide](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
-3. [Installing kubectl on Linux](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
-4. [Kubernetes Package Repositories](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/change-package-repository/)
-5. [Kubernetes Container Runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
-6. [Kubernetes Version Skew Policy](https://kubernetes.io/releases/version-skew-policy/)
-
-## Author Information
-
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_node_name` | str | Kubernetes node name; an empty value allows Kubernetes to use the system

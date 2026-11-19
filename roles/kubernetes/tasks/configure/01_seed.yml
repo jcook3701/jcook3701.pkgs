@@ -1,3 +1,94 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# -------------------------------------------------------------------------
+# Kubernetes Configuration Directory
+# -------------------------------------------------------------------------
+- name: Ensure Kubernetes (k8s) configuration directory exists
+  ansible.builtin.file:
+    path: "{{ kubernetes_directory.config }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+# -------------------------------------------------------------------------
+# Kubernetes Cluster Initialization Configuration
+# -------------------------------------------------------------------------
+- name: Seed Kubernetes (k8s) cluster initialization configuration
+  ansible.builtin.template:
+    src: kubeadm-init-config.yaml.j2
+    dest: "{{ kubernetes_file.kubeadm_init }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+# -------------------------------------------------------------------------
+# Kubernetes Kubelet Configuration
+# -------------------------------------------------------------------------
+- name: Seed Kubernetes (k8s) kubelet configuration
+  ansible.builtin.template:
+    src: kubelet-config.yaml.j2
+    dest: "{{ kubernetes_file.kubelet }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+# -------------------------------------------------------------------------
+# Kubernetes CRI Tools Configuration
+# -------------------------------------------------------------------------
+- name: Validate Kubernetes (k8s) CRI runtime configuration
+  ansible.builtin.assert:
+    that:
+      - kubernetes_crictl_runtime_endpoint_effective | length > 0
+    fail_msg: >-
+      A CRI runtime endpoint could not be determined.
+      Configure kubernetes_crictl_runtime_endpoint,
+      kubernetes_cri_socket, or kubernetes_engine.
+  when: kubernetes_manage_crictl_config | bool
+
+- name: Seed Kubernetes (k8s) CRI tools configuration
+  ansible.builtin.template:
+    src: crictl.yaml.j2
+    dest: "{{ kubernetes_file.crictl }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: kubernetes_manage_crictl_config | bool
+
+# -------------------------------------------------------------------------
+# Kubernetes Cluster Joining Configuration
+# -------------------------------------------------------------------------
+- name: Validate Kubernetes (k8s) cluster joining configuration
+  ansible.builtin.assert:
+    that:
+      - kubernetes_join_api_server_endpoint | length > 0
+      - kubernetes_join_token | length > 0
+      - kubernetes_join_ca_cert_hashes | length > 0
+    fail_msg: >-
+      Kubernetes cluster joining requires an API server endpoint,
+      bootstrap token, and at least one CA certificate hash.
+  when: >-
+    (kubernetes_join_api_server_endpoint | length > 0)
+    or (kubernetes_join_token | length > 0)
+    or (kubernetes_join_ca_cert_hashes | length > 0)
+    or (kubernetes_join_control_plane | bool)
+  no_log: true
+
+- name: Seed Kubernetes (k8s) cluster joining configuration
+  ansible.builtin.template:
+    src: kubeadm-join-config.yaml.j2
+    dest: "{{ kubernetes_file.kubeadm_join }}"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+  no_log: true
+  when:
+    - kubernetes_join_api_server_endpoint | length > 0
+    - kubernetes_join_token | length > 0
+    - kubernetes_join_ca_cert_hashes | length > 0
