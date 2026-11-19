@@ -1,0 +1,105 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug Helm (CLI) configuration
+  ansible.builtin.debug:
+    msg:
+      - "helm_pkg_names: {{ helm_pkg_names }}"
+      - "helm_install_pkg_names: {{ helm_install_pkg_names }}"
+      - "helm_repo_id: {{ helm_repo_id }}"
+      - "helm_repo_name: {{ helm_repo_name }}"
+      - "helm_manage_repository: {{ helm_manage_repository }}"
+      - "helm_manage_chart_repositories: {{ helm_manage_chart_repositories }}"
+  when: helm_debug | bool
+
+# Do not trust a downloaded package signing key solely because HTTPS worked.
+# Verify the fingerprint before delegating key installation to repo_add.
+- name: Ensure Helm repository signing-key tools are installed
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs:
+      - gnupg
+      - ca-certificates
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+  when: helm_manage_repository | bool
+
+- name: Configure verified Helm (CLI) APT repository
+  when: helm_manage_repository | bool
+  block:
+    - name: Create temporary file for Helm repository signing key
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .helm-repo-key
+      register: helm_repo_key_temp
+      become: true
+
+    - name: Download Helm repository signing key
+      ansible.builtin.get_url:
+        url: "{{ helm_debian_signed_by }}"
+        dest: "{{ helm_repo_key_temp.path }}"
+        owner: root
+        group: root
+        mode: "0600"
+      become: true
+
+    - name: Inspect Helm repository signing key fingerprint
+      ansible.builtin.command:
+        argv:
+          - gpg
+          - --batch
+          - --show-keys
+          - --with-colons
+          - --fingerprint
+          - "{{ helm_repo_key_temp.path }}"
+      register: helm_repo_key_details
+      changed_when: false
+      become: true
+
+    - name: Ensure Helm repository signing key fingerprint matches
+      ansible.builtin.assert:
+        that:
+          - >-
+            (helm_repo_key_details.stdout_lines
+              | select('match', '^fpr:')
+              | map('split', ':')
+              | map(attribute=9)
+              | first
+              | default('')
+              | upper) == (helm_repo_signing_key_fingerprint | upper)
+        fail_msg: >-
+          Helm repository signing key fingerprint does not match the
+          configured trusted fingerprint. Refusing to add the repository.
+
+    - name: Setup Helm (CLI) Package Repository
+      ansible.builtin.include_role:
+        name: jcook3701.utils.repo_add
+      vars:
+        repo_add_id: "{{ helm_repo_id }}"
+        repo_add_name: "{{ helm_repo_name }}"
+        repo_add_state: present
+        repo_add_enabled: true
+        repo_add_debian_key_format: asc
+        repo_add_debian_uris: "{{ helm_debian_uris }}"
+        repo_add_debian_suites: "{{ helm_debian_suites }}"
+        repo_add_debian_components: "{{ helm_debian_component }}"
+        repo_add_debian_signed_by: "{{ helm_repo_key_temp.path }}"
+  always:
+    - name: Remove temporary Helm repository signing key
+      ansible.builtin.file:
+        path: "{{ helm_repo_key_temp.path }}"
+        state: absent
+      become: true
+      when: helm_repo_key_temp.path is defined
+
+- name: Install Helm (CLI) package
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ helm_install_pkg_names }}"
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure Helm (CLI)
+  ansible.builtin.include_tasks: configure/main.yml

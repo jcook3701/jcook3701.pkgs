@@ -59,4 +59,132 @@ Package repository management is delegated to `jcook3701.utils.repo_add`, while 
 
 | Variable | Type | Description / Choices | Default |
 | :--- | :--- | :--- | :--- |
-| `kubernetes_node_name` | str | Kubernetes node name; an empty value allows Kubernetes to use the system
+| `kubernetes_node_name` | str | Kubernetes node name; an empty value allows Kubernetes to use the system hostname. | `""` |
+| `kubernetes_cri_socket` | str | Container Runtime Interface socket, optionally specified instead of automatic detection. | `""` |
+
+### Kubernetes Kubelet Configuration
+
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_kubelet_cgroup_driver` | str | Cgroup driver used by kubelet. Choices: `systemd`, `cgroupfs`. | `systemd` |
+| `kubernetes_kubelet_rotate_certificates` | bool | Enable automatic rotation of kubelet client certificates. | `true` |
+| `kubernetes_kubelet_cluster_dns` | list[str] | DNS servers used by Kubernetes Pods. | `[]` |
+| `kubernetes_kubelet_resolv_conf` | str | Path to the resolver configuration used by kubelet. | `""` |
+
+### Kubernetes Node Joining Configuration
+
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_join_api_server_endpoint` | str | API server endpoint used when joining a Kubernetes cluster. | `""` |
+| `kubernetes_join_token` | str | Bootstrap token used for cluster authentication. Store securely using Ansible Vault. | `""` |
+| `kubernetes_join_ca_cert_hashes` | list[str] | Trusted SHA-256 CA public key hashes used during cluster discovery. | `[]` |
+| `kubernetes_join_control_plane` | bool | Configure the joining node as an additional control-plane node instead of a worker. | `false` |
+| `kubernetes_join_certificate_key` | str | Certificate decryption key used when joining additional control-plane nodes. Store securely using Ansible Vault. | `""` |
+| `kubernetes_join_advertise_address` | str | Local API server advertise address for a joining control-plane node. | `""` |
+
+### Kubernetes CRI Tools Configuration
+
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `kubernetes_manage_crictl_config` | bool | Manage the `/etc/crictl.yaml` configuration file. | `true` |
+| `kubernetes_crictl_runtime_endpoint` | str | Explicit CRI runtime socket endpoint. When empty, derive from `kubernetes_cri_socket` or the selected container engine. | `""` |
+| `kubernetes_crictl_image_endpoint` | str | CRI image service endpoint. When empty, use the effective runtime endpoint. | `""` |
+| `kubernetes_crictl_timeout` | int | Timeout in seconds for crictl runtime requests. | `2` |
+| `kubernetes_crictl_debug` | bool | Enable debugging for crictl commands. | `false` |
+
+### Internal Role Variables
+
+The following variables are defined in `vars/main.yml` and `vars/ubuntu.yml` and are used internally for operating-system-specific package management, repository configuration, and file paths.
+
+| Variable | Type | Description / Default |
+| :--- | :--- | :--- |
+| `kubernetes_kubernetes_major_minor_version` | str | Derived Kubernetes major/minor version, e.g. `1.37`. |
+| `kubernetes_pkg_names` | list[str] | Package list determined by OS-specific variables. |
+| `kubernetes_os_pkg_names` | list[str] | Ubuntu packages: `kubelet`, `kubeadm`, `kubectl`, `cri-tools`. |
+| `kubernetes_directory` | dict | Kubernetes configuration directory, default `/etc/kubernetes`. |
+| `kubernetes_file` | dict | Destination paths for the Kubernetes configuration files. |
+| `kubernetes_repo_id` | str | Repository identifier, default `kubernetes`. |
+| `kubernetes_repo_name` | str | Human-readable repository description, default `Kubernetes (k8s) PPA`. |
+| `kubernetes_os_directory` | dict | Ubuntu-specific configuration directory paths. |
+| `kubernetes_os_repo_id` | str | Ubuntu repository identifier, default `kubernetes`. |
+| `kubernetes_os_repo_name` | str | Ubuntu repository description, default `Kubernetes (k8s) PPA`. |
+| `kubernetes_debian_uris` | str | Kubernetes minor-version-specific Debian repository URL. |
+| `kubernetes_debian_suites` | str | Debian repository suite, default `/`. |
+| `kubernetes_debian_component` | str | Debian repository component, default empty string. |
+| `kubernetes_debian_signed_by` | str | Official Kubernetes repository signing key URL. |
+| `kubernetes_crictl_runtime_endpoint_effective` | str | Derived CRI endpoint, resolved from explicit settings or the container engine. |
+
+## Configuration Files
+
+The role provides Jinja2 templates for Kubernetes cluster initialization, node joining, kubelet configuration, and CRI tooling.
+
+| Template | Destination | Purpose |
+| :--- | :--- | :--- |
+| `kubeadm-init-config.yaml.j2` | `/etc/kubernetes/kubeadm-init-config.yaml` | Configuration for initializing a Kubernetes cluster. |
+| `kubeadm-join-config.yaml.j2` | `/etc/kubernetes/kubeadm-join-config.yaml` | Configuration for joining worker or control-plane nodes. |
+| `kubelet-config.yaml.j2` | `/etc/kubernetes/kubelet-config.yaml` | Kubelet configuration, including cgroup and networking settings. |
+| `crictl.yaml.j2` | `/etc/crictl.yaml` | CRI endpoint, image service, timeout, and debugging configuration. |
+
+Configuration templates are deployed through `tasks/configure/01_seed.yml`.
+
+The cluster-joining configuration is generated only when the required API server endpoint, bootstrap token, and CA certificate hashes are provided.
+
+**Note:** These templates generate configuration files; they do not automatically execute `kubeadm init` or `kubeadm join`. The standalone kubelet configuration is not automatically installed as kubeadm's live configuration.
+
+## Container Runtime Configuration
+
+Kubernetes requires a Container Runtime Interface (CRI) compatible runtime.
+
+The role derives the default CRI endpoint from the selected `kubernetes_engine`, unless an explicit endpoint is supplied.
+
+| Container Engine | Default CRI Endpoint |
+| :--- | :--- |
+| `docker` | `unix:///var/run/cri-dockerd.sock` |
+| `containerd` | `unix:///run/containerd/containerd.sock` |
+| `cri-o` | `unix:///var/run/crio/crio.sock` |
+
+The endpoint selection follows this priority:
+
+1. `kubernetes_crictl_runtime_endpoint`
+2. `kubernetes_cri_socket`
+3. Endpoint derived from `kubernetes_engine`
+
+Docker Engine requires an additional CRI adapter, such as `cri-dockerd`, to function as a Kubernetes container runtime.
+
+The role currently generates the configuration necessary to communicate with the selected runtime but does not automatically install or start that runtime.
+
+## Authors Notes
+
+The Kubernetes role separates package lifecycle management from repository configuration and cluster initialization.
+
+Repository configuration is delegated to `jcook3701.utils.repo_add`, and package installation and removal are managed through `jcook3701.utils.pkg_manager`.
+
+The role supports three lifecycle states:
+
+- **present** — Install Kubernetes packages and generate the applicable configuration files.
+- **absent** — Uninstall Kubernetes packages through the package manager.
+- **teardown** — Uninstall Kubernetes packages and remove the configured package repository.
+
+The current teardown workflow does not automatically delete the generated Kubernetes configuration files.
+
+Kubernetes publishes separate package repositories for each minor release series. The `kubernetes_kubernetes_version` variable determines the appropriate repository series, but does not independently enforce an exact installed package patch version.
+
+Cluster initialization, CNI installation, runtime provisioning, and node joining remain separate operations.
+
+Sensitive credentials, including cluster bootstrap tokens and control-plane certificate keys, should be managed using Ansible Vault. Generated cluster-joining configuration files use restrictive `0600` permissions.
+
+**List of helpful links:**
+
+1. [Kubernetes Documentation](https://kubernetes.io/docs/home/)
+2. [Installing kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+3. [Installing kubectl on Linux](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+4. [Creating a Cluster with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
+5. [Kubernetes Configuration API](https://kubernetes.io/docs/reference/config-api/)
+6. [Kubernetes Container Runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
+7. [Debugging Kubernetes Nodes with crictl](https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/)
+8. [Kubernetes Package Repositories](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/change-package-repository/)
+9. [Kubernetes Version Skew Policy](https://kubernetes.io/releases/version-skew-policy/)
+
+## Author Information
+
+Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.

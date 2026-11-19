@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Validate Helm (CLI) platform support
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: >-
+      The Helm role currently supports Debian-family Linux distributions.
+      Other package managers are not configured for this role.
+
+- name: Load Helm (CLI) OS-specific variables
+  ansible.builtin.include_vars: "{{ helm_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['distribution'] | lower }}.yml"
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: helm_vars
+    label: "Loading variables file: {{ helm_vars }}"
+
+- name: Ensure Helm (CLI) packages are installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: helm_state == 'present'
+
+- name: Ensure Helm (CLI) packages are removed
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: helm_state == 'absent'
+
+- name: Ensure Helm (CLI) installation and repository are removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: helm_state == 'teardown'

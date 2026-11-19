@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+galaxy_info:
+  author: Jared Cook
+  description: >-
+    Install, configure, uninstall, or fully decommission the Helm CLI
+    using shared repository and package-management roles.
+  company: "Cook's Code, Inc."
+  license: "AGPL-3.0-or-later"
+  min_ansible_version: ">=2.19"
+  role_name: helm
+
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+
+  galaxy_tags:
+    - helm
+    - kubernetes
+    - packages
+    - apt
+    - charts
+
+dependencies: []
+
+collections:
+  - jcook3701.utils

@@ -1,0 +1,126 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: Install and configure Helm CLI
+    description:
+      - Manage the Helm command-line package on Debian and Ubuntu.
+      - Delegate APT repository configuration to jcook3701.utils.repo_add.
+      - Delegate package management to jcook3701.utils.pkg_manager.
+      - Optionally manage per-user Helm chart repositories.
+    author:
+      - Jared Cook
+
+    options:
+      # -------------------------------------------------------------------
+      # Lifecycle & Debug Management
+      # -------------------------------------------------------------------
+      helm_state:
+        type: str
+        default: present
+        choices:
+          - present
+          - absent
+          - teardown
+        description:
+          - Desired lifecycle state of the Helm installation.
+          - C(present) installs Helm and applies optional chart repositories.
+          - C(absent) removes the Helm package.
+          - C(teardown) removes Helm and its managed APT repository.
+
+      helm_debug:
+        type: bool
+        default: true
+        description:
+          - Enable role debugging output, excluding secret material.
+
+      # -------------------------------------------------------------------
+      # Helm Package Configuration
+      # -------------------------------------------------------------------
+      helm_package_version:
+        type: str
+        default: ""
+        description:
+          - Exact Debian package version for Helm, including packaging revision.
+          - Empty means no explicit APT package version constraint.
+          - The value must exist in the configured APT repository.
+
+      helm_verify_installation:
+        type: bool
+        default: true
+        description:
+          - Run helm version --short after installing the package.
+
+      # -------------------------------------------------------------------
+      # Helm APT Repository Configuration
+      # -------------------------------------------------------------------
+      helm_manage_repository:
+        type: bool
+        default: true
+        description:
+          - Manage the Helm APT repository through jcook3701.utils.repo_add.
+          - Disabling this requires Helm to be available from another package source.
+
+      helm_download_url:
+        type: str
+        default: "https://packages.buildkite.com/helm-linux/helm-debian/any/"
+        description:
+          - Officially documented Debian and Ubuntu Helm APT repository URL.
+
+      helm_repo_signing_key_url:
+        type: str
+        default: "https://packages.buildkite.com/helm-linux/helm-debian/gpgkey"
+        description:
+          - URL for the Helm APT repository signing key.
+
+      helm_repo_signing_key_fingerprint:
+        type: str
+        default: "DDF78C3E6EBB2D2CC223C95C62BA89D07698DBC6"
+        description:
+          - Expected full fingerprint of the Helm APT repository signing key.
+          - A mismatch stops installation before repository configuration.
+
+      # -------------------------------------------------------------------
+      # Helm Chart Repository Management
+      # -------------------------------------------------------------------
+      helm_manage_chart_repositories:
+        type: bool
+        default: false
+        description:
+          - Manage optional Helm chart repositories using the Helm CLI.
+          - Chart repositories are per-user and are distinct from APT sources.
+
+      helm_repository_user:
+        type: str
+        default: ""
+        description:
+          - Local Linux user whose Helm chart repositories are managed.
+          - Empty uses the Ansible connection user.
+
+      helm_chart_repositories:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - List of chart repository mappings with name, url, and state.
+          - A url is required for entries whose state is present.
+        options:
+          name:
+            type: str
+            required: true
+            description:
+              - Unique name of the Helm chart repository.
+          url:
+            type: str
+            default: ""
+            description:
+              - Helm chart repository URL, required for state present.
+          state:
+            type: str
+            default: present
+            choices:
+              - present
+              - absent
+            description:
+              - Ensure the chart repository is present or absent.
