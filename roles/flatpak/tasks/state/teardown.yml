@@ -4,6 +4,19 @@
 - name: Ensure Flatpak is Uninstalled
   ansible.builtin.include_tasks: uninstall.yml
 
+- name: Decommission Flatpak Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ flatpak_repo_id | default('flatpak') }}"
+    repo_add_name: "{{ flatpak_repo_name | default('Flatpak PPA') }}"
+    repo_add_state: "absent"
+  when:
+    - flatpak_repo_id is defined
+    - flatpak_repo_id | length > 0
+    - ansible_facts['distribution'] | lower == 'ubuntu'
+    - flatpak_use_upstream_repo | default(true) | bool
+
 - name: Look up user account information
   ansible.builtin.getent:
     database: passwd

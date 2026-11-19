@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+cloudflared_state: present
+cloudflared_debug: true
+
+# -------------------------------------------------------------------------
+# Cloudflared Repository Configuration
+# -------------------------------------------------------------------------
+cloudflared_download_url: "https://pkg.cloudflare.com"
+
+# -------------------------------------------------------------------------
+# Cloudflared Configuration Management
+# -------------------------------------------------------------------------
+cloudflared_manage_config: true
+
+# -------------------------------------------------------------------------
+# Cloudflared Tunnel Identification
+# -------------------------------------------------------------------------
+cloudflared_tunnel_uuid: ""
+cloudflared_tunnel_name: ""
+
+# -------------------------------------------------------------------------
+# Cloudflared Tunnel Runtime Configuration
+# -------------------------------------------------------------------------
+cloudflared_protocol: "auto"
+cloudflared_loglevel: "info"
+cloudflared_logfile: ""
+cloudflared_metrics: ""
+cloudflared_region: ""
+cloudflared_grace_period: "30s"
+
+# -------------------------------------------------------------------------
+# Cloudflared Origin Server Configuration
+# -------------------------------------------------------------------------
+cloudflared_origin_request:
+  connectTimeout: "30s"
+  noTLSVerify: false
+
+# -------------------------------------------------------------------------
+# Cloudflared Ingress Routing Configuration
+# -------------------------------------------------------------------------
+cloudflared_ingress:
+  - service: "http_status:404"
+
+# -------------------------------------------------------------------------
+# Cloudflared Private Network Configuration
+# -------------------------------------------------------------------------
+cloudflared_warp_routing_enabled: false

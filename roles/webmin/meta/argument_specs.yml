@@ -4,7 +4,8 @@
 argument_specs:
   main:
     short_description: "Manage Webmin control panel installation and repository setups."
-    description: "This role downloads the official setup script, configures upstream package repositories, and manages the Webmin package state."
+    description: "This role downloads the official setup script, configures upstream package
+      repositories, and manages the Webmin package state."
     author: "Jared Cook"
     options:
       webmin_state:
@@ -14,7 +15,8 @@ argument_specs:
         choices:
           - "present"
           - "absent"
-        description: "The operational state for Webmin. Set to 'present' to setup repositories and install packages, or 'absent' to cleanly remove them."
+        description: "The operational state for Webmin. Set to 'present' to setup repositories
+          and install packages, or 'absent' to cleanly remove them."
       webmin_repo_url:
         type: "str"
         required: false

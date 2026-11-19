@@ -7,7 +7,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0750'
+    mode: "0750"
   loop:
     - "{{ firewalld_directory.conf }}"
     - "{{ firewalld_directory.services }}"

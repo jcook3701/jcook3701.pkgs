@@ -4,7 +4,8 @@
 argument_specs:
   main:
     short_description: "Enterprise-grade UniFi Network Application configuration"
-    description: "Configures memory architectures, performance Java execution paths, local listening socket arrays, and background database connection engines for UniFi."
+    description: "Configures memory architectures, performance Java execution paths,
+      local listening socket arrays, and background database connection engines for UniFi."
     author: "Ansible DevOps Engineer"
     options:
 
@@ -20,29 +21,34 @@ argument_specs:
         elements: "dict"
         required: false
         default: []
-        description: "Accounts granted rootless or direct access to the unifi daemon socket."
+        description: "Accounts granted rootless or direct access
+          to the unifi daemon socket."
         options:
           name:
             type: "str"
             required: true
-            description: "The exact local username string to grant UniFi daemon socket access."
+            description: "The exact local username string to grant
+              UniFi daemon socket access."
 
       unifi_manage_group:
         type: "bool"
         required: false
         default: true
-        description: "Controls whether the role should actively manage the lifecycle of the 'unifi' system group."
+        description: "Controls whether the role should actively manage
+          the lifecycle of the 'unifi' system group."
 
       unifi_download_url:
         type: str
         default: "https://www.ui.com"
-        description: "The upstream base mirror server URL hosting UniFi application source distribution packages."
+        description: "The upstream base mirror server URL hosting UniFi
+          application source distribution packages."
 
       unifi_version:
         type: "str"
         required: false
         default: "10.4"
-        description: "The major version suite path used to populate the APT repository Suite parameter."
+        description: "The major version suite path used to populate the APT
+          repository Suite parameter."
         choices:
           - "10.4"
           - "8.6"
@@ -53,34 +59,40 @@ argument_specs:
       unifi_jvm_init_heap_size:
         type: str
         default: "1024m"
-        description: "Initial memory floor space assigned directly to the running Java Virtual Machine environment."
+        description: "Initial memory floor space assigned directly to the running
+          Java Virtual Machine environment."
 
       unifi_jvm_max_heap_size:
         type: str
         default: "2024m"
-        description: "Maximum safety boundary ceiling constraint for runtime Java virtual execution page tracking."
+        description: "Maximum safety boundary ceiling constraint for runtime Java
+          virtual execution page tracking."
 
       unifi_jvm_extra_opts:
         type: str
         default: "-XX:+UseG1GC -XX:+UseStringDeduplication"
-        description: "Appended explicit processing performance optimization flags passed straight to the Java daemon launcher."
+        description: "Appended explicit processing performance optimization flags passed
+          straight to the Java daemon launcher."
 
       # Core Database Engine Connection Configurations
       unifi_db_mongo_connections_max:
         type: int
         default: 100
-        description: "Upper bound connection handle cap used when establishing application query processing loops."
+        description: "Upper bound connection handle cap used when establishing
+          application query processing loops."
 
       unifi_db_mongo_timeout_ms:
         type: int
         default: 5000
-        description: "Maximum transaction threshold duration drop limit before a dead request block throws errors."
+        description: "Maximum transaction threshold duration drop limit before
+          a dead request block throws errors."
 
       # Enterprise Networking & Port Configurations
       unifi_port_inform:
         type: int
         default: 8080
-        description: "TCP port handling incoming heartbeat packet check-ins sent directly from adopted client hardware nodes."
+        description: "TCP port handling incoming heartbeat packet check-ins
+          sent directly from adopted client hardware nodes."
 
       unifi_port_https:
         type: int

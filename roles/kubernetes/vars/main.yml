@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Kubernetes Version Configuration
+# -------------------------------------------------------------------------
+kubernetes_kubernetes_major_minor_version: "{{ (kubernetes_kubernetes_version | split('.')
+                                                  | batch(2) | first) | join('.') }}"
+
+# -------------------------------------------------------------------------
+# Kubernetes Package Configuration
+# -------------------------------------------------------------------------
+kubernetes_pkg_names: >-
+  {{ kubernetes_os_pkg_names | default(['kubelet', 'kubeadm', 'kubectl']) }}
+
+# -------------------------------------------------------------------------
+# Kubernetes Directory Configuration
+# -------------------------------------------------------------------------
+kubernetes_directory:
+  config: "{{ kubernetes_os_directory.config | default('/etc/kubernetes') }}"
+
+# -------------------------------------------------------------------------
+# Kubernetes Configuration Files
+# -------------------------------------------------------------------------
+kubernetes_file:
+  config: "{{ kubernetes_directory.config ~ '/config.toml'
+                | default('/etc/kubernetes/config.toml') }}"
+  kubeadm_init: "{{ kubernetes_directory.config }}/kubeadm-init-config.yaml"
+  kubeadm_join: "{{ kubernetes_directory.config }}/kubeadm-join-config.yaml"
+  kubelet: "{{ kubernetes_directory.config }}/kubelet-config.yaml"
+
+# -------------------------------------------------------------------------
+# Kubernetes Repository Configuration
+# -------------------------------------------------------------------------
+kubernetes_repo_id: "{{ kubernetes_os_repo_id | default('kubernetes') }}"
+kubernetes_repo_name: "{{ kubernetes_os_repo_name | default('Kubernetes (k8s) PPA') }}"

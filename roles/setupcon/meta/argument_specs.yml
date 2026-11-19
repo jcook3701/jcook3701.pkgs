@@ -53,7 +53,7 @@ argument_specs:
       setupcon_xkblayout:
         type: "str"
         default: "us"
-        description: "The localized geographical alpha-numeric layout identifier code."
+        description: "The localized geographical alphanumeric layout identifier code."
 
       setupcon_xkbvariant:
         type: "str"
@@ -65,7 +65,8 @@ argument_specs:
         type: "str"
         default: ""
         required: false
-        description: "Supplementary control modifications, including layout swaps or option switches like 'ctrl:nocaps'."
+        description: "Supplementary control modifications, including layout swaps or option
+          switches like 'ctrl:nocaps'."
 
       setupcon_backspace:
         type: "str"

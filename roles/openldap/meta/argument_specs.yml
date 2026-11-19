@@ -21,19 +21,22 @@ argument_specs:
         type: "str"
         default: "master"
         choices: ["master", "slave", "client"]
-        description: "Designates if this instance acts as a write-capable provider (master) or a read-only consumer (slave)."
+        description: "Designates if this instance acts as a write-capable
+          provider (master) or a read-only consumer (slave)."
 
       openldap_admin_servers:
         type: "list"
         elements: "str"
         default: []
-        description: "A list of hostnames or IP addresses for administrative management servers."
+        description: "A list of hostnames or IP addresses for administrative
+          management servers."
 
       openldap_slave_servers:
         type: "list"
         elements: "str"
         default: []
-        description: "A list of downstream replica consumer engines connected to this cluster."
+        description: "A list of downstream replica consumer engines connected
+          to this cluster."
 
       # Domain Options
       openldap_top_level_domain:
@@ -80,7 +83,8 @@ argument_specs:
       openldap_replication_user:
         type: "str"
         default: "syncrepluser"
-        description: "The service account identity used by downstream replica engines to authenticate against the master provider."
+        description: "The service account identity used by downstream replica
+          engines to authenticate against the master provider."
 
       openldap_replication_password:
         type: "str"
@@ -96,7 +100,8 @@ argument_specs:
       openldap_generate_ca:
         type: "bool"
         default: true
-        description: "Determines if the deployment engine should generate a self-signed root Certification Authority asset internally."
+        description: "Determines if the deployment engine should generate a self-signed
+          root Certification Authority asset internally."
 
       openldap_tls_ca_cert:
         type: "str"
@@ -126,7 +131,8 @@ argument_specs:
       openldap_tls_csr:
         type: "str"
         default: "{{ openldap_directory.certs }}/ldap.csr"
-        description: "The target system path indicating where the server node identity certificate signing request file is saved."
+        description: "The target system path indicating where the server node identity
+          certificate signing request file is saved."
 
       openldap_tls_cipher_suite:
         type: "str"
@@ -137,18 +143,21 @@ argument_specs:
         type: "str"
         default: "on"
         choices: ["on", "off"]
-        description: "Configures canonical host-to-identity evaluation parameters within internal SASL authentication pipelines."
+        description: "Configures canonical host-to-identity evaluation parameters within
+          internal SASL authentication pipelines."
 
       openldap_tls_reqcert:
         type: "str"
         default: "allow"
         choices: ["never", "allow", "try", "demand", "hard"]
-        description: "Defines peer certificate validation strictly enforced by the server on incoming client connection contexts."
+        description: "Defines peer certificate validation strictly enforced by the
+          server on incoming client connection contexts."
 
       openldap_cleartext_port:
         type: "int"
         default: 389
-        description: "The unencrypted listen port reserved for standard lookup operations and explicit StartTLS elevations."
+        description: "The unencrypted listen port reserved for standard lookup
+          operations and explicit StartTLS elevations."
 
       openldap_secure_port:
         type: "int"
@@ -170,43 +179,51 @@ argument_specs:
       openldap_size_limit:
         type: "int"
         default: 500
-        description: "The hard ceiling capping the total number of directory objects returned in a single search operation query."
+        description: "The hard ceiling capping the total number of directory objects
+          returned in a single search operation query."
 
       openldap_time_limit:
         type: "int"
         default: 3600
-        description: "The absolute runtime duration execution ceiling in seconds permitted before forcing a lookup request cancellation."
+        description: "The absolute runtime duration execution ceiling in seconds
+          permitted before forcing a lookup request cancellation."
 
       # Feature Activations Matrix Switches
       openldap_autofs:
         type: "bool"
         default: false
-        description: "Toggles directory-based automount schema definitions enabling system file map tracking parameters over LDAP."
+        description: "Toggles directory-based automount schema definitions enabling
+          system file map tracking parameters over LDAP."
 
       openldap_guac:
         type: "bool"
         default: false
-        description: "Enables configuration schema definitions handling client connection setups matching an Apache Guacamole engine."
+        description: "Enables configuration schema definitions handling client
+          connection setups matching an Apache Guacamole engine."
 
       openldap_ppolicy:
         type: "bool"
         default: false
-        description: "Activates standard overlay management modules handling complex user password policies and lockout logic rules."
+        description: "Activates standard overlay management modules handling
+          complex user password policies and lockout logic rules."
 
       openldap_samba:
         type: "bool"
         default: false
-        description: "Toggles schema extensions required for handling Windows NT/Active Directory network file shares and client data tracking."
+        description: "Toggles schema extensions required for handling Windows
+          NT/Active Directory network file shares and client data tracking."
 
       openldap_sudo:
         type: "bool"
         default: false
-        description: "Injects explicit schema extensions designed to house and stream sudoers authorization policies via the centralized directory."
+        description: "Injects explicit schema extensions designed to house
+          and stream sudoers authorization policies via the centralized directory."
 
       openldap_openssh:
         type: "bool"
         default: false
-        description: "Extends the directory schema to store OpenSSH public keys centrally, enabling servers to securely fetch and validate user authentication keys at login."
+        description: "Extends the directory schema to store OpenSSH public keys
+          centrally, enabling servers to securely fetch and validate user authentication keys at login."
 
       # Password Policy (ppolicy) Constraints
       openldap_ppolicy_min_length:
@@ -217,34 +234,40 @@ argument_specs:
       openldap_ppolicy_max_failure:
         type: "int"
         default: 5
-        description: "The continuous authentication failure limit permitted before triggering a target account lock state."
+        description: "The continuous authentication failure limit permitted
+          before triggering a target account lock state."
 
       openldap_ppolicy_lockout_duration:
         type: "int"
         default: 1800
-        description: "The time duration in seconds an account remains completely locked following too many failure events (Default: 30 minutes)."
+        description: "The time duration in seconds an account remains completely
+          locked following too many failure events (Default: 30 minutes)."
 
       openldap_ppolicy_history_count:
         type: "int"
         default: 5
-        description: "The tracking ceiling of past passwords kept to block reuse sequences during updates."
+        description: "The tracking ceiling of past passwords kept to block reuse
+          sequences during updates."
 
       openldap_ppolicy_expire_warning:
         type: "int"
         default: 432000
-        description: "The lead warning timeline in seconds reminding users of password expiry states (Default: 5 days)."
+        description: "The lead warning timeline in seconds reminding users of
+          password expiry states (Default: 5 days)."
 
       # Samba Policy Constraints
       openldap_samba_domain:
         type: "str"
         default: "{{ openldap_second_level_domain | upper }}"
-        description: "The legacy uppercase NetBIOS domain identity string assigned for Windows client connectivity tracking."
+        description: "The legacy uppercase NetBIOS domain identity string
+          assigned for Windows client connectivity tracking."
 
       # Directory Bootstrap Data Mapping
       openldap_bootstrap_groups:
         type: "list"
         elements: "dict"
-        description: "The primary operational list used to create groups inside the directory structure."
+        description: "The primary operational list used to create groups
+          inside the directory structure."
         options:
           name:
             type: "str"
@@ -257,13 +280,15 @@ argument_specs:
           rid:
             type: "int"
             required: false
-            description: "The explicit Relative Identifier (RID) assigned to the group. If omitted, the template defaults to falling back on the native Linux gid value."
+            description: "The explicit Relative Identifier (RID) assigned
+              to the group. If omitted, the template defaults to falling back on the native Linux gid value."
           type:
             type: "int"
             required: false
             default: 2
             choices: [2, 4, 5]
-            description: "The Windows group scope descriptor type flag (e.g., 2 for Global Groups, 4 for Local Aliases/Built-ins, 5 for Universal Groups)."
+            description: "The Windows group scope descriptor type flag
+              (e.g., 2 for Global Groups, 4 for Local Aliases/Built-ins, 5 for Universal Groups)."
           display_name:
             type: "str"
             required: false
@@ -276,7 +301,8 @@ argument_specs:
             type: "bool"
             required: false
             default: false
-            description: "A boolean execution flag specifying whether this element requires a Windows NT4 structural group mapping."
+            description: "A boolean execution flag specifying whether this
+              element requires a Windows NT4 structural group mapping."
 
       openldap_bootstrap_users:
         type: "list"
@@ -329,7 +355,8 @@ argument_specs:
             description: "Controls privilege escalation assignments across client layers."
           is_samba_user:
             type: "bool"
-            description: "Enables structural generation of Windows-compatible NT password hashes and security descriptors required for central SMB/CIFS file share mounting."
+            description: "Enables structural generation of Windows-compatible
+              NT password hashes and security descriptors required for central SMB/CIFS file share mounting."
           is_pxe_worker:
             type: "bool"
             description: "Custom network lifecycle flag tagging infrastructure automation profiles."
@@ -355,7 +382,8 @@ argument_specs:
         type: "list"
         elements: "dict"
         required: false
-        description: "The raw share-drive configuration data collection passed dynamically to the OpenLDAP generation role."
+        description: "The raw share-drive configuration data collection
+          passed dynamically to the OpenLDAP generation role."
         options:
           name:
             type: "str"
@@ -364,7 +392,8 @@ argument_specs:
           src:
             type: "str"
             required: true
-            description: "The fully qualified remote Windows/Samba network share destination URL, formatted as '//server_hostname/share_name'."
+            description: "The fully qualified remote Windows/Samba network
+              share destination URL, formatted as '//server_hostname/share_name'."
           fstype:
             type: "str"
             required: false
@@ -406,9 +435,11 @@ argument_specs:
             type: "list"
             elements: "str"
             required: false
-            description: "A string array configuring access connection variables like hostnames and target operational ports."
+            description: "A string array configuring access connection
+              variables like hostnames and target operational ports."
           members:
             type: "list"
             elements: "str"
             required: false
-            description: "A list of target account login strings given permission access routes over this endpoint channel."
+            description: "A list of target account login strings given
+              permission access routes over this endpoint channel."

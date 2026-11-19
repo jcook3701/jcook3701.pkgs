@@ -23,9 +23,11 @@
     question: "{{ config.question }}"
     value: "{{ config.value }}"
     vtype: "{{ config.vtype }}"
+  vars:
+    domain_name: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}"
   loop:
     - { question: "slapd/no_configuration", value: "false", vtype: "boolean" }
-    - { question: "slapd/domain", value: "{{ openldap_second_level_domain }}.{{ openldap_top_level_domain }}", vtype: "string" }
+    - { question: "slapd/domain", value: "{{ domain_name }}", vtype: "string" }
     - { question: "slapd/root_password", value: "{{ openldap_admin_password }}", vtype: "password" }
     - { question: "slapd/root_password_again", value: "{{ openldap_admin_password }}", vtype: "password" }
   loop_control:

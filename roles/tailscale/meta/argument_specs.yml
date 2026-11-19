@@ -4,7 +4,8 @@
 argument_specs:
   main:
     short_description: "Manage Tailscale mesh VPN node lifecycle and configuration."
-    description: "This role automates Tailscale client provisioning, listens on customized tunnel ports, and handles automated node authentication."
+    description: "This role automates Tailscale client provisioning, listens on customized
+      tunnel ports, and handles automated node authentication."
     author: "Jared Cook"
     options:
       tailscale_state:
@@ -15,7 +16,8 @@ argument_specs:
           - "present"
           - "absent"
           - "teardown"
-        description: "The desired operational lifecycle state of the Tailscale package and system service."
+        description: "The desired operational lifecycle state of the Tailscale package
+          and system service."
       tailscale_repo_url:
         type: "str"
         required: false
@@ -35,7 +37,8 @@ argument_specs:
         type: "bool"
         required: false
         default: false
-        description: "Controls whether the host accepts MagicDNS rules. Set to false to prevent local resolver overrides from breaking Kerberos."
+        description: "Controls whether the host accepts MagicDNS rules. Set to false
+          to prevent local resolver overrides from breaking Kerberos."
       tailscale_hostname:
         type: "str"
         required: false
@@ -56,7 +59,8 @@ argument_specs:
         type: "str"
         required: false
         default: null
-        description: "An optional, secure Tailnet onboarding secret token (tskey-auth-...) to bypass interactive browser logins."
+        description: "An optional, secure Tailnet onboarding secret token
+          (tskey-auth-...) to bypass interactive browser logins."
       tailscale_up_extra_flags:
         type: "str"
         required: false
@@ -71,4 +75,5 @@ argument_specs:
         type: "bool"
         required: false
         default: false
-        description: "Enables secure, policy-controlled SSH connectivity directly through the encrypted wire mesh layer."
+        description: "Enables secure, policy-controlled SSH connectivity directly
+          through the encrypted wire mesh layer."

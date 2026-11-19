@@ -60,12 +60,14 @@ argument_specs:
       nfs_utils_domain_name:
         type: "str"
         default: "{{ nfs_utils_second_level_domain }}.{{ nfs_utils_top_level_domain }}"
-        description: "The fully qualified NFSv4 domain string utilized by idmapd to translate local user/group IDs to strings."
+        description: "The fully qualified NFSv4 domain string utilized by idmapd
+          to translate local user/group IDs to strings."
 
       nfs_utils_server_threads:
         type: "int"
         default: 8
-        description: "The number of concurrent kernel worker threads spawned by the NFS server daemon to process I/O requests."
+        description: "The number of concurrent kernel worker threads spawned
+          by the NFS server daemon to process I/O requests."
 
       nfs_utils_server_priority:
         type: "int"
@@ -79,7 +81,8 @@ argument_specs:
 
       nfs_utils_server_protocols:
         type: "dict"
-        description: "A key-value map defining which specific NFS network protocol versions are explicitly enabled or blocked."
+        description: "A key-value map defining which specific NFS network
+          protocol versions are explicitly enabled or blocked."
         options:
           v3:
             type: "str"
@@ -101,70 +104,81 @@ argument_specs:
         type: "list"
         elements: "dict"
         default: []
-        description: "A declarative array of local paths, client ACL hosts, and standard mount security options exported by
+        description: "A declarative array of local paths, client ACL hosts,
+          and standard mount security options exported by
           the server."
         options:
           name:
             type: "str"
             required: true
-            description: "The explicit, clean naming handle used for the virtual sub-directory anchor inside the export root
+            description: "The explicit, clean naming handle used for the
+              virtual sub-directory anchor inside the export root
               tree."
           path:
             type: "str"
             required: true
-            description: "The absolute local filesystem path being shared by the NFS master server."
+            description: "The absolute local filesystem path being shared
+              by the NFS master server."
           hosts:
             type: "list"
             elements: "dict"
             required: true
-            description: "A list of target clients or subnets authorized to connect to this shared path."
+            description: "A list of target clients or subnets authorized to
+              connect to this shared path."
             options:
               name:
                 type: "str"
                 required: true
-                description: "The hostname, IP address, or network CIDR range allowed to access the export."
+                description: "The hostname, IP address, or network CIDR range
+                  allowed to access the export."
               options:
                 type: "str"
                 required: true
-                description: "The comma-separated string of NFS export attributes (e.g., 'rw,sync,no_subtree_check')."
+                description: "The comma-separated string of NFS export
+                  attributes (e.g., 'rw,sync,no_subtree_check')."
 
       nfs_utils_client_enable_mounts:
         type: "bool"
         default: false
-        description: "Master configuration toggle to enable or disable the execution of client-side NFS storage mounts during
-          the playbook run."
+        description: "Master configuration toggle to enable or disable the
+          execution of client-side NFS storage mounts during the playbook run."
 
       nfs_utils_client_mounts:
         type: "list"
         elements: "dict"
         default: []
-        description: "A declarative array of remote NFS resource URLs, local targets, and operational mount options managed
+        description: "A declarative array of remote NFS resource URLs,
+          local targets, and operational mount options managed
           on client nodes."
         options:
           src:
             type: "str"
             required: true
-            description: "The remote NFS export target path formatted as 'server:/exported/path'."
+            description: "The remote NFS export target path formatted
+              as 'server:/exported/path'."
           path:
             type: "str"
             required: true
-            description: "The local absolute directory path where the remote export should be mounted."
+            description: "The local absolute directory path where the remote
+              export should be mounted."
           opts:
             type: "str"
             default: "defaults"
-            description: "The mount option string passed to the /etc/fstab configuration (e.g., 'rw,noatime,sec=krb5p')."
+            description: "The mount option string passed to the /etc/fstab
+              configuration (e.g., 'rw,noatime,sec=krb5p')."
           state:
             type: "str"
             default: "mounted"
             choices: ["mounted", "unmounted", "present", "absent"]
-            description: "The operational state of the target mount within the client OS lifecycle."
+            description: "The operational state of the target mount
+              within the client OS lifecycle."
 
       nfs_utils_enable_logging:
         type: "bool"
         required: false
         default: true
-        description: "Controls whether verbose debug logging and runtime trace loops are enabled across the system NFS core
-          utilities."
+        description: "Controls whether verbose debug logging and
+          runtime trace loops are enabled across the system NFS core utilities."
 
       nfs_utils_debug_mode:
         type: "bool"

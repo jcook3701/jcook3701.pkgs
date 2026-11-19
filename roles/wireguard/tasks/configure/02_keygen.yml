@@ -11,7 +11,7 @@
   ansible.builtin.command: wg genkey
   register: wireguard_generated_private_key
   when:
-    - wireguard_private_key is none or wireguard_private_key == ""
+    - wireguard_private_key is none or wireguard_private_key | length == 0
     - not wireguard_private_key_file.stat.exists
   changed_when: true
   no_log: true
@@ -25,7 +25,7 @@
     group: root
     mode: "0600"
   when:
-    - wireguard_private_key is none or wireguard_private_key == ""
+    - wireguard_private_key is none or wireguard_private_key | length == 0
     - not wireguard_private_key_file.stat.exists
   become: true
 

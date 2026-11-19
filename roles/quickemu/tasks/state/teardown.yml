@@ -12,6 +12,6 @@
     repo_add_name: "{{ quickemu_os_repo_name | default('Quickemu PPA') }}"
     repo_add_state: "absent"
   when:
-    - quickemu_os_repo_id is defined
-    - quickemu_os_repo_id | length > 0
+    - quickemu_repo_id is defined
+    - quickemu_repo_id | length > 0
     - ansible_facts['distribution'] | lower == 'ubuntu'

@@ -5,6 +5,6 @@
   ansible.builtin.include_role:
     name: jcook3701.utils.pkg_manager
   vars:
-    pkg_manager_pkgs: "{{ flatpak_pkg_names | default([]) }}"
+    pkg_manager_pkgs: "{{ flatpak_pkg_names | default(['flatpak']) }}"
     pkg_manager_state: absent
     pkg_manager_remove_level: complete

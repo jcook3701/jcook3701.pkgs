@@ -8,8 +8,8 @@
   ansible.builtin.include_role:
     name: jcook3701.utils.repo_add
   vars:
-    repo_add_id: "{{ anydesk_repo_id }}"
-    repo_add_name: "{{ anydesk_repo_name }}"
+    repo_add_id: "{{ anydesk_repo_id | default('anydesk-stable') }}"
+    repo_add_name: "{{ anydesk_repo_name | default('AnyDesk') }}"
     repo_add_state: "absent"
   when:
     - anydesk_repo_id is defined

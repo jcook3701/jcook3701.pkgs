@@ -166,6 +166,10 @@ skip = [
   "*.css",
   "*.html",
   "*.lock",
+  "./roles/anydesk/templates/system.conf.j2",
+  "./roles/vagrant/tasks/configure-vm.yml",
+  "./roles/openldap/files/schema/samba.ldif",
+  "./roles/openldap/templates/01_config_database.ldif.j2"
 ]
 
 # words to ignore globally

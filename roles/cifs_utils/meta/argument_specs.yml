@@ -15,12 +15,14 @@ argument_specs:
         type: "str"
         default: "present"
         choices: ["present", "absent", "teardown"]
-        description: "The installation, configuration, or structural removal state of the CIFS client software packages."
+        description: "The installation, configuration, or structural removal
+          state of the CIFS client software packages."
 
       cifs_utils_use_gssproxy:
         type: "bool"
         default: false
-        description: "Toggles whether the kernel cifs.upcall binary should bypass traditional filesystem lookups to utilize a GSSProxy interception socket."
+        description: "Toggles whether the kernel cifs.upcall binary should
+          bypass traditional filesystem lookups to utilize a GSSProxy interception socket."
 
       cifs_utils_gssproxy_socket:
         type: "str"
@@ -30,26 +32,31 @@ argument_specs:
       cifs_utils_client_enable_mounts:
         type: "bool"
         default: false
-        description: "Master configuration toggle to enable or disable the execution of client-side SMB/CIFS storage mounts during the playbook run."
+        description: "Master configuration toggle to enable or disable the
+          execution of client-side SMB/CIFS storage mounts during the playbook run."
 
       cifs_utils_client_mounts:
         type: "list"
         elements: "dict"
         default: []
-        description: "A declarative array tracking active remote SMB/CIFS network share allocations managed on the target machine."
+        description: "A declarative array tracking active remote SMB/CIFS network
+          share allocations managed on the target machine."
         options:
           src:
             type: "str"
             required: true
-            description: "The remote Windows/Samba export share target path formatted as '//server/share_name'."
+            description: "The remote Windows/Samba export share target path formatted
+              as '//server/share_name'."
           path:
             type: "str"
             required: true
-            description: "The absolute local folder path on the client filesystem where the network share should be attached."
+            description: "The absolute local folder path on the client filesystem
+              where the network share should be attached."
           opts:
             type: "str"
             default: "defaults"
-            description: "The comma-separated parameter mount string passed to the /etc/fstab layout (e.g., 'rw,sec=krb5,vers=3.11,multiuser')."
+            description: "The comma-separated parameter mount string passed to the
+              /etc/fstab layout (e.g., 'rw,sec=krb5,vers=3.11,multiuser')."
           state:
             type: "str"
             default: "mounted"

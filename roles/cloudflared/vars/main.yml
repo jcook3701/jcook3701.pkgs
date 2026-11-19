@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# User/Group Settings
+cloudflared_group: "{{ cloudflared_os_group | default('root') }}"
+cloudflared_user: "{{ cloudflared_os_user | default('root') }}"
+
+# Service Settings
+cloudflared_service: "{{ cloudflared_os_service | default('cloudflared') }}"
+
+# Package Settings
+cloudflared_pkg_names: "{{ cloudflared_os_pkg_names | default(['cloudflared']) }}"
+
+# System File Settings
+cloudflared_directory:
+  config: "{{ cloudflared_os_directory.config | default('/usr/local/etc/cloudflared') }}"
+  systemd: "{{ cloudflared_os_directory.systemd | default('/etc/systemd/system') }}"
+
+cloudflared_file:
+  config: "{{ cloudflared_directory.config ~ '/config.yml'
+                      | default('/etc/cloudflared/config.yml') }}"
+  cert: "{{ cloudflared_directory.config ~ '/cert.pem'
+                      | default('/etc/cloudflared/cert.pem') }}"
+  credentials: "{{ cloudflared_directory.config ~ '/'
+                      ~ cloudflared_tunnel_uuid | default('default-tunnel', true) ~ '.json'
+                      | default('/etc/cloudflared/default-tunnel.json') }}"
+  service: "{{ cloudflared_directory.systemd ~ '/cloudflared.service'
+                      | default('/etc/systemd/system/cloudflared.service') }}"
+
+# Repository Specifics
+cloudflared_repo_id: "{{ cloudflared_os_repo_id | default('cloudflared') }}"
+cloudflared_repo_name: "{{ cloudflared_os_repo_name | default('Cloudflared PPA') }}"

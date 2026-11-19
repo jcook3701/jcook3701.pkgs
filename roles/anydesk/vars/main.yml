@@ -12,9 +12,12 @@ anydesk_directory:
   log: "{{ anydesk_os_directory.log | default('/etc/log') }}"
 
 anydesk_file:
-  service_conf: "{{ anydesk_directory.conf }}/service.conf"
-  system_conf: "{{ anydesk_directory.conf }}/system.conf"
-  log: "{{ anydesk_directory.log }}/anydesk.trace"
+  service_conf: "{{ anydesk_directory.conf ~ '/service.conf'
+                    | default('/etc/anydesk/service.conf') }}"
+  system_conf: "{{ anydesk_directory.conf ~ '/system.conf'
+                    | default('/etc/anydesk/system.conf') }}"
+  log: "{{ anydesk_directory.log ~ '/anydesk.trace'
+                    | default('/etc/log/anydesk.trace') }}"
 
 # Repository Specifics
 anydesk_repo_id: "{{ anydesk_os_repo_id | default('anydesk-stable') }}"

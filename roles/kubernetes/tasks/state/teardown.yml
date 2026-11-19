@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Kubernetes (k8s) package is uninstalled
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Decommission Kubernetes (k8s) Package Repositories via repo_add
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ kubernetes_os_repo_id | default('kubernetes') }}"
+    repo_add_name: "{{ kubernetes_os_repo_name | default('Kubernetes (k8s) PPA') }}"
+    repo_add_state: "absent"
+  when:
+    - kubernetes_os_repo_id is defined
+    - kubernetes_os_repo_id | length > 0
+    - ansible_facts['distribution'] | lower == 'ubuntu'

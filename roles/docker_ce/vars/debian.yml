@@ -37,7 +37,9 @@ docker_ce_os_directory:
 docker_ce_os_repo_id: "docker-ce"
 docker_ce_os_repo_name: "Docker Community Edition"
 
-docker_ce_debian_uris: "{{ docker_ce_download_url }}/linux/{{ ansible_distribution | lower }}"
+docker_ce_debian_uris: "{{ docker_ce_download_url ~ '/linux/' ~ ansible_distribution | lower
+                            | default('https://download.docker.com/linux/' ~ ansible_distribution | lower) }}"
 docker_ce_debian_suites: "{{ ansible_distribution_release }}"
 docker_ce_debian_component: "stable"
-docker_ce_debian_signed_by: "{{ docker_ce_debian_uris }}/gpg"
+docker_ce_debian_signed_by: "{{ docker_ce_debian_uris ~ '/gpg'
+                                | default('https://download.docker.com/gpg') }}"

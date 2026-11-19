@@ -1,0 +1,231 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: Install and configure Kubernetes (k8s)
+    description:
+      - Manage Kubernetes packages and related configuration.
+      - Support Kubernetes cluster initialization and node joining.
+      - Delegate package repository management to jcook3701.utils.repo_add.
+    author:
+      - Jared Cook
+
+    options:
+      # -------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------
+      kubernetes_state:
+        type: str
+        default: present
+        choices:
+          - present
+          - absent
+          - teardown
+        description:
+          - Desired lifecycle state of Kubernetes.
+          - C(present) installs and configures Kubernetes.
+          - C(absent) uninstalls Kubernetes packages.
+          - C(teardown) removes Kubernetes packages and configurations.
+
+      kubernetes_debug:
+        type: bool
+        default: true
+        description:
+          - Enable debugging output during role execution.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Repository Configuration
+      # -------------------------------------------------------------------
+      kubernetes_download_url:
+        type: str
+        default: "https://pkgs.k8s.io/core"
+        description:
+          - Base URL of the Kubernetes package repository.
+          - The Kubernetes minor version determines the repository path.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Package Configuration
+      # -------------------------------------------------------------------
+      kubernetes_manage_engine:
+        type: bool
+        default: true
+        description:
+          - Control whether the role manages the container engine.
+
+      kubernetes_engine:
+        type: str
+        default: "docker"
+        description:
+          - Container engine selected for Kubernetes integration.
+          - Kubernetes requires a CRI-compatible runtime.
+
+      kubernetes_kubernetes_version:
+        type: str
+        default: "1.37.0"
+        description:
+          - Target Kubernetes release version.
+          - Used to derive the Kubernetes major and minor repository version.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Configuration API
+      # -------------------------------------------------------------------
+      kubernetes_kubeadm_api_version:
+        type: str
+        default: "kubeadm.k8s.io/v1beta4"
+        description:
+          - API version used for kubeadm configuration templates.
+
+      kubernetes_kubelet_api_version:
+        type: str
+        default: "kubelet.config.k8s.io/v1beta1"
+        description:
+          - API version used for kubelet configuration templates.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Cluster Configuration
+      # -------------------------------------------------------------------
+      kubernetes_cluster_name:
+        type: str
+        default: "kubernetes"
+        description:
+          - Logical name assigned to the Kubernetes cluster.
+
+      kubernetes_control_plane_endpoint:
+        type: str
+        default: ""
+        description:
+          - Stable endpoint for the Kubernetes control plane.
+          - Can be an IP address or DNS name with an optional port.
+
+      kubernetes_api_advertise_address:
+        type: str
+        default: ""
+        description:
+          - IP address advertised by the Kubernetes API server.
+          - An empty value allows kubeadm to determine the address.
+
+      kubernetes_api_bind_port:
+        type: int
+        default: 6443
+        description:
+          - Port used by the Kubernetes API server.
+
+      kubernetes_pod_subnet:
+        type: str
+        default: ""
+        description:
+          - CIDR subnet allocated to Kubernetes Pods.
+          - Should match the selected CNI plugin configuration.
+
+      kubernetes_service_subnet:
+        type: str
+        default: "10.96.0.0/12"
+        description:
+          - CIDR subnet allocated to Kubernetes Services.
+
+      kubernetes_dns_domain:
+        type: str
+        default: "cluster.local"
+        description:
+          - DNS domain used for Kubernetes cluster services.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Node Configuration
+      # -------------------------------------------------------------------
+      kubernetes_node_name:
+        type: str
+        default: ""
+        description:
+          - Name assigned to the Kubernetes node.
+          - An empty value allows Kubernetes to use the host name.
+
+      kubernetes_cri_socket:
+        type: str
+        default: ""
+        description:
+          - Unix socket endpoint of the container runtime.
+          - Examples include containerd and cri-dockerd sockets.
+          - An empty value allows kubeadm runtime detection.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Kubelet Configuration
+      # -------------------------------------------------------------------
+      kubernetes_kubelet_cgroup_driver:
+        type: str
+        default: "systemd"
+        choices:
+          - systemd
+          - cgroupfs
+        description:
+          - Cgroup driver used by the Kubernetes kubelet.
+          - Must be compatible with the container runtime configuration.
+
+      kubernetes_kubelet_rotate_certificates:
+        type: bool
+        default: true
+        description:
+          - Enable automatic rotation of kubelet client certificates.
+
+      kubernetes_kubelet_cluster_dns:
+        type: list
+        elements: str
+        default: []
+        description:
+          - List of DNS server addresses used by Kubernetes Pods.
+          - An empty list leaves cluster DNS configuration unspecified.
+
+      kubernetes_kubelet_resolv_conf:
+        type: str
+        default: ""
+        description:
+          - Path to the resolver configuration used by kubelet.
+          - An empty value leaves the kubelet default unchanged.
+
+      # -------------------------------------------------------------------
+      # Kubernetes Node Joining Configuration
+      # -------------------------------------------------------------------
+      kubernetes_join_api_server_endpoint:
+        type: str
+        default: ""
+        description:
+          - Kubernetes API server endpoint used when joining a cluster.
+          - Must be configured before executing kubeadm join.
+
+      kubernetes_join_token:
+        type: str
+        default: ""
+        no_log: true
+        description:
+          - Bootstrap token used to authenticate a joining node.
+          - Store the token securely using Ansible Vault.
+
+      kubernetes_join_ca_cert_hashes:
+        type: list
+        elements: str
+        default: []
+        description:
+          - List of trusted Kubernetes control-plane CA public key hashes.
+          - Hashes are normally specified using the sha256 prefix.
+
+      kubernetes_join_control_plane:
+        type: bool
+        default: false
+        description:
+          - Configure the joining node as an additional control-plane node.
+          - When false, the node joins as a worker.
+
+      kubernetes_join_certificate_key:
+        type: str
+        default: ""
+        no_log: true
+        description:
+          - Certificate decryption key for joining additional control-plane nodes.
+          - Store the key securely using Ansible Vault.
+
+      kubernetes_join_advertise_address:
+        type: str
+        default: ""
+        description:
+          - Local API server advertise address for a joining control-plane node.
+          - An empty value allows kubeadm to determine the address.

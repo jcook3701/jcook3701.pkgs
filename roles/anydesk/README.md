@@ -4,13 +4,16 @@
 
 ## Role Variables
 
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `anydesk_state` | The desired state of the AnyDesk package. Choices: `present`, `absent`, `teardown`. | `"present"` |
+| Variable | Type | Description / Choices | Default |
+| :--- | :--- | :--- | :--- |
+| `anydesk_state` | string | Desired lifecycle state of AnyDesk. Choices: `present`, `absent`, `teardown`. | `present` |
+| `anydesk_debug` | boolean | Enable additional debugging output during role execution. | `true` |
+| `anydesk_download_url` | string | Base URL of the official AnyDesk APT package repository. | `http://deb.anydesk.com` |
+| `anydesk_key_download_url` | string | URL used to retrieve the official AnyDesk repository GPG signing key. | `https://keys.anydesk.com/repos/DEB-GPG-KEY` |
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared Cook** as part of the core infrastructure and package management ecosystem.
 
 <!--
 ## Authors Notes

@@ -15,8 +15,8 @@
   ansible.builtin.include_role:
     name: jcook3701.utils.repo_add
   vars:
-    repo_add_id: "{{ quickemu_os_repo_id | default('quickemu') }}"
-    repo_add_name: "{{ quickemu_os_repo_name | default('Quickemu PPA') }}"
+    repo_add_id: "{{ quickemu_repo_id | default('quickemu') }}"
+    repo_add_name: "{{ quickemu_repo_name | default('Quickemu PPA') }}"
     repo_add_enabled: true
     # Debian Overrides (Passed cleanly when running on Debian nodes)
     repo_add_debian_uris: "{{ quickemu_debian_uris | default(omit) }}"

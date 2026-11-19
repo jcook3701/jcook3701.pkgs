@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug Kubernetes (k8s) Variables
+  ansible.builtin.debug:
+    msg:
+      - "kubernetes_pkg_names: {{ kubernetes_pkg_names }}"
+      - "kubernetes_directory: {{ kubernetes_directory }}"
+      - "kubernetes_file: {{ kubernetes_file }}"
+      - "kubernetes_repo_id: {{ kubernetes_repo_id }}"
+      - "kubernetes_repo_name: {{ kubernetes_repo_name }}"
+  when: kubernetes_debug | default(false) | bool
+
+- name: Setup Kubernetes (k8s) Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ kubernetes_os_repo_id | default('kubernetes') }}"
+    repo_add_name: "{{ kubernetes_os_repo_name | default('Kubernetes (k8s) PPA') }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ kubernetes_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ kubernetes_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ kubernetes_debian_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ kubernetes_debian_signed_by | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ kubernetes_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ kubernetes_arch_server | default(omit) }}"
+  when: ansible_facts['distribution'] | lower == 'ubuntu'
+
+- name: Installing Kubernetes (k8s)
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ kubernetes_os_pkg_names | default(['kubernetes']) }}
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure Kubernetes (k8s)
+  ansible.builtin.include_tasks: configure/main.yml

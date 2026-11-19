@@ -225,7 +225,8 @@ argument_specs:
         type: str
         default: "true"
         choices: ["true", "false"]
-        description: "Toggle string dictating whether issued tokens can be cleanly forwarded across distinct system boundaries."
+        description: "Toggle string dictating whether issued tokens can be cleanly forwarded across
+          distinct system boundaries."
 
       kerberos_max_clock_skew:
         type: str
@@ -289,7 +290,8 @@ argument_specs:
         type: str
         default: "true"
         choices: ["true", "false"]
-        description: "Toggle string driving automated target host principal registration and local file keytab transfers."
+        description: "Toggle string driving automated target host principal registration and local
+          file keytab transfers."
 
       kerberos_bootstrap_users:
         type: list
@@ -345,8 +347,8 @@ argument_specs:
             description: "Custom network lifecycle flag tagging infrastructure automation profiles."
           is_samba_user:
             type: "bool"
-            description: "Enables structural generation of Windows-compatible NT password hashes and security descriptors
-              required for central SMB/CIFS file share mounting."
+            description: "Enables structural generation of Windows-compatible NT password
+              hashes and security descriptors required for central SMB/CIFS file share mounting."
           login_shell:
             type: "str"
             description: "Target execution command interpreter binary location path."
@@ -376,12 +378,14 @@ argument_specs:
           realm:
             type: str
             required: true
-            description: "The corresponding target uppercase realm block identifier string mapping to the domain suffix."
+            description: "The corresponding target uppercase realm block identifier string
+              mapping to the domain suffix."
 
       kerberos_realms:
         type: list
         elements: dict
-        description: "Fallback configuration structs processed by client libraries when live inventory lookups collapse."
+        description: "Fallback configuration structs processed by client libraries when
+          live inventory lookups collapse."
         options:
           name:
             type: str

@@ -14,10 +14,10 @@ anydesk_os_directory:
   log: "/etc/log"
 
 # Repository Specifics
-# anydesk_os_repo_id:
-# anydesk_os_repo_name:
+anydesk_os_repo_id: "anydesk-stable"
+anydesk_os_repo_name: ""
 
-repo_add_debian_uris: "http://deb.anydesk.com/"
-repo_add_debian_suites: "{{ ansible_distribution_release | default('all') }}"
-repo_add_debian_components: "main"
-repo_add_debian_signed_by: "https://keys.anydesk.com/repos/DEB-GPG-KEY"
+anydesk_debian_uris: "{{ anydesk_download_url | default('http://deb.anydesk.com') }}"
+anydesk_debian_suites: "{{ ansible_distribution_release | default('all') }}"
+anydesk_debian_component: "main"
+anydesk_debian_signed_by: "{{ anydesk_key_download_url | default('https://keys.anydesk.com/repos/DEB-GPG-KEY') }}"

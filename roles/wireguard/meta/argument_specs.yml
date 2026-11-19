@@ -4,7 +4,8 @@
 argument_specs:
   main:
     short_description: "Configure and manage WireGuard VPN tunnels."
-    description: "This role installs WireGuard, configures host interfaces, manages firewall routing, and links VPN peers."
+    description: "This role installs WireGuard, configures host interfaces, manages firewall
+      routing, and links VPN peers."
     author: "Your Name"
     options:
       wireguard_state:
@@ -18,13 +19,15 @@ argument_specs:
         type: "str"
         required: false
         default: "wg0"
-        description: "The name of the WireGuard interface configuration file (maps to `/etc/wireguard/{{ wireguard_interface }}.conf`)."
+        description: "The name of the WireGuard interface configuration file
+          (maps to `/etc/wireguard/{{ wireguard_interface }}.conf`)."
 
       wireguard_address:
         type: "str"
         required: false
         default: ""
-        description: "The local IP address and subnet mask assigned to this host's tunnel interface (e.g., '10.0.0.1/24')."
+        description: "The local IP address and subnet mask assigned to this host's tunnel
+          interface (e.g., '10.0.0.1/24')."
 
       wireguard_port:
         type: "int"
@@ -36,20 +39,23 @@ argument_specs:
         type: "str"
         required: false
         default: null
-        description: "The local private key for this node. If empty, tasks can automatically generate a persistent key inside `/etc/wireguard/keys/`."
+        description: "The local private key for this node. If empty, tasks can automatically
+          generate a persistent key inside `/etc/wireguard/keys/`."
 
       wireguard_ip_forward:
         type: "bool"
         required: false
         default: false
-        description: "Controls whether to configure kernel IP forwarding (`sysctl`) to route traffic between peers."
+        description: "Controls whether to configure kernel IP forwarding (`sysctl`) to route
+          traffic between peers."
 
       wireguard_post_up:
         type: "list"
         elements: "str"
         required: false
         default: []
-        description: "PostUp shell commands executed when bringing the interface up (often used for iptables NAT routing)."
+        description: "PostUp shell commands executed when bringing the interface up (often used
+          for iptables NAT routing)."
 
       wireguard_post_down:
         type: "list"
@@ -86,8 +92,10 @@ argument_specs:
           endpoint:
             type: "str"
             required: false
-            description: "Optional public WAN IP and port if this peer sits on a static address (e.g., `1.2.3.4:51820`)."
+            description: "Optional public WAN IP and port if this peer sits on a static
+              address (e.g., `1.2.3.4:51820`)."
           persistent_keepalive:
             type: "int"
             required: false
-            description: "Optional interval in seconds to keep tunnels open through stateful firewalls or restrictive NATs."
+            description: "Optional interval in seconds to keep tunnels open through stateful
+              firewalls or restrictive NATs."

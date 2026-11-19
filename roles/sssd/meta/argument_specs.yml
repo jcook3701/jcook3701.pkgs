@@ -4,7 +4,8 @@
 argument_specs:
   main:
     short_description: "Enterprise system access orchestration specification blueprint for SSSD."
-    description: "Enforces typechecking, strict choices, and default parameters for linking OpenLDAP identity vectors with MIT Kerberos security realms across all clients."
+    description: "Enforces typechecking, strict choices, and default parameters
+      for linking OpenLDAP identity vectors with MIT Kerberos security realms across all clients."
     author: "Jared Cook"
     options:
       sssd_state:
@@ -31,7 +32,8 @@ argument_specs:
           - "stderr"
         description: >
           Determines where the internal SSSD engine sends its operational logs and deep diagnostic matrices.
-          Selecting 'files' routes output to /var/log/sssd/, while 'journald' integrates directly with the systemd event logging rings.
+          Selecting 'files' routes output to /var/log/sssd/, while 'journald'
+            integrates directly with the systemd event logging rings.
 
       sssd_responder_activation_method:
         type: "str"
@@ -42,29 +44,34 @@ argument_specs:
           - "service"
         description: >
           Controls the architecture style used to trigger SSSD sub-responders (autofs, ssh, sudo, kcm, pac).
-          Set to 'socket' for modern on-demand systemd socket activation. Set to 'service' for high-frequency or legacy resident background daemons.
+          Set to 'socket' for modern on-demand systemd socket activation. Set to
+            'service' for high-frequency or legacy resident background daemons.
 
       sssd_enable_nss:
         type: "bool"
         required: false
         default: true
-        description: "Toggles the Name Service Switch (NSS) responder loop for system identity maps (passwd, group, netgroup)."
+        description: "Toggles the Name Service Switch (NSS) responder loop for
+          system identity maps (passwd, group, netgroup)."
 
       sssd_enable_pam:
         type: "bool"
         required: false
         default: false
-        description: "Toggles advanced SSSD responder loop configuration for system-wide Pluggable Authentication Modules (PAM)."
+        description: "Toggles advanced SSSD responder loop configuration for
+          system-wide Pluggable Authentication Modules (PAM)."
 
       sssd_enable_autofs:
         type: bool
         default: true
-        description: "Toggles dynamic network storage mounting capabilities via the autofs daemon connection pipe."
+        description: "Toggles dynamic network storage mounting capabilities
+          via the autofs daemon connection pipe."
 
       sssd_enable_ssh:
         type: bool
         default: true
-        description: "Toggles centralized key authorization retrieval filters for secure SSH access control rules."
+        description: "Toggles centralized key authorization retrieval filters
+          for secure SSH access control rules."
 
       sssd_enable_sudo:
         type: bool
@@ -75,13 +82,15 @@ argument_specs:
         type: "bool"
         required: false
         default: true
-        description: "Enables or disables SSSD locator plugin integration to help clients dynamically find Kerberos Key Distribution Centers (KDCs)."
+        description: "Enables or disables SSSD locator plugin integration to
+          help clients dynamically find Kerberos Key Distribution Centers (KDCs)."
 
       sssd_enable_pac:
         type: "bool"
         required: false
         default: true
-        description: "Controls whether SSSD processes and validates Active Directory Privilege Attribute Certificate (PAC) data for Kerberos tickets."
+        description: "Controls whether SSSD processes and validates Active
+          Directory Privilege Attribute Certificate (PAC) data for Kerberos tickets."
 
       sssd_enable_ifp:
         type: "bool"
@@ -139,7 +148,8 @@ argument_specs:
         type: bool
         default: true
         required: false
-        description: "Enables secure localized caching of user passwords when the Active Directory or Kerberos KDC network is offline."
+        description: "Enables secure localized caching of user passwords when the
+          Active Directory or Kerberos KDC network is offline."
 
       sssd_top_level_domain:
         type: str
@@ -196,7 +206,8 @@ argument_specs:
         type: "bool"
         required: false
         default: false
-        description: "Controls whether the role should actively collect, deploy and manage LDAP TLS certificates and private cryptographic keys on the system."
+        description: "Controls whether the role should actively collect, deploy
+          and manage LDAP TLS certificates and private cryptographic keys on the system."
 
       sssd_ldap_servers:
         type: list
@@ -208,19 +219,22 @@ argument_specs:
         type: list
         elements: str
         required: true
-        description: "An array of fully qualified domain names mapping to targeted verification realm key distribution centers."
+        description: "An array of fully qualified domain names mapping to targeted
+          verification realm key distribution centers."
 
       sssd_ldap_sasl_mech:
         type: str
         default: "GSSAPI"
         required: false
-        description: "The Simple Authentication and Security Layer (SASL) mechanism used for secure GSSAPI Kerberos directory binding."
+        description: "The Simple Authentication and Security Layer (SASL) mechanism
+          used for secure GSSAPI Kerberos directory binding."
 
       sssd_ldap_user_principal:
         type: str
         default: "nosubst"
         required: false
-        description: "Controls User Principal Name (UPN) evaluation behavior, forcing raw string matches without string substitution."
+        description: "Controls User Principal Name (UPN) evaluation behavior,
+          forcing raw string matches without string substitution."
 
       sssd_debug_level:
         type: int
@@ -256,13 +270,15 @@ argument_specs:
         type: "int"
         required: false
         default: 7
-        description: "Sets the diagnostic logging level for the Kerberos Key Distribution Center (KDC) locator proxy responder. Higher values yield more verbose output."
+        description: "Sets the diagnostic logging level for the Kerberos Key
+          Distribution Center (KDC) locator proxy responder. Higher values yield more verbose output."
 
       sssd_pac_debug_level:
         type: "int"
         required: false
         default: 7
-        description: "Sets the diagnostic logging level for the Privileged Attribute Certificate (PAC) responder subsystem."
+        description: "Sets the diagnostic logging level for the Privileged Attribute
+          Certificate (PAC) responder subsystem."
 
       sssd_ifp_debug_level:
         type: "int"
@@ -300,12 +316,14 @@ argument_specs:
       sssd_ldap_rfc2307_fallback_to_local_users:
         type: "bool"
         default: true
-        description: "Instructs the local SSSD engine to merge network-fetched account memberships cleanly into matching local files like /etc/group."
+        description: "Instructs the local SSSD engine to merge network-fetched account
+          memberships cleanly into matching local files like /etc/group."
 
       sssd_ldap_group_object_class:
         type: "str"
         default: "posixGroup"
-        description: "Defines the explicit LDAP database structural object type used to filter group container searches."
+        description: "Defines the explicit LDAP database structural object type used
+          to filter group container searches."
 
       sssd_ldap_group_name:
         type: "str"
@@ -325,17 +343,20 @@ argument_specs:
       sssd_ldap_group_uuid:
         type: "str"
         default: "nsUniqueId"
-        description: "Tracks the internal unique structural object identifier used by the provider backend for group indexing operations."
+        description: "Tracks the internal unique structural object identifier used by the
+          provider backend for group indexing operations."
 
       sssd_ldap_user_uuid:
         type: "str"
         default: "nsUniqueId"
-        description: "Tracks the internal unique structural object identifier used by the provider backend for user indexing operations."
+        description: "Tracks the internal unique structural object identifier used by the
+          provider backend for user indexing operations."
 
       sssd_ldap_id_mapping:
         type: "bool"
         default: false
-        description: "Controls dynamic SID-to-UID calculation. Set to false to force SSSD to rely strictly on your explicitly declared directory uidNumber and gidNumber attributes."
+        description: "Controls dynamic SID-to-UID calculation. Set to false to force
+          SSSD to rely strictly on your explicitly declared directory uidNumber and gidNumber attributes."
 
       sssd_nss_homedir_substring:
         type: str
@@ -385,9 +406,11 @@ argument_specs:
       sssd_ssh_hash_known_hosts:
         type: bool
         default: true
-        description: "Toggles cryptographic obfuscation processing parameters for cached SSH client identity tracking matrices."
+        description: "Toggles cryptographic obfuscation processing parameters for cached
+          SSH client identity tracking matrices."
 
       sssd_ldap_access_filter:
         type: str
         default: "(objectClass=posixAccount)"
-        description: "The exact search criteria token string mandatory for allowing an identity object to initialize system logins."
+        description: "The exact search criteria token string mandatory for allowing an
+          identity object to initialize system logins."

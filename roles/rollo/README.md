@@ -2,13 +2,13 @@
 
 [Rollo](https://www.rollo.com/) printer drivers for [Linux](https://www.rollo.com/driver-linux/)
 
-Install **Rollo Driver** package from vender website.
+Install **Rollo Driver** package from vendor website.
 
 ``` shell
 $ ansible-playbook jcook3701.pkgs.rollo.yml -K
 ```
 
-Uninstall **Rollo Driver** package from vender website.
+Uninstall **Rollo Driver** package from vendor website.
 
 ``` shell
 $ ansible-playbook jcook3701.pkgs.rollo.yml -K -e "rollo_state=absent"
