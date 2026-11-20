@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Validate cri-dockerd platform support
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+    fail_msg: >-
+      This cri-dockerd role supports Debian and Ubuntu packages only.
+
+- name: Load cri-dockerd OS-specific variables
+  ansible.builtin.include_vars: "{{ cri_dockerd_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['distribution'] | lower }}.yml"
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: cri_dockerd_vars
+    label: "Loading variables file: {{ cri_dockerd_vars }}"
+
+- name: Ensure cri-dockerd is installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: cri_dockerd_state == 'present'
+
+- name: Ensure cri-dockerd is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: cri_dockerd_state == 'absent'
+
+- name: Ensure cri-dockerd is uninstalled and cached package removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: cri_dockerd_state == 'teardown'

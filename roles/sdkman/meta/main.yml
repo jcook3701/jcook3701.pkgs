@@ -23,11 +23,9 @@ galaxy_info:
         - all
 
   galaxy_tags:
-    - packages
-    - yum
-    - apt
-    - pacman
-    - desktop
+    - package-manager
+    - lifecycle-manager
+    - terminal
     - apps
 
 dependencies: []

@@ -7,6 +7,14 @@
     tasks_from: sudo_user_facts.yml
   when: sudo_user is not defined
 
-- name: Install sdkman
-  ansible.builtin.include_tasks: install.yml
+- name: Ensure Sdkman is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
   when: sdkman_state | default('present') == 'present'
+
+- name: Ensure Sdkman is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: sdkman_state | default('present') == 'absent'
+
+- name: Ensure Sdkman is uninstalled and configurations are removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: sdkman_state | default('present') == 'teardown'

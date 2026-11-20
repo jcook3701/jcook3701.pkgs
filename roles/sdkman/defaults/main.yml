@@ -1,5 +1,16 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-sdkman_base_url: https://get.sdkman.io
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
 sdkman_state: present
+
+# Accounts where sdkman will be managed
+sdkman_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# -------------------------------------------------------------------------
+# Sdkman Package Configuration
+# -------------------------------------------------------------------------
+sdkman_base_url: https://get.sdkman.io

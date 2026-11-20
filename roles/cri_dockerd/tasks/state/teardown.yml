@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Uninstall cri-dockerd package
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Remove cri-dockerd package cache directory
+  ansible.builtin.file:
+    path: "{{ cri_dockerd_package_cache_dir }}"
+    state: absent
+  become: true
