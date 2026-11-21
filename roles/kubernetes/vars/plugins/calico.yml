@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Calico Helm Plugin Configuration
+# -------------------------------------------------------------------------
+kubernetes_calico_helm_repository: "https://docs.tigera.io/calico/charts"
+kubernetes_calico_helm_release: "calico"
+kubernetes_calico_helm_namespace: "tigera-operator"
+kubernetes_calico_helm_chart: "projectcalico/tigera-operator"
+kubernetes_calico_crds_chart: "projectcalico/projectcalico.org.v3"
+kubernetes_calico_values:
+  installation:
+    cni:
+      type: Calico
+    calicoNetwork:
+      bgp: Disabled
+      ipPools:
+        - cidr: "{{ kubernetes_pod_subnet_effective }}"
+          encapsulation: VXLAN

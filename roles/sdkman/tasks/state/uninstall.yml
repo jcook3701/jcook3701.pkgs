@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Resolve SDKMAN account details
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ sdkman_user.name }}"
+    fail_key: true
+  become: true
+
+- name: Ensure SDKMAN installation is removed
+  ansible.builtin.file:
+    path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/.sdkman"
+    state: absent
+  become: true

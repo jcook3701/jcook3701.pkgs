@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Force deep purge of Kubernetes (k8s) packages
+- name: Remove Kubernetes packages through the shared package manager
   ansible.builtin.include_role:
     name: jcook3701.utils.pkg_manager
   vars:
-    pkg_manager_pkgs: >-
-      {{ kubernetes_os_pkg_names | default(['kubernetes']) }}
+    pkg_manager_pkgs: "{{ kubernetes_pkg_names }}"
     pkg_manager_state: absent
-    pkg_manager_remove_level: complete
+    pkg_manager_remove_level: standard
+    pkg_manager_update_cache: false

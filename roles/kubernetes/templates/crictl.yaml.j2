@@ -1,36 +1,6 @@
-{#
-# crictl.yaml.j2 for jcook3701.pkgs
-#
-# SPDX-FileCopyrightText: Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#}
-
-# -------------------------------------------------------------------------
-# Kubernetes CRI Runtime Configuration
-# -------------------------------------------------------------------------
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
 runtime-endpoint: {{ kubernetes_crictl_runtime_endpoint_effective | to_json }}
-
 image-endpoint: {{ (kubernetes_crictl_image_endpoint if kubernetes_crictl_image_endpoint | length > 0 else kubernetes_crictl_runtime_endpoint_effective) | to_json }}
-
-# -------------------------------------------------------------------------
-# Kubernetes CRI Connection Configuration
-# -------------------------------------------------------------------------
 timeout: {{ kubernetes_crictl_timeout }}
-
-# -------------------------------------------------------------------------
-# Kubernetes CRI Debug Configuration
-# -------------------------------------------------------------------------
 debug: {{ kubernetes_crictl_debug | bool | lower }}

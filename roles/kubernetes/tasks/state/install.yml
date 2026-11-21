@@ -1,42 +1,44 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Debug Kubernetes (k8s) Variables
-  ansible.builtin.debug:
-    msg:
-      - "kubernetes_pkg_names: {{ kubernetes_pkg_names }}"
-      - "kubernetes_directory: {{ kubernetes_directory }}"
-      - "kubernetes_file: {{ kubernetes_file }}"
-      - "kubernetes_repo_id: {{ kubernetes_repo_id }}"
-      - "kubernetes_repo_name: {{ kubernetes_repo_name }}"
-  when: kubernetes_debug | default(false) | bool
+- name: Validate supported Kubernetes runtime and networking choices
+  ansible.builtin.assert:
+    that:
+      - kubernetes_engine == 'containerd'
+      - kubernetes_cni_provider in ['calico', 'cilium', 'external']
+      - kubernetes_kubelet_cgroup_driver == 'systemd'
+      - kubernetes_cri_socket_effective | length > 0
+      - kubernetes_kubernetes_version is match('^[0-9]+\\.[0-9]+\\.[0-9]+$')
+    fail_msg: >-
+      This automated kubeadm deployment uses containerd with systemd cgroups,
+      and supports Calico, Cilium, or a deliberately external CNI.
 
-- name: Setup Kubernetes (k8s) Package Repository
+- name: Configure the Kubernetes package repository
   ansible.builtin.include_role:
     name: jcook3701.utils.repo_add
   vars:
-    repo_add_id: "{{ kubernetes_os_repo_id | default('kubernetes') }}"
-    repo_add_name: "{{ kubernetes_os_repo_name | default('Kubernetes (k8s) PPA') }}"
+    repo_add_id: "{{ kubernetes_repo_id }}"
+    repo_add_name: "{{ kubernetes_repo_name }}"
+    repo_add_state: present
     repo_add_enabled: true
-    # Debian Overrides (Passed cleanly when running on Debian nodes)
     repo_add_debian_uris: "{{ kubernetes_debian_uris | default(omit) }}"
     repo_add_debian_suites: "{{ kubernetes_debian_suites | default(omit) }}"
     repo_add_debian_components: "{{ kubernetes_debian_component | default(omit) }}"
     repo_add_debian_signed_by: "{{ kubernetes_debian_signed_by | default(omit) }}"
-    # Red Hat Overrides
     repo_add_redhat_baseurl: "{{ kubernetes_redhat_baseurl | default(omit) }}"
-    # Arch Linux Overrides
-    repo_add_arch_server: "{{ kubernetes_arch_server | default(omit) }}"
-  when: ansible_facts['distribution'] | lower == 'ubuntu'
+    repo_add_redhat_gpgkey: "{{ kubernetes_redhat_gpgkey | default(omit) }}"
 
-- name: Installing Kubernetes (k8s)
+- name: Install Kubernetes packages through the shared package manager
   ansible.builtin.include_role:
     name: jcook3701.utils.pkg_manager
   vars:
-    pkg_manager_pkgs: >-
-      {{ kubernetes_os_pkg_names | default(['kubernetes']) }}
+    pkg_manager_pkgs: "{{ kubernetes_pkg_names }}"
     pkg_manager_state: present
     pkg_manager_update_cache: true
 
-- name: Configure Kubernetes (k8s)
+- name: Prepare Kubernetes configuration
   ansible.builtin.include_tasks: configure/main.yml
+
+- name: Initialize or reconcile the Kubernetes cluster
+  ansible.builtin.include_tasks: cluster/main.yml
+  when: kubernetes_manage_cluster | bool

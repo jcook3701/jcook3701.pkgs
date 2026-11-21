@@ -5,6 +5,7 @@
 # Lifecycle & System Access Management
 # -------------------------------------------------------------------------
 sdkman_state: present
+sdkman_debug: false
 
 # Accounts where sdkman will be managed
 sdkman_users:

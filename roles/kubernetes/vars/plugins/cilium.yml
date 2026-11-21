@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Cilium Helm Plugin Configuration
+# -------------------------------------------------------------------------
+kubernetes_cilium_helm_release: "cilium"
+kubernetes_cilium_helm_namespace: "kube-system"
+kubernetes_cilium_helm_chart: "oci://quay.io/cilium/charts/cilium"
+kubernetes_cilium_values:
+  ipam:
+    mode: kubernetes
+  k8s:
+    requireIPv4PodCIDR: true
+  kubeProxyReplacement: false
+  routingMode: tunnel
+  tunnelProtocol: vxlan
+  operator:
+    replicas: 1

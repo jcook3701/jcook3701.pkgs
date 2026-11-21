@@ -3,268 +3,229 @@
 ---
 argument_specs:
   main:
-    short_description: Install and configure Kubernetes (k8s)
+    short_description: Install Kubernetes packages and provision a kubeadm cluster
     description:
-      - Manage Kubernetes packages and related configuration.
-      - Support Kubernetes cluster initialization and node joining.
-      - Configure kubeadm, kubelet, and crictl.
-      - Delegate package repository management to jcook3701.utils.repo_add.
+    - Install Kubernetes packages and provision a kubeadm cluster
+    - Preserve the established lifecycle and role boundaries.
     author:
-      - Jared Cook
-
+    - Jared Cook
     options:
-      # -------------------------------------------------------------------
-      # Lifecycle & System Access Management
-      # -------------------------------------------------------------------
       kubernetes_state:
         type: str
         default: present
+        description: Configure kubernetes state.
         choices:
-          - present
-          - absent
-          - teardown
-        description:
-          - Desired lifecycle state of Kubernetes.
-          - C(present) installs and configures Kubernetes.
-          - C(absent) uninstalls Kubernetes packages.
-          - C(teardown) removes Kubernetes packages and configurations.
-
+        - present
+        - absent
+        - teardown
       kubernetes_debug:
         type: bool
         default: true
-        description:
-          - Enable debugging output during role execution.
-
-      # -------------------------------------------------------------------
-      # Kubernetes Repository Configuration
-      # -------------------------------------------------------------------
+        description: Configure kubernetes debug.
       kubernetes_download_url:
         type: str
-        default: "https://pkgs.k8s.io/core"
-        description:
-          - Base URL of the Kubernetes package repository.
-          - The Kubernetes minor version determines the repository path.
-
-      # -------------------------------------------------------------------
-      # Kubernetes Package Configuration
-      # -------------------------------------------------------------------
+        default: https://pkgs.k8s.io/core
+        description: Configure kubernetes download url.
+      kubernetes_kubernetes_version:
+        type: str
+        default: 1.37.2
+        description: Configure kubernetes kubernetes version.
       kubernetes_manage_engine:
         type: bool
         default: true
-        description:
-          - Control whether the role manages the container engine.
-
+        description: Configure kubernetes manage engine.
       kubernetes_engine:
         type: str
-        default: "docker"
-        description:
-          - Container engine selected for Kubernetes integration.
-          - Used as a fallback when determining the CRI socket.
-
-      kubernetes_kubernetes_version:
-        type: str
-        default: "1.37.0"
-        description:
-          - Target Kubernetes release version.
-          - Used to derive the Kubernetes major and minor repository version.
-
-      # -------------------------------------------------------------------
-      # Kubernetes Configuration API
-      # -------------------------------------------------------------------
+        default: containerd
+        description: Configure kubernetes engine.
+        choices:
+        - containerd
+      kubernetes_install_crictl:
+        type: bool
+        default: true
+        description: Configure kubernetes install crictl.
       kubernetes_kubeadm_api_version:
         type: str
-        default: "kubeadm.k8s.io/v1beta4"
-        description:
-          - API version used for kubeadm configuration templates.
-
+        default: kubeadm.k8s.io/v1beta4
+        description: Configure kubernetes kubeadm api version.
       kubernetes_kubelet_api_version:
         type: str
-        default: "kubelet.config.k8s.io/v1beta1"
-        description:
-          - API version used for kubelet configuration templates.
-
-      # -------------------------------------------------------------------
-      # Kubernetes Cluster Configuration
-      # -------------------------------------------------------------------
+        default: kubelet.config.k8s.io/v1beta1
+        description: Configure kubernetes kubelet api version.
+      kubernetes_manage_cluster:
+        type: bool
+        default: true
+        description: Configure kubernetes manage cluster.
       kubernetes_cluster_name:
         type: str
-        default: "kubernetes"
-        description:
-          - Logical name assigned to the Kubernetes cluster.
-
+        default: kubernetes
+        description: Configure kubernetes cluster name.
       kubernetes_control_plane_endpoint:
         type: str
-        default: ""
-        description:
-          - Stable endpoint for the Kubernetes control plane.
-          - Can be an IP address or DNS name with an optional port.
-
+        default: ''
+        description: Configure kubernetes control plane endpoint.
       kubernetes_api_advertise_address:
         type: str
-        default: ""
-        description:
-          - IP address advertised by the Kubernetes API server.
-          - An empty value allows kubeadm to determine the address.
-
+        default: ''
+        description: Configure kubernetes api advertise address.
       kubernetes_api_bind_port:
         type: int
         default: 6443
-        description:
-          - Port used by the Kubernetes API server.
-
+        description: Configure kubernetes api bind port.
       kubernetes_pod_subnet:
         type: str
-        default: ""
-        description:
-          - CIDR subnet allocated to Kubernetes Pods.
-          - Should match the selected CNI plugin configuration.
-
+        default: ''
+        description: Configure kubernetes pod subnet.
       kubernetes_service_subnet:
         type: str
-        default: "10.96.0.0/12"
-        description:
-          - CIDR subnet allocated to Kubernetes Services.
-
+        default: 10.96.0.0/12
+        description: Configure kubernetes service subnet.
       kubernetes_dns_domain:
         type: str
-        default: "cluster.local"
-        description:
-          - DNS domain used for Kubernetes cluster services.
-
+        default: cluster.local
+        description: Configure kubernetes dns domain.
+      kubernetes_cni_provider:
+        type: str
+        default: calico
+        description: Configure kubernetes cni provider.
+        choices:
+        - calico
+        - cilium
+        - external
       # -------------------------------------------------------------------
-      # Kubernetes Node Configuration
+      # Helm-managed Kubernetes Plugins
       # -------------------------------------------------------------------
+      kubernetes_manage_plugins:
+        type: bool
+        default: true
+        description: Install and reconcile the selected CNI chart using Helm.
+      kubernetes_calico_chart_version:
+        type: str
+        default: "v3.33.0"
+        description: Pinned Calico Tigera operator and CRD chart version.
+      kubernetes_cilium_chart_version:
+        type: str
+        default: "1.20.5"
+        description: Pinned Cilium CNI chart version.
+      kubernetes_calico_custom_values:
+        type: dict
+        default: {}
+        description: Chart values merged with the managed Calico defaults.
+      kubernetes_cilium_custom_values:
+        type: dict
+        default: {}
+        description: Chart values merged with the managed Cilium defaults.
+      kubernetes_allow_control_plane_workloads:
+        type: bool
+        default: true
+        description: Configure kubernetes allow control plane workloads.
+      kubernetes_manage_swap:
+        type: bool
+        default: true
+        description: Configure kubernetes manage swap.
+      kubernetes_manage_kernel_settings:
+        type: bool
+        default: true
+        description: Configure kubernetes manage kernel settings.
+      kubernetes_verify_cluster:
+        type: bool
+        default: true
+        description: Configure kubernetes verify cluster.
+      kubernetes_wait_timeout:
+        type: int
+        default: 600
+        description: Configure kubernetes wait timeout.
       kubernetes_node_name:
         type: str
-        default: ""
-        description:
-          - Name assigned to the Kubernetes node.
-          - An empty value allows Kubernetes to use the host name.
-
+        default: ''
+        description: Configure kubernetes node name.
       kubernetes_cri_socket:
         type: str
-        default: ""
-        description:
-          - Unix socket endpoint of the container runtime.
-          - An empty value allows kubeadm runtime detection.
-          - Also serves as a fallback for crictl configuration.
-
-      # -------------------------------------------------------------------
-      # Kubernetes Kubelet Configuration
-      # -------------------------------------------------------------------
+        default: ''
+        description: Configure kubernetes cri socket.
       kubernetes_kubelet_cgroup_driver:
         type: str
-        default: "systemd"
+        default: systemd
+        description: Configure kubernetes kubelet cgroup driver.
         choices:
-          - systemd
-          - cgroupfs
-        description:
-          - Cgroup driver used by the Kubernetes kubelet.
-          - Must match the container runtime configuration.
-
+        - systemd
       kubernetes_kubelet_rotate_certificates:
         type: bool
         default: true
-        description:
-          - Enable automatic rotation of kubelet client certificates.
-
+        description: Configure kubernetes kubelet rotate certificates.
       kubernetes_kubelet_cluster_dns:
         type: list
-        elements: str
         default: []
-        description:
-          - List of DNS server addresses used by Kubernetes Pods.
-          - An empty list leaves cluster DNS configuration unspecified.
-
+        description: Configure kubernetes kubelet cluster dns.
+        elements: str
       kubernetes_kubelet_resolv_conf:
         type: str
-        default: ""
-        description:
-          - Path to the resolver configuration used by kubelet.
-          - An empty value leaves the kubelet default unchanged.
-
-      # -------------------------------------------------------------------
-      # Kubernetes Node Joining Configuration
-      # -------------------------------------------------------------------
+        default: ''
+        description: Configure kubernetes kubelet resolv conf.
       kubernetes_join_api_server_endpoint:
         type: str
-        default: ""
-        description:
-          - Kubernetes API server endpoint used when joining a cluster.
-          - Required before executing kubeadm join.
-
+        default: ''
+        description: Configure kubernetes join api server endpoint.
       kubernetes_join_token:
         type: str
-        default: ""
+        default: ''
+        description: Configure kubernetes join token.
         no_log: true
-        description:
-          - Bootstrap token used to authenticate a joining node.
-          - Store the token securely using Ansible Vault.
-
       kubernetes_join_ca_cert_hashes:
         type: list
-        elements: str
         default: []
-        description:
-          - List of trusted Kubernetes control-plane CA public key hashes.
-          - Hashes use the sha256 prefix.
-
+        description: Configure kubernetes join ca cert hashes.
+        elements: str
       kubernetes_join_control_plane:
         type: bool
         default: false
-        description:
-          - Configure the joining node as an additional control-plane node.
-          - When false, the node joins as a worker.
-
+        description: Configure kubernetes join control plane.
       kubernetes_join_certificate_key:
         type: str
-        default: ""
+        default: ''
+        description: Configure kubernetes join certificate key.
         no_log: true
-        description:
-          - Certificate decryption key for joining additional control-plane nodes.
-          - Store the key securely using Ansible Vault.
-
       kubernetes_join_advertise_address:
         type: str
-        default: ""
-        description:
-          - Local API server advertise address for a joining control-plane node.
-          - An empty value allows kubeadm to determine the address.
-
-      # -------------------------------------------------------------------
-      # Kubernetes CRI Tools Configuration
-      # -------------------------------------------------------------------
+        default: ''
+        description: Configure kubernetes join advertise address.
+      kubernetes_manage_join:
+        type: bool
+        default: false
+        description: Configure kubernetes manage join.
+      kubernetes_manage_user_kubeconfig:
+        type: bool
+        default: true
+        description: Configure kubernetes manage user kubeconfig.
+      kubernetes_kubeconfig_user:
+        type: str
+        default: '{{ ansible_user | default(ansible_user_id) }}'
+        description: Configure kubernetes kubeconfig user.
+      kubernetes_user_kubeconfig_path:
+        type: str
+        default: ''
+        description: Configure kubernetes user kubeconfig path.
       kubernetes_manage_crictl_config:
         type: bool
         default: true
-        description:
-          - Manage the crictl configuration file.
-          - When enabled, deploy /etc/crictl.yaml.
-
+        description: Configure kubernetes manage crictl config.
       kubernetes_crictl_runtime_endpoint:
         type: str
-        default: ""
-        description:
-          - CRI runtime endpoint used by crictl.
-          - When empty, derive the endpoint from kubernetes_cri_socket.
-          - Otherwise, use the selected container engine as a fallback.
-
+        default: ''
+        description: Configure kubernetes crictl runtime endpoint.
       kubernetes_crictl_image_endpoint:
         type: str
-        default: ""
-        description:
-          - CRI image service endpoint used by crictl.
-          - When empty, use the effective runtime endpoint.
-
+        default: ''
+        description: Configure kubernetes crictl image endpoint.
       kubernetes_crictl_timeout:
         type: int
-        default: 2
-        description:
-          - CRI connection timeout in seconds.
-
+        default: 5
+        description: Configure kubernetes crictl timeout.
       kubernetes_crictl_debug:
         type: bool
         default: false
-        description:
-          - Enable debug output for crictl commands.
-          - Independent of kubernetes_debug.
+        description: Configure kubernetes crictl debug.
+      kubernetes_reset_cluster_on_teardown:
+        type: bool
+        default: false
+        description: Configure kubernetes reset cluster on teardown.

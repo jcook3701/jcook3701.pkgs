@@ -1,23 +1,29 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Load Kubernetes (k8s) OS-specific variables
+- name: Validate Kubernetes state and platform
+  ansible.builtin.assert:
+    that:
+      - kubernetes_state in ['present', 'absent', 'teardown']
+      - ansible_facts['os_family'] in ['Debian', 'RedHat']
+    fail_msg: "Unsupported Kubernetes lifecycle state or operating system family."
+
+- name: Load Kubernetes OS-specific variables
   ansible.builtin.include_vars: "{{ kubernetes_vars }}"
   with_first_found:
     - "{{ ansible_facts['distribution'] | lower }}.yml"
     - "{{ ansible_facts['os_family'] | lower }}.yml"
   loop_control:
     loop_var: kubernetes_vars
-    label: "Loading variables file: {{ kubernetes_vars }}"
 
-- name: Ensure Kubernetes (k8s) packages are installed
+- name: Install and configure Kubernetes
   ansible.builtin.include_tasks: state/install.yml
-  when: kubernetes_state | default('present') == 'present'
+  when: kubernetes_state == 'present'
 
-- name: Ensure Kubernetes (k8s) is uninstalled
+- name: Remove Kubernetes packages
   ansible.builtin.include_tasks: state/uninstall.yml
-  when: kubernetes_state | default('present') == 'absent'
+  when: kubernetes_state == 'absent'
 
-- name: Ensure Kubernetes (k8s) is uninstalled and configurations removed
+- name: Teardown Kubernetes packages and repository
   ansible.builtin.include_tasks: state/teardown.yml
-  when: kubernetes_state | default('present') == 'teardown'
+  when: kubernetes_state == 'teardown'

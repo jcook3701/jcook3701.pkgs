@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Inspect existing joined kubelet configuration
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubernetes_joined_state
+  become: true
+
+- name: Join this Kubernetes node once
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - join
+      - --config
+      - "{{ kubernetes_file.kubeadm_join }}"
+  become: true
+  no_log: true
+  when: not kubernetes_joined_state.stat.exists

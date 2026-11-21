@@ -1,37 +1,13 @@
-{#
-# kubeadm-init-config.yaml.j2 for jcook3701.pkgs
-#
-# SPDX-FileCopyrightText: Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#}
-
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
 ---
 apiVersion: {{ kubernetes_kubeadm_api_version }}
 kind: InitConfiguration
-{% if kubernetes_node_name or kubernetes_cri_socket %}
 nodeRegistration:
-{% if kubernetes_node_name %}
-  name: {{ kubernetes_node_name | to_json }}
-{% endif %}
-{% if kubernetes_cri_socket %}
-  criSocket: {{ kubernetes_cri_socket | to_json }}
-{% endif %}
-{% endif %}
+  name: {{ kubernetes_node_name_effective | to_json }}
+  criSocket: {{ kubernetes_cri_socket_effective | to_json }}
 localAPIEndpoint:
-{% if kubernetes_api_advertise_address %}
+{% if kubernetes_api_advertise_address | length > 0 %}
   advertiseAddress: {{ kubernetes_api_advertise_address | to_json }}
 {% endif %}
   bindPort: {{ kubernetes_api_bind_port }}
@@ -40,12 +16,26 @@ apiVersion: {{ kubernetes_kubeadm_api_version }}
 kind: ClusterConfiguration
 clusterName: {{ kubernetes_cluster_name | to_json }}
 kubernetesVersion: {{ ('v' ~ kubernetes_kubernetes_version) | to_json }}
-{% if kubernetes_control_plane_endpoint %}
+{% if kubernetes_control_plane_endpoint | length > 0 %}
 controlPlaneEndpoint: {{ kubernetes_control_plane_endpoint | to_json }}
 {% endif %}
 networking:
   dnsDomain: {{ kubernetes_dns_domain | to_json }}
   serviceSubnet: {{ kubernetes_service_subnet | to_json }}
-{% if kubernetes_pod_subnet %}
-  podSubnet: {{ kubernetes_pod_subnet | to_json }}
+{% if kubernetes_pod_subnet_effective | length > 0 %}
+  podSubnet: {{ kubernetes_pod_subnet_effective | to_json }}
+{% endif %}
+---
+apiVersion: {{ kubernetes_kubelet_api_version }}
+kind: KubeletConfiguration
+cgroupDriver: {{ kubernetes_kubelet_cgroup_driver | to_json }}
+rotateCertificates: {{ kubernetes_kubelet_rotate_certificates | bool | lower }}
+{% if kubernetes_kubelet_cluster_dns | length > 0 %}
+clusterDNS:
+{% for address in kubernetes_kubelet_cluster_dns %}
+  - {{ address | to_json }}
+{% endfor %}
+{% endif %}
+{% if kubernetes_kubelet_resolv_conf | length > 0 %}
+resolvConf: {{ kubernetes_kubelet_resolv_conf | to_json }}
 {% endif %}

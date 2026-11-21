@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Kubernetes OS Packages & Paths
+# -------------------------------------------------------------------------
+kubernetes_os_pkg_names:
+  - kubelet
+  - kubeadm
+  - kubectl
+kubernetes_os_directory:
+  config: "/etc/kubernetes"
+
+# -------------------------------------------------------------------------
+# Repository Configuration for jcook3701.utils.repo_add
+# -------------------------------------------------------------------------
+kubernetes_os_repo_id: "kubernetes"
+kubernetes_os_repo_name: "Kubernetes (k8s)"
+kubernetes_debian_uris: >-
+  {{ kubernetes_download_url ~ ':/stable:/v' ~ kubernetes_kubernetes_major_minor_version ~ '/deb/' }}
+kubernetes_debian_suites: "/"
+kubernetes_debian_component: ""
+kubernetes_debian_signed_by: "{{ kubernetes_debian_uris }}Release.key"

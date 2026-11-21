@@ -1,11 +1,14 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Collect running user facts
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: sudo_user_facts.yml
-  when: sudo_user is not defined
+- name: Display SDKMAN configuration
+  ansible.builtin.debug:
+    msg:
+      state: "{{ sdkman_state }}"
+      users: "{{ sdkman_users | map(attribute='name') | list }}"
+      base_url: "{{ sdkman_base_url }}"
+      packages: "{{ sdkman_pkgs }}"
+  when: sdkman_debug | bool
 
 - name: Ensure Sdkman is installed and configured
   ansible.builtin.include_tasks: state/install.yml

@@ -1,0 +1,141 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Calico Helm Repository & Custom Resource Definitions
+# -------------------------------------------------------------------------
+- name: Ensure Calico Helm repository is registered
+  ansible.builtin.command:
+    argv:
+      - helm
+      - repo
+      - add
+      - projectcalico
+      - "{{ kubernetes_calico_helm_repository }}"
+      - --force-update
+  register: kubernetes_calico_repo_add
+  changed_when: "'has been added' in kubernetes_calico_repo_add.stdout"
+  become: true
+
+- name: Update Calico Helm repository metadata
+  ansible.builtin.command:
+    argv:
+      - helm
+      - repo
+      - update
+      - projectcalico
+  changed_when: false
+  become: true
+
+- name: Render Calico CRDs using Kubernetes 1.36+ API compatibility
+  ansible.builtin.command:
+    argv:
+      - helm
+      - template
+      - calico-crds
+      - "{{ kubernetes_calico_crds_chart }}"
+      - --version
+      - "{{ kubernetes_calico_chart_version }}"
+      - --api-versions
+      - admissionregistration.k8s.io/v1/MutatingAdmissionPolicy
+  register: kubernetes_calico_crds
+  changed_when: false
+  become: true
+  no_log: true
+
+- name: Apply Calico CRDs with server-side apply
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - apply
+      - --server-side
+      - --field-manager=jcook3701-kubernetes
+      - -f
+      - -
+    stdin: "{{ kubernetes_calico_crds.stdout }}"
+  register: kubernetes_calico_crd_apply
+  changed_when: >-
+    ('created' in kubernetes_calico_crd_apply.stdout)
+    or ('configured' in kubernetes_calico_crd_apply.stdout)
+    or ('serverside-applied' in kubernetes_calico_crd_apply.stdout)
+  become: true
+  no_log: true
+
+# -------------------------------------------------------------------------
+# Calico Operator Helm Release
+# -------------------------------------------------------------------------
+- name: Render the managed Calico Helm values
+  ansible.builtin.template:
+    src: plugins/calico-values.yml.j2
+    dest: "{{ kubernetes_file.calico_values }}"
+    owner: root
+    group: root
+    mode: '0600'
+  become: true
+
+- name: Inspect existing Calico Helm release
+  ansible.builtin.set_fact:
+    kubernetes_calico_existing_release: >-
+      {{ (kubernetes_helm_installed_releases
+          | selectattr('name','equalto',kubernetes_calico_helm_release)
+          | list | first) | default({}) }}
+
+- name: Read existing Calico Helm values
+  ansible.builtin.command:
+    argv:
+      - helm
+      - get
+      - values
+      - "{{ kubernetes_calico_helm_release }}"
+      - --namespace
+      - "{{ kubernetes_calico_helm_namespace }}"
+      - --output
+      - json
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  become: true
+  register: kubernetes_calico_existing_values
+  changed_when: false
+  when: kubernetes_calico_existing_release | length > 0
+
+- name: Reconcile the Calico operator Helm chart
+  ansible.builtin.command:
+    argv:
+      - helm
+      - upgrade
+      - --install
+      - "{{ kubernetes_calico_helm_release }}"
+      - "{{ kubernetes_calico_helm_chart }}"
+      - --namespace
+      - "{{ kubernetes_calico_helm_namespace }}"
+      - --create-namespace
+      - --version
+      - "{{ kubernetes_calico_chart_version }}"
+      - --values
+      - "{{ kubernetes_file.calico_values }}"
+      - --wait
+      - --timeout
+      - "{{ kubernetes_wait_timeout }}s"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  become: true
+  when: >-
+    kubernetes_calico_existing_release | length == 0
+    or kubernetes_calico_existing_release.status | default('') != 'deployed'
+    or kubernetes_calico_existing_release.chart | default('') != 'tigera-operator-' ~ kubernetes_calico_chart_version
+    or (kubernetes_calico_existing_values.stdout | default('{}') | from_json)
+       != (kubernetes_calico_values | combine(kubernetes_calico_custom_values, recursive=true))
+
+- name: Wait for Calico node DaemonSet readiness
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - --namespace=calico-system
+      - rollout
+      - status
+      - daemonset/calico-node
+      - "--timeout={{ kubernetes_wait_timeout }}s"
+  become: true
+  changed_when: false

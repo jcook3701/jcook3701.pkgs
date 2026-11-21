@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Cilium CNI Helm Release
+# -------------------------------------------------------------------------
+- name: Render managed Cilium Helm values
+  ansible.builtin.template:
+    src: plugins/cilium-values.yml.j2
+    dest: "{{ kubernetes_file.cilium_values }}"
+    owner: root
+    group: root
+    mode: '0600'
+  become: true
+
+- name: Inspect existing Cilium Helm release
+  ansible.builtin.set_fact:
+    kubernetes_cilium_existing_release: >-
+      {{ (kubernetes_helm_installed_releases
+          | selectattr('name','equalto',kubernetes_cilium_helm_release)
+          | list | first) | default({}) }}
+
+- name: Read existing Cilium Helm values
+  ansible.builtin.command:
+    argv:
+      - helm
+      - get
+      - values
+      - "{{ kubernetes_cilium_helm_release }}"
+      - --namespace
+      - "{{ kubernetes_cilium_helm_namespace }}"
+      - --output
+      - json
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  become: true
+  register: kubernetes_cilium_existing_values
+  changed_when: false
+  when: kubernetes_cilium_existing_release | length > 0
+
+- name: Reconcile Cilium using the upstream Helm OCI chart
+  ansible.builtin.command:
+    argv:
+      - helm
+      - upgrade
+      - --install
+      - "{{ kubernetes_cilium_helm_release }}"
+      - "{{ kubernetes_cilium_helm_chart }}"
+      - --namespace
+      - "{{ kubernetes_cilium_helm_namespace }}"
+      - --version
+      - "{{ kubernetes_cilium_chart_version }}"
+      - --values
+      - "{{ kubernetes_file.cilium_values }}"
+      - --wait
+      - --timeout
+      - "{{ kubernetes_wait_timeout }}s"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  become: true
+  when: >-
+    kubernetes_cilium_existing_release | length == 0
+    or kubernetes_cilium_existing_release.status | default('') != 'deployed'
+    or kubernetes_cilium_existing_release.chart | default('') != 'cilium-' ~ kubernetes_cilium_chart_version
+    or (kubernetes_cilium_existing_values.stdout | default('{}') | from_json)
+       != (kubernetes_cilium_values | combine(kubernetes_cilium_custom_values, recursive=true))
+
+- name: Wait for Cilium DaemonSet readiness
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - --namespace=kube-system
+      - rollout
+      - status
+      - daemonset/cilium
+      - "--timeout={{ kubernetes_wait_timeout }}s"
+  become: true
+  changed_when: false

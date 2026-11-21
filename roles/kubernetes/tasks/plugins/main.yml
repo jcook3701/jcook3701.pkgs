@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Kubernetes Plugin Selection & Safety
+# -------------------------------------------------------------------------
+- name: Validate one managed Kubernetes CNI is selected
+  ansible.builtin.assert:
+    that:
+      - kubernetes_cni_provider in ['calico', 'cilium']
+      - kubernetes_pod_subnet_effective | length > 0
+    fail_msg: >-
+      A Helm-managed Kubernetes network must select exactly one provider:
+      calico or cilium. To manage networking yourself, select external and
+      disable kubernetes_manage_plugins.
+
+- name: Require Debian-family Helm role support for managed CNIs
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: >-
+      The existing jcook3701.pkgs.helm role currently installs Helm on
+      Debian/Ubuntu only. Extend that role before enabling managed CNI charts
+      on Red Hat; do not bypass the package manager.
+
+- name: Inspect installed Helm releases across Kubernetes namespaces
+  ansible.builtin.command:
+    argv:
+      - helm
+      - list
+      - --all-namespaces
+      - --all
+      - --output
+      - json
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  become: true
+  register: kubernetes_helm_list
+  changed_when: false
+
+- name: Parse managed CNI Helm release inventory
+  ansible.builtin.set_fact:
+    kubernetes_helm_installed_releases: "{{ kubernetes_helm_list.stdout | from_json }}"
+
+- name: Refuse unsafe CNI replacement and conflicting releases
+  ansible.builtin.assert:
+    that:
+      - >-
+        kubernetes_helm_installed_releases
+        | selectattr('name', 'equalto', 'cilium' if kubernetes_cni_provider == 'calico' else 'calico')
+        | list | length == 0
+      - >-
+        kubernetes_helm_installed_releases
+        | selectattr('name', 'equalto', 'cilium' if kubernetes_cni_provider == 'cilium' else 'calico')
+        | list | length <= 1
+    fail_msg: >-
+      A conflicting CNI release or duplicate Helm release exists.
+      Changing CNI providers in an operational cluster requires a planned migration.
+      This role will never uninstall one provider to install the other automatically.
+
+- name: Inspect existing Kubernetes CNI config files
+  ansible.builtin.find:
+    paths: /etc/cni/net.d
+    patterns:
+      - '*.conf'
+      - '*.conflist'
+    file_type: file
+  become: true
+  register: kubernetes_existing_cni_configs
+
+- name: Refuse to overwrite unmanaged CNI networking
+  ansible.builtin.assert:
+    that:
+      - >-
+        kubernetes_existing_cni_configs.matched == 0
+        or kubernetes_helm_installed_releases
+           | selectattr('name','equalto',kubernetes_cni_provider)
+           | list | length > 0
+    fail_msg: >-
+      Existing Kubernetes CNI configuration is present but the selected
+      provider has no matching managed Helm release. Review and migrate that
+      networking explicitly instead of installing a second CNI.
+
+- name: Load selected CNI plugin variables
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/vars/plugins/{{ kubernetes_cni_provider }}.yml"
+
+- name: Reconcile the selected CNI plugin using Helm
+  ansible.builtin.include_tasks: "plugins/{{ kubernetes_cni_provider }}.yml"

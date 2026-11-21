@@ -1,23 +1,5 @@
-{#
-# kubeadm-join-config.yaml.j2 for jcook3701.pkgs
-#
-# SPDX-FileCopyrightText: Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#}
-
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
 ---
 apiVersion: {{ kubernetes_kubeadm_api_version }}
 kind: JoinConfiguration
@@ -29,23 +11,17 @@ discovery:
 {% for hash in kubernetes_join_ca_cert_hashes %}
       - {{ hash | to_json }}
 {% endfor %}
-{% if kubernetes_node_name or kubernetes_cri_socket %}
 nodeRegistration:
-{% if kubernetes_node_name %}
-  name: {{ kubernetes_node_name | to_json }}
-{% endif %}
-{% if kubernetes_cri_socket %}
-  criSocket: {{ kubernetes_cri_socket | to_json }}
-{% endif %}
-{% endif %}
-{% if kubernetes_join_control_plane %}
+  name: {{ kubernetes_node_name_effective | to_json }}
+  criSocket: {{ kubernetes_cri_socket_effective | to_json }}
+{% if kubernetes_join_control_plane | bool %}
 controlPlane:
   localAPIEndpoint:
-{% if kubernetes_join_advertise_address %}
+{% if kubernetes_join_advertise_address | length > 0 %}
     advertiseAddress: {{ kubernetes_join_advertise_address | to_json }}
 {% endif %}
     bindPort: {{ kubernetes_api_bind_port }}
-{% if kubernetes_join_certificate_key %}
+{% if kubernetes_join_certificate_key | length > 0 %}
   certificateKey: {{ kubernetes_join_certificate_key | to_json }}
 {% endif %}
 {% endif %}
