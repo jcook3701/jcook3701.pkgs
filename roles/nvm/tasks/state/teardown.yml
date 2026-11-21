@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Uninstall NVM for configured accounts
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Locate NVM shell configuration files
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.getent_passwd[nvm_account_profile.0.name][4] }}/{{ nvm_account_profile.1 }}"
+  become: true
+  loop: >-
+    {{ nvm_users | default([])
+       | product(['.bashrc', '.bash_profile', '.bash_login', '.profile', '.zshrc', '.zprofile'])
+       | list }}
+  loop_control:
+    loop_var: nvm_account_profile
+    label: "{{ nvm_account_profile.0.name }}: {{ nvm_account_profile.1 }}"
+  register: nvm_profile_checks
+  when: nvm_account_profile.0.name != 'root'
+
+- name: Remove NVM initialization from shell configuration
+  ansible.builtin.lineinfile:
+    path: "{{ nvm_profile_check.stat.path }}"
+    regexp: "^(export NVM_DIR=.*|.*NVM_DIR/(nvm[.]sh|bash_completion).*)$"
+    state: absent
+  become: true
+  loop: "{{ nvm_profile_checks.results }}"
+  loop_control:
+    loop_var: nvm_profile_check
+    label: "{{ nvm_profile_check.nvm_account_profile.0.name }}: {{ nvm_profile_check.nvm_account_profile.1 }}"
+  when:
+    - nvm_profile_check.stat is defined
+    - nvm_profile_check.stat.exists | default(false)
+    - nvm_profile_check.stat.isreg | default(false)

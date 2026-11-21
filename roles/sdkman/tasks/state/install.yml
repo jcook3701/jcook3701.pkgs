@@ -1,58 +1,88 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Install SDKMAN dependencies
+  ansible.builtin.package:
+    name: "{{ sdkman_pkgs | default(['zip', 'unzip', 'curl']) }}"
+    state: present
+  become: true
+  when: sdkman_users | default([]) | length > 0
+
 - name: Resolve SDKMAN account details
   ansible.builtin.getent:
     database: passwd
-    key: "{{ sdkman_user.name }}"
-    fail_key: true
   become: true
 
-- name: Check whether SDKMAN is installed for account
+- name: Validate configured SDKMAN accounts
+  ansible.builtin.assert:
+    that:
+      - sdkman_user.name is defined
+      - sdkman_user.name | length > 0
+      - sdkman_user.name in ansible_facts.getent_passwd
+    fail_msg: "The configured SDKMAN account must exist on the target host."
+  loop: "{{ sdkman_users | default([]) }}"
+  loop_control:
+    loop_var: sdkman_user
+    label: "{{ sdkman_user.name | default('undefined') }}"
+  when: sdkman_user.name | default('') != "root"
+
+- name: Check SDKMAN installations for configured accounts
   ansible.builtin.stat:
     path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/.sdkman/bin/sdkman-init.sh"
-  register: sdkman_init
+  register: sdkman_install_checks
   become: true
+  loop: "{{ sdkman_users | default([]) }}"
+  loop_control:
+    loop_var: sdkman_user
+    label: "{{ sdkman_user.name }}"
+  when: sdkman_user.name != "root"
 
-- name: Install SDKMAN for account when missing
-  when: not sdkman_init.stat.exists
-  block:
-    - name: Create temporary SDKMAN installer for account
-      ansible.builtin.tempfile:
-        state: file
-        path: "{{ sdkman_file.package | dirname }}"
-        prefix: "{{ sdkman_file.package | basename }}-"
-      register: sdkman_installer
-      become: true
-      become_user: "{{ sdkman_user.name }}"
+- name: Create temporary SDKMAN installer
+  ansible.builtin.tempfile:
+    state: file
+    path: "{{ sdkman_file.package | default('/tmp/sdkman-install.sh') | dirname }}"
+    prefix: "{{ sdkman_file.package | default('/tmp/sdkman-install.sh') | basename }}-"
+  register: sdkman_installer
+  become: true
+  when: >-
+    sdkman_install_checks.results
+    | selectattr('stat.exists', 'defined')
+    | selectattr('stat.exists', 'equalto', false)
+    | list | length > 0
 
-    - name: Download SDKMAN installer for account
-      ansible.builtin.get_url:
-        url: "{{ sdkman_base_url }}"
-        dest: "{{ sdkman_installer.path }}"
-        mode: "0700"
-      become: true
-      become_user: "{{ sdkman_user.name }}"
+- name: Download SDKMAN installer
+  ansible.builtin.get_url:
+    url: "{{ sdkman_base_url | default('https://get.sdkman.io') }}"
+    dest: "{{ sdkman_installer.path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  when: sdkman_installer.path is defined
 
-    - name: Run SDKMAN installer as account
-      ansible.builtin.command:
-        argv:
-          - "bash"
-          - "{{ sdkman_installer.path }}"
-        creates: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/.sdkman/bin/sdkman-init.sh"
-      become: true
-      become_user: "{{ sdkman_user.name }}"
-      environment:
-        HOME: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}"
-        SDKMAN_DIR: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/.sdkman"
+- name: Install SDKMAN for configured accounts
+  ansible.builtin.command:
+    argv:
+      - "bash"
+      - "{{ sdkman_installer.path }}"
+    creates: "{{ ansible_facts.getent_passwd[sdkman_install_check.sdkman_user.name][4] }}/.sdkman/bin/sdkman-init.sh"
+  become: true
+  become_user: "{{ sdkman_install_check.sdkman_user.name }}"
+  environment:
+    HOME: "{{ ansible_facts.getent_passwd[sdkman_install_check.sdkman_user.name][4] }}"
+    SDKMAN_DIR: "{{ ansible_facts.getent_passwd[sdkman_install_check.sdkman_user.name][4] }}/.sdkman"
+    SDKMAN_NON_INTERACTIVE: "true"
+  loop: "{{ sdkman_install_checks.results }}"
+  loop_control:
+    loop_var: sdkman_install_check
+    label: "{{ sdkman_install_check.sdkman_user.name }}"
+  when:
+    - sdkman_install_check.sdkman_user.name != "root"
+    - not (sdkman_install_check.stat.exists | default(false))
 
-  always:
-    - name: Remove temporary SDKMAN installer for account
-      ansible.builtin.file:
-        path: "{{ sdkman_installer.path }}"
-        state: absent
-      become: true
-      become_user: "{{ sdkman_user.name }}"
-      when:
-        - sdkman_installer is defined
-        - sdkman_installer.path is defined
+- name: Remove temporary SDKMAN installer
+  ansible.builtin.file:
+    path: "{{ sdkman_installer.path }}"
+    state: absent
+  become: true
+  when: sdkman_installer.path is defined

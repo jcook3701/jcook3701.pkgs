@@ -4,12 +4,28 @@
 - name: Resolve SDKMAN account details
   ansible.builtin.getent:
     database: passwd
-    key: "{{ sdkman_user.name }}"
-    fail_key: true
   become: true
 
-- name: Ensure SDKMAN installation is removed
+- name: Validate configured SDKMAN accounts
+  ansible.builtin.assert:
+    that:
+      - sdkman_user.name is defined
+      - sdkman_user.name | length > 0
+      - sdkman_user.name in ansible_facts.getent_passwd
+    fail_msg: "The configured SDKMAN account must exist on the target host."
+  loop: "{{ sdkman_users | default([]) }}"
+  loop_control:
+    loop_var: sdkman_user
+    label: "{{ sdkman_user.name | default('undefined') }}"
+  when: sdkman_user.name | default('') != "root"
+
+- name: Remove SDKMAN installations for configured accounts
   ansible.builtin.file:
     path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/.sdkman"
     state: absent
   become: true
+  loop: "{{ sdkman_users | default([]) }}"
+  loop_control:
+    loop_var: sdkman_user
+    label: "{{ sdkman_user.name }}"
+  when: sdkman_user.name != "root"

@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Installs, configures, and removes NVM for selected local accounts."
+    description: >-
+      Manages Node Version Manager (NVM) independently for configured local accounts.
+      Supports installation, removal, and shell initialization teardown.
+    author: "Jared Cook"
+    options:
+      # -------------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------------
+      nvm_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: >-
+          Present installs NVM if missing; absent removes user installations;
+          teardown also removes NVM shell initialization lines.
+
+      nvm_debug:
+        type: "bool"
+        default: false
+        description: "Enable NVM configuration debugging output."
+
+      nvm_users:
+        type: "list"
+        elements: "dict"
+        description: >-
+          Existing local accounts where NVM is managed. By default, uses the
+          Ansible connection account; root is skipped.
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "Existing local user name."
+
+      # -------------------------------------------------------------------------
+      # NVM Package Configuration
+      # -------------------------------------------------------------------------
+      nvm_repo_url:
+        type: "str"
+        default: "https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh"
+        description: "Pinned upstream NVM installer URL."

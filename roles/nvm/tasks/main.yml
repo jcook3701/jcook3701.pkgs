@@ -1,12 +1,23 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Collect running user facts
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: sudo_user_facts.yml
-  when: sudo_user is not defined
+- name: Display NVM configuration
+  ansible.builtin.debug:
+    msg:
+      state: "{{ nvm_state | default('present') }}"
+      users: "{{ nvm_users | default([]) | map(attribute='name') | list }}"
+      repo_url: "{{ nvm_repo_url | default('https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh') }}"
+      packages: "{{ nvm_pkgs | default(['git', 'curl']) }}"
+  when: nvm_debug | default(false) | bool
 
-- name: Install nvm
-  ansible.builtin.include_tasks: install.yml
+- name: Ensure NVM is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
   when: nvm_state | default('present') == 'present'
+
+- name: Ensure NVM is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: nvm_state | default('present') == 'absent'
+
+- name: Ensure NVM is uninstalled and configurations are removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: nvm_state | default('present') == 'teardown'

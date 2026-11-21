@@ -6,7 +6,7 @@
 
 - name: Locate SDKMAN shell configuration files
   ansible.builtin.stat:
-    path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/{{ sdkman_profile }}"
+    path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/{{ sdkman_shell_file }}"
   loop:
     - ".bashrc"
     - ".bash_profile"
@@ -14,21 +14,23 @@
     - ".profile"
     - ".zshrc"
   loop_control:
-    loop_var: sdkman_profile
-    label: "{{ sdkman_profile }}"
-  register: sdkman_shell_profiles
+    loop_var: sdkman_shell_file
+    label: "{{ sdkman_user.name }}: {{ sdkman_shell_file }}"
+  register: sdkman_shell_files
   become: true
 
 - name: Remove SDKMAN initialization from shell configuration
   ansible.builtin.lineinfile:
-    path: "{{ sdkman_profile_result.stat.path }}"
-    regexp: "^(#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!|.*SDKMAN_DIR=.*|.*sdkman-init[.]sh.*)$"
+    path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/{{ sdkman_shell_result.sdkman_shell_file }}"
+    regexp: "^(#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!|\
+      [[:blank:]]*export[[:blank:]]+SDKMAN_DIR=.*|\
+      .*sdkman-init[.]sh.*)$"
     state: absent
-  loop: "{{ sdkman_shell_profiles.results }}"
+  loop: "{{ sdkman_shell_files.results }}"
   loop_control:
-    loop_var: sdkman_profile_result
-    label: "{{ sdkman_profile_result.stat.path }}"
+    loop_var: sdkman_shell_result
+    label: "{{ sdkman_user.name }}: {{ sdkman_shell_result.sdkman_shell_file }}"
   become: true
   when:
-    - sdkman_profile_result.stat.exists
-    - sdkman_profile_result.stat.isreg | default(false)
+    - sdkman_shell_result.stat.exists | default(false)
+    - sdkman_shell_result.stat.isreg | default(false)
