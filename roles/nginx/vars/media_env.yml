@@ -1,9 +1,0 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
-# SPDX-License-Identifier: AGPL-3.0-or-later
----
-nginx_sites:
-  - server_name: "media.local"
-    listen: 8080
-    root: "/var/lib/plex"
-    location_path: "/library/"
-    autoindex: "off"

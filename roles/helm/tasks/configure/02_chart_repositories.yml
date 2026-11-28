@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Validate Helm chart repository entries
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name | default('') | length > 0
+      - item.state | default('present') in ['present', 'absent']
+      - >-
+        (item.state | default('present') == 'absent')
+        or (item.url | default('') | length > 0)
+    fail_msg: >-
+      Each Helm chart repository needs a name and valid state.
+      Repositories with state present also require a URL.
+  loop: "{{ helm_chart_repositories }}"
+  loop_control:
+    label: "{{ item.name | default('unnamed') }}"
+
+- name: Ensure Helm chart repository names are unique
+  ansible.builtin.assert:
+    that:
+      - >-
+        (helm_chart_repositories | map(attribute='name') | list | unique | list | length)
+        == (helm_chart_repositories | length)
+    fail_msg: Helm chart repository names must be unique.
+
+- name: Query configured Helm chart repositories
+  ansible.builtin.command:
+    argv:
+      - helm
+      - repo
+      - list
+      - --output
+      - json
+  register: helm_chart_repository_query
+  changed_when: false
+  failed_when: >-
+    helm_chart_repository_query.rc != 0 and
+    'no repositories to show' not in (helm_chart_repository_query.stderr | lower)
+  become: "{{ helm_repository_user | length > 0 }}"
+  become_user: "{{ helm_repository_user | default('root', true) }}"
+
+- name: Record existing Helm chart repositories
+  ansible.builtin.set_fact:
+    helm_existing_chart_repositories: >-
+      {{ (helm_chart_repository_query.stdout | from_json | default([], true))
+         if helm_chart_repository_query.rc == 0 else [] }}
+
+- name: Add or update Helm chart repositories
+  ansible.builtin.command:
+    argv:
+      - helm
+      - repo
+      - add
+      - "{{ item.name }}"
+      - "{{ item.url }}"
+      - --force-update
+  loop: "{{ helm_chart_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.state | default('present') == 'present'
+    - >-
+      (helm_existing_chart_repositories
+       | selectattr('name', 'equalto', item.name)
+       | map(attribute='url') | first | default('')) != item.url
+  become: "{{ helm_repository_user | length > 0 }}"
+  become_user: "{{ helm_repository_user | default('root', true) }}"
+
+- name: Remove unwanted Helm chart repositories
+  ansible.builtin.command:
+    argv:
+      - helm
+      - repo
+      - remove
+      - "{{ item.name }}"
+  loop: "{{ helm_chart_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.state | default('present') == 'absent'
+    - >-
+      (helm_existing_chart_repositories
+       | selectattr('name', 'equalto', item.name)
+       | list | length) > 0
+  become: "{{ helm_repository_user | length > 0 }}"
+  become_user: "{{ helm_repository_user | default('root', true) }}"

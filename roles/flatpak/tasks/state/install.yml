@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Determine if target Debian/Ubuntu host uses legacy apt
+  ansible.builtin.set_fact:
+    flatpak_repo_add_uses_legacy_apt: "{{ true if (ansible_distribution == 'Ubuntu'
+                                  and ansible_distribution_major_version | int < 20)
+                                  or (ansible_distribution == 'Debian'
+                                  and ansible_distribution_major_version | int < 11)
+                                else false }}"
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - false
+
+- name: Setup Flatpak Package Repository for Legacy Systems
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ flatpak_repo_id | default('flatpak') }}"
+    repo_add_name: "{{ flatpak_repo_name | default('Flatpak PPA') }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ flatpak_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ flatpak_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ flatpak_debian_components | default(omit) }}"
+    repo_add_debian_signed_by: "{{ flatpak_debian_signed_by | default(omit) }}"
+  # when: flatpak_repo_add_uses_legacy_apt | bool
+  when:
+    - ansible_facts['distribution'] | lower == 'ubuntu'
+    - flatpak_use_upstream_repo | default(true) | bool
+
+- name: Installing Flatpak package and dependencies
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ flatpak_dep_pkg_names | default([])
+          + flatpak_pkg_names | default(['flatpak']) }}
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Ensure Flatpak is configured
+  ansible.builtin.include_tasks: configure/main.yml

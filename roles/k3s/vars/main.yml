@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# User/Group Settings
+k8s_group: "{{ k8s_os_group | default('root') }}"
+k8s_user: "{{ k8s_os_user | default('root') }}"
+
+# Service Settings
+k8s_service: "{{ k8s_os_service | default('k8s') }}"
+
+# Package Settings
+k8s_pkg_names: "{{ k8s_os_pkg_names | default(['k8s']) }}"
+
+# System File Settings
+k8s_directory:
+  config: "{{ k8s_os_directory.config | default('/usr/local/etc/k8s') }}"
+  systemd: "{{ k8s_os_directory.systemd | default('/etc/systemd/system') }}"
+
+k8s_file:
+  config: "{{ k8s_directory.config ~ '/config.yml'
+                      | default('/etc/k8s/config.yml') }}"
+  cert: "{{ k8s_directory.config ~ '/cert.pem'
+                      | default('/etc/k8s/cert.pem') }}"
+  credentials: "{{ k8s_directory.config ~ '/'
+                      ~ k8s_tunnel_uuid | default('default-tunnel', true) ~ '.json'
+                      | default('/etc/k8s/default-tunnel.json') }}"
+  service: "{{ k8s_directory.systemd ~ '/k8s.service'
+                      | default('/etc/systemd/system/k8s.service') }}"
+
+# Repository Specifics
+k8s_repo_id: "{{ k8s_os_repo_id | default('k8s') }}"
+k8s_repo_name: "{{ k8s_os_repo_name | default('k8s PPA') }}"

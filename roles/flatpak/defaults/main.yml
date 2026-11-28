@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+# Lifecycle execution state for package installation or removal
+flatpak_state: present
+flatpak_debug: true
+
+# Manage lifecycle of the 'flatpak' system group
+flatpak_manage_group: true
+
+# Accounts granted rootless or direct access to flatpak runtime group
+flatpak_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+
+# -------------------------------------------------------------------------
+# Flatpak Repository Configuration
+# -------------------------------------------------------------------------
+# Toggle whether to configure upstream repositories (e.g., PPA on Ubuntu)
+flatpak_use_upstream_repo: true
+
+flatpak_download_url: "https://ppa.launchpadcontent.net"
+flatpak_key_download_url: >-
+  https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x5C6D153A17C02C337EF6C663B8B9D41229DFA5F5
+
+# -------------------------------------------------------------------------
+# Flatpak Repository Management
+# -------------------------------------------------------------------------
+# Overarching toggle to manage 'flatpak' repositories
+flatpak_manage_repos: true
+
+# A list of Flatpak remote repositories to configure.
+flatpak_repos:
+  - name: flathub
+    url: https://dl.flathub.org/repo/flathub.flatpakrepo

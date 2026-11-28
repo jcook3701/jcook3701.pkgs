@@ -8,7 +8,7 @@ parent: "Developer Resources"
 
 This agreement is based on the Apache Software Foundation Individual Contributor License Agreement ("Agreement") V2.2
 
-Thank you for your interest in __The pkgs project by Jared Cook,__ dba Jared Cook (the "Project"). To clarify the intellectual property license granted with Contributions from any person or entity, the Project must have on file a signed Contributor License Agreement ("CLA") from each Contributor, indicating agreement with the license terms below. This agreement is for your protection as a Contributor as well as the protection of the Project and its users. It does not change your rights to use your own Contributions for any other purpose.
+Thank you for your interest in __The pkgs project by Jared W. Cook,__ dba Jared W. Cook (the "Project"). To clarify the intellectual property license granted with Contributions from any person or entity, the Project must have on file a signed Contributor License Agreement ("CLA") from each Contributor, indicating agreement with the license terms below. This agreement is for your protection as a Contributor as well as the protection of the Project and its users. It does not change your rights to use your own Contributions for any other purpose.
 
 You accept and agree to the following terms and conditions for Your Contributions (present and future) that you submit to the Project. In return, the Project shall not use Your Contributions in a way that is contrary to the public benefit or inconsistent with its nonprofit status and bylaws in effect at the time of the Contribution. Except for the license granted herein to the Project and recipients of software distributed by the Project, You reserve all right, title, and interest in and to Your Contributions.
 

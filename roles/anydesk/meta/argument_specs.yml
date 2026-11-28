@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Install and configure AnyDesk"
+    description: "This role installs the AnyDesk package and ensures
+      the service is running and configured correctly."
+    author: "Jared W. Cook"
+    options:
+      # -------------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------------
+      anydesk_state:
+        type: str
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: "The desired state of the AnyDesk package."
+
+      anydesk_debug:
+        type: "bool"
+        required: false
+        default: true
+        description: "Enable additional debugging output during role execution."
+
+      # -------------------------------------------------------------------------
+      # AnyDesk Repository Configuration
+      # -------------------------------------------------------------------------
+      anydesk_download_url:
+        type: "str"
+        required: false
+        default: "http://deb.anydesk.com"
+        description: "Base URL of the official AnyDesk APT package repository."
+
+      anydesk_key_download_url:
+        type: "str"
+        required: false
+        default: "https://keys.anydesk.com/repos/DEB-GPG-KEY"
+        description: "URL used to retrieve the official AnyDesk repository GPG signing key."

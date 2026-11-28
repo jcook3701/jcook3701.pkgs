@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Resolve NVM account details
+  ansible.builtin.getent:
+    database: passwd
+  become: true
+  when: nvm_users | default([]) | length > 0
+
+- name: Validate configured NVM accounts
+  ansible.builtin.assert:
+    that:
+      - nvm_user.name is defined
+      - nvm_user.name | length > 0
+      - nvm_user.name in ansible_facts.getent_passwd
+    fail_msg: "The configured NVM account must exist on the target host."
+  loop: "{{ nvm_users | default([]) }}"
+  loop_control:
+    loop_var: nvm_user
+    label: "{{ nvm_user.name | default('undefined') }}"
+  when: nvm_user.name | default('') != 'root'
+
+- name: Remove NVM installations for configured accounts
+  ansible.builtin.file:
+    path: "{{ ansible_facts.getent_passwd[nvm_user.name][4] }}/.nvm"
+    state: absent
+  become: true
+  loop: "{{ nvm_users | default([]) }}"
+  loop_control:
+    loop_var: nvm_user
+    label: "{{ nvm_user.name }}"
+  when: nvm_user.name != 'root'

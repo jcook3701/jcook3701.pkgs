@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check installed Helm (CLI) version
+  ansible.builtin.command:
+    argv:
+      - helm
+      - version
+      - --short
+  register: helm_version_result
+  changed_when: false
+
+- name: Display installed Helm (CLI) version
+  ansible.builtin.debug:
+    msg: "Installed Helm version: {{ helm_version_result.stdout }}"
+  when: helm_debug | bool

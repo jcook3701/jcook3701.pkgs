@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Install Git and manage configuration for selected local accounts."
+    description: >-
+      Installs or removes Git packages and independently manages Git commit
+      identities for multiple existing Linux accounts.
+    author: "Jared W. Cook"
+    options:
+      # -------------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------------
+      git_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: >-
+          Present installs Git and configures selected accounts.
+          Absent and teardown retain the existing package removal behavior.
+
+      git_debug:
+        type: "bool"
+        default: false
+        description: >-
+          Enable Git role diagnostics, including lifecycle state,
+          selected Linux accounts, and resolved packages.
+
+      git_users:
+        type: "list"
+        elements: "dict"
+        description: >-
+          Existing local accounts where Git configuration is managed.
+          Defaults to the Ansible connection account. Root is skipped.
+          Git name and email are optional and independent per account.
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "Existing Linux account username."
+          git_name:
+            type: "str"
+            required: false
+            description: "Git user.name value for this account."
+          git_email:
+            type: "str"
+            required: false
+            description: "Git user.email value for this account."

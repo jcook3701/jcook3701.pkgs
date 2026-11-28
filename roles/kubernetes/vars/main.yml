@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Version & Package Configuration
+# -------------------------------------------------------------------------
+kubernetes_kubernetes_major_minor_version: >-
+  {{ kubernetes_kubernetes_version.split('.')[:2] | join('.') }}
+kubernetes_pkg_names: >-
+  {{ kubernetes_os_pkg_names + (['cri-tools'] if kubernetes_install_crictl | bool else []) }}
+
+# -------------------------------------------------------------------------
+# Paths
+# -------------------------------------------------------------------------
+kubernetes_directory:
+  config: "{{ kubernetes_os_directory.config | default('/etc/kubernetes') }}"
+kubernetes_file:
+  config: "{{ kubernetes_directory.config }}/config.toml"
+  kubeadm_init: "{{ kubernetes_directory.config }}/kubeadm-init-config.yaml"
+  kubeadm_join: "{{ kubernetes_directory.config }}/kubeadm-join-config.yaml"
+  kubelet: "{{ kubernetes_directory.config }}/kubelet-config.yaml"
+  crictl: "/etc/crictl.yaml"
+  sysctl: "/etc/sysctl.d/99-jcook3701-kubernetes.conf"
+  modules: "/etc/modules-load.d/jcook3701-kubernetes.conf"
+  calico_values: "{{ kubernetes_directory.config }}/calico-values.yml"
+  cilium_values: "{{ kubernetes_directory.config }}/cilium-values.yml"
+
+# -------------------------------------------------------------------------
+# Cluster & Container Runtime Effective Values
+# -------------------------------------------------------------------------
+kubernetes_node_name_effective: >-
+  {{ kubernetes_node_name if kubernetes_node_name | length > 0 else ansible_facts['hostname'] | lower }}
+kubernetes_pod_subnet_effective: >-
+  {{ kubernetes_pod_subnet if kubernetes_pod_subnet | length > 0 else ('10.244.0.0/16' if kubernetes_cni_provider in ['calico', 'cilium'] else '') }}
+kubernetes_cri_socket_effective: >-
+  {{ kubernetes_cri_socket if kubernetes_cri_socket | length > 0 else {
+    'containerd': 'unix:///run/containerd/containerd.sock',
+    'cri-o': 'unix:///var/run/crio/crio.sock',
+    'crio': 'unix:///var/run/crio/crio.sock',
+    'docker': 'unix:///var/run/cri-dockerd.sock'
+  }.get(kubernetes_engine, '') }}
+kubernetes_crictl_runtime_endpoint_effective: >-
+  {{ kubernetes_crictl_runtime_endpoint if kubernetes_crictl_runtime_endpoint | length > 0 else kubernetes_cri_socket_effective }}
+
+# -------------------------------------------------------------------------
+# Repository Identifiers
+# -------------------------------------------------------------------------
+kubernetes_repo_id: "{{ kubernetes_os_repo_id | default('kubernetes') }}"
+kubernetes_repo_name: "{{ kubernetes_os_repo_name | default('Kubernetes (k8s)') }}"

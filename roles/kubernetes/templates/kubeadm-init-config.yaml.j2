@@ -1,0 +1,41 @@
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
+---
+apiVersion: {{ kubernetes_kubeadm_api_version }}
+kind: InitConfiguration
+nodeRegistration:
+  name: {{ kubernetes_node_name_effective | to_json }}
+  criSocket: {{ kubernetes_cri_socket_effective | to_json }}
+localAPIEndpoint:
+{% if kubernetes_api_advertise_address | length > 0 %}
+  advertiseAddress: {{ kubernetes_api_advertise_address | to_json }}
+{% endif %}
+  bindPort: {{ kubernetes_api_bind_port }}
+---
+apiVersion: {{ kubernetes_kubeadm_api_version }}
+kind: ClusterConfiguration
+clusterName: {{ kubernetes_cluster_name | to_json }}
+kubernetesVersion: {{ ('v' ~ kubernetes_kubernetes_version) | to_json }}
+{% if kubernetes_control_plane_endpoint | length > 0 %}
+controlPlaneEndpoint: {{ kubernetes_control_plane_endpoint | to_json }}
+{% endif %}
+networking:
+  dnsDomain: {{ kubernetes_dns_domain | to_json }}
+  serviceSubnet: {{ kubernetes_service_subnet | to_json }}
+{% if kubernetes_pod_subnet_effective | length > 0 %}
+  podSubnet: {{ kubernetes_pod_subnet_effective | to_json }}
+{% endif %}
+---
+apiVersion: {{ kubernetes_kubelet_api_version }}
+kind: KubeletConfiguration
+cgroupDriver: {{ kubernetes_kubelet_cgroup_driver | to_json }}
+rotateCertificates: {{ kubernetes_kubelet_rotate_certificates | bool | lower }}
+{% if kubernetes_kubelet_cluster_dns | length > 0 %}
+clusterDNS:
+{% for address in kubernetes_kubelet_cluster_dns %}
+  - {{ address | to_json }}
+{% endfor %}
+{% endif %}
+{% if kubernetes_kubelet_resolv_conf | length > 0 %}
+resolvConf: {{ kubernetes_kubelet_resolv_conf | to_json }}
+{% endif %}

@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Check for an already initialized control plane
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_existing_admin
+  become: true
+
+- name: Check for an existing API server static Pod manifest
+  ansible.builtin.stat:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+  register: kubernetes_existing_apiserver
+  become: true
+
+- name: Refuse to overwrite an incomplete kubeadm control plane
+  ansible.builtin.assert:
+    that:
+      - kubernetes_existing_admin.stat.exists == kubernetes_existing_apiserver.stat.exists
+    fail_msg: >-
+      Partial kubeadm control-plane state detected. Examine /etc/kubernetes
+      and running Pods before recovering. This role will not reset it automatically.
+
+- name: Initialize the Kubernetes control plane once
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - init
+      - --config
+      - "{{ kubernetes_file.kubeadm_init }}"
+  become: true
+  register: kubernetes_kubeadm_init
+  when: not kubernetes_existing_admin.stat.exists
+
+- name: Wait for the Kubernetes API server to listen
+  ansible.builtin.wait_for:
+    host: "{{ kubernetes_api_advertise_address if kubernetes_api_advertise_address | length > 0 else '127.0.0.1' }}"
+    port: "{{ kubernetes_api_bind_port }}"
+    timeout: "{{ kubernetes_wait_timeout }}"
+  when: not ansible_check_mode
+
+- name: Confirm Kubernetes API connectivity using the admin kubeconfig
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - cluster-info
+  register: kubernetes_cluster_info
+  changed_when: false
+  retries: 15
+  delay: 5
+  until: kubernetes_cluster_info.rc == 0
+  become: true
+  when: not ansible_check_mode

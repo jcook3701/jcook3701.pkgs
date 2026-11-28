@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Warn when keeping cluster data during teardown
+  ansible.builtin.debug:
+    msg: >-
+      kubeadm cluster state, PKI and admin kubeconfig are preserved.
+      Set kubernetes_reset_cluster_on_teardown=true to authorize destructive reset.
+  when: not kubernetes_reset_cluster_on_teardown | bool
+
+- name: Check for existing cluster before optional reset
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_teardown_admin
+  when: kubernetes_reset_cluster_on_teardown | bool
+
+- name: Reset cluster only when explicitly authorized
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - reset
+      - --force
+      - --cri-socket
+      - "{{ kubernetes_cri_socket_effective }}"
+  become: true
+  when:
+    - kubernetes_reset_cluster_on_teardown | bool
+    - kubernetes_teardown_admin.stat.exists | default(false)
+
+- name: Uninstall Kubernetes packages
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Remove Kubernetes package repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ kubernetes_repo_id }}"
+    repo_add_name: "{{ kubernetes_repo_name }}"
+    repo_add_state: absent

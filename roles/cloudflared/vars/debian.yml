@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+cloudflared_os_group: "root"
+cloudflared_os_user: "root"
+
+cloudflared_os_service: "cloudflared"
+
+cloudflared_os_pkg_names:
+  - cloudflared
+
+cloudflared_os_directory:
+  config: "/usr/local/etc/cloudflared/"
+
+# Repository Configuration for jcook3701.utils.repo_add
+cloudflared_os_repo_id: "cloudflared"
+cloudflared_os_repo_name: "Cloudflared PPA"
+
+cloudflared_debian_uris: >-
+  {{ cloudflared_download_url ~ '/cloudflared'
+      | default('https://pkg.cloudflare.com/cloudflared') }}
+cloudflared_debian_suites: "any"
+cloudflared_debian_component: "main"
+cloudflared_debian_signed_by: >-
+  {{ cloudflared_download_url ~ '/cloudflare-main.gpg'
+      | default('https://pkg.cloudflare.com/cloudflare-main.gpg') }}

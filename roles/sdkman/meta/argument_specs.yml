@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Installs SDKMAN for selected local accounts."
+    description: >-
+      Installs SDKMAN independently for configured local users without requiring
+      a separate role to determine the target account.
+    author: "Jared W. Cook"
+    options:
+      sdkman_state:
+        type: "str"
+        default: "present"
+        description: >-
+          When set to present, installs SDKMAN for the configured users.
+          Other values do not trigger installation.
+
+      sdkman_debug:
+        type: "bool"
+        default: false
+        description: "Enable SDKMAN configuration debugging output."
+
+      sdkman_users:
+        type: "list"
+        elements: "dict"
+        description: >-
+          Local accounts that will receive SDKMAN. The default includes the
+          Ansible connection user; override this list in inventory or playbooks.
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "Existing local account name. The root account is skipped."
+
+      sdkman_base_url:
+        type: "str"
+        default: "https://get.sdkman.io"
+        description: "Upstream URL used to retrieve the SDKMAN installer."

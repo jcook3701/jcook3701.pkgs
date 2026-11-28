@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install Bind9 to localhost
@@ -15,7 +15,6 @@
     - name: Bind9 install
       ansible.builtin.include_role:
         name: jcook3701.pkgs.bind9
-        tasks_from: bind9-install.yml
 
 #    - name: Import Bind9 Variables
 #      ansible.builtin.include_role:

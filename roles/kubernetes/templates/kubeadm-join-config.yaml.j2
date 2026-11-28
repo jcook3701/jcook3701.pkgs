@@ -1,0 +1,27 @@
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
+---
+apiVersion: {{ kubernetes_kubeadm_api_version }}
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: {{ kubernetes_join_api_server_endpoint | to_json }}
+    token: {{ kubernetes_join_token | to_json }}
+    caCertHashes:
+{% for hash in kubernetes_join_ca_cert_hashes %}
+      - {{ hash | to_json }}
+{% endfor %}
+nodeRegistration:
+  name: {{ kubernetes_node_name_effective | to_json }}
+  criSocket: {{ kubernetes_cri_socket_effective | to_json }}
+{% if kubernetes_join_control_plane | bool %}
+controlPlane:
+  localAPIEndpoint:
+{% if kubernetes_join_advertise_address | length > 0 %}
+    advertiseAddress: {{ kubernetes_join_advertise_address | to_json }}
+{% endif %}
+    bindPort: {{ kubernetes_api_bind_port }}
+{% if kubernetes_join_certificate_key | length > 0 %}
+  certificateKey: {{ kubernetes_join_certificate_key | to_json }}
+{% endif %}
+{% endif %}

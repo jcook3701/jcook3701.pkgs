@@ -16,7 +16,7 @@
     "_output_dir": "/home/jcook/Documents/git_repo/jcook3701.pkgs/docs/_tmp_docs",
     "_repo_dir": "/home/jcook/.cookiecutters/sphinx-cookiecutter",
     "_template": "https://github.com/jcook3701/sphinx-cookiecutter.git",
-    "author": "Jared Cook",
+    "author": "Jared W. Cook",
     "description": "Ansible installer for snap packages.",
     "project_name": "pkgs",
     "project_slug": "jcook3701.pkgs",

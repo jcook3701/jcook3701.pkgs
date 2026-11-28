@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install ctop to localhost
@@ -15,4 +15,3 @@
     - name: Install ctop
       ansible.builtin.include_role:
         name: jcook3701.pkgs.ctop
-        tasks_from: ctop-install.yml

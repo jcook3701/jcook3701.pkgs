@@ -1,4 +1,7 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 rustup_init_url: "https://sh.rustup.rs"
+
+rustup_file:
+  package: "/tmp/rustup-init.sh"

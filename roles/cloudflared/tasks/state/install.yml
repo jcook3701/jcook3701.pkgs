@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug Cloudflared Variables
+  ansible.builtin.debug:
+    msg:
+      - "cloudflared_pkg_names: {{ cloudflared_pkg_names }}"
+      - "cloudflared_directory: {{ cloudflared_directory }}"
+      - "cloudflared_file: {{ cloudflared_file }}"
+      - "cloudflared_repo_id: {{ cloudflared_repo_id }}"
+      - "cloudflared_repo_name: {{ cloudflared_repo_name }}"
+  when: cloudflared_debug | default(false) | bool
+
+- name: Setup Cloudflared Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ cloudflared_os_repo_id | default('cloudflared') }}"
+    repo_add_name: "{{ cloudflared_os_repo_name | default('Cloudflared PPA') }}"
+    repo_add_enabled: true
+    # Debian Overrides (Passed cleanly when running on Debian nodes)
+    repo_add_debian_uris: "{{ cloudflared_debian_uris | default(omit) }}"
+    repo_add_debian_suites: "{{ cloudflared_debian_suites | default(omit) }}"
+    repo_add_debian_components: "{{ cloudflared_debian_component | default(omit) }}"
+    repo_add_debian_signed_by: "{{ cloudflared_debian_signed_by | default(omit) }}"
+    # Red Hat Overrides
+    repo_add_redhat_baseurl: "{{ cloudflared_redhat_baseurl | default(omit) }}"
+    # Arch Linux Overrides
+    repo_add_arch_server: "{{ cloudflared_arch_server | default(omit) }}"
+  when: ansible_facts['distribution'] | lower == 'ubuntu'
+
+- name: Installing Cloudflared
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: >-
+      {{ cloudflared_os_pkg_names | default(['cloudflared']) }}
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure Cloudflared
+  ansible.builtin.include_tasks: configure/main.yml

@@ -1,0 +1,16 @@
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
+---
+apiVersion: {{ kubernetes_kubelet_api_version }}
+kind: KubeletConfiguration
+cgroupDriver: {{ kubernetes_kubelet_cgroup_driver | to_json }}
+rotateCertificates: {{ kubernetes_kubelet_rotate_certificates | bool | lower }}
+{% if kubernetes_kubelet_cluster_dns | length > 0 %}
+clusterDNS:
+{% for address in kubernetes_kubelet_cluster_dns %}
+  - {{ address | to_json }}
+{% endfor %}
+{% endif %}
+{% if kubernetes_kubelet_resolv_conf | length > 0 %}
+resolvConf: {{ kubernetes_kubelet_resolv_conf | to_json }}
+{% endif %}

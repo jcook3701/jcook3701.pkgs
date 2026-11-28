@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Display SDKMAN configuration
+  ansible.builtin.debug:
+    msg:
+      state: "{{ sdkman_state }}"
+      users: "{{ sdkman_users | map(attribute='name') | list }}"
+      base_url: "{{ sdkman_base_url }}"
+      packages: "{{ sdkman_pkgs }}"
+  when: sdkman_debug | bool
+
+- name: Ensure Sdkman is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: sdkman_state | default('present') == 'present'
+
+- name: Ensure Sdkman is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: sdkman_state | default('present') == 'absent'
+
+- name: Ensure Sdkman is uninstalled and configurations are removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: sdkman_state | default('present') == 'teardown'

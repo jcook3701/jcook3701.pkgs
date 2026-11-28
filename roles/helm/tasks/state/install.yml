@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Debug Helm (CLI) configuration
+  ansible.builtin.debug:
+    msg:
+      - "helm_pkg_names: {{ helm_pkg_names }}"
+      - "helm_install_pkg_names: {{ helm_install_pkg_names }}"
+      - "helm_repo_id: {{ helm_repo_id }}"
+      - "helm_repo_name: {{ helm_repo_name }}"
+      - "helm_manage_repository: {{ helm_manage_repository }}"
+      - "helm_manage_chart_repositories: {{ helm_manage_chart_repositories }}"
+  when: helm_debug | bool
+
+- name: Setup Helm (CLI) Package Repository
+  ansible.builtin.include_role:
+    name: jcook3701.utils.repo_add
+  vars:
+    repo_add_id: "{{ helm_repo_id }}"
+    repo_add_name: "{{ helm_repo_name }}"
+    repo_add_state: present
+    repo_add_enabled: true
+    repo_add_debian_key_format: asc
+    repo_add_debian_uris: "{{ helm_debian_uris }}"
+    repo_add_debian_suites: "{{ helm_debian_suites }}"
+    repo_add_debian_components: "{{ helm_debian_component }}"
+    repo_add_debian_signed_by: "{{ helm_debian_signed_by }}"
+  when: helm_manage_repository | bool
+
+- name: Install Helm (CLI) package
+  ansible.builtin.include_role:
+    name: jcook3701.utils.pkg_manager
+  vars:
+    pkg_manager_pkgs: "{{ helm_install_pkg_names }}"
+    pkg_manager_state: present
+    pkg_manager_update_cache: true
+
+- name: Configure Helm (CLI)
+  ansible.builtin.include_tasks: configure/main.yml

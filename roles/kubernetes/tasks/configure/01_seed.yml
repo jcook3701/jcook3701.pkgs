@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Ensure Kubernetes configuration directory exists
+  ansible.builtin.file:
+    path: "{{ kubernetes_directory.config }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Render kubeadm initialization configuration
+  ansible.builtin.template:
+    src: kubeadm-init-config.yaml.j2
+    dest: "{{ kubernetes_file.kubeadm_init }}"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+
+- name: Render standalone kubelet configuration reference
+  ansible.builtin.template:
+    src: kubelet-config.yaml.j2
+    dest: "{{ kubernetes_file.kubelet }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Render CRI tools configuration
+  ansible.builtin.template:
+    src: crictl.yaml.j2
+    dest: "{{ kubernetes_file.crictl }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: kubernetes_manage_crictl_config | bool
+
+- name: Validate joining credentials when joining is enabled
+  ansible.builtin.assert:
+    that:
+      - kubernetes_join_api_server_endpoint | length > 0
+      - kubernetes_join_token | length > 0
+      - kubernetes_join_ca_cert_hashes | length > 0
+    fail_msg: "A join endpoint, token and CA hashes are required for kubeadm join."
+  when: kubernetes_manage_join | bool
+  no_log: true
+
+- name: Render Kubernetes joining configuration
+  ansible.builtin.template:
+    src: kubeadm-join-config.yaml.j2
+    dest: "{{ kubernetes_file.kubeadm_join }}"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+  no_log: true
+  when: kubernetes_manage_join | bool

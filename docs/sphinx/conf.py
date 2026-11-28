@@ -1,10 +1,10 @@
 """Sphinx Configuration
 
-© All rights reserved. Jared Cook
+© All rights reserved. Jared W. Cook
 
 See the LICENSE file for more details.
 
-Author: Jared Cook
+Author: Jared W. Cook
 Description: Configuration file for the Sphinx documentation builder.
   For the full list of built-in configuration values, see the documentation:
   https://www.sphinx-doc.org/en/master/usage/configuration.html
@@ -25,12 +25,12 @@ sys.path.insert(0, os.path.abspath("../../src"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "pkgs"
-copyright = "2025, Jared Cook"  # noqa: A001
-author = "Jared Cook"
+copyright = "2025, Jared W. Cook"  # noqa: A001
+author = "Jared W. Cook"
 release = "1.0.0"
 
 html_context = {
-    "copyright": "2025, Jared Cook",
+    "copyright": "2025, Jared W. Cook",
 }
 
 # Main Sphinx Entry Point

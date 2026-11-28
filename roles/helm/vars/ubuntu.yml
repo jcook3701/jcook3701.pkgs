@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Helm Packages
+# -------------------------------------------------------------------------
+helm_os_pkg_names:
+  - helm
+
+# -------------------------------------------------------------------------
+# Repository Configuration for jcook3701.utils.repo_add
+# -------------------------------------------------------------------------
+helm_os_repo_id: "helm"
+helm_os_repo_name: "Helm CLI (Buildkite)"
+helm_debian_uris: "{{ helm_download_url }}"
+helm_debian_suites: "any"
+helm_debian_component: "main"
+helm_debian_signed_by: "{{ helm_repo_signing_key_url }}"

@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# Package Settings
+anydesk_pkg_dep_names: []
+
+anydesk_os_pkg_names:
+  - anydesk
+
+# System File Settings
+anydesk_os_directory:
+  conf: "/etc/anydesk"
+  cache: "/etc/anydesk/cache"
+  log: "/etc/log"
+
+# Repository Specifics
+anydesk_os_repo_id: "anydesk-stable"
+anydesk_os_repo_name: ""
+
+anydesk_debian_uris: "{{ anydesk_download_url | default('http://deb.anydesk.com') }}"
+anydesk_debian_suites: "{{ ansible_distribution_release | default('all') }}"
+anydesk_debian_component: "main"
+anydesk_debian_signed_by: "{{ anydesk_key_download_url | default('https://keys.anydesk.com/repos/DEB-GPG-KEY') }}"

@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Kubernetes Cluster Lifecycle
+# -------------------------------------------------------------------------
+- name: Validate runtime and prepare the operating system
+  ansible.builtin.include_tasks: preflight.yml
+
+- name: Join a pre-existing Kubernetes cluster
+  ansible.builtin.include_tasks: join.yml
+  when: kubernetes_manage_join | bool
+
+- name: Initialize and manage the control plane
+  when: not kubernetes_manage_join | bool
+  block:
+    - name: Bootstrap Kubernetes with kubeadm
+      ansible.builtin.include_tasks: kubeadm.yml
+
+    - name: Configure regular-user Kubernetes access
+      ansible.builtin.include_tasks: kubeconfig.yml
+      when: kubernetes_manage_user_kubeconfig | bool
+
+    - name: Manage Kubernetes plugins and CNI networking
+      ansible.builtin.include_tasks: plugins/main.yml
+      when: kubernetes_manage_plugins | bool
+
+    - name: Manage single-node control-plane scheduling
+      ansible.builtin.include_tasks: scheduling.yml
+
+    - name: Verify Kubernetes cluster health
+      ansible.builtin.include_tasks: verify.yml
+      when: kubernetes_verify_cluster | bool

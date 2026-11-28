@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install ruby to localhost
@@ -14,4 +14,3 @@
     - name: Install ruby
       ansible.builtin.include_role:
         name: jcook3701.pkgs.ruby
-        tasks_from: ruby-install.yml

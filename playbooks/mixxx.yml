@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Install Ubuntu Mixxx to localhost
@@ -13,4 +13,3 @@
     - name: Install Mixxx
       ansible.builtin.include_role:
         name: jcook3701.pkgs.mixxx
-        tasks_from: ubuntu-mixxx.yml

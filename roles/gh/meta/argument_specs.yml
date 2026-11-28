@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+argument_specs:
+  main:
+    short_description: "Install GitHub CLI and configure selected local accounts."
+    description: >-
+      Installs or removes GitHub CLI packages and manages configuration
+      independently for multiple existing Linux accounts.
+    author: "Jared W. Cook"
+    options:
+      # -------------------------------------------------------------------------
+      # Lifecycle & System Access Management
+      # -------------------------------------------------------------------------
+      gh_state:
+        type: "str"
+        default: "present"
+        choices: ["present", "absent", "teardown"]
+        description: >-
+          Present installs GitHub CLI and configures selected accounts.
+          Absent removes the package. Teardown also removes the package
+          while preserving user authentication and configuration.
+
+      gh_debug:
+        type: "bool"
+        default: false
+        description: >-
+          Enable GitHub CLI role diagnostics, including lifecycle state,
+          selected Linux accounts, and resolved packages.
+      # -------------------------------------------------------------------------
+      # GitHub CLI User Profile Configuration
+      # -------------------------------------------------------------------------
+      gh_users:
+        type: "list"
+        elements: "dict"
+        description: >-
+          Existing local Linux accounts where GitHub CLI configuration is
+          managed. Defaults to the Ansible connection account. Root is
+          skipped. Optional empty values preserve existing settings.
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "Existing Linux account username."
+
+          gh_host:
+            type: "str"
+            required: false
+            description: >-
+              GitHub hostname for host-specific configuration.
+              Defaults to github.com.
+
+          gh_account:
+            type: "str"
+            required: false
+            description: >-
+              Intended GitHub account username. Informational only;
+              does not authenticate or switch GitHub identities.
+
+          gh_git_protocol:
+            type: "str"
+            required: false
+            choices: ["", "https", "ssh"]
+            description: >-
+              Git protocol for the configured GitHub host.
+              An empty value preserves the existing setting.
+
+          gh_editor:
+            type: "str"
+            required: false
+            description: >-
+              Editor command used by GitHub CLI.
+              An empty value preserves the existing setting.
+
+          gh_pager:
+            type: "str"
+            required: false
+            description: >-
+              Pager command used by GitHub CLI.
+              An empty value preserves the existing setting.
+
+          gh_prompt:
+            type: "str"
+            required: false
+            choices: ["", "enabled", "disabled"]
+            description: >-
+              Enable or disable interactive GitHub CLI prompts.
+              An empty value preserves the existing setting.

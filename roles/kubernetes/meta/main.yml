@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+galaxy_info:
+  author: "Jared W. Cook"
+  description: "Install Kubernetes packages and provision a kubeadm cluster"
+  company: "Cook's Code, Inc."
+  license: "AGPL-3.0-or-later"
+  min_ansible_version: ">=2.19"
+  role_name: kubernetes
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - packages
+    - linux
+    - kubernetes
+    - containers
+dependencies:
+  - role: jcook3701.pkgs.helm
+    helm_state: present
+    when:
+      - kubernetes_state == 'present'
+      - kubernetes_manage_cluster | bool
+      - kubernetes_manage_plugins | bool
+      - not kubernetes_manage_join | bool
+      - ansible_facts['os_family'] == 'Debian'
+collections:
+  - "jcook3701.utils"

@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+git_state: present
+git_debug: false
+
+# -------------------------------------------------------------------------
+# Git User Profile Configuration
+# -------------------------------------------------------------------------
+# Existing local accounts where Git configuration will be managed.
+# Each account maintains its own Git identity and global configuration.
+# Empty identity values preserve existing Git settings.
+git_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+    git_name: ""
+    git_email: ""

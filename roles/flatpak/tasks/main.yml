@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Gather target host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Load Flatpak OS-specific variables
+  ansible.builtin.include_vars: "{{ flatpak_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['distribution'] | lower }}.yml"
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: flatpak_vars
+    label: "Loading variables file: {{ flatpak_vars }}"
+
+- name: Debug Flatpak Variables
+  ansible.builtin.debug:
+    msg:
+      - "OS Distribution: {{ ansible_facts['distribution'] }}"
+      - "OS Family: {{ ansible_facts['os_family'] }}"
+      - "flatpak_pkg_names: {{ flatpak_pkg_names }}"
+      - "flatpak_repo_id: {{ flatpak_repo_id }}"
+      - "flatpak_repo_name: {{ flatpak_repo_name }}"
+  when: flatpak_debug | default(false) | bool
+
+- name: Ensure Flatpak is installed and configured
+  ansible.builtin.include_tasks: state/install.yml
+  when: flatpak_state | default('present') == 'present'
+
+- name: Ensure Flatpak is uninstalled from system
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: flatpak_state | default('present') == 'absent'
+
+- name: Ensure Flatpak is purged from system
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: flatpak_state | default('present') == 'teardown'

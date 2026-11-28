@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Resolve NVM account details
+  ansible.builtin.getent:
+    database: passwd
+  become: true
+  when: nvm_users | default([]) | length > 0
+
+- name: Validate configured NVM accounts
+  ansible.builtin.assert:
+    that:
+      - nvm_user.name is defined
+      - nvm_user.name | length > 0
+      - nvm_user.name in ansible_facts.getent_passwd
+    fail_msg: "The configured NVM account must exist on the target host."
+  loop: "{{ nvm_users | default([]) }}"
+  loop_control:
+    loop_var: nvm_user
+    label: "{{ nvm_user.name | default('undefined') }}"
+  when: nvm_user.name | default('') != 'root'
+
+- name: Install NVM dependencies
+  ansible.builtin.package:
+    name: "{{ nvm_pkgs | default(['git', 'curl']) }}"
+    state: present
+  become: true
+  when: nvm_users | default([]) | rejectattr('name', 'equalto', 'root') | list | length > 0
+
+- name: Check NVM installations for configured accounts
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.getent_passwd[nvm_user.name][4] }}/.nvm/nvm.sh"
+  register: nvm_install_checks
+  become: true
+  loop: "{{ nvm_users | default([]) }}"
+  loop_control:
+    loop_var: nvm_user
+    label: "{{ nvm_user.name }}"
+  when: nvm_user.name != 'root'
+
+- name: Create temporary NVM installer
+  ansible.builtin.tempfile:
+    state: file
+    path: "{{ nvm_file.script | default('/tmp/nvm-install.sh') | dirname }}"
+    prefix: "{{ nvm_file.script | default('/tmp/nvm-install.sh') | basename }}-"
+  register: nvm_installer
+  become: true
+  when: >-
+    nvm_install_checks.results
+    | rejectattr('skipped', 'defined')
+    | selectattr('stat.exists', 'equalto', false)
+    | list | length > 0
+
+- name: Download NVM installer
+  ansible.builtin.get_url:
+    url: "{{ nvm_repo_url | default('https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh') }}"
+    dest: "{{ nvm_installer.path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  when: nvm_installer.path is defined
+
+- name: Install NVM for configured accounts
+  ansible.builtin.command:
+    argv:
+      - "bash"
+      - "{{ nvm_installer.path }}"
+    creates: "{{ ansible_facts.getent_passwd[nvm_install_check.nvm_user.name][4] }}/.nvm/nvm.sh"
+  become: true
+  become_user: "{{ nvm_install_check.nvm_user.name }}"
+  environment:
+    HOME: "{{ ansible_facts.getent_passwd[nvm_install_check.nvm_user.name][4] }}"
+    NVM_DIR: "{{ ansible_facts.getent_passwd[nvm_install_check.nvm_user.name][4] }}/.nvm"
+  loop: "{{ nvm_install_checks.results }}"
+  loop_control:
+    loop_var: nvm_install_check
+    label: "{{ nvm_install_check.nvm_user.name }}"
+  when:
+    - nvm_install_check.nvm_user.name != 'root'
+    - nvm_install_check.stat is defined
+    - not (nvm_install_check.stat.exists | default(false))
+
+- name: Remove temporary NVM installer
+  ansible.builtin.file:
+    path: "{{ nvm_installer.path }}"
+    state: absent
+  become: true
+  when: nvm_installer.path is defined

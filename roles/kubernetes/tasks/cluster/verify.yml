@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Wait for Kubernetes control-plane node readiness
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - wait
+      - --for=condition=Ready
+      - "node/{{ kubernetes_node_name_effective }}"
+      - "--timeout={{ kubernetes_wait_timeout }}s"
+  register: kubernetes_node_ready
+  changed_when: false
+  become: true
+  when: kubernetes_cni_provider in ['calico', 'cilium'] and kubernetes_manage_plugins | bool
+
+
+- name: Wait for CoreDNS system Pods
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - -n
+      - kube-system
+      - rollout
+      - status
+      - deployment/coredns
+      - "--timeout={{ kubernetes_wait_timeout }}s"
+  changed_when: false
+  become: true
+  when: kubernetes_cni_provider in ['calico', 'cilium'] and kubernetes_manage_plugins | bool
+
+- name: Verify cluster node inventory
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - get
+      - nodes
+      - -o
+      - wide
+  register: kubernetes_nodes_result
+  changed_when: false
+  become: true
+
+- name: Verify Kubernetes system Pods
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - get
+      - pods
+      - --all-namespaces
+  register: kubernetes_pods_result
+  changed_when: false
+  become: true
+
+- name: Display Kubernetes verification results
+  ansible.builtin.debug:
+    msg:
+      - "{{ kubernetes_nodes_result.stdout }}"
+      - "{{ kubernetes_pods_result.stdout }}"
+  when: kubernetes_debug | bool

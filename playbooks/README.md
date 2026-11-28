@@ -40,6 +40,10 @@
 
 ## Vagrant
 
+``` shell
+$ ansible-playbook jcook3701.pkgs.vagrant.yml -K -e "env=default-server"
+```
+
 ## VirtualBox
 
 ## Webmin

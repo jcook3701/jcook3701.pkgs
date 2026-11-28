@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Verify Helm (CLI) installation
+  ansible.builtin.include_tasks: 01_verify.yml
+  when: helm_verify_installation | bool
+
+- name: Manage configured Helm chart repositories
+  ansible.builtin.include_tasks: 02_chart_repositories.yml
+  when:
+    - helm_manage_chart_repositories | bool
+    - helm_chart_repositories | length > 0

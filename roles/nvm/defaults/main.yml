@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
+nvm_state: present
+nvm_debug: false
+
+# Accounts where NVM will be managed
+nvm_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+
+# -------------------------------------------------------------------------
+# NVM Package Configuration
+# -------------------------------------------------------------------------
+nvm_repo_url: "https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh"

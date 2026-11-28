@@ -1,6 +1,6 @@
 # .ansible-lint for jcook3701.pkgs
 #
-# SPDX-FileCopyrightText: Jared Cook
+# SPDX-FileCopyrightText: Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ exclude_paths:
   - .git
   - .github/workflows
   - .venv
+  - .venv/
   - .pre-commit-config.yaml
   - .yamllint
   - changelogs/.plugin-cache.yaml
@@ -60,6 +61,8 @@ skip_list:
   - name[template]   # Disables enforced naming conventions
   - name[prefix]     # Disables enforced naming conventions
   - package-latest   # Disables enforcing of “Package installs should not use latest”
+  - schema[meta]     # Disables strict validation of role metadata (meta/main.yml)
+  - jinja[spacing]   # Disables strict spacing rules inside Jinja brackets
 
 # Ansible-lint does not automatically load rules that have the 'opt-in' tag.
 # You must enable opt-in rules by listing each rule 'id' below.

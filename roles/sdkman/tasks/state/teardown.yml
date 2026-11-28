@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Uninstall SDKMAN for configured account
+  ansible.builtin.include_tasks: uninstall.yml
+
+- name: Locate SDKMAN shell configuration files
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/{{ sdkman_shell_file }}"
+  loop:
+    - ".bashrc"
+    - ".bash_profile"
+    - ".bash_login"
+    - ".profile"
+    - ".zshrc"
+  loop_control:
+    loop_var: sdkman_shell_file
+    label: "{{ sdkman_user.name }}: {{ sdkman_shell_file }}"
+  register: sdkman_shell_files
+  become: true
+
+- name: Remove SDKMAN initialization from shell configuration
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts.getent_passwd[sdkman_user.name][4] }}/{{ sdkman_shell_result.sdkman_shell_file }}"
+    regexp: "^(#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!|\
+      [[:blank:]]*export[[:blank:]]+SDKMAN_DIR=.*|\
+      .*sdkman-init[.]sh.*)$"
+    state: absent
+  loop: "{{ sdkman_shell_files.results }}"
+  loop_control:
+    loop_var: sdkman_shell_result
+    label: "{{ sdkman_user.name }}: {{ sdkman_shell_result.sdkman_shell_file }}"
+  become: true
+  when:
+    - sdkman_shell_result.stat.exists | default(false)
+    - sdkman_shell_result.stat.isreg | default(false)

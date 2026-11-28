@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+k8s_os_group: "root"
+k8s_os_user: "root"
+
+k8s_os_service: "k8s"
+
+k8s_os_pkg_names:
+  - k8s
+
+k8s_os_directory:
+  config: "/usr/local/etc/k8s/"
+
+# Repository Configuration for jcook3701.utils.repo_add
+k8s_os_repo_id: "k8s"
+k8s_os_repo_name: "k8s PPA"
+
+k8s_debian_uris: >-
+  {{ k8s_download_url ~ '/k8s'
+      | default('https://pkg.cloudflare.com/k8s') }}
+k8s_debian_suites: "any"
+k8s_debian_component: "main"
+k8s_debian_signed_by: >-
+  {{ k8s_download_url ~ '/cloudflare-main.gpg'
+      | default('https://pkg.cloudflare.com/cloudflare-main.gpg') }}

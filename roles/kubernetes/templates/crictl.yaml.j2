@@ -1,0 +1,6 @@
+{# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook #}
+{# SPDX-License-Identifier: AGPL-3.0-or-later #}
+runtime-endpoint: {{ kubernetes_crictl_runtime_endpoint_effective | to_json }}
+image-endpoint: {{ (kubernetes_crictl_image_endpoint if kubernetes_crictl_image_endpoint | length > 0 else kubernetes_crictl_runtime_endpoint_effective) | to_json }}
+timeout: {{ kubernetes_crictl_timeout }}
+debug: {{ kubernetes_crictl_debug | bool | lower }}

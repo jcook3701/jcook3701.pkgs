@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Package Configuration
+# -------------------------------------------------------------------------
+helm_pkg_names: "{{ helm_os_pkg_names | default(['helm']) }}"
+helm_install_pkg_names: >-
+  {{ ['helm=' ~ helm_package_version] if helm_package_version | length > 0 else helm_pkg_names }}
+
+# -------------------------------------------------------------------------
+# Repository Configuration
+# -------------------------------------------------------------------------
+helm_repo_id: "{{ helm_os_repo_id | default('helm') }}"
+helm_repo_name: "{{ helm_os_repo_name | default('Helm CLI') }}"

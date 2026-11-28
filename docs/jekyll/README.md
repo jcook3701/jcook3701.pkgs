@@ -51,3 +51,10 @@ This project is licensed under the **{{ site.license }} License**.
 See the [LICENSE]({{ site.repo_blob }}/LICENSE.md) file for the full license text.  
 
 SPDX-License-Identifier: {{ site.license }}  
+
+<!--
+    TODO: Setup the following packages
+        1. Email Sever
+            1. Postfix (SMTP/sending)
+            2. Dovecot (IMAP/receiving)
+-->

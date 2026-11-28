@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & Debug Management
+# -------------------------------------------------------------------------
+kubernetes_state: present
+kubernetes_debug: true
+
+# -------------------------------------------------------------------------
+# Kubernetes Repository & Package Configuration
+# -------------------------------------------------------------------------
+kubernetes_download_url: "https://pkgs.k8s.io/core"
+kubernetes_kubernetes_version: "1.37.2"
+kubernetes_manage_engine: true  # Validate existing containerd CRI; Docker CE owns daemon configuration
+kubernetes_engine: "containerd"
+kubernetes_install_crictl: true
+
+# -------------------------------------------------------------------------
+# Kubernetes Configuration API
+# -------------------------------------------------------------------------
+kubernetes_kubeadm_api_version: "kubeadm.k8s.io/v1beta4"
+kubernetes_kubelet_api_version: "kubelet.config.k8s.io/v1beta1"
+
+# -------------------------------------------------------------------------
+# Kubernetes Cluster Configuration
+# -------------------------------------------------------------------------
+kubernetes_manage_cluster: true
+kubernetes_cluster_name: "kubernetes"
+kubernetes_control_plane_endpoint: ""
+kubernetes_api_advertise_address: ""
+kubernetes_api_bind_port: 6443
+kubernetes_pod_subnet: ""
+kubernetes_service_subnet: "10.96.0.0/12"
+kubernetes_dns_domain: "cluster.local"
+kubernetes_cni_provider: "calico" # calico, cilium, or external
+kubernetes_manage_plugins: true
+kubernetes_calico_chart_version: "v3.33.0"
+kubernetes_cilium_chart_version: "1.20.5"
+kubernetes_calico_custom_values: {}
+kubernetes_cilium_custom_values: {}
+kubernetes_allow_control_plane_workloads: true
+kubernetes_manage_swap: true
+kubernetes_manage_kernel_settings: true
+kubernetes_verify_cluster: true
+kubernetes_wait_timeout: 600
+
+# -------------------------------------------------------------------------
+# Kubernetes Node & Container Runtime Configuration
+# -------------------------------------------------------------------------
+kubernetes_node_name: ""
+kubernetes_cri_socket: ""
+kubernetes_kubelet_cgroup_driver: "systemd"
+kubernetes_kubelet_rotate_certificates: true
+kubernetes_kubelet_cluster_dns: []
+kubernetes_kubelet_resolv_conf: ""
+
+# -------------------------------------------------------------------------
+# Kubernetes Joining Configuration (existing interface)
+# -------------------------------------------------------------------------
+kubernetes_join_api_server_endpoint: ""
+kubernetes_join_token: ""
+kubernetes_join_ca_cert_hashes: []
+kubernetes_join_control_plane: false
+kubernetes_join_certificate_key: ""
+kubernetes_join_advertise_address: ""
+kubernetes_manage_join: false
+
+# -------------------------------------------------------------------------
+# Kubernetes User Kubeconfig
+# -------------------------------------------------------------------------
+kubernetes_manage_user_kubeconfig: true
+kubernetes_kubeconfig_user: "{{ ansible_user | default(ansible_user_id) }}"
+kubernetes_user_kubeconfig_path: ""  # Empty -> target user's ~/.kube/config
+
+# -------------------------------------------------------------------------
+# Kubernetes CRI Tools Configuration
+# -------------------------------------------------------------------------
+kubernetes_manage_crictl_config: true
+kubernetes_crictl_runtime_endpoint: ""
+kubernetes_crictl_image_endpoint: ""
+kubernetes_crictl_timeout: 5
+kubernetes_crictl_debug: false
+
+# -------------------------------------------------------------------------
+# Teardown Safety
+# -------------------------------------------------------------------------
+kubernetes_reset_cluster_on_teardown: false

@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Load Cloudflared OS-specific variables
+  ansible.builtin.include_vars: "{{ cloudflared_vars }}"
+  with_first_found:
+    - "{{ ansible_facts['distribution'] | lower }}.yml"
+    - "{{ ansible_facts['os_family'] | lower }}.yml"
+  loop_control:
+    loop_var: cloudflared_vars
+    label: "Loading variables file: {{ cloudflared_vars }}"
+
+- name: Ensure Cloudflared packages are installed
+  ansible.builtin.include_tasks: state/install.yml
+  when: cloudflared_state | default('present') == 'present'
+
+- name: Ensure Cloudflared is uninstalled
+  ansible.builtin.include_tasks: state/uninstall.yml
+  when: cloudflared_state | default('present') == 'absent'
+
+- name: Ensure Cloudflared is uninstalled and configurations removed
+  ansible.builtin.include_tasks: state/teardown.yml
+  when: cloudflared_state | default('present') == 'teardown'

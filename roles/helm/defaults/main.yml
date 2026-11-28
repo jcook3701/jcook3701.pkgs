@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+# -------------------------------------------------------------------------
+# Lifecycle & Debug Management
+# -------------------------------------------------------------------------
+helm_state: present
+helm_debug: true
+
+# -------------------------------------------------------------------------
+# Helm Package Configuration
+# -------------------------------------------------------------------------
+# Exact APT package version (e.g. 4.x.y-1); empty installs available package.
+helm_package_version: ""
+helm_verify_installation: true
+
+# -------------------------------------------------------------------------
+# Helm APT Repository Configuration
+# -------------------------------------------------------------------------
+helm_manage_repository: true
+helm_download_url: "https://packages.buildkite.com/helm-linux/helm-debian/any/"
+helm_repo_signing_key_url: "https://packages.buildkite.com/helm-linux/helm-debian/gpgkey"
+helm_repo_signing_key_fingerprint: "DDF78C3E6EBB2D2CC223C95C62BA89D07698DBC6"
+
+# -------------------------------------------------------------------------
+# Optional Per-User Helm Chart Repository Management
+# -------------------------------------------------------------------------
+# This is different from the operating system's APT package repository.
+# Configured repositories belong to the selected Linux user's Helm profile.
+helm_manage_chart_repositories: false
+helm_repository_user: ""
+helm_chart_repositories: []
+# Example:
+# helm_chart_repositories:
+#   - name: bitnami
+#     url: https://charts.bitnami.com/bitnami
+#     state: present
+#   - name: old-repo
+#     state: absent

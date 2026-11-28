@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Inspect control-plane node taints
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - get
+      - node
+      - "{{ kubernetes_node_name_effective }}"
+      - -o
+      - json
+  register: kubernetes_node_json
+  changed_when: false
+  become: true
+  when: kubernetes_allow_control_plane_workloads | bool
+
+- name: Allow application Pods on the single control plane
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - --kubeconfig=/etc/kubernetes/admin.conf
+      - taint
+      - nodes
+      - "{{ kubernetes_node_name_effective }}"
+      - node-role.kubernetes.io/control-plane-
+  become: true
+  when:
+    - kubernetes_allow_control_plane_workloads | bool
+    - (kubernetes_node_json.stdout | from_json).spec.taints | default([]) | selectattr('key', 'equalto', 'node-role.kubernetes.io/control-plane') | list | length > 0

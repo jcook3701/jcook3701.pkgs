@@ -1,0 +1,171 @@
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+# SPDX-License-Identifier: AGPL-3.0-or-later
+---
+- name: Validate existing Kubernetes runtime and network CIDRs
+  ansible.builtin.assert:
+    that:
+      - kubernetes_cri_socket_effective == 'unix:///run/containerd/containerd.sock'
+      - kubernetes_pod_subnet_effective != kubernetes_service_subnet
+      - kubernetes_manage_plugins | bool or kubernetes_cni_provider == 'external'
+    fail_msg: >-
+      This configuration requires Docker CE's containerd CRI socket and
+      a separate Pod network. External CNI management must be explicit.
+
+- name: Ensure containerd service is active
+  ansible.builtin.service_facts:
+
+- name: Assert containerd is already running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services['containerd.service'].state == 'running'
+    fail_msg: "Containerd must be running with its CRI plugin enabled."
+
+- name: Ensure required Kubernetes kernel modules are loaded at boot
+  ansible.builtin.copy:
+    dest: "{{ kubernetes_file.modules }}"
+    content: |
+      # SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+      # SPDX-License-Identifier: AGPL-3.0-or-later
+      overlay
+      br_netfilter
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: kubernetes_manage_kernel_settings | bool
+
+- name: Check the Kubernetes kernel modules
+  ansible.builtin.stat:
+    path: "/sys/module/{{ item }}"
+  loop:
+    - overlay
+    - br_netfilter
+  register: kubernetes_kernel_module_checks
+  when: kubernetes_manage_kernel_settings | bool
+
+- name: Load missing Kubernetes kernel modules
+  ansible.builtin.command:
+    argv:
+      - modprobe
+      - "{{ item.item }}"
+  loop: "{{ kubernetes_kernel_module_checks.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - kubernetes_manage_kernel_settings | bool
+    - not item.stat.exists
+  become: true
+
+- name: Configure Kubernetes host networking sysctls
+  ansible.builtin.copy:
+    dest: "{{ kubernetes_file.sysctl }}"
+    content: |
+      # SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
+      # SPDX-License-Identifier: AGPL-3.0-or-later
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-iptables = 1
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  register: kubernetes_sysctl_file
+  when: kubernetes_manage_kernel_settings | bool
+
+- name: Apply updated Kubernetes sysctls without reloading unrelated files
+  ansible.builtin.command:
+    argv:
+      - sysctl
+      - -p
+      - "{{ kubernetes_file.sysctl }}"
+  become: true
+  when:
+    - kubernetes_manage_kernel_settings | bool
+    - kubernetes_sysctl_file.changed
+
+- name: Inspect active swap devices
+  ansible.builtin.command:
+    argv:
+      - swapon
+      - --noheadings
+      - --show=NAME
+  register: kubernetes_swap_devices
+  changed_when: false
+
+- name: Disable active swap for kubelet
+  ansible.builtin.command:
+    argv:
+      - swapoff
+      - -a
+  become: true
+  when:
+    - kubernetes_manage_swap | bool
+    - kubernetes_swap_devices.stdout | length > 0
+
+- name: Disable fstab swap entries for future boots
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^(\s*[^#\s]\S*\s+\S+\s+swap\s+.*)$'
+    replace: '# jcook3701.kubernetes disabled swap: \1'
+    backup: true
+  become: true
+  when: kubernetes_manage_swap | bool
+
+- name: Refuse to bootstrap with swap still enabled
+  ansible.builtin.assert:
+    that:
+      - kubernetes_manage_swap | bool or kubernetes_swap_devices.stdout | length == 0
+    fail_msg: "Swap is active. Set kubernetes_manage_swap=true or disable it before kubeadm init."
+
+- name: Check whether crictl is installed for CRI verification
+  ansible.builtin.command:
+    argv:
+      - which
+      - crictl
+  register: kubernetes_crictl_binary
+  changed_when: false
+  failed_when: false
+
+- name: Require crictl for runtime verification
+  ansible.builtin.assert:
+    that:
+      - kubernetes_crictl_binary.rc == 0
+    fail_msg: >-
+      crictl must be installed to verify containerd. Enable
+      kubernetes_install_crictl and rerun Kubernetes package installation.
+  when: kubernetes_manage_engine | bool
+
+- name: Validate the containerd CRI endpoint using crictl
+  ansible.builtin.command:
+    argv:
+      - crictl
+      - "--runtime-endpoint={{ kubernetes_cri_socket_effective }}"
+      - info
+  register: kubernetes_cri_status
+  changed_when: false
+  become: true
+  when: kubernetes_manage_engine | bool
+
+- name: Confirm kubeadm is installed
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - version
+      - -o
+      - short
+  register: kubernetes_kubeadm_version
+  changed_when: false
+
+- name: Verify kubeadm major/minor matches requested Kubernetes version
+  ansible.builtin.assert:
+    that:
+      - (kubernetes_kubeadm_version.stdout | regex_search('v?[0-9]+\\.[0-9]+')) | regex_replace('^v', '') == kubernetes_kubernetes_major_minor_version
+    fail_msg: >-
+      kubeadm's installed major/minor must match the requested cluster release.
+      Check the installed collection and package repository selection.
+
+- name: Ensure the kubelet is enabled for the kubeadm lifecycle
+  ansible.builtin.systemd_service:
+    name: kubelet
+    enabled: true
+    state: started
+  become: true
