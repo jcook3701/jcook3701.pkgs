@@ -13,6 +13,14 @@
     loop_var: git_vars
     label: "Loading variables file: {{ git_vars }}"
 
+- name: Display Git role configuration
+  ansible.builtin.debug:
+    msg:
+      state: "{{ git_state }}"
+      users: "{{ git_users | default([]) | map(attribute='name') | list }}"
+      packages: "{{ git_pkg_names | default(['git']) }}"
+  when: git_debug | default(false) | bool
+
 - name: Ensure installation of Git package
   ansible.builtin.include_tasks: state/install.yml
   when: git_state | default('present') == 'present'

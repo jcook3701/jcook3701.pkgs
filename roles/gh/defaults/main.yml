@@ -1,4 +1,22 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+# -------------------------------------------------------------------------
+# Lifecycle & System Access Management
+# -------------------------------------------------------------------------
 gh_state: present
+gh_debug: false
+
+# -------------------------------------------------------------------------
+# GitHub CLI User Profile Configuration
+# -------------------------------------------------------------------------
+# Existing local accounts where GitHub CLI settings will be managed.
+# Empty optional values preserve the account's existing configuration.
+gh_users:
+  - name: "{{ ansible_user | default(ansible_user_id) }}"
+    gh_host: "github.com"
+    gh_account: ""
+    gh_git_protocol: ""
+    gh_editor: ""
+    gh_pager: ""
+    gh_prompt: ""

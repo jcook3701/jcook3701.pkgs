@@ -1,3 +1,81 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
+- name: Resolve GitHub CLI account details
+  ansible.builtin.getent:
+    database: passwd
+  become: true
+  when: gh_users | default([]) | length > 0
+
+- name: Validate configured GitHub CLI accounts
+  ansible.builtin.assert:
+    that:
+      - gh_user.name is defined
+      - gh_user.name | default('') | length > 0
+      - gh_user.name in ansible_facts.getent_passwd
+      - gh_user.gh_host | default('github.com') | length > 0
+      - gh_user.gh_account is not defined or gh_user.gh_account is string
+      - gh_user.gh_git_protocol | default('') in ['', 'https', 'ssh']
+      - gh_user.gh_prompt | default('') in ['', 'enabled', 'disabled']
+      - gh_user.gh_editor is not defined or gh_user.gh_editor is string
+      - gh_user.gh_pager is not defined or gh_user.gh_pager is string
+    fail_msg: "The GitHub CLI account must exist and provide valid profile settings."
+  loop: "{{ gh_users | default([]) }}"
+  loop_control:
+    loop_var: gh_user
+    label: "{{ gh_user.name | default('undefined') }}"
+  when: gh_user.name | default('') != 'root'
+
+- name: Read existing GitHub CLI settings for configured accounts
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['gh', 'config', 'get', gh_setting[1] | regex_replace('^gh_', '')]
+        + (['--host', gh_setting[0].gh_host | default('github.com')]
+           if gh_setting[1] == 'gh_git_protocol' else [])
+      }}
+  become: true
+  become_user: "{{ gh_setting[0].name }}"
+  environment:
+    HOME: "{{ ansible_facts.getent_passwd[gh_setting[0].name][4] }}"
+    GH_CONFIG_DIR: "{{ ansible_facts.getent_passwd[gh_setting[0].name][4] }}/.config/gh"
+  loop: >-
+    {{ gh_users | default([]) | product(['gh_git_protocol', 'gh_editor', 'gh_pager', 'gh_prompt']) | list }}
+  loop_control:
+    loop_var: gh_setting
+    label: "{{ gh_setting[0].name | default('undefined') }}: {{ gh_setting[1] }}"
+  register: gh_config_checks
+  changed_when: false
+  failed_when: false
+  when:
+    - gh_setting[0].name | default('') != 'root'
+    - gh_setting[0][gh_setting[1]] is defined
+    - gh_setting[0][gh_setting[1]] | string | length > 0
+
+- name: Apply changed GitHub CLI settings for configured accounts
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['gh', 'config', 'set',
+         gh_config_check.gh_setting[1] | regex_replace('^gh_', ''),
+         gh_config_check.gh_setting[0][gh_config_check.gh_setting[1]] | string]
+        + (['--host', gh_config_check.gh_setting[0].gh_host | default('github.com')]
+           if gh_config_check.gh_setting[1] == 'gh_git_protocol' else [])
+      }}
+  become: true
+  become_user: "{{ gh_config_check.gh_setting[0].name }}"
+  environment:
+    HOME: "{{ ansible_facts.getent_passwd[gh_config_check.gh_setting[0].name][4] }}"
+    GH_CONFIG_DIR: "{{ ansible_facts.getent_passwd[gh_config_check.gh_setting[0].name][4] }}/.config/gh"
+  loop: "{{ gh_config_checks.results | default([]) }}"
+  loop_control:
+    loop_var: gh_config_check
+    label: >-
+      {{ gh_config_check.gh_setting[0].name | default('undefined') }}:
+      {{ gh_config_check.gh_setting[1] }}
+  when:
+    - not (gh_config_check.skipped | default(false))
+    - >-
+      (gh_config_check.rc | default(1) != 0)
+      or (gh_config_check.stdout | default('') | trim !=
+          gh_config_check.gh_setting[0][gh_config_check.gh_setting[1]] | string)

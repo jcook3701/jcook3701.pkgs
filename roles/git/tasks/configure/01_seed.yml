@@ -1,19 +1,59 @@
 # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
-- name: Collect running user facts
-  ansible.builtin.include_role:
-    name: jcook3701.utils.general
-    tasks_from: sudo_user_facts.yml
-  when: sudo_user is not defined
-
-- name: Configure global Git settings
+- name: Resolve Git account details
+  ansible.builtin.getent:
+    database: passwd
   become: true
-  become_user: "{{ sudo_user }}"
+  when: git_users | default([]) | length > 0
+
+- name: Validate configured Git accounts
+  ansible.builtin.assert:
+    that:
+      - git_user.name is defined
+      - git_user.name | default("") | length > 0
+      - git_user.name in ansible_facts.getent_passwd
+      - git_user.git_name is not defined or git_user.git_name is string
+      - git_user.git_email is not defined or git_user.git_email is string
+    fail_msg: "The configured Git account must exist and contain valid Git identity settings."
+  loop: "{{ git_users | default([]) }}"
+  loop_control:
+    loop_var: git_user
+    label: "{{ git_user.name | default('undefined') }}"
+  when: git_user.name | default("") != "root"
+
+- name: Configure Git user names for selected accounts
   community.general.git_config:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
+    name: "user.name"
+    value: "{{ git_user.git_name }}"
     scope: global
-  loop:
-    - { name: "user.name", value: "{{ github.username }}" }
-    - { name: "user.email", value: "{{ github.email }}" }
+  become: true
+  become_user: "{{ git_user.name }}"
+  environment:
+    HOME: "{{ ansible_facts.getent_passwd[git_user.name][4] }}"
+  loop: "{{ git_users | default([]) }}"
+  loop_control:
+    loop_var: git_user
+    label: "{{ git_user.name | default('undefined') }}"
+  when:
+    - git_user.name | default("") != "root"
+    - git_user.git_name is defined
+    - git_user.git_name | default("") | length > 0
+
+- name: Configure Git email addresses for selected accounts
+  community.general.git_config:
+    name: "user.email"
+    value: "{{ git_user.git_email }}"
+    scope: global
+  become: true
+  become_user: "{{ git_user.name }}"
+  environment:
+    HOME: "{{ ansible_facts.getent_passwd[git_user.name][4] }}"
+  loop: "{{ git_users | default([]) }}"
+  loop_control:
+    loop_var: git_user
+    label: "{{ git_user.name | default('undefined') }}"
+  when:
+    - git_user.name | default("") != "root"
+    - git_user.git_email is defined
+    - git_user.git_email | default("") | length > 0

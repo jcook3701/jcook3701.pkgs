@@ -13,6 +13,14 @@
     loop_var: gh_vars
     label: "Loading variables file: {{ gh_vars }}"
 
+- name: Display Github CLI role configuration
+  ansible.builtin.debug:
+    msg:
+      state: "{{ gh_state }}"
+      users: "{{ gh_users | default([]) | map(attribute='name') | list }}"
+      packages: "{{ gh_pkg_names | default(['gh']) }}"
+  when: gh_debug | default(false) | bool
+
 - name: Install Github CLI packages
   ansible.builtin.include_tasks: state/install.yml
   when: gh_state | default('present') == 'present'
@@ -24,7 +32,7 @@
     - ansible_facts.packages is defined
     - gh_pkg_names[0] in ansible_facts.packages
 
-- name: Ensure teardown of Github CLI package and configuration files
+- name: Ensure teardown of Github CLI packages
   ansible.builtin.include_tasks: state/teardown.yml
   when:
     - gh_state | default('present') == 'teardown'
