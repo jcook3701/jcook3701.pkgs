@@ -41,4 +41,4 @@ already exist. This role does not create local users or install SDK candidates.
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

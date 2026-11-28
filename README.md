@@ -7,7 +7,7 @@
 
 <p><a href="LICENSE.md"><img src="https://img.shields.io/github/license/jcook3701/jcook3701.pkgs" alt="License" /></a></p>
 
-<p><strong>Author:</strong> Jared Cook<br />
+<p><strong>Author:</strong> Jared W. Cook<br />
 <strong>Version:</strong> 1.0.0</p>
 
 <h2 id="overview">Overview</h2>
@@ -56,7 +56,7 @@
 
 <h2 id="️-license">⚖️ License</h2>
 
-<p>Copyright (c) 2025-2026, Jared Cook</p>
+<p>Copyright (c) 2025-2026, Jared W. Cook</p>
 
 <p>This project is licensed under the <strong>AGPL-3.0-or-later License</strong>.<br />
 See the <a href="https://github.com/jcook3701/jcook3701.pkgs/blob/master/LICENSE.md">LICENSE</a> file for the full license text.</p>

@@ -138,5 +138,5 @@ to the upstream release string (for example, `v4.3.2`).
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container
+Maintained by **Jared W. Cook** as part of the core infrastructure and container
 management ecosystem.

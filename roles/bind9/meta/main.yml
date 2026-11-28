@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 galaxy_info:
-  author: Jared Cook
+  author: "Jared W. Cook"
   description: >-
     Installs, sets up, or removes Bind9,
     ensuring all dependencies and configurations are managed.

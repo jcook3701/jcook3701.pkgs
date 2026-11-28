@@ -16,4 +16,4 @@ Easily scan with devices from Canon, Brother, HP, Epson, Fujitsu, and more. Then
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

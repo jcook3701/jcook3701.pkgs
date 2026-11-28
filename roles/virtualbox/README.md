@@ -88,7 +88,7 @@ Safely disables execution privileges, uninstalls core binary packages, stops run
 
 ## Author Information
 
-Maintained by **Jared Cook** as a core component of the private virtualization infrastructure catalog.
+Maintained by **Jared W. Cook** as a core component of the private virtualization infrastructure catalog.
 
 <!--
 

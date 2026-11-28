@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 - name: Validate existing Kubernetes runtime and network CIDRs
@@ -24,7 +24,7 @@
   ansible.builtin.copy:
     dest: "{{ kubernetes_file.modules }}"
     content: |
-      # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+      # SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
       # SPDX-License-Identifier: AGPL-3.0-or-later
       overlay
       br_netfilter
@@ -60,7 +60,7 @@
   ansible.builtin.copy:
     dest: "{{ kubernetes_file.sysctl }}"
     content: |
-      # SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+      # SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
       # SPDX-License-Identifier: AGPL-3.0-or-later
       net.ipv4.ip_forward = 1
       net.bridge.bridge-nf-call-iptables = 1

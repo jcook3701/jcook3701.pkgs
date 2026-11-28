@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -9,7 +9,7 @@ argument_specs:
       configures the Linux kernel SPNEGO upcall interface. It features bimodal operation,
       allowing it to resolve Kerberos credentials natively via environment probing or
       route cryptographic handshakes through a centralized GSSProxy socket interface.
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       cifs_utils_state:
         type: "str"

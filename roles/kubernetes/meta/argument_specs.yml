@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -8,7 +8,7 @@ argument_specs:
     - Install Kubernetes packages and provision a kubeadm cluster
     - Preserve the established lifecycle and role boundaries.
     author:
-    - Jared Cook
+    - Jared W. Cook
     options:
       kubernetes_state:
         type: str

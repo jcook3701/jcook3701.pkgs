@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -6,7 +6,7 @@ argument_specs:
     short_description: "Manage Webmin control panel installation and repository setups."
     description: "This role downloads the official setup script, configures upstream package
       repositories, and manages the Webmin package state."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       webmin_state:
         type: "str"

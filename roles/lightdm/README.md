@@ -4,4 +4,4 @@ LightDM is a lightweight, cross-desktop display manager (login screen) for Linux
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

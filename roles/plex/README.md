@@ -4,4 +4,4 @@ Plex offers a stable, resource-efficient, and ideal solution for self-hosted med
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

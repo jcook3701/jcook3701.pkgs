@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 nfs_utils_is_server: "{{ nfs_utils_node_type | default('client') == 'master' }}"

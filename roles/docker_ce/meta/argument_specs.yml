@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -8,7 +8,7 @@ argument_specs:
       This role provisions Docker CE, handles local user group assignments to the
       docker socket interface, installs container tools (Compose and Buildx), and
       deploys an enterprise-grade, defensive daemon.json configuration file.
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       # -------------------------------------------------------------------------
       # Lifecycle & System Access Management

@@ -2,7 +2,7 @@
 #
 # samba_filters.py for jcook3701.pkgs
 #
-# SPDX-FileCopyrightText: Jared Cook
+# SPDX-FileCopyrightText: Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ from typing import Any
 
 DOCUMENTATION = """
     name: to_ntlm
-    author: Jared Cook (jcook3701)
+    author: Jared W. Cook (jcook3701)
     version_added: "1.0.0"
     short_description: Convert a plaintext password into an NTLM MD4 hash.
     description:

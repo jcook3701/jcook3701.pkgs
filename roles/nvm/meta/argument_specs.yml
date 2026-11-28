@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -7,7 +7,7 @@ argument_specs:
     description: >-
       Manages Node Version Manager (NVM) independently for configured local accounts.
       Supports installation, removal, and shell initialization teardown.
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       # -------------------------------------------------------------------------
       # Lifecycle & System Access Management

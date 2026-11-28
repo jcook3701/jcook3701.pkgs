@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
   main:
     short_description: "Manage PAM (Pluggable Authentication Modules) stack configuration."
     description: "This role manages the system security architecture, configures authentication hooks, handles automated directory creation, and toggles hardware token and multi-factor validation stacks."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       pam_state:
         type: "str"

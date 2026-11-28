@@ -4,4 +4,4 @@ AWX provides a web-based user interface, REST API, and task engine built on top 
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

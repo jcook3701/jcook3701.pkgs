@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
   main:
     short_description: "Enterprise multi-OS hybrid Samba automation core"
     description: "Deploys standalone, NT4 Classic PDC (OpenLDAP), Active Directory Domain Controllers, or storage mounting clients."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       # Control switches
       samba_state:

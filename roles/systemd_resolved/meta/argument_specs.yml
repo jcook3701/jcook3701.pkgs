@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
   main:
     short_description: "Manage systemd-resolved configuration."
     description: "This role configures systemd-resolved DNS servers and domain settings."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       systemd_resolved_state:
         type: "str"

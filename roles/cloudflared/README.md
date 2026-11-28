@@ -4,4 +4,4 @@ Cloudflared is the official command-line client and daemon for Cloudflare Tunnel
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and package management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and package management ecosystem.

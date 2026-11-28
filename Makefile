@@ -1,6 +1,6 @@
 # Makefile for jcook3701.pkgs
 #
-# SPDX-FileCopyrightText: Jared Cook
+# SPDX-FileCopyrightText: Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # This program is free software: you can redistribute it and/or modify
@@ -62,7 +62,7 @@ endef
 GALAXY_NAMESPACE := jcook3701
 GALAXY_COLLECTION := pkgs
 GALAXY_PACKAGE_NAME = $(GALAXY_NAMESPACE).$(GALAXY_COLLECTION)
-GALAXY_AUTHOR := Jared Cook
+GALAXY_AUTHOR := Jared W. Cook
 GALAXY_VERSION := 1.0.0
 GALAXY_RELEASE := v$(GALAXY_VERSION)
 GALAXY_PATH := $(PROJECT_ROOT)

@@ -14,4 +14,4 @@ The [console-setup](https://manpages.debian.org/testing/console-setup/console-se
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

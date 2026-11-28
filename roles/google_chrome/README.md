@@ -11,4 +11,4 @@ Chrome is the official web browser from Google, built to be fast, secure, and cu
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

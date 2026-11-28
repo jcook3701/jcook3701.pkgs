@@ -139,5 +139,5 @@ Replace `developer` with the target Linux account.
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and
+Maintained by **Jared W. Cook** as part of the core infrastructure and
 container management ecosystem.

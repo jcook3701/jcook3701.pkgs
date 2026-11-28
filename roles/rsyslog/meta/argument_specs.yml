@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -7,7 +7,7 @@ argument_specs:
     description: "This role deploys rsyslog, structures file creation
       masking, maps pluggable selector facilities, and orchestrates
       client-to-master streaming links."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       rsyslog_state:
         type: "str"

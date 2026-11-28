@@ -16,7 +16,7 @@ sudo mount -t cifs //hostname.example.com /mnt -o sec=krb5,vers=3.11,multiuser
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.
 
 <!--
 # Authors Notes:

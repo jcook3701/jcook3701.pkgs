@@ -4,4 +4,4 @@ i3 is a tiling window manager, completely written from scratch. The target platf
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.

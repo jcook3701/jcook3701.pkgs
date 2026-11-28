@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -7,7 +7,7 @@ argument_specs:
     description: "Enforces typechecking, strict cryptographic choices,
       and required parameter bounds to align the secure shell server
       with centralized SSSD network lookups."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       ssh_state:
         type: str

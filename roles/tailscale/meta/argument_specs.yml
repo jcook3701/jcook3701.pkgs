@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -6,7 +6,7 @@ argument_specs:
     short_description: "Manage Tailscale mesh VPN node lifecycle and configuration."
     description: "This role automates Tailscale client provisioning, listens on customized
       tunnel ports, and handles automated node authentication."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       tailscale_state:
         type: "str"

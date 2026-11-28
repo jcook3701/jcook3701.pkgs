@@ -87,7 +87,7 @@ $$\text{Application/Kernel} \xrightarrow{\text{GSSAPI Calls}} \textbf{gssproxy} 
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.
 
 <!--
 ## Authors Notes

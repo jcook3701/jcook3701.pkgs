@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -6,7 +6,7 @@ argument_specs:
     short_description: "Enterprise system access orchestration specification blueprint for SSSD."
     description: "Enforces typechecking, strict choices, and default parameters
       for linking OpenLDAP identity vectors with MIT Kerberos security realms across all clients."
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       sssd_state:
         type: str

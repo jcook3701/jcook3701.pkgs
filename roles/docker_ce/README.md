@@ -101,7 +101,7 @@ Stops services, cleans up systemd unit files, and completely removes Docker CE p
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.
 
 <!--
 helpful links:

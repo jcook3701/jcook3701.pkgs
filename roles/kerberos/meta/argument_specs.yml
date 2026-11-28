@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright © 2026, Jared Cook
+# SPDX-FileCopyrightText: Copyright © 2026, Jared W. Cook
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ---
 argument_specs:
@@ -8,7 +8,7 @@ argument_specs:
       This role deploys, configures, and secures an MIT Kerberos V5 infrastructure.
       It supports initializing master KDCs, secondary replicas, and automated
       client node realm attachments with secure keytab generation on playbook re-runs.
-    author: "Jared Cook"
+    author: "Jared W. Cook"
     options:
       kerberos_state:
         type: str

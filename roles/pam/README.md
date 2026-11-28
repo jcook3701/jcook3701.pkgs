@@ -49,7 +49,7 @@ pam_enable_network_authentication: false
 
 ## Author Information
 
-Maintained by **Jared Cook** as part of the core infrastructure and container management ecosystem.
+Maintained by **Jared W. Cook** as part of the core infrastructure and container management ecosystem.
 
 <!--
 ## Authors Notes
